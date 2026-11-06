@@ -1,0 +1,19 @@
+.header-bg {
+  background: linear-gradient(90deg, #0d2b45 0%, #1a4f7a 100%);
+}
+
+.banner-bg {
+  background: linear-gradient(180deg, #092238 0%, #0f212e 100%);
+  border: 1px solid #2F4553;
+}
+
+.bottom-nav {
+  background-color: #1A2C38;
+  border-top: 1px solid #2F4553;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.floating-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
