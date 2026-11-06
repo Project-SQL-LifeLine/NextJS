@@ -11,6 +11,8 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  basePath: "/NextJS",
+  assetPrefix: "/NextJS/",
 };
 
 export default nextConfig;
