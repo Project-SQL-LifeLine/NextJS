@@ -1,17 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
+import { supabase } from "../lib/supabase/client";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // ... বাকি কোড
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    // পেজ লোড হওয়ার সময় সেশন চেক করা
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        setIsLoggedIn(true);
+        // ইউজারের প্রোফাইল ডাটা আনা (ব্যালেন্স, ইউজারনেম)
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+          
+        if (profile) setUserProfile(profile);
+      } else {
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkSession();
+
+    // Auth স্টেট পরিবর্তন হলে (লগইন/লগআউট) আবার চেক করবে
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+        setUserProfile(null);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0F212E] pb-20 relative overflow-hidden">
       
-      <Header isLoggedIn={isLoggedIn} />
+      <Header isLoggedIn={isLoggedIn} userProfile={userProfile} />
 
       {/* Notification Bar */}
       <div className="px-3 mt-3">
@@ -77,7 +115,6 @@ export default function Home() {
       </div>
 
       <BottomNav />
-
     </div>
   );
 }
