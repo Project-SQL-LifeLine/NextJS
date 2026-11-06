@@ -7,32 +7,50 @@ import { supabase } from "../../../lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // পেজ লোডিং অ্যানিমেশন (১ সেকেন্ড)
+  useState(() => {
+    const timer = setTimeout(() => setIsLoadingPage(false), 800);
+    return () => clearTimeout(timer);
+  });
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setLoading(true);
+
+    // মোবাইল নম্বর চেক (১১ ডিজিট এবং ০১ দিয়ে শুরু)
+    if (!/^01\d{9}$/.test(mobile)) {
+      setError("সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন: 017XXXXXXXX)");
+      setLoading(false);
+      return;
+    }
+
+    // পাসওয়ার্ড চেক (মিনিমাম ৮ ডিজিট)
+    if (password.length < 8) {
+      setError("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে");
+      setLoading(false);
+      return;
+    }
 
     try {
-      // Edge Function এ রিকোয়েস্ট পাঠানো
       const { data, error: funcError } = await supabase.functions.invoke("auth-manager", {
         body: { action: "login", mobile, password },
       });
 
       if (funcError || data?.error) {
-        throw new Error(data?.error || funcError?.message || "Login failed");
+        throw new Error(data?.error || funcError?.message || "লগইন ব্যর্থ হয়েছে");
       }
 
-      // সেশন সেভ করা (প্রয়োজন হলে)
       if (data?.session) {
         localStorage.setItem("supabase_session", JSON.stringify(data.session));
       }
 
-      // সফল হলে হোমপেজে রিডাইরেক্ট
       router.push("/");
     } catch (err: any) {
       setError(err.message);
@@ -41,10 +59,17 @@ export default function LoginPage() {
     }
   };
 
+  if (isLoadingPage) {
+    return (
+      <div className="min-h-screen bg-[#0F212E] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-[#2F4553] border-t-[#00E701] rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0F212E] flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm bg-[#1A2C38] border border-[#2F4553] rounded-xl p-6 shadow-lg">
-        
         <h1 className="text-2xl font-bold text-white text-center mb-6">Login</h1>
 
         {error && (
@@ -81,9 +106,9 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#00E701] hover:bg-[#00c701] text-[#071A0B] font-bold text-sm py-2.5 rounded-md mt-2 transition-colors disabled:opacity-50"
+            className="w-full bg-[#00E701] hover:bg-[#00c701] text-[#071A0B] font-bold text-sm py-2.5 rounded-md mt-2 transition-colors disabled:opacity-50 flex justify-center items-center"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? <div className="w-5 h-5 border-2 border-[#071A0B] border-t-transparent rounded-full animate-spin"></div> : "Login"}
           </button>
         </form>
 
