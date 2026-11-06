@@ -91,10 +91,12 @@ export default function VoucherCenterPage() {
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
           <h1 className="text-lg font-bold text-white">Deposit</h1>
-          <button className="text-white relative">
+          
+          {/* খাতার আইকন যা voucher-report এ নিয়ে যাবে */}
+          <Link href="/wallets/voucher-report" className="text-white relative">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
             <span className="absolute -top-1 -right-1 bg-danger text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">2</span>
-          </button>
+          </Link>
         </header>
 
         {/* ৪০% জুম-আউট কন্টেইনার (শুধু এই পেজের জন্য) */}
