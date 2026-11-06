@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
     <header className="bg-[#0d2b45] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md">
@@ -10,12 +12,20 @@ export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
       <div className="flex items-center gap-2">
         {!isLoggedIn ? (
           <>
-            <button className="border border-yellow-500 text-yellow-400 px-3 py-1 rounded-full text-xs font-bold">
+            {/* Login বাটন */}
+            <Link 
+              href="/user/login" 
+              className="border border-yellow-500 text-yellow-400 px-3 py-1 rounded-full text-xs font-bold hover:bg-yellow-500/10 transition"
+            >
               Login
-            </button>
-            <button className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-3 py-1 rounded-full text-xs font-bold">
+            </Link>
+            {/* Register বাটন */}
+            <Link 
+              href="/user/signup" 
+              className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-3 py-1 rounded-full text-xs font-bold hover:opacity-90 transition"
+            >
               Register
-            </button>
+            </Link>
           </>
         ) : (
           <div className="flex items-center gap-2 bg-black/30 px-2 py-1 rounded-full border border-[#2F4553]">
