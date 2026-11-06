@@ -122,7 +122,7 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
             onClick={(e) => e.stopPropagation()}
           >
             {/* Deposit & Withdraw Links */}
-            <Link href="/wallets/deposit" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#253B49] transition">
+            <Link href="/wallets/voucher-center" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#253B49] transition">
               <Icons.Deposit /> <span className="text-sm">{t.Deposit}</span>
             </Link>
             <Link href="/wallets/withdrawal" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#253B49] transition">
