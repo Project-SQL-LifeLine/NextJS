@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
@@ -15,10 +15,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useState(() => {
+  // useEffect ব্যবহার করা হয়েছে (useState এর ভেতরে টাইমার কাজ করে না)
+  useEffect(() => {
     const timer = setTimeout(() => setIsLoadingPage(false), 800);
     return () => clearTimeout(timer);
-  });
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,11 +41,17 @@ export default function LoginPage() {
         throw new Error(data?.error || funcError?.message || "লগইন ব্যর্থ হয়েছে");
       }
 
+      // সেশন সেভ করার সঠিক নিয়ম (Supabase ক্লায়েন্টে সেট করা)
       if (data?.session) {
-        localStorage.setItem("supabase_session", JSON.stringify(data.session));
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
+        if (sessionError) throw sessionError;
       }
 
       router.push("/");
+      router.refresh(); // হোমপেজে গিয়ে নতুন করে সেশন চেক করার জন্য
     } catch (err: any) {
       setError(err.message);
     } finally {
