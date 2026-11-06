@@ -8,12 +8,13 @@ import { supabase } from "../../../lib/supabase/client";
 export default function LoginPage() {
   const router = useRouter();
   const [isLoadingPage, setIsLoadingPage] = useState(true);
-  const [mobile, setMobile] = useState("");
+  
+  const [gameId, setGameId] = useState("");
   const [password, setPassword] = useState("");
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // পেজ লোডিং অ্যানিমেশন (১ সেকেন্ড)
   useState(() => {
     const timer = setTimeout(() => setIsLoadingPage(false), 800);
     return () => clearTimeout(timer);
@@ -24,23 +25,15 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    // মোবাইল নম্বর চেক (১১ ডিজিট এবং ০১ দিয়ে শুরু)
-    if (!/^01\d{9}$/.test(mobile)) {
-      setError("সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন: 017XXXXXXXX)");
-      setLoading(false);
-      return;
-    }
-
-    // পাসওয়ার্ড চেক (মিনিমাম ৮ ডিজিট)
-    if (password.length < 8) {
-      setError("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে");
+    if (!gameId || !password) {
+      setError("সবগুলো ঘর পূরণ করুন");
       setLoading(false);
       return;
     }
 
     try {
       const { data, error: funcError } = await supabase.functions.invoke("auth-manager", {
-        body: { action: "login", mobile, password },
+        body: { action: "login", game_id: gameId, password },
       });
 
       if (funcError || data?.error) {
@@ -80,12 +73,12 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div>
-            <label className="text-[#B1BAD3] text-xs font-semibold mb-1 block">Mobile Number</label>
+            <label className="text-[#B1BAD3] text-xs font-semibold mb-1 block">Game ID / Number</label>
             <input
               type="text"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
-              placeholder="01XXXXXXXXX"
+              value={gameId}
+              onChange={(e) => setGameId(e.target.value)}
+              placeholder="Enter Game ID"
               required
               className="w-full bg-[#0F212E] text-white border border-[#2F4553] rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-[#00E701]"
             />
