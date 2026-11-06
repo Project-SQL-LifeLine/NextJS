@@ -10,10 +10,10 @@ export default function SignupPage() {
   const [isLoadingPage, setIsLoadingPage] = useState(true);
   
   const [formData, setFormData] = useState({
-    full_name: "",
-    mobile: "",
     game_id: "",
+    mobile: "",
     password: "",
+    confirmPassword: "",
   });
   
   const [loading, setLoading] = useState(false);
@@ -40,23 +40,30 @@ export default function SignupPage() {
       return;
     }
 
-    // ২. পাসওয়ার্ড ভ্যালিডেশন (মিনিমাম ৮ ডিজিট)
+    // ২. পাসওয়ার্ড ম্যাচিং চেক
+    if (formData.password !== formData.confirmPassword) {
+      setError("পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড মিলছে না");
+      setLoading(false);
+      return;
+    }
+
+    // ৩. পাসওয়ার্ড ভ্যালিডেশন (মিনিমাম ৮ ডিজিট)
     if (formData.password.length < 8) {
       setError("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে");
       setLoading(false);
       return;
     }
 
-    // ৩. ইউজারনেম ভ্যালিডেশন (মিনিমাম ৮ ডিজিট)
+    // ৪. ইউজারনেম ভ্যালিডেশন (মিনিমাম ৮ ডিজিট)
     if (formData.game_id.length < 8) {
-      setError("ইউজারনেম (Game ID) কমপক্ষে ৮ অক্ষরের হতে হবে");
+      setError("ইউজারনেম কমপক্ষে ৮ অক্ষরের হতে হবে");
       setLoading(false);
       return;
     }
 
     try {
-      // ৪. ইউজারনেম আগে থেকে আছে কি না চেক করা (Supabase ডাটাবেসে)
-      const { data: existingUser, error: checkError } = await supabase
+      // ৫. ইউজারনেম (Game ID) আগে থেকে আছে কি না চেক করা
+      const { data: existingUser } = await supabase
         .from("profiles")
         .select("game_id")
         .eq("game_id", formData.game_id)
@@ -68,13 +75,12 @@ export default function SignupPage() {
         return;
       }
 
-      // ৫. Edge Function এ রিকোয়েস্ট পাঠানো
+      // ৬. Edge Function এ রিকোয়েস্ট পাঠানো
       const { data, error: funcError } = await supabase.functions.invoke("auth-manager", {
         body: {
           action: "signup",
-          full_name: formData.full_name,
-          mobile: formData.mobile,
           game_id: formData.game_id,
+          mobile: formData.mobile,
           password: formData.password,
         },
       });
@@ -83,7 +89,6 @@ export default function SignupPage() {
         throw new Error(data?.error || funcError?.message || "সাইনআপ ব্যর্থ হয়েছে");
       }
 
-      // সফল হলে লগইন পেজে রিডাইরেক্ট
       router.push("/user/login");
     } catch (err: any) {
       setError(err.message);
@@ -113,20 +118,7 @@ export default function SignupPage() {
 
         <form onSubmit={handleSignup} className="flex flex-col gap-4">
           <div>
-            <label className="text-[#B1BAD3] text-xs font-semibold mb-1 block">Full Name</label>
-            <input
-              type="text"
-              name="full_name"
-              value={formData.full_name}
-              onChange={handleChange}
-              placeholder="John Doe"
-              required
-              className="w-full bg-[#0F212E] text-white border border-[#2F4553] rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-[#00E701]"
-            />
-          </div>
-
-          <div>
-            <label className="text-[#B1BAD3] text-xs font-semibold mb-1 block">Username (Game ID)</label>
+            <label className="text-[#B1BAD3] text-xs font-semibold mb-1 block">Username</label>
             <input
               type="text"
               name="game_id"
@@ -159,6 +151,19 @@ export default function SignupPage() {
               value={formData.password}
               onChange={handleChange}
               placeholder="Min 8 characters"
+              required
+              className="w-full bg-[#0F212E] text-white border border-[#2F4553] rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-[#00E701]"
+            />
+          </div>
+
+          <div>
+            <label className="text-[#B1BAD3] text-xs font-semibold mb-1 block">Confirm Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Re-enter password"
               required
               className="w-full bg-[#0F212E] text-white border border-[#2F4553] rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-[#00E701]"
             />
