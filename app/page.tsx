@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
-import "./page.css";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // ... বাকি কোড
 
   return (
     <div className="min-h-screen bg-[#0F212E] pb-20 relative overflow-hidden">
