@@ -1,6 +1,8 @@
+import "./globals.css";
+
 export const metadata = {
   title: "Casino Site",
-  description: "Casino site",
+  description: "Premium Dark Casino",
 };
 
 export default function RootLayout({
