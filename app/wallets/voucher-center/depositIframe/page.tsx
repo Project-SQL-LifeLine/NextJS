@@ -28,19 +28,26 @@ function DepositIframeContent() {
   const bonusAmount = (amount * bonusPercent) / 100;
   const totalAmount = amount + bonusAmount;
 
-  // মোবাইলের Back বাটন সরাসরি আগের পেজে নিয়ে যাবে
+  // মোবাইলের Back বাটন ফিক্স করার লজিক
   useEffect(() => {
-    const handlePopState = () => {
-      // এখানে কোনো স্টেট চেঞ্জ না করে সরাসরি আগের পেজে (Router Back) পাঠানো হচ্ছে
-      // যা ব্রাউজারের স্বাভাবিক ব্যাক বাটনের মতো কাজ করবে
-      router.back(); 
+    // অর্ডার প্লেসড স্টেটে গেলে ব্রাউজারের হিস্ট্রিতে একটি ডামি স্টেট পুশ করবো
+    if (isOrderPlaced) {
+      window.history.pushState({ orderPlaced: true }, "");
+    }
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state?.orderPlaced || isOrderPlaced) {
+        setIsOrderPlaced(false); // Order Info থেকে সাকসেস পেজে ফিরে যাবে
+      } else if (isSubmitted) {
+        setIsSubmitted(false); // সাকসেস পেজ থেকে ইনপুট পেজে ফিরে যাবে
+      }
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [router]);
+  }, [isOrderPlaced, isSubmitted]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(walletNumber);
@@ -105,7 +112,7 @@ function DepositIframeContent() {
     return (
       <div className="iframe-container">
         <div className="iframe-header" style={{ background: '#0b7a3e', padding: '15px' }}>
-          <button onClick={() => router.push('/')} className="text-white">
+          <button onClick={() => setIsOrderPlaced(false)} className="text-white">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
           <span className="text-white font-bold text-lg">{lang === "EN" ? "Deposit Info" : "ডিপোজিট তথ্য"}</span>
@@ -254,7 +261,7 @@ function DepositIframeContent() {
             <h3>{lang === "EN" ? "This order can only be submitted once, please confirm your Transaction ID: " : "এই অর্ডারটি শুধুমাত্র একবার সাবমিট করা যাবে, অনুগ্রহ করে আপনার ট্রানজেকশন আইডি নিশ্চিত করুন: "}<span>{txnId}</span> {lang === "EN" ? "is correct!" : "সঠিক আছে!"}</h3>
             <div className="modal-btns">
               <button className="btn-cancel" onClick={() => setShowConfirmModal(false)}>{lang === "EN" ? "Cancel" : "বাতিল"}</button>
-              <button className="btn-confirm" onClick={handleConfirmSubmit}>{lang === "EN" ? "Confirm" : "নিশ্চিত"}</button>
+              <button className="btn-confirm" onClick={handleConfirmSubmit}>{lang === "EN" ? "নিশ্চিত" : "Confirm"}</button>
             </div>
           </div>
         </div>
