@@ -6,30 +6,30 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "../lib/LanguageContext";
 import { supabase } from "../lib/supabase/client";
 
-// Bottom Navbar Icons
+// Bottom Navbar Icons (text-white সরানো হয়েছে যাতে কালার ইনহেরিট করে)
 const NavIcons = {
   Home: () => (
-    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
     </svg>
   ),
   Promotion: () => (
-    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
     </svg>
   ),
   Lottery: () => (
-    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
     </svg>
   ),
   Reward: () => (
-    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
     </svg>
   ),
   Profile: () => (
-    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
     </svg>
   ),
@@ -88,14 +88,14 @@ export default function BottomNav() {
 
       {/* Side Drawer (Right Side) */}
       <div 
-        className={`fixed top-0 right-0 h-full w-[80%] max-w-[300px] bg-[#0d1e15] border-l border-[#1A2C38] z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-[80%] max-w-[300px] bg-bgSec border-l border-borderCol z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
           isDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Drawer Header */}
-        <div className="flex items-center justify-between p-5 border-b border-[#1A2C38]">
-          <h2 className="text-xl font-bold text-white">{t("My Account", "আমার অ্যাকাউন্ট")}</h2>
-          <button onClick={() => setIsDrawerOpen(false)} className="text-[#B1BAD3] hover:text-white">
+        <div className="flex items-center justify-between p-5 border-b border-borderCol">
+          <h2 className="text-xl font-bold text-textMain">{t("My Account", "আমার অ্যাকাউন্ট")}</h2>
+          <button onClick={() => setIsDrawerOpen(false)} className="text-textSec hover:text-textMain">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -106,7 +106,7 @@ export default function BottomNav() {
             <div 
               key={idx}
               onClick={() => { setIsDrawerOpen(false); router.push(item.path); }}
-              className="flex items-center gap-4 px-6 py-4 text-[#B1BAD3] hover:text-white hover:bg-[#1A2C38]/50 cursor-pointer transition-colors"
+              className="flex items-center gap-4 px-6 py-4 text-textSec hover:text-textMain hover:bg-cardHover/50 cursor-pointer transition-colors"
             >
               {item.icon}
               <span className="font-medium text-sm">{item.name}</span>
@@ -115,7 +115,7 @@ export default function BottomNav() {
         </div>
 
         {/* Drawer Footer (Logout) */}
-        <div className="p-4 border-t border-[#1A2C38]">
+        <div className="p-4 border-t border-borderCol">
           <button 
             onClick={handleLogout}
             className="flex items-center gap-4 w-full px-4 py-3 text-[#ED4163] hover:bg-[#ED4163]/10 rounded-lg cursor-pointer transition-colors"
@@ -127,36 +127,36 @@ export default function BottomNav() {
       </div>
 
       {/* Bottom Navigation */}
-      <nav className="bg-[#1A2C38] border-t border-[#2F4553] fixed bottom-0 w-full flex justify-around items-center py-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+      <nav className="bg-[#0b1712] border-t border-borderCol fixed bottom-0 w-full flex justify-around items-center py-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
         
-        <Link href="/" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/") ? "text-primary" : "text-[#B1BAD3] hover:text-white"}`}>
+        <Link href="/" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/") ? "text-primary" : "text-textSec hover:text-textMain"}`}>
           <NavIcons.Home />
-          <span className={`text-[10px] font-bold mt-1 ${isActive("/") ? "text-primary" : "text-[#B1BAD3]"}`}>{t("Home", "হোম")}</span>
+          <span className={`text-[10px] font-bold mt-1 ${isActive("/") ? "text-primary" : "text-textSec"}`}>{t("Home", "হোম")}</span>
         </Link>
 
-        <Link href="/promotion" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/promotion") ? "text-primary" : "text-[#B1BAD3] hover:text-white"}`}>
+        <Link href="/promotion" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/promotion") ? "text-primary" : "text-textSec hover:text-textMain"}`}>
           <NavIcons.Promotion />
-          <span className={`text-[10px] font-bold mt-1 ${isActive("/promotion") ? "text-primary" : "text-[#B1BAD3]"}`}>{t("Promotion", "প্রমোশন")}</span>
+          <span className={`text-[10px] font-bold mt-1 ${isActive("/promotion") ? "text-primary" : "text-textSec"}`}>{t("Promotion", "প্রমোশন")}</span>
         </Link>
         
         {/* মাঝখানের বড় বাটন: Mega Lottery */}
         <div className="relative -top-5 cursor-pointer">
           <Link 
             href="/lottery"
-            className="w-14 h-14 rounded-full bg-[#1475E0] flex flex-col items-center justify-center shadow-lg border-4 border-[#0F212E] hover:bg-[#0f5bb5] transition-colors"
+            className="w-14 h-14 rounded-full bg-primary flex flex-col items-center justify-center shadow-lg border-4 border-[#07110f] hover:bg-[#00c701] transition-colors"
           >
-            <span className="text-white mb-0.5"><NavIcons.Lottery /></span>
-            <span className="text-[8px] font-extrabold text-white leading-none uppercase tracking-wider">Mega</span>
+            <span className="text-[#07110f] mb-0.5"><NavIcons.Lottery /></span>
+            <span className="text-[8px] font-extrabold text-[#07110f] leading-none uppercase tracking-wider">Mega</span>
           </Link>
         </div>
 
-        <Link href="/reward" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/reward") ? "text-primary" : "text-[#B1BAD3] hover:text-white"}`}>
+        <Link href="/reward" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/reward") ? "text-primary" : "text-textSec hover:text-textMain"}`}>
           <NavIcons.Reward />
-          <span className={`text-[10px] font-bold mt-1 ${isActive("/reward") ? "text-primary" : "text-[#B1BAD3]"}`}>{t("Reward", "রিওয়ার্ড")}</span>
+          <span className={`text-[10px] font-bold mt-1 ${isActive("/reward") ? "text-primary" : "text-textSec"}`}>{t("Reward", "রিওয়ার্ড")}</span>
         </Link>
 
         {/* Member এর বদলে Profile বাটন */}
-        <button onClick={() => setIsDrawerOpen(true)} className="flex flex-col items-center relative cursor-pointer text-[#B1BAD3] hover:text-white transition-colors">
+        <button onClick={() => setIsDrawerOpen(true)} className="flex flex-col items-center relative cursor-pointer text-textSec hover:text-textMain transition-colors">
           <NavIcons.Profile />
           <span className="text-[10px] font-bold mt-1">{t("Profile", "প্রোফাইল")}</span>
         </button>
