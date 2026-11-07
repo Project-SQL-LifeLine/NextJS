@@ -8,7 +8,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "#00E701",
+        primary: "#1475E0",
         bgMain: "#0F212E",
         bgSec: "#1A2C38",
         cardHover: "#253B49",
