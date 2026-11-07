@@ -63,7 +63,8 @@ export default function VoucherCenterPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Head>
 
-      <div className={`min-h-screen bg-bgMain text-textMain flex flex-col pb-20 transition-opacity duration-700 ease-in-out ${isFadeIn ? 'opacity-100' : 'opacity-0'}`}>
+      {/* pb-28 দেওয়া হয়েছে যাতে ফিক্সড বাটনের নিচে কনটেন্ট ঢাকা না পড়ে */}
+      <div className={`min-h-screen bg-bgMain text-textMain flex flex-col pb-28 transition-opacity duration-700 ease-in-out ${isFadeIn ? 'opacity-100' : 'opacity-0'}`}>
         
         <header className="bg-bgSec px-4 py-3 flex items-center justify-between sticky top-0 z-50 border-b border-borderCol">
           <button onClick={() => router.back()} className="text-white">
@@ -154,7 +155,7 @@ export default function VoucherCenterPage() {
               <span className="w-2 h-2 rounded-full bg-primary inline-block"></span> Promotions
             </h2>
             
-            {/* বোনাস কার্ড গ্রিড (ভেতরের পার্সেন্টেজ সরানো হয়েছে) */}
+            {/* স্লিম বোনাস কার্ড গ্রিড (হলুদ কালার বাদ দেওয়া হয়েছে) */}
             <div className="grid grid-cols-3 gap-2 mb-3">
               {bonuses.map((bonus) => {
                 const dynamicBonusAmount = (selectedAmount * bonus.bonus_percentage) / 100;
@@ -163,28 +164,27 @@ export default function VoucherCenterPage() {
                   <div 
                     key={bonus.id} 
                     onClick={() => setSelectedPromo(bonus)}
-                    className={`relative flex flex-col items-center justify-center p-3 h-28 rounded-md cursor-pointer transition-all overflow-hidden border-2 ${
+                    className={`relative flex flex-col items-center justify-center p-2 h-20 rounded-md cursor-pointer transition-all overflow-hidden border-2 ${
                       selectedPromo?.id === bonus.id 
                         ? "border-primary bg-gradient-to-br from-[#0a5c29] to-[#0b3d1e]" 
                         : "border-borderCol bg-gradient-to-br from-[#1d3b2b] to-[#14251c] hover:border-primary/50"
                     }`}
                   >
-                    {/* হলুদ ব্যাজ (উপরে ডানে) */}
-                    <div className="absolute top-0 right-0 bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded-bl-lg z-10">
+                    {/* ব্যাজ (সাদা ব্যাকগ্রাউন্ড, কালো টেক্সট) */}
+                    <div className="absolute top-0 right-0 bg-white text-black text-[10px] font-bold px-1.5 py-0.5 rounded-bl-md z-10">
                       +{bonus.bonus_percentage}%
                     </div>
 
-                    <div className="flex flex-col items-center z-10 mt-2">
-                      {/* ডাইনামিক বোনাস এমাউন্ট (বড় করে দেখানো হয়েছে) */}
-                      <span className="text-[#00E701] font-extrabold text-xl mt-2">
+                    <div className="flex flex-col items-center z-10 mt-3">
+                      <span className="text-[#00E701] font-extrabold text-sm">
                         ৳{dynamicBonusAmount.toLocaleString()}
                       </span>
                     </div>
 
-                    {/* সিলেক্টেড টিক মার্ক (নিচে ডানে) */}
+                    {/* সিলেক্টেড টিক মার্ক */}
                     {selectedPromo?.id === bonus.id && (
-                      <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#00E701] rounded-tl-full flex items-end justify-end p-1 z-10">
-                        <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                      <div className="absolute bottom-0 right-0 w-6 h-6 bg-[#00E701] rounded-tl-full flex items-end justify-end p-1 z-10">
+                        <svg className="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                       </div>
                     )}
                   </div>
@@ -220,7 +220,8 @@ export default function VoucherCenterPage() {
           </div>
         )}
 
-        <div className="fixed bottom-0 left-0 w-full p-4 bg-bgMain border-t border-borderCol">
+        {/* Next Button (Fixed at bottom) */}
+        <div className="fixed bottom-0 left-0 w-full p-4 bg-bgMain border-t border-borderCol z-50">
           <Link 
             href={`/wallets/voucher-center/depositIframe?method=${selectedMethod?.method_name}&logo=${selectedMethod?.method_logo_url}&amount=${selectedAmount}&bonus=${selectedPromo?.bonus_percentage || 0}&bonus_id=${selectedPromo?.id || ''}`} 
             className="w-full block text-center bg-primary text-[#071A0B] font-bold text-lg py-3 rounded-lg hover:bg-[#00c701] transition-colors"
