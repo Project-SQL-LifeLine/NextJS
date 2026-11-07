@@ -6,10 +6,18 @@ import Link from "next/link";
 import { supabase } from "../../../lib/supabase/client";
 import Head from "next/head"; 
 
-// পেমেন্ট/ওয়ালেট নির্দেশক সাদা SVG আইকন
+// পেমেন্ট মেথডে ব্যবহারের জন্য ছোট আইকন
 const PaymentIcon = () => (
   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+  </svg>
+);
+
+// লোডিং এনিমেশনের জন্য বড় সাদা ওয়ালেট/কার্ড আইকন
+const LoadingWalletIcon = () => (
+  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 10h2v4h-2z" />
   </svg>
 );
 
@@ -51,8 +59,12 @@ export default function VoucherCenterPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bgMain flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#2F4553] border-t-primary rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-bgMain flex flex-col items-center justify-center gap-4">
+        {/* লোডিং অ্যানিমেশন (সাদা পেমেন্ট আইকন স্পিন করছে) */}
+        <div className="animate-spin">
+          <LoadingWalletIcon />
+        </div>
+        <span className="text-primary text-sm font-bold mt-2">Loading...</span>
       </div>
     );
   }
