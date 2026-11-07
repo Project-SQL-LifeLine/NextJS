@@ -8,8 +8,11 @@ import { supabase } from "../lib/supabase/client";
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [banners, setBanners] = useState<any[]>([]);
+  const [currentBanner, setCurrentBanner] = useState(0);
 
   useEffect(() => {
+    // ১. সেশন চেক
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -27,7 +30,21 @@ export default function Home() {
       }
     };
 
+    // ২. ব্যানার ডাটা আনা
+    const fetchBanners = async () => {
+      const { data, error } = await supabase
+        .from("home_banners")
+        .select("*")
+        .eq("is_active", true)
+        .order("serial", { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        setBanners(data);
+      }
+    };
+
     checkSession();
+    fetchBanners();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
@@ -43,6 +60,17 @@ export default function Home() {
     };
   }, []);
 
+  // ৩. ব্যানার স্লাইডারের জন্য টাইমার
+  useEffect(() => {
+    if (banners.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentBanner((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
+      }, 3000); // ৩ সেকেন্ড পর পর পরিবর্তন হবে
+
+      return () => clearInterval(interval);
+    }
+  }, [banners.length]);
+
   return (
     <div className="min-h-screen bg-[#0F212E] pb-20 relative overflow-hidden">
       
@@ -55,9 +83,32 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ডাইনামিক ব্যানার স্লাইডার */}
       <div className="px-3 mt-3">
         <div className="bg-[#092238] border border-[#2F4553] rounded-lg p-2 h-36 flex items-center justify-center relative overflow-hidden">
-          <img src="https://placehold.co/600x200/0F212E/00E701?text=Hero+Banner" alt="Banner" className="w-full h-full object-cover rounded-lg opacity-80" />
+          {banners.length > 0 ? (
+            <a 
+              href={banners[currentBanner].redirect_url || "#"} 
+              className="w-full h-full relative block"
+            >
+              <img 
+                src={banners[currentBanner].image_url} 
+                alt="Banner" 
+                className="w-full h-full object-cover rounded-lg opacity-90 transition-opacity duration-500" 
+              />
+              {/* স্লাইডার ডট ইন্ডিকেটর */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                {banners.map((_, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`w-1.5 h-1.5 rounded-full ${idx === currentBanner ? "bg-yellow-400" : "bg-white/50"}`}
+                  />
+                ))}
+              </div>
+            </a>
+          ) : (
+            <div className="text-textSec text-sm">No banners available</div>
+          )}
         </div>
       </div>
 
