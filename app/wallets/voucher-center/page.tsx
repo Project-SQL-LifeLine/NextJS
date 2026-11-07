@@ -154,10 +154,9 @@ export default function VoucherCenterPage() {
               <span className="w-2 h-2 rounded-full bg-primary inline-block"></span> Promotions
             </h2>
             
-            {/* বোনাস কার্ড গ্রিড (অতিরিক্ত ডাইনামিক এমাউন্টসহ) */}
+            {/* বোনাস কার্ড গ্রিড (ভেতরের পার্সেন্টেজ সরানো হয়েছে) */}
             <div className="grid grid-cols-3 gap-2 mb-3">
               {bonuses.map((bonus) => {
-                // এই নির্দিষ্ট বোনাসের জন্য ডাইনামিক এমাউন্ট
                 const dynamicBonusAmount = (selectedAmount * bonus.bonus_percentage) / 100;
 
                 return (
@@ -176,12 +175,8 @@ export default function VoucherCenterPage() {
                     </div>
 
                     <div className="flex flex-col items-center z-10 mt-2">
-                       {/* সাদা বড় লেখা (বোনাস নাম) */}
-                      <span className="text-white font-extrabold text-lg">
-                        {bonus.bonus_name.replace(' BONUS', '')}
-                      </span>
-                      {/* ডাইনামিক বোনাস এমাউন্ট */}
-                      <span className="text-[#00E701] font-bold text-xs mt-1">
+                      {/* ডাইনামিক বোনাস এমাউন্ট (বড় করে দেখানো হয়েছে) */}
+                      <span className="text-[#00E701] font-extrabold text-xl mt-2">
                         ৳{dynamicBonusAmount.toLocaleString()}
                       </span>
                     </div>
