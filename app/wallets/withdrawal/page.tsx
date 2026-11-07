@@ -26,26 +26,10 @@ export default function WithdrawalPage() {
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // 👇 এখানে আপনার PNG ইমেজের লিংকগুলো বসাবেন 👇
   const methods = [
-    { 
-      id: "bkash", 
-      name: "bKash", 
-      // বিকাশের PNG লিংক এখানে দিন
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Bkash_Logo.svg/512px-Bkash_Logo.svg.png" 
-    },
-    { 
-      id: "nagad", 
-      name: "Nagad", 
-      // নগদের PNG লিংক এখানে দিন
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Nagad_Logo.svg/512px-Nagad_Logo.svg.png" 
-    },
-    { 
-      id: "rocket", 
-      name: "Rocket", 
-      // রকেটের PNG লিংক এখানে দিন
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Rocket_Logo.svg/512px-Rocket_Logo.svg.png" 
-    }
+    { id: "bkash", name: "bKash", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Bkash_Logo.svg/512px-Bkash_Logo.svg.png" },
+    { id: "nagad", name: "Nagad", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Nagad_Logo.svg/512px-Nagad_Logo.svg.png" },
+    { id: "rocket", name: "Rocket", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Rocket_Logo.svg/512px-Rocket_Logo.svg.png" }
   ];
 
   useEffect(() => {
@@ -193,13 +177,7 @@ export default function WithdrawalPage() {
                 : "text-gray-500 font-medium"
             }`}
           >
-            {/* ইমেজ লোড না হলে alt লেখা দেখাবে না, এটি হাইড হয়ে যাবে */}
-            <img 
-              src={method.logo} 
-              alt="" 
-              className="h-4 sm:h-5 object-contain" 
-              onError={(e) => { e.currentTarget.style.display = 'none'; }} 
-            />
+            <img src={method.logo} alt="" className="h-4 sm:h-5 object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
             <span className="truncate">{method.name}</span>
           </button>
         ))}
@@ -207,16 +185,16 @@ export default function WithdrawalPage() {
 
       <div className="p-4 w-full max-w-full overflow-hidden">
         
-        {/* E-wallet সেকশন */}
+        {/* E-wallet সেকশন (হরাইজন্টাল স্লাইডার) */}
         <div className="mb-6 relative w-full">
           <h3 className="text-gray-700 text-base font-medium mb-3">
             {t("Registered E-wallet", "রেজিস্টার্ড ই-ওয়ালেট")} ({savedWallets.length}/5)
           </h3>
           
           {savedWallets.length > 0 ? (
-            <div className="flex flex-col gap-3 w-full">
+            <div className="flex overflow-x-auto gap-3 pb-4 snap-x snap-mandatory no-scrollbar">
               {savedWallets.map((wallet) => (
-                <div key={wallet.id} className="relative bg-gradient-to-r from-[#6B4CFF] to-[#00E5FF] rounded-xl p-4 text-white shadow-md w-full overflow-hidden">
+                <div key={wallet.id} className="relative min-w-[85vw] sm:min-w-[300px] flex-shrink-0 snap-center bg-gradient-to-r from-[#6B4CFF] to-[#00E5FF] rounded-xl p-4 text-white shadow-md overflow-hidden">
                   <div className="flex items-center gap-2 mb-3">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                     <span className="font-semibold text-lg uppercase">{selectedMethod}</span>
@@ -238,14 +216,14 @@ export default function WithdrawalPage() {
           {savedWallets.length < 5 && (
             <button 
               onClick={() => router.push("/wallets/securityCenter/addBankCard")}
-              className="absolute bottom-4 right-4 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-red-700 transition z-10"
+              className="absolute bottom-6 right-0 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-red-700 transition z-10"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             </button>
           )}
         </div>
 
-        <div className="mt-8">
+        <div className="mt-2">
           {/* ইনফরমেশন */}
           <div className="flex flex-col gap-2 mb-6 text-sm text-gray-500">
             <p>{t("Withdrawal time: 24 Hours", "উত্তোলনের সময়: ২৪ ঘন্টা")}</p>
@@ -268,7 +246,6 @@ export default function WithdrawalPage() {
 
           {/* ফর্ম */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
-            
             <div className="w-full">
               <label className="text-gray-700 text-sm font-medium mb-2 block">{t("Withdrawal Amount:", "উত্তোলনের পরিমাণ:")}</label>
               <div className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50 focus-within:border-blue-500 transition w-full">
