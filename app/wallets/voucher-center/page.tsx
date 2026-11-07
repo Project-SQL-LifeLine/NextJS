@@ -6,7 +6,7 @@ import Link from "next/link";
 import { supabase } from "../../../lib/supabase/client";
 import Head from "next/head"; 
 
-// পেমেন্ট মেথডে ব্যবহারের জন্য ছোট আইকন
+// পেমেন্ট/ওয়ালেট নির্দেশক সাদা SVG আইকন
 const PaymentIcon = () => (
   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -27,6 +27,7 @@ export default function VoucherCenterPage() {
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [selectedChannel, setSelectedChannel] = useState("");
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
+  const [customAmount, setCustomAmount] = useState(""); // কাস্টম অ্যামাউন্টের জন্য স্টেট
   const [selectedPromo, setSelectedPromo] = useState<any>(null);
   const [bonuses, setBonuses] = useState<any[]>([]);
   const [methods, setMethods] = useState<any[]>([]);
@@ -60,7 +61,6 @@ export default function VoucherCenterPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-bgMain flex flex-col items-center justify-center gap-4">
-        {/* লোডিং অ্যানিমেশন (সাদা পেমেন্ট আইকন স্পিন করছে) */}
         <div className="animate-spin">
           <LoadingWalletIcon />
         </div>
@@ -141,12 +141,27 @@ export default function VoucherCenterPage() {
               {[500, 1000, 2000, 5000, 10000, 20000, 30000].map((amt) => (
                 <button
                   key={amt}
-                  onClick={() => { setSelectedAmount(amt); }}
+                  onClick={() => { setSelectedAmount(amt); setCustomAmount(amt.toString()); }}
                   className={`py-3 rounded-lg border-2 font-bold transition-all ${selectedAmount === amt ? "border-danger text-danger" : "border-borderCol text-textSec"}`}
                 >
                   {amt.toLocaleString()}
                 </button>
               ))}
+            </div>
+            
+            {/* কাস্টম অ্যামাউন্ট ইনপুট বক্স */}
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-textSec font-bold">৳</span>
+              <input
+                type="number"
+                value={customAmount}
+                onChange={(e) => { 
+                  setCustomAmount(e.target.value); 
+                  setSelectedAmount(Number(e.target.value)); 
+                }}
+                placeholder={`${selectedMethod?.min_deposit || 500} - ${selectedMethod?.max_deposit || 30000}`}
+                className="w-full bg-bgSec text-white border-2 border-borderCol rounded-lg pl-10 pr-4 py-3 text-lg font-bold focus:outline-none focus:border-primary transition-colors"
+              />
             </div>
           </section>
 
