@@ -28,18 +28,19 @@ function DepositIframeContent() {
   const bonusAmount = (amount * bonusPercent) / 100;
   const totalAmount = amount + bonusAmount;
 
-  // মোবাইলের Back বাটন ফিক্স করার লজিক
+  // মোবাইলের Back বাটন হ্যান্ডেল করার লজিক
   useEffect(() => {
-    // অর্ডার প্লেসড স্টেটে গেলে ব্রাউজারের হিস্ট্রিতে একটি ডামি স্টেট পুশ করবো
     if (isOrderPlaced) {
-      window.history.pushState({ orderPlaced: true }, "");
+      // অর্ডার প্লেসড স্টেটে গেলে ব্রাউজারের হিস্ট্রিতে একটি ডামি স্টেট পুশ করবো
+      window.history.pushState({ page: "orderPlaced" }, "");
     }
 
     const handlePopState = (event: PopStateEvent) => {
-      if (event.state?.orderPlaced || isOrderPlaced) {
-        setIsOrderPlaced(false); // Order Info থেকে সাকসেস পেজে ফিরে যাবে
+      // ব্যাক বাটনে ক্লিক করলে এই ইভেন্টটি ফায়ার হবে
+      if (isOrderPlaced) {
+        setIsOrderPlaced(false); // আবার সাকসেস পেজে (✔) ফিরে যাবে
       } else if (isSubmitted) {
-        setIsSubmitted(false); // সাকসেস পেজ থেকে ইনপুট পেজে ফিরে যাবে
+        setIsSubmitted(false); // সাকসেস থেকে ইনপুট পেজে ফিরে যাবে
       }
     };
 
