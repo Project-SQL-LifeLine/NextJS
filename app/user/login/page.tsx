@@ -61,15 +61,15 @@ export default function LoginPage() {
 
   if (isLoadingPage) {
     return (
-      <div className="min-h-screen bg-[#0F212E] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#2F4553] border-t-[#00E701] rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#07110f] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-[#26352e] border-t-[#00e701] rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0F212E] flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-[#1A2C38] border border-[#2F4553] rounded-xl p-6 shadow-lg">
+    <div className="min-h-screen bg-[#07110f] flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-sm bg-[#111d19] border border-[#26352e] rounded-xl p-6 shadow-lg">
         <h1 className="text-2xl font-bold text-white text-center mb-6">Login</h1>
 
         {error && (
@@ -80,41 +80,41 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div>
-            <label className="text-[#B1BAD3] text-xs font-semibold mb-1 block">Game ID / Number</label>
+            <label className="text-[#9ca9a3] text-xs font-semibold mb-1 block">Game ID / Number</label>
             <input
               type="text"
               value={gameId}
               onChange={(e) => setGameId(e.target.value)}
               placeholder="Enter Game ID"
               required
-              className="w-full bg-[#0F212E] text-white border border-[#2F4553] rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-[#00E701]"
+              className="w-full bg-[#07110f] text-white border border-[#26352e] rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-[#00e701]"
             />
           </div>
 
           <div>
-            <label className="text-[#B1BAD3] text-xs font-semibold mb-1 block">Password</label>
+            <label className="text-[#9ca9a3] text-xs font-semibold mb-1 block">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full bg-[#0F212E] text-white border border-[#2F4553] rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-[#00E701]"
+              className="w-full bg-[#07110f] text-white border border-[#26352e] rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-[#00e701]"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#00E701] hover:bg-[#00c701] text-[#071A0B] font-bold text-sm py-2.5 rounded-md mt-2 transition-colors disabled:opacity-50 flex justify-center items-center"
+            className="w-full bg-[#00e701] hover:bg-[#00c701] text-[#07110f] font-bold text-sm py-2.5 rounded-md mt-2 transition-colors disabled:opacity-50 flex justify-center items-center"
           >
-            {loading ? <div className="w-5 h-5 border-2 border-[#071A0B] border-t-transparent rounded-full animate-spin"></div> : "Login"}
+            {loading ? <div className="w-5 h-5 border-2 border-[#07110f] border-t-transparent rounded-full animate-spin"></div> : "Login"}
           </button>
         </form>
 
-        <p className="text-[#B1BAD3] text-xs text-center mt-6">
+        <p className="text-[#9ca9a3] text-xs text-center mt-6">
           Don't have an account?{" "}
-          <Link href="/user/signup" className="text-[#00E701] font-semibold hover:underline">
+          <Link href="/user/signup" className="text-[#00e701] font-semibold hover:underline">
             Register
           </Link>
         </p>
