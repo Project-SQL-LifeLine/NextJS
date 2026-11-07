@@ -118,7 +118,7 @@ export default function VoucherCenterPage() {
           </section>
 
           <p className="text-xs text-textSec leading-relaxed">
-            ডিপোজিট তথ্য: বারবার ডিপোজিট পেমেন্ট এড়াতে ডিপোজিট করার সময় শুধুমাত্র একবার পেমেন্ট করুন।
+            Deposit Info: To avoid duplicate deposit payments, please make the payment only once during the deposit process.
           </p>
 
           <section>
@@ -153,22 +153,30 @@ export default function VoucherCenterPage() {
             <h2 className="text-sm font-bold text-textSec mb-3 flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-primary inline-block"></span> Promotions
             </h2>
-            <div className="flex flex-col gap-3">
+            {/* বোনাস কার্ড ৩ কলামের গ্রিডে দেখানো হয়েছে */}
+            <div className="grid grid-cols-3 gap-2 mb-3">
               {bonuses.map((bonus) => (
-                <label key={bonus.id} className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${selectedPromo?.id === bonus.id ? "border-primary bg-primary/5" : "border-borderCol hover:bg-bgSec/50"}`}>
-                  <div className="flex items-center gap-3">
-                    <input type="radio" name="promo" checked={selectedPromo?.id === bonus.id} onChange={() => setSelectedPromo(bonus)} className="w-5 h-5 accent-primary" />
-                    <span className="text-sm font-semibold text-textSec">{bonus.bonus_name}</span>
-                  </div>
-                  <span className="text-xs text-textSec">{bonus.bonus_percentage}% (x{bonus.turnover_multiplier})</span>
+                <label 
+                  key={bonus.id} 
+                  className={`flex flex-col items-center justify-center p-3 rounded-lg border cursor-pointer transition-colors text-center ${selectedPromo?.id === bonus.id ? "border-primary bg-primary/5" : "border-borderCol hover:bg-bgSec/50"}`}
+                >
+                  <input 
+                    type="radio" 
+                    name="promo" 
+                    checked={selectedPromo?.id === bonus.id} 
+                    onChange={() => setSelectedPromo(bonus)} 
+                    className="w-4 h-4 accent-primary mb-2" 
+                  />
+                  <span className="text-[11px] font-semibold text-textSec leading-tight">{bonus.bonus_name}</span>
+                  <span className="text-[11px] text-textSec mt-1 font-bold">{bonus.bonus_percentage}%</span>
                 </label>
               ))}
-              
-              <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${selectedPromo === null ? "border-primary bg-primary/5" : "border-borderCol hover:bg-bgSec/50"}`}>
-                <input type="radio" name="promo" checked={selectedPromo === null} onChange={() => setSelectedPromo(null)} className="w-5 h-5 accent-primary" />
-                <span className="text-sm font-bold text-white">Do not participate in any promotions</span>
-              </label>
             </div>
+            
+            <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${selectedPromo === null ? "border-primary bg-primary/5" : "border-borderCol hover:bg-bgSec/50"}`}>
+              <input type="radio" name="promo" checked={selectedPromo === null} onChange={() => setSelectedPromo(null)} className="w-5 h-5 accent-primary" />
+              <span className="text-sm font-bold text-white">Do not participate in any promotions</span>
+            </label>
           </section>
         </div>
 
