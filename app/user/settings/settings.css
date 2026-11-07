@@ -1,0 +1,127 @@
+.settings-page {
+  --set-bg: #18221E;
+  --set-card: #1C2A24;
+  --set-border: #2B4236;
+  --set-text: #FFFFFF;
+  --set-muted: #A0AAB2;
+  --set-accent: #00E701;
+  --set-input-bg: #111815;
+
+  background-color: var(--set-bg);
+  min-height: 100vh;
+  width: 100%;
+}
+
+.settings-main {
+  padding: 1rem 0.8rem 3rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.settings-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--set-text);
+  margin-bottom: 1rem;
+}
+
+/* Tabs */
+.settings-tabs {
+  display: flex;
+  background: var(--set-card);
+  border: 1px solid var(--set-border);
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.settings-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.settings-tabs button {
+  flex: 1;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: var(--set-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.2s;
+}
+
+.settings-tabs button.active {
+  background: var(--set-accent);
+  color: #000;
+}
+
+/* Card */
+.settings-card {
+  background: var(--set-card);
+  border: 1px solid var(--set-border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* Alert / Warning */
+.settings-alert {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+.settings-alert.success { background: rgba(0,231,1,0.1); color: var(--set-accent); border: 1px solid rgba(0,231,1,0.3); }
+.settings-alert.error { background: rgba(255,77,77,0.1); color: #ff4d4d; border: 1px solid rgba(255,77,77,0.3); }
+
+.verify-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(245, 193, 7, 0.1);
+  color: #ffc107;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  border: 1px solid rgba(245, 193, 7, 0.2);
+}
+
+/* Info Row */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--set-border);
+  font-size: 0.9rem;
+}
+.info-row:last-child { border-bottom: none; }
+.info-row span { color: var(--set-muted); }
+.info-row strong { color: var(--set-text); }
+.text-green { color: var(--set-accent) !important; }
+
+/* Verify Cards */
+.verify-list { display: flex; flex-direction: column; gap: 12px; }
+.verify-card { background: var(--set-card); border: 1px solid var(--set-border); border-radius: 12px; padding: 16px; }
+.verify-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.verify-header h3 { margin: 0; font-size: 0.95rem; color: var(--set-text); }
+.verify-desc { font-size: 0.8rem; color: var(--set-muted); margin: 0; }
+.verify-form { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.verify-form input { background: var(--set-input-bg); border: 1px solid var(--set-border); padding: 12px; border-radius: 6px; color: var(--set-text); font-size: 0.9rem; outline: none; }
+.verify-form input:focus { border-color: var(--set-accent); }
+.verify-form button { background: var(--set-accent); color: #000; font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; }
+
+/* Security Form */
+.settings-form { display: flex; flex-direction: column; gap: 12px; }
+.settings-form label { font-size: 0.8rem; color: var(--set-muted); }
+.settings-form input { background: var(--set-input-bg); border: 1px solid var(--set-border); padding: 12px; border-radius: 6px; color: var(--set-text); outline: none; }
+.settings-form input:focus { border-color: var(--set-accent); }
+.settings-form button { background: var(--set-accent); color: #000; font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; margin-top: 8px; }
+
+/* Sessions */
+.session-list { display: flex; flex-direction: column; gap: 12px; }
+.session-item { display: flex; align-items: flex-start; background: var(--set-input-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--set-border); }
