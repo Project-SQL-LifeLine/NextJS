@@ -58,6 +58,7 @@ export default function Home() {
     };
   }, []);
 
+  // ব্যানার স্লাইডারের জন্য টাইমার
   useEffect(() => {
     if (banners.length > 1) {
       const interval = setInterval(() => {
@@ -68,7 +69,6 @@ export default function Home() {
     }
   }, [banners.length]);
 
-  // অ্যানাউন্সমেন্ট টেক্সট (যদি ডাটাবেসে থাকে তবে সেটা, নাহলে ডিফল্ট)
   const noticeText = banners.length > 0 && banners[0].notice_text 
     ? banners[0].notice_text 
     : "করুণ! 👑 দৈনিক প্রথম আমানত বোনাস ২০%! ✨";
@@ -76,7 +76,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#0F212E] pb-20 relative overflow-hidden">
       
-      {/* কাস্টম মার্কি অ্যানিমেশন স্টাইল */}
+      {/* স্ক্রলিং অ্যানাউন্সমেন্ট স্টাইল */}
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(100%); }
@@ -85,13 +85,13 @@ export default function Home() {
         .animate-marquee {
           display: inline-block;
           white-space: nowrap;
-          animation: marquee 12s linear infinite;
+          animation: marquee 15s linear infinite;
         }
       `}</style>
 
       <Header isLoggedIn={isLoggedIn} userProfile={userProfile} />
 
-      {/* স্ক্রলিং অ্যানাউন্সমেন্ট বার */}
+      {/* স্ক্রলিং অ্যানাউন্সমেন্ট */}
       <div className="px-3 mt-3">
         <div className="bg-[#1A2C38] border border-[#2F4553] rounded-full py-1.5 px-3 flex items-center justify-between overflow-hidden relative">
           <span className="flex items-center gap-1 text-white text-xs w-full overflow-hidden">
@@ -106,24 +106,41 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ব্যানার স্লাইডার (ফিট ঠিক করা হয়েছে, p-0 ব্যবহার করা হয়েছে) */}
+      {/* ব্যানার স্লাইডার (Cross Fade & Fully Fitted) */}
       <div className="px-3 mt-3">
-        <div className="bg-[#092238] border border-[#2F4553] rounded-lg overflow-hidden h-40 flex items-center justify-center relative">
+        <div className="bg-[#092238] border border-[#2F4553] rounded-xl overflow-hidden h-40 relative">
           {banners.length > 0 ? (
-            <a href={banners[currentBanner].redirect_url || "#"} className="w-full h-full relative block">
-              <img 
-                src={banners[currentBanner].image_url} 
-                alt="Banner" 
-                className="w-full h-full object-cover rounded-lg" 
-              />
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            <>
+              {banners.map((banner, index) => (
+                <a 
+                  key={banner.id}
+                  href={banner.redirect_url || "#"} 
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out block ${
+                    index === currentBanner ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                  }`}
+                >
+                  <img 
+                    src={banner.image_url} 
+                    alt="Banner" 
+                    className="w-full h-full object-cover" 
+                  />
+                </a>
+              ))}
+              
+              {/* ডট ইন্ডিকেটর */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
                 {banners.map((_, idx) => (
-                  <div key={idx} className={`w-1.5 h-1.5 rounded-full ${idx === currentBanner ? "bg-yellow-400" : "bg-white/50"}`} />
+                  <div 
+                    key={idx} 
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      idx === currentBanner ? "bg-yellow-400" : "bg-white/40"
+                    }`} 
+                  />
                 ))}
               </div>
-            </a>
+            </>
           ) : (
-            <div className="text-textSec text-sm">No banners available</div>
+            <div className="flex h-full items-center justify-center text-textSec text-sm">No banners available</div>
           )}
         </div>
       </div>
@@ -147,6 +164,7 @@ export default function Home() {
         ))}
       </div>
 
+      {/* ফ্লোটিং বাটন */}
       <div className="fixed right-3 bottom-24 flex flex-col gap-3 z-50">
         <button className="w-10 h-10 rounded-full bg-[#00E701] flex items-center justify-center text-black shadow-lg">✈️</button>
         <button className="w-10 h-10 rounded-full bg-[#00E701] flex items-center justify-center text-black shadow-lg">✈️</button>
