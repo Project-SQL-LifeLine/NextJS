@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../../lib/supabase/client";
 import "./voucherCenterdepositIframe.css";
@@ -22,16 +22,31 @@ function DepositIframeContent() {
   const [isSubmitted, setIsSubmitted] = useState(false); 
   const [isOrderPlaced, setIsOrderPlaced] = useState(false); 
   const [loading, setLoading] = useState(false);
-  
   const [lang, setLang] = useState<"EN" | "BN">("EN");
 
   const walletNumber = method.includes("Bkash") ? "01967961725" : "01962778104";
   const bonusAmount = (amount * bonusPercent) / 100;
   const totalAmount = amount + bonusAmount;
 
+  // মোবাইলের Back বাটন হ্যান্ডেল করার লজিক
+  useEffect(() => {
+    const handlePopState = () => {
+      if (isOrderPlaced) {
+        setIsOrderPlaced(false); // Order Info থেকে Success পেজে ফিরে যাবে
+      } else if (isSubmitted) {
+        setIsSubmitted(false); // Success থেকে ইনপুট পেজে ফিরে যাবে
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [isOrderPlaced, isSubmitted]);
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(walletNumber);
-    alert(lang === "EN" ? "Wallet number copied!" : "ওয়ালেট নম্বর কপি করা হয়েছে!");
+    alert(lang === "EN" ? "Wallet number copied!" : "ওয়ালেট নম্বর কপি করা হয়েছে!");
   };
 
   const handleInitialSubmit = () => {
@@ -82,13 +97,12 @@ function DepositIframeContent() {
         setIsSubmitted(true); 
       }
     } catch (err) {
-      alert(lang === "EN" ? "Something went wrong!" : "কিছু একটা সমস্যা হয়েছে!");
+      alert(lang === "EN" ? "Something went wrong!" : "কিছু একটা সমস্যা হয়েছে!");
     } finally {
       setLoading(false);
     }
   };
 
-  // ৭ নম্বর ছবির Order Info ভিউ (এখানে Total Amount দেখানো হয়েছে)
   if (isOrderPlaced) {
     return (
       <div className="iframe-container">
@@ -102,7 +116,7 @@ function DepositIframeContent() {
         
         <div className="iframe-content text-center pt-6">
           <h2 className="text-xl font-bold mb-6">{method}</h2>
-          <h3 className="text-lg font-bold text-left mb-4">{lang === "EN" ? "Order placed" : "অর্ডার সম্পন্ন হয়েছে"}</h3>
+          <h3 className="text-lg font-bold text-left mb-4">{lang === "EN" ? "Order placed" : "অর্ডার সম্পন্ন হয়েছে"}</h3>
           
           <div className="flex justify-between items-center mb-4">
             <div className="text-left">
@@ -159,7 +173,7 @@ function DepositIframeContent() {
       <div className="iframe-header">
         <div>
           <h1>{lang === "EN" ? `BDT ${amount}` : `বিডিটি ${amount}`}</h1>
-          <p>{lang === "EN" ? "Don't over or under cash out." : "ক্যাশ আউটের চেয়ে বেশি বা কম দিবেন না।"}</p>
+          <p>{lang === "EN" ? "Don't over or under cash out." : "ক্যাশ আউটের চেয়ে বেশি বা কম দিবেন না।"}</p>
         </div>
         <div className="text-right flex flex-col items-end">
           <p className="text-white font-bold text-sm">PAY SERVICE</p>
@@ -182,7 +196,7 @@ function DepositIframeContent() {
           <h2>{method} Deposit</h2>
         </div>
 
-        <div className="wallet-label">{lang === "EN" ? "Wallet No*" : "ওয়ালেট নম্বর*"}</div>
+        <div className="wallet-label">{lang === "EN" ? "Wallet No*" : "ওয়ালেট নম্বর*"}</div>
         <div className="wallet-note">{lang === "EN" ? `This ${method} number only accepts Send Money.` : `এই ${method} নম্বরটি শুধুমাত্র সেন্ড মানি গ্রহণ করে।`}</div>
         <div className="wallet-box">
           <span>{walletNumber}</span>
@@ -231,8 +245,8 @@ function DepositIframeContent() {
 
         <div className="warning-section">
           <h3>{lang === "EN" ? "Warning:" : "সতর্কতা:"}</h3>
-          <div className="red-subtext">{lang === "EN" ? "Transaction ID must be filled in correctly, otherwise the score will fail!" : "ট্রানজেকশন আইডি সঠিকভাবে পূরণ করতে হবে, অন্যথায় স্কোর বাতিল হবে!"}</div>
-          <p>{lang === "EN" ? `Please note that you make deposit to ${method} deposit. Be sure that you make the payment from the same wallet, otherwise it may be lost.` : `অনুগ্রহ করে মনে রাখবেন যে আপনি ${method} এ ডিপোজিট করছেন। একই ওয়ালেট থেকে পেমেন্ট করেছেন কিনা নিশ্চিত করুন, অন্যথায় এটি হারিয়ে যেতে পারে।`}</p>
+          <div className="red-subtext">{lang === "EN" ? "Transaction ID must be filled in correctly, otherwise the score will fail!" : "ট্রানজেকশন আইডি সঠিকভাবে পূরণ করতে হবে, অন্যথায় স্কোর বাতিল হবে!"}</div>
+          <p>{lang === "EN" ? `Please note that you make deposit to ${method} deposit. Be sure that you make the payment from the same wallet, otherwise it may be lost.` : `অনুগ্রহ করে মনে রাখবেন যে আপনি ${method} এ ডিপোজিট করছেন। একই ওয়ালেট থেকে পেমেন্ট করেছেন কিনা নিশ্চিত করুন, অন্যথায় এটি হারিয়ে যেতে পারে।`}</p>
         </div>
       </div>
 
