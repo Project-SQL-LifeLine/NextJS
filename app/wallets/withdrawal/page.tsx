@@ -26,20 +26,24 @@ export default function WithdrawalPage() {
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // 👇 এখানে আপনার PNG ইমেজের লিংকগুলো বসাবেন 👇
   const methods = [
     { 
       id: "bkash", 
       name: "bKash", 
+      // বিকাশের PNG লিংক এখানে দিন
       logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Bkash_Logo.svg/512px-Bkash_Logo.svg.png" 
     },
     { 
       id: "nagad", 
       name: "Nagad", 
+      // নগদের PNG লিংক এখানে দিন
       logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Nagad_Logo.svg/512px-Nagad_Logo.svg.png" 
     },
     { 
       id: "rocket", 
       name: "Rocket", 
+      // রকেটের PNG লিংক এখানে দিন
       logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Rocket_Logo.svg/512px-Rocket_Logo.svg.png" 
     }
   ];
