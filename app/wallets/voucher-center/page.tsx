@@ -6,14 +6,12 @@ import Link from "next/link";
 import { supabase } from "../../../lib/supabase/client";
 import Head from "next/head"; 
 
-// পেমেন্ট/ওয়ালেট নির্দেশক সাদা SVG আইকন
 const PaymentIcon = () => (
   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
   </svg>
 );
 
-// লোডিং এনিমেশনের জন্য বড় সাদা ওয়ালেট/কার্ড আইকন
 const LoadingWalletIcon = () => (
   <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -27,7 +25,7 @@ export default function VoucherCenterPage() {
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [selectedChannel, setSelectedChannel] = useState("");
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
-  const [customAmount, setCustomAmount] = useState(""); // কাস্টম অ্যামাউন্টের জন্য স্টেট
+  const [customAmount, setCustomAmount] = useState("");
   const [selectedPromo, setSelectedPromo] = useState<any>(null);
   const [bonuses, setBonuses] = useState<any[]>([]);
   const [methods, setMethods] = useState<any[]>([]);
@@ -54,16 +52,13 @@ export default function VoucherCenterPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // বোনাস ক্যালকুলেশন
   const bonusAmount = selectedPromo ? (selectedAmount * (selectedPromo.bonus_percentage / 100)) : 0;
   const totalAmount = selectedAmount + bonusAmount;
 
   if (loading) {
     return (
       <div className="min-h-screen bg-bgMain flex flex-col items-center justify-center gap-4">
-        <div className="animate-spin">
-          <LoadingWalletIcon />
-        </div>
+        <div className="animate-spin"><LoadingWalletIcon /></div>
         <span className="text-primary text-sm font-bold mt-2">Loading...</span>
       </div>
     );
@@ -101,7 +96,7 @@ export default function VoucherCenterPage() {
                   className={`relative flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all ${selectedMethod?.id === method.id ? "border-danger bg-danger/10" : "border-borderCol bg-bgSec"}`}
                 >
                   <div className="absolute top-0 left-0 p-1 rounded-br-lg bg-danger"><PaymentIcon /></div>
-                  <img src={method.method_logo_url} alt={method.method_name} className="w-10 h-10 object-contain mb-1 mt-3" />
+                  <img src={method.method_logo_url} alt="" className="w-10 h-10 object-contain mb-1 mt-3" />
                   <span className={`text-[10px] font-semibold text-center leading-tight ${selectedMethod?.id === method.id ? "text-danger" : "text-white"}`}>{method.method_name}</span>
                   {selectedMethod?.id === method.id && (
                     <div className="absolute -bottom-1.5 -right-1.5 bg-danger text-white rounded-full p-0.5"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg></div>
@@ -149,16 +144,12 @@ export default function VoucherCenterPage() {
               ))}
             </div>
             
-            {/* কাস্টম অ্যামাউন্ট ইনপুট বক্স */}
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-textSec font-bold">৳</span>
               <input
                 type="number"
                 value={customAmount}
-                onChange={(e) => { 
-                  setCustomAmount(e.target.value); 
-                  setSelectedAmount(Number(e.target.value)); 
-                }}
+                onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(Number(e.target.value)); }}
                 placeholder={`${selectedMethod?.min_deposit || 500} - ${selectedMethod?.max_deposit || 30000}`}
                 className="w-full bg-bgSec text-white border-2 border-borderCol rounded-lg pl-10 pr-4 py-3 text-lg font-bold focus:outline-none focus:border-primary transition-colors"
               />
@@ -169,31 +160,21 @@ export default function VoucherCenterPage() {
             <h2 className="text-sm font-bold text-textSec mb-3 flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-primary inline-block"></span> Promotions
             </h2>
-            
             <div className="grid grid-cols-3 gap-2 mb-3">
               {bonuses.map((bonus) => {
                 const dynamicBonusAmount = (selectedAmount * bonus.bonus_percentage) / 100;
-
                 return (
                   <div 
                     key={bonus.id} 
                     onClick={() => setSelectedPromo(bonus)}
                     className={`relative flex flex-col items-center justify-center p-2 h-20 rounded-md cursor-pointer transition-all overflow-hidden border-2 ${
-                      selectedPromo?.id === bonus.id 
-                        ? "border-primary bg-gradient-to-br from-[#0a5c29] to-[#0b3d1e]" 
-                        : "border-borderCol bg-gradient-to-br from-[#1d3b2b] to-[#14251c] hover:border-primary/50"
+                      selectedPromo?.id === bonus.id ? "border-primary bg-gradient-to-br from-[#0a5c29] to-[#0b3d1e]" : "border-borderCol bg-gradient-to-br from-[#1d3b2b] to-[#14251c] hover:border-primary/50"
                     }`}
                   >
-                    <div className="absolute top-0 right-0 bg-white text-black text-[10px] font-bold px-1.5 py-0.5 rounded-bl-md z-10">
-                      +{bonus.bonus_percentage}%
-                    </div>
-
+                    <div className="absolute top-0 right-0 bg-white text-black text-[10px] font-bold px-1.5 py-0.5 rounded-bl-md z-10">+{bonus.bonus_percentage}%</div>
                     <div className="flex flex-col items-center z-10 mt-3">
-                      <span className="text-[#00E701] font-extrabold text-sm">
-                        ৳{dynamicBonusAmount.toLocaleString()}
-                      </span>
+                      <span className="text-[#00E701] font-extrabold text-sm">৳{dynamicBonusAmount.toLocaleString()}</span>
                     </div>
-
                     {selectedPromo?.id === bonus.id && (
                       <div className="absolute bottom-0 right-0 w-6 h-6 bg-[#00E701] rounded-tl-full flex items-end justify-end p-1 z-10">
                         <svg className="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
@@ -211,7 +192,6 @@ export default function VoucherCenterPage() {
           </section>
         </div>
 
-        {/* Total Amount Showing Section */}
         {selectedAmount > 0 && (
           <div className="mx-4 mb-4 p-4 rounded-lg bg-bgSec border border-borderCol flex flex-col gap-2">
             <div className="flex justify-between text-sm text-textSec">
@@ -232,10 +212,10 @@ export default function VoucherCenterPage() {
           </div>
         )}
 
-        {/* Next Button (Fixed at bottom) */}
         <div className="fixed bottom-0 left-0 w-full p-4 bg-bgMain border-t border-borderCol z-50">
+          {/* এখানে turnover প্যারামিটার যোগ করা হয়েছে */}
           <Link 
-            href={`/wallets/voucher-center/depositIframe?method=${selectedMethod?.method_name}&logo=${selectedMethod?.method_logo_url}&amount=${selectedAmount}&bonus=${selectedPromo?.bonus_percentage || 0}&bonus_id=${selectedPromo?.id || ''}`} 
+            href={`/wallets/voucher-center/depositIframe?method=${selectedMethod?.method_name}&logo=${selectedMethod?.method_logo_url}&amount=${selectedAmount}&bonus=${selectedPromo?.bonus_percentage || 0}&bonus_id=${selectedPromo?.id || ''}&turnover=${selectedPromo?.turnover_multiplier || 0}`} 
             className="w-full block text-center bg-primary text-[#071A0B] font-bold text-lg py-3 rounded-lg hover:bg-[#00c701] transition-colors"
           >
             Next
