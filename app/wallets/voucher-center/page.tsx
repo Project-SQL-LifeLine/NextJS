@@ -6,9 +6,10 @@ import Link from "next/link";
 import { supabase } from "../../../lib/supabase/client";
 import Head from "next/head"; 
 
-const ThumbsUpIcon = () => (
-  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M2 20h2c.55 0 1-.45 1-1v-9c0-.55-.45-1-1-1H2v11zm19.83-7.12c.11-.25.17-.52.17-.8V11c0-1.1-.9-2-2-2h-5.5l.92-4.65c.05-.22.02-.46-.1-.66-.32-.51-.94-.66-1.47-.36L7.25 6.86C7.09 6.95 7 7.12 7 7.3V19c0 .55.45 1 1 1h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.72z" />
+// পেমেন্ট/ওয়ালেট নির্দেশক সাদা SVG আইকন
+const PaymentIcon = () => (
+  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
   </svg>
 );
 
@@ -51,7 +52,6 @@ export default function VoucherCenterPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-bgMain flex items-center justify-center">
-        {/* লোডিং এনিমেশন */}
         <div className="w-10 h-10 border-4 border-[#2F4553] border-t-primary rounded-full animate-spin"></div>
       </div>
     );
@@ -88,7 +88,7 @@ export default function VoucherCenterPage() {
                   onClick={() => { setSelectedMethod(method); setSelectedChannel(method.payment_channels[0]); }}
                   className={`relative flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all ${selectedMethod?.id === method.id ? "border-danger bg-danger/10" : "border-borderCol bg-bgSec"}`}
                 >
-                  <div className="absolute top-0 left-0 p-1 rounded-br-lg bg-danger"><ThumbsUpIcon /></div>
+                  <div className="absolute top-0 left-0 p-1 rounded-br-lg bg-danger"><PaymentIcon /></div>
                   <img src={method.method_logo_url} alt={method.method_name} className="w-10 h-10 object-contain mb-1 mt-3" />
                   <span className={`text-[10px] font-semibold text-center leading-tight ${selectedMethod?.id === method.id ? "text-danger" : "text-white"}`}>{method.method_name}</span>
                   {selectedMethod?.id === method.id && (
@@ -110,7 +110,7 @@ export default function VoucherCenterPage() {
                   onClick={() => setSelectedChannel(channel)}
                   className={`relative p-3 rounded-lg border-2 font-bold text-sm transition-all ${selectedChannel === channel ? "border-danger text-danger bg-danger/10" : "border-borderCol text-textSec bg-bgSec"}`}
                 >
-                  <div className="absolute top-0 left-0 p-1 rounded-br-lg bg-danger"><ThumbsUpIcon /></div>
+                  <div className="absolute top-0 left-0 p-1 rounded-br-lg bg-danger"><PaymentIcon /></div>
                   {channel}
                 </button>
               ))}
@@ -136,8 +136,6 @@ export default function VoucherCenterPage() {
                 </button>
               ))}
             </div>
-            
-            {/* কাস্টম ইনপুট বক্স সরিয়ে ফেলা হয়েছে */}
           </section>
 
           <section>
