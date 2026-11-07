@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
@@ -13,9 +13,11 @@ export default function WithdrawalPage() {
   const [reqTurnover, setReqTurnover] = useState(0);
   const [compTurnover, setCompTurnover] = useState(0);
   const [txnPasswordDb, setTxnPasswordDb] = useState<string | null>(null);
+  
+  // সব ওয়ালেট একবারে লোড হবে, পরে ফিল্টার হবে
+  const [allWallets, setAllWallets] = useState<any[]>([]);
 
   const [selectedMethod, setSelectedMethod] = useState("bkash");
-  const [savedWallets, setSavedWallets] = useState<any[]>([]);
   
   const [amount, setAmount] = useState("");
   const [password, setPassword] = useState("");
@@ -26,47 +28,67 @@ export default function WithdrawalPage() {
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // PNG লোগোসহ মেথড লিস্ট
   const methods = [
-    { id: "bkash", name: "bKash", color: "#D12053" },
-    { id: "nagad", name: "Nagad", color: "#F63" },
-    { id: "rocket", name: "Rocket", color: "#8C3494" }
+    { 
+      id: "bkash", 
+      name: "bKash", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Bkash_Logo.svg/512px-Bkash_Logo.svg.png" 
+    },
+    { 
+      id: "nagad", 
+      name: "Nagad", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Nagad_Logo.svg/512px-Nagad_Logo.svg.png" 
+    },
+    { 
+      id: "rocket", 
+      name: "Rocket", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Rocket_Logo.svg/512px-Rocket_Logo.svg.png" 
+    }
   ];
 
+  // পেজ লোডের সময় একবারই ডাটা ফেচ হবে
   useEffect(() => {
-    fetchData();
-  }, [selectedMethod]);
+    const fetchInitialData = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/user/login");
+        return;
+      }
 
-  const fetchData = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      router.push("/user/login");
-      return;
-    }
+      // ১. প্রোফাইল ডাটা
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("balance, total_required_turnover, total_completed_turnover, transaction_password")
+        .eq("id", session.user.id)
+        .single();
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("balance, total_required_turnover, total_completed_turnover, transaction_password")
-      .eq("id", session.user.id)
-      .single();
+      if (profile) {
+        setBalance(Number(profile.balance) || 0);
+        setReqTurnover(Number(profile.total_required_turnover) || 0);
+        setCompTurnover(Number(profile.total_completed_turnover) || 0);
+        setTxnPasswordDb(profile.transaction_password);
+      }
 
-    if (profile) {
-      setBalance(Number(profile.balance) || 0);
-      setReqTurnover(Number(profile.total_required_turnover) || 0);
-      setCompTurnover(Number(profile.total_completed_turnover) || 0);
-      setTxnPasswordDb(profile.transaction_password);
-    }
+      // ২. সব ওয়ালেট একবারে ফেচ করা (ফাস্ট লোডিংয়ের জন্য)
+      const { data: wallets } = await supabase
+        .from("user_payment_type_store")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
 
-    const { data: wallets } = await supabase
-      .from("user_payment_type_store")
-      .select("*")
-      .eq("user_id", session.user.id)
-      .eq("method_code", selectedMethod)
-      .eq("is_active", true)
-      .order("created_at", { ascending: false });
+      if (wallets) setAllWallets(wallets);
+      setLoading(false);
+    };
+    
+    fetchInitialData();
+  }, [router]);
 
-    if (wallets) setSavedWallets(wallets);
-    setLoading(false);
-  };
+  // selectedMethod পরিবর্তন হলে শুধু ফিল্টার হবে (ইনস্ট্যান্ট)
+  const savedWallets = useMemo(() => {
+    return allWallets.filter(w => w.method_code === selectedMethod);
+  }, [allWallets, selectedMethod]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +105,10 @@ export default function WithdrawalPage() {
     }
     if (numericAmount < 100) {
       setMessage(t("Minimum withdrawal is 100 BDT.", "সর্বনিম্ন উইথড্র ১০০ টাকা।"));
+      return;
+    }
+    if (numericAmount > 25000) {
+      setMessage(t("Maximum withdrawal is 25,000 BDT.", "সর্বোচ্চ উইথড্র ২৫,০০০ টাকা।"));
       return;
     }
     if (numericAmount > balance) {
@@ -139,7 +165,6 @@ export default function WithdrawalPage() {
 
   const isTurnoverComplete = compTurnover >= reqTurnover;
 
-  // নাম্বার মাস্ক করার ফাংশন (যেমন: *******3183)
   const maskNumber = (num: string) => {
     if (!num) return "";
     return "*******" + num.slice(-4);
@@ -148,8 +173,8 @@ export default function WithdrawalPage() {
   return (
     <div className="min-h-screen bg-white pb-10 font-sans text-gray-800">
       
-      {/* Header */}
-      <header className="bg-[#0A2C6B] px-4 py-4 flex items-center justify-between sticky top-0 z-50">
+      {/* Top Bar (কালার আপডেট করা হয়েছে) */}
+      <header className="bg-[#1475E0] px-4 py-4 flex items-center justify-between sticky top-0 z-50">
         <button onClick={() => router.back()} className="text-white">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
         </button>
@@ -159,19 +184,20 @@ export default function WithdrawalPage() {
         </button>
       </header>
 
-      {/* ট্যাব */}
+      {/* ট্যাব (PNG লোগোসহ) */}
       <div className="flex border-b border-gray-200">
         {methods.map((method) => (
           <button
             key={method.id}
             onClick={() => setSelectedMethod(method.id)}
-            className={`flex-1 py-4 text-center font-bold text-sm transition-all flex items-center justify-center ${
+            className={`flex-1 py-3 text-center font-bold text-sm transition-all flex items-center justify-center gap-1 ${
               selectedMethod === method.id 
                 ? "text-red-600 border-b-2 border-red-600" 
                 : "text-gray-500"
             }`}
           >
-            {method.name}
+            <img src={method.logo} alt={method.name} className="h-5 object-contain" />
+            <span>{method.name}</span>
           </button>
         ))}
       </div>
@@ -205,7 +231,7 @@ export default function WithdrawalPage() {
             </div>
           )}
 
-          {/* প্লাস বাটন (নতুন পেজে রিডাইরেক্ট করবে) */}
+          {/* প্লাস বাটন */}
           {savedWallets.length < 5 && (
             <button 
               onClick={() => router.push("/wallets/securityCenter/addBankCard")}
@@ -219,8 +245,8 @@ export default function WithdrawalPage() {
         <div className="mt-8">
           {/* ইনফরমেশন */}
           <div className="flex flex-col gap-2 mb-6 text-sm text-gray-500">
-            <p>{t("Withdrawal time:", "উত্তোলনের সময়:")} <span className="text-gray-800">06:00 - 22:00</span></p>
-            <p>{t("Daily withdrawal 99,999,999 (Times), Remaining 99,999,999 (Times)", "দৈনিক উত্তোলন ৯৯,৯৯৯,৯৯৯ (বার), অবশিষ্ট ৯৯,৯৯৯,৯৯৯ (বার)")}</p>
+            <p>{t("Withdrawal time: 24 Hours", "উত্তোলনের সময়: ২৪ ঘন্টা")}</p>
+            <p>{t("Daily withdrawal Unlimited", "দৈনিক উত্তোলন আনলিমিটেড")}</p>
             <p>{t("Main Wallet :", "মূল ওয়ালেট :")} <span className="text-gray-800 font-bold">৳ {balance.toLocaleString()}</span></p>
             <p>{t("Available Amount :", "উপলব্ধ পরিমাণ :")} <span className="text-gray-800 font-bold">৳ {balance.toLocaleString()}</span></p>
             <p>{t("Turnover:", "টার্নওভার:")} <span className={isTurnoverComplete ? "text-green-600" : "text-red-600"}>{compTurnover.toLocaleString()} / {reqTurnover.toLocaleString()}</span></p>
