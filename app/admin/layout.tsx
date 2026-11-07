@@ -8,7 +8,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  // সাইডবার মেনু লিস্ট (আপনার রিকোয়ারমেন্ট অনুযায়ী সব ফিচার এখানে আছে)
+  // সাইডবার মেনু লিস্ট
   const menuItems = [
     { name: "Dashboard", path: "/admin", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
     { name: "Users", path: "/admin/users", icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" },
@@ -23,73 +23,69 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="min-h-screen bg-[#0F212E] flex font-sans text-gray-200">
-      
-      {/* Sidebar (Desktop Type) */}
-      <aside className={`bg-[#1A2C38] border-r border-[#2F4553] w-64 flex-shrink-0 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'ml-0' : '-ml-64'}`}>
-        
-        {/* Logo Area */}
-        <div className="h-16 flex items-center justify-center border-b border-[#2F4553]">
-          <Link href="/admin" className="text-xl font-extrabold text-[#1475E0] tracking-wider uppercase">
-            Admin Panel
-          </Link>
-        </div>
-
-        {/* Menu Items */}
-        <div className="flex-1 overflow-y-auto py-4">
-          <ul className="flex flex-col gap-1 px-3">
-            {menuItems.map((item) => {
-              const isActive = pathname === item.path || (item.path !== "/admin" && pathname.startsWith(item.path));
-              return (
-                <li key={item.name}>
-                  <Link
-                    href={item.path}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      isActive 
-                        ? "bg-[#1475E0] text-white" 
-                        : "text-[#B1BAD3] hover:bg-[#253B49] hover:text-white"
-                    }`}
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                    </svg>
-                    <span className="font-semibold text-sm">{item.name}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-
-        {/* Bottom Area (Logout/Home) */}
-        <div className="p-4 border-t border-[#2F4553]">
-          <Link href="/" className="flex items-center justify-center gap-2 w-full bg-[#253B49] hover:bg-[#2F4553] text-white py-2 rounded-lg text-sm font-semibold transition-colors">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-            Back to Site
-          </Link>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        
-        {/* Top Header */}
-        <header className="h-16 bg-[#1A2C38] border-b border-[#2F4553] flex items-center justify-between px-6">
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-[#B1BAD3] hover:text-white focus:outline-none">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-          </button>
-          
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-semibold text-[#B1BAD3]">Admin User</span>
-            <div className="w-8 h-8 rounded-full bg-[#1475E0] flex items-center justify-center text-white font-bold">A</div>
+    // মোবাইল স্ক্রিনে ডেক্সটপ ভিউ দেখার জন্য র‍্যাপার (zoom: 0.5 দেওয়া হলো যাতে স্ক্রিনে ফিট হয়)
+    <div className="w-full h-screen overflow-auto bg-[#0F212E]">
+      <div 
+        className="flex font-sans text-gray-200 min-h-[900px]" 
+        style={{ width: "1200px", zoom: "0.5" }} 
+      >
+        {/* Sidebar */}
+        <aside className="bg-[#1A2C38] border-r border-[#2F4553] w-64 flex-shrink-0 flex flex-col">
+          <div className="h-16 flex items-center justify-center border-b border-[#2F4553]">
+            <Link href="/admin" className="text-xl font-extrabold text-[#1475E0] tracking-wider uppercase">
+              Admin Panel
+            </Link>
           </div>
-        </header>
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
+          <div className="flex-1 overflow-y-auto py-4">
+            <ul className="flex flex-col gap-1 px-3">
+              {menuItems.map((item) => {
+                const isActive = pathname === item.path || (item.path !== "/admin" && pathname.startsWith(item.path));
+                return (
+                  <li key={item.name}>
+                    <Link
+                      href={item.path}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                        isActive 
+                          ? "bg-[#1475E0] text-white" 
+                          : "text-[#B1BAD3] hover:bg-[#253B49] hover:text-white"
+                      }`}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                      </svg>
+                      <span className="font-semibold text-sm">{item.name}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
 
+          <div className="p-4 border-t border-[#2F4553]">
+            <Link href="/" className="flex items-center justify-center gap-2 w-full bg-[#253B49] hover:bg-[#2F4553] text-white py-2 rounded-lg text-sm font-semibold transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+              Back to Site
+            </Link>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <header className="h-16 bg-[#1A2C38] border-b border-[#2F4553] flex items-center justify-between px-6">
+            <div className="text-[#B1BAD3] font-semibold text-sm">
+              Desktop View Mode
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-semibold text-[#B1BAD3]">Admin User</span>
+              <div className="w-8 h-8 rounded-full bg-[#1475E0] flex items-center justify-center text-white font-bold">A</div>
+            </div>
+          </header>
+
+          <main className="flex-1 overflow-y-auto p-6">
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   );
