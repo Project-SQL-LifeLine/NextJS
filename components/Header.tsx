@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase/client";
+import { useLanguage } from "../lib/LanguageContext";
 
 // SVG আইকন সেট (সব সাদা রঙের)
 const Icons = {
@@ -47,28 +48,15 @@ const Icons = {
 export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolean, userProfile?: any }) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [language, setLanguage] = useState("EN");
   const [hideBalance, setHideBalance] = useState(false);
-
-  useEffect(() => {
-    const savedLang = localStorage.getItem("app_lang");
-    if (savedLang) setLanguage(savedLang);
-  }, []);
-
-  const changeLanguage = (lang: string) => {
-    setLanguage(lang);
-    localStorage.setItem("app_lang", lang);
-  };
+  
+  // গ্লোবাল ল্যাঙ্গুয়েজ কনটেক্সট
+  const { language, setLanguage, t } = useLanguage();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/user/login");
   };
-
-  const t = {
-    EN: { Deposit: "Deposit", Withdraw: "Withdraw", Refresh: "Refresh Balance", Hide: "Hide Balance", Show: "Show Balance", Logout: "Logout", Language: "Language" },
-    BN: { Deposit: "ডিপোজিট", Withdraw: "উত্তোলন", Refresh: "ব্যালেন্স রিফ্রেশ", Hide: "ব্যালেন্স লুকান", Show: "ব্যালেন্স দেখান", Logout: "লগআউট", Language: "ভাষা" },
-  }[language as "EN" | "BN"];
 
   return (
     <>
@@ -83,15 +71,15 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
           {!isLoggedIn ? (
             <>
               <Link href="/user/login" className="border border-primary text-primary px-3 py-1 rounded-full text-xs font-bold hover:bg-primary/10 transition">
-                Login
+                {t("Login", "লগইন")}
               </Link>
               <Link href="/user/signup" className="bg-primary text-[#071A0B] px-3 py-1 rounded-full text-xs font-bold hover:opacity-90 transition">
-                Register
+                {t("Register", "রেজিস্টার")}
               </Link>
             </>
           ) : (
             <div className="flex items-center gap-2">
-              {/* Profile Info (Avatar Removed, Game ID Added, White Wallet Icon) */}
+              {/* Profile Info */}
               <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-full border border-[#2F4553]">
                 <span className="font-bold text-white text-xs">{userProfile?.game_id || "User"}</span>
                 <div className="w-px h-4 bg-[#2F4553]"></div>
@@ -123,22 +111,22 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
           >
             {/* Deposit & Withdraw Links */}
             <Link href="/wallets/voucher-center" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#253B49] transition">
-              <Icons.Deposit /> <span className="text-sm">{t.Deposit}</span>
+              <Icons.Deposit /> <span className="text-sm">{t("Deposit", "ডিপোজিট")}</span>
             </Link>
             <Link href="/wallets/withdrawal" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#253B49] transition">
-              <Icons.Withdraw /> <span className="text-sm">{t.Withdraw}</span>
+              <Icons.Withdraw /> <span className="text-sm">{t("Withdraw", "উত্তোলন")}</span>
             </Link>
             
             <div className="h-px bg-[#2F4553] my-1"></div>
 
             <button className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#253B49] transition">
-              <Icons.Refresh /> <span className="text-sm">{t.Refresh}</span>
+              <Icons.Refresh /> <span className="text-sm">{t("Refresh Balance", "ব্যালেন্স রিফ্রেশ")}</span>
             </button>
             <button 
               onClick={() => setHideBalance(!hideBalance)}
               className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#253B49] transition"
             >
-              <Icons.EyeOff /> <span className="text-sm">{hideBalance ? t.Show : t.Hide}</span>
+              <Icons.EyeOff /> <span className="text-sm">{hideBalance ? t("Show Balance", "ব্যালেন্স দেখান") : t("Hide Balance", "ব্যালেন্স লুকান")}</span>
             </button>
 
             <div className="h-px bg-[#2F4553] my-1"></div>
@@ -146,17 +134,17 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
             {/* Language Selector inside Menu */}
             <div className="px-4 py-2 flex flex-col gap-2">
               <span className="text-xs text-[#B1BAD3] font-semibold flex items-center gap-2">
-                <Icons.Globe /> {t.Language}
+                <Icons.Globe /> {t("Language", "ভাষা")}
               </span>
               <div className="flex gap-2 mt-1">
                 <button 
-                  onClick={() => changeLanguage("BN")} 
+                  onClick={() => setLanguage("BN")} 
                   className={`flex-1 text-xs py-1.5 rounded border ${language === "BN" ? "border-primary text-primary" : "border-[#2F4553] text-white"}`}
                 >
                   🇧🇩 বাংলা
                 </button>
                 <button 
-                  onClick={() => changeLanguage("EN")} 
+                  onClick={() => setLanguage("EN")} 
                   className={`flex-1 text-xs py-1.5 rounded border ${language === "EN" ? "border-primary text-primary" : "border-[#2F4553] text-white"}`}
                 >
                   🇺🇸 English
@@ -167,7 +155,7 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
             <div className="h-px bg-[#2F4553] my-1"></div>
 
             <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#ED4163]/20 transition">
-              <Icons.Logout /> <span className="text-sm">{t.Logout}</span>
+              <Icons.Logout /> <span className="text-sm">{t("Logout", "লগআউট")}</span>
             </button>
           </div>
         </div>
