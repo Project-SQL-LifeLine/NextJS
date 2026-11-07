@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import { supabase } from "../lib/supabase/client";
-import { useLanguage } from "../lib/LanguageContext";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -59,7 +58,6 @@ export default function Home() {
     };
   }, []);
 
-  // ব্যানার স্লাইডারের জন্য টাইমার
   useEffect(() => {
     if (banners.length > 1) {
       const interval = setInterval(() => {
@@ -70,19 +68,45 @@ export default function Home() {
     }
   }, [banners.length]);
 
+  // অ্যানাউন্সমেন্ট টেক্সট (যদি ডাটাবেসে থাকে তবে সেটা, নাহলে ডিফল্ট)
+  const noticeText = banners.length > 0 && banners[0].notice_text 
+    ? banners[0].notice_text 
+    : "করুণ! 👑 দৈনিক প্রথম আমানত বোনাস ২০%! ✨";
+
   return (
     <div className="min-h-screen bg-[#0F212E] pb-20 relative overflow-hidden">
       
+      {/* কাস্টম মার্কি অ্যানিমেশন স্টাইল */}
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(100%); }
+          100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+          display: inline-block;
+          white-space: nowrap;
+          animation: marquee 12s linear infinite;
+        }
+      `}</style>
+
       <Header isLoggedIn={isLoggedIn} userProfile={userProfile} />
 
+      {/* স্ক্রলিং অ্যানাউন্সমেন্ট বার */}
       <div className="px-3 mt-3">
-        <div className="bg-[#1A2C38] border border-[#2F4553] rounded-full py-1.5 px-3 flex items-center justify-between text-xs">
-          <span className="flex items-center gap-1 text-white"><span>🔔</span> করুণ! 👑 দৈনিক প্রথম আমানত বোনাস ২০%! ✨</span>
-          <span className="text-yellow-400 text-lg">✉️</span>
+        <div className="bg-[#1A2C38] border border-[#2F4553] rounded-full py-1.5 px-3 flex items-center justify-between overflow-hidden relative">
+          <span className="flex items-center gap-1 text-white text-xs w-full overflow-hidden">
+            <span>🔔</span> 
+            <div className="flex-1 overflow-hidden relative h-4">
+              <span className="animate-marquee text-white font-medium">
+                {noticeText}
+              </span>
+            </div>
+          </span>
+          <span className="text-yellow-400 text-lg z-10 bg-[#1A2C38] pl-2">✉️</span>
         </div>
       </div>
 
-      {/* ব্যানার স্লাইডার (বর্ডার পর্যন্ত ফিট করা হয়েছে) */}
+      {/* ব্যানার স্লাইডার (ফিট ঠিক করা হয়েছে, p-0 ব্যবহার করা হয়েছে) */}
       <div className="px-3 mt-3">
         <div className="bg-[#092238] border border-[#2F4553] rounded-lg overflow-hidden h-40 flex items-center justify-center relative">
           {banners.length > 0 ? (
@@ -90,9 +114,8 @@ export default function Home() {
               <img 
                 src={banners[currentBanner].image_url} 
                 alt="Banner" 
-                className="w-full h-full object-cover" 
+                className="w-full h-full object-cover rounded-lg" 
               />
-              {/* স্লাইডার ডট ইন্ডিকেটর */}
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
                 {banners.map((_, idx) => (
                   <div key={idx} className={`w-1.5 h-1.5 rounded-full ${idx === currentBanner ? "bg-yellow-400" : "bg-white/50"}`} />
@@ -105,8 +128,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* জ্যাকপট এবং অ্যাকশন বাটন সরিয়ে ফেলা হয়েছে */}
-
+      {/* ক্যাটাগরি বাটন */}
       <div className="px-3 mt-6 grid grid-cols-4 gap-2">
         {["Hot", "Slot", "Live", "Fishing"].map((item, idx) => (
           <div key={idx} className={`bg-[#1A2C38] rounded-md p-2 flex flex-col items-center justify-center border border-[#2F4553] ${idx === 0 ? 'bg-[#1475E0]/10' : ''}`}>
@@ -116,6 +138,7 @@ export default function Home() {
         ))}
       </div>
 
+      {/* গেম কার্ড */}
       <div className="px-3 mt-3 grid grid-cols-3 gap-2">
         {[1, 2, 3, 4, 5, 6].map((game) => (
           <div key={game} className="bg-[#1A2C38] rounded-md overflow-hidden relative aspect-square border border-[#2F4553]">
