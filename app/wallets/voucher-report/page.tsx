@@ -7,15 +7,15 @@ import { useLanguage } from "../../../lib/LanguageContext";
 
 export default function VoucherReportPage() {
   const router = useRouter();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   
+  // All Time ট্যাব যোগ করা হয়েছে
   const [activeTab, setActiveTab] = useState("today");
   const [filterType, setFilterType] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ফিল্টার মডাল স্টেট
   const [showTypeModal, setShowTypeModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
 
@@ -39,7 +39,7 @@ export default function VoucherReportPage() {
       .eq("transaction_type", "deposit")
       .order("created_at", { ascending: false });
 
-    // তারিখ অনুযায়ী ফিল্টার
+    // তারিখ অনুযায়ী ফিল্টার (All Time বাদে)
     const now = new Date();
     if (activeTab === "today") {
       const startOfToday = new Date(now.setHours(0, 0, 0, 0)).toISOString();
@@ -55,21 +55,13 @@ export default function VoucherReportPage() {
       last7Days.setDate(last7Days.getDate() - 7);
       query = query.gte("created_at", last7Days.toISOString());
     }
+    // "all_time" হলে কোনো ডেট ফিল্টার থাকবে না
 
-    // টাইপ ফিল্টার
-    if (filterType !== "all") {
-      query = query.eq("method_code", filterType);
-    }
-
-    // স্ট্যাটাস ফিল্টার
-    if (statusFilter !== "all") {
-      query = query.eq("status", statusFilter.toLowerCase());
-    }
+    if (filterType !== "all") query = query.eq("method_code", filterType);
+    if (statusFilter !== "all") query = query.eq("status", statusFilter.toLowerCase());
 
     const { data, error } = await query;
-    if (!error && data) {
-      setTransactions(data);
-    }
+    if (!error && data) setTransactions(data);
     setLoading(false);
   };
 
@@ -78,12 +70,11 @@ export default function VoucherReportPage() {
     alert(t("Copied!", "কপি করা হয়েছে!"));
   };
 
-  // Total Deposit Calculation (শুধুমাত্র Approved ডিপোজিটগুলোর যোগফল)
+  // Total Deposit Calculation
   const totalDeposit = transactions
     .filter((tx) => tx.status === "approved")
     .reduce((sum, tx) => sum + Number(tx.amount), 0);
 
-  // মেথড অনুযায়ী ইমোজি
   const getMethodEmoji = (method: string) => {
     if (method?.toLowerCase() === "bkash") return "🔥";
     if (method?.toLowerCase() === "nagad") return "🔥";
@@ -103,51 +94,51 @@ export default function VoucherReportPage() {
         <div className="w-6"></div>
       </header>
 
-      {/* Top Tabs (Today, Yesterday, 7-days) */}
-      <div className="flex border-b border-[#2F4553] bg-[#1A2C38]">
-        {["today", "yesterday", "7days"].map((tab) => (
+      {/* Top Tabs (Today, Yesterday, 7-Days, All Time) */}
+      <div className="flex border-b border-[#2F4553] bg-[#1A2C38] overflow-x-auto no-scrollbar">
+        {[
+          { id: "today", en: "Today", bn: "আজ" },
+          { id: "yesterday", en: "Yesterday", bn: "গতকাল" },
+          { id: "7days", en: "7-Days", bn: "৭ দিন" },
+          { id: "all_time", en: "All Time", bn: "সর্বকালের" }
+        ].map((tab) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-3 text-sm font-semibold capitalize transition-colors ${
-              activeTab === tab ? "text-primary border-b-2 border-primary" : "text-textSec"
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex-1 min-w-[80px] py-3 text-sm font-semibold whitespace-nowrap transition-colors ${
+              activeTab === tab.id ? "text-primary border-b-2 border-primary" : "text-textSec"
             }`}
           >
-            {tab === "7days" ? t("7-Days", "৭ দিন") : tab === "today" ? t("Today", "আজ") : t("Yesterday", "গতকাল")}
+            {t(tab.en, tab.bn)}
           </button>
         ))}
       </div>
 
-      {/* Filter Buttons */}
-      <div className="flex gap-2 p-3 border-b border-[#2F4553] bg-[#1A2C38]">
+      {/* Filter Buttons & Small Total Deposit */}
+      <div className="flex gap-2 p-3 border-b border-[#2F4553] bg-[#1A2C38] items-center">
         <button 
           onClick={() => setShowTypeModal(true)}
-          className="flex-1 py-2 px-3 rounded border border-[#2F4553] bg-[#0F212E] text-xs text-textMain flex justify-between items-center"
+          className="w-24 py-2 px-2 rounded border border-[#2F4553] bg-[#0F212E] text-[11px] text-textMain flex justify-between items-center"
         >
-          <span>{filterType === "all" ? t("All", "সব") : filterType}</span>
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+          <span className="truncate">{filterType === "all" ? t("All", "সব") : filterType}</span>
+          <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
         </button>
         <button 
           onClick={() => setShowStatusModal(true)}
-          className="flex-1 py-2 px-3 rounded border border-[#2F4553] bg-[#0F212E] text-xs text-textMain flex justify-between items-center"
+          className="w-24 py-2 px-2 rounded border border-[#2F4553] bg-[#0F212E] text-[11px] text-textMain flex justify-between items-center"
         >
-          <span>{statusFilter === "all" ? t("Types", "টাইপ") : statusFilter}</span>
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+          <span className="truncate">{statusFilter === "all" ? t("Types", "টাইপ") : statusFilter}</span>
+          <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
         </button>
-        <div className="flex-1 py-2 px-3 rounded border border-[#2F4553] bg-[#0F212E] text-xs text-textMain flex justify-center items-center gap-1">
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+        <div className="w-24 py-2 px-2 rounded border border-[#2F4553] bg-[#0F212E] text-[11px] text-textMain flex justify-center items-center gap-1">
+          <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
           <span>{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}</span>
         </div>
-      </div>
 
-      {/* Total Deposit Summary */}
-      <div className="mx-4 mt-4 p-4 rounded-xl bg-gradient-to-r from-[#1A2C38] to-[#253B49] border border-[#2F4553] flex justify-between items-center shadow-lg">
-        <div>
-          <p className="text-textSec text-xs font-semibold mb-1">{t("Total Deposit", "সর্বমোট ডিপোজিট")}</p>
-          <h2 className="text-2xl font-bold text-[#00E701]">৳ {totalDeposit.toLocaleString()}</h2>
-        </div>
-        <div className="w-10 h-10 bg-[#00E701]/10 rounded-full flex items-center justify-center text-[#00E701]">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+        {/* ছোট Total Deposit ডান কোণায় */}
+        <div className="ml-auto flex flex-col items-end pl-2">
+          <span className="text-[10px] text-textSec leading-none mb-1">{t("Total Deposit", "মোট ডিপোজিট")}</span>
+          <span className="text-[#00E701] font-bold text-sm leading-none">৳ {totalDeposit.toLocaleString()}</span>
         </div>
       </div>
 
@@ -164,11 +155,13 @@ export default function VoucherReportPage() {
             <div key={tx.id} className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 shadow-sm">
               
               {/* Row 1: Method & Amount */}
-              <div className="flex justify-between items-center mb-3">
+              <div className="flex justify-between items-start mb-2">
                 <h3 className="text-white font-bold text-base capitalize flex items-center gap-1">
                   {tx.method_code} <span>{getMethodEmoji(tx.method_code)}</span>
                 </h3>
-                <span className="text-white font-bold text-lg">৳ {Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="text-white font-bold text-lg whitespace-nowrap">
+                  ৳ {Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
               </div>
 
               {/* Row 2: Date */}
@@ -176,17 +169,17 @@ export default function VoucherReportPage() {
                 {new Date(tx.created_at).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(',', '')}
               </p>
 
-              {/* Row 3: TrxID & Status */}
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <span className="text-[#B1BAD3] text-sm font-mono truncate max-w-[200px]">{tx.transaction_reference || "N/A"}</span>
-                  {tx.transaction_reference && (
-                    <button onClick={() => copyToClipboard(tx.transaction_reference)} className="text-textSec hover:text-white">
+              {/* Row 3: Order Number (TrxID এর বদলে) & Status */}
+              <div className="flex justify-between items-center gap-2">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className="text-[#B1BAD3] text-sm font-mono truncate">{tx.order_number || "Generating..."}</span>
+                  {tx.order_number && (
+                    <button onClick={() => copyToClipboard(tx.order_number)} className="text-textSec hover:text-white flex-shrink-0">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                     </button>
                   )}
                 </div>
-                <span className={`text-xs font-bold ${
+                <span className={`text-xs font-bold whitespace-nowrap ${
                   tx.status === "approved" ? "text-[#00E701]" : 
                   tx.status === "rejected" ? "text-[#ED4163]" : 
                   "text-[#F59E0B]"
