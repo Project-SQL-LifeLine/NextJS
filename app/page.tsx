@@ -38,8 +38,6 @@ export default function Home() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [banners, setBanners] = useState<any[]>([]);
   const [currentBanner, setCurrentBanner] = useState(0);
-  
-  // ক্যাটাগরি ডাটা স্টেট
   const [categories, setCategories] = useState<any[]>([]);
   
   const { t, language } = useLanguage();
@@ -67,7 +65,6 @@ export default function Home() {
     };
 
     const fetchData = async () => {
-      // ব্যানার আনা
       const { data: bannerData } = await supabase
         .from("home_banners")
         .select("*")
@@ -75,7 +72,6 @@ export default function Home() {
         .order("serial", { ascending: true });
       if (bannerData) setBanners(bannerData);
 
-      // ক্যাটাগরি আনা
       const { data: catData } = await supabase
         .from("home_categories_create")
         .select("*")
@@ -185,13 +181,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ডাইনামিক ক্যাটাগরি বাটন (অ্যাডমিন প্যানেল থেকে কন্ট্রোলড) */}
-      <div className="px-3 mt-4 flex gap-2 overflow-x-auto no-scrollbar">
+      {/* ডাইনামিক ক্যাটাগরি বাটন (ফ্রি সাইজ ফ্লেক্স লেআউট) */}
+      <div className="px-3 mt-4 flex flex-wrap gap-2">
         {categories.map((cat) => (
           <a 
             key={cat.id}
             href={cat.link_url}
-            className="flex items-center justify-center gap-2 bg-[#1A2C38] border border-[#2F4553] rounded-lg px-4 py-2.5 min-w-[120px] hover:bg-[#253B49] transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-[#1A2C38] border border-[#2F4553] rounded-lg px-4 py-2 hover:bg-[#253B49] transition-colors"
           >
             <CategoryIcon name={cat.icon_name} />
             <span className="text-white text-sm font-semibold whitespace-nowrap">{cat.title}</span>
@@ -199,23 +195,8 @@ export default function Home() {
         ))}
       </div>
 
-      {/* ক্যাটাগরি বাটন (যেমন: Hot, Slot, Live, Fishing) */}
-      <div className="px-3 mt-6 grid grid-cols-4 gap-2">
-        {[
-          { key: "Hot", label: t("Hot", "হট"), icon: "🔥" },
-          { key: "Slot", label: t("Slot", "স্লট"), icon: "🎰" },
-          { key: "Live", label: t("Live", "লাইভ"), icon: "🎲" },
-          { key: "Fishing", label: t("Fishing", "ফিশিং"), icon: "🎣" }
-        ].map((item, idx) => (
-          <div key={idx} className={`bg-[#1A2C38] rounded-md p-2 flex flex-col items-center justify-center border border-[#2F4553] ${idx === 0 ? 'bg-[#1475E0]/10' : ''}`}>
-            <span className="text-xl mb-1">{item.icon}</span>
-            <span className={`text-xs font-semibold ${idx === 0 ? 'text-[#1475E0]' : 'text-[#B1BAD3]'}`}>{item.label}</span>
-          </div>
-        ))}
-      </div>
-
       {/* গেম কার্ড */}
-      <div className="px-3 mt-3 grid grid-cols-3 gap-2">
+      <div className="px-3 mt-6 grid grid-cols-3 gap-2">
         {[1, 2, 3, 4, 5, 6].map((game) => (
           <div key={game} className="bg-[#1A2C38] rounded-md overflow-hidden relative aspect-square border border-[#2F4553]">
              <img src={`https://placehold.co/150x150/1A2C38/FFF?text=Game+${game}`} alt={`Game ${game}`} className="w-full h-full object-cover" />
