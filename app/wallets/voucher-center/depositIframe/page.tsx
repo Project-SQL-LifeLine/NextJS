@@ -23,11 +23,11 @@ function DepositIframeContent() {
   const [isOrderPlaced, setIsOrderPlaced] = useState(false); // ৭ম ছবি
   const [loading, setLoading] = useState(false);
   
-  // ল্যাঙ্গুয়েজ স্টেট (EN / BN)
   const [lang, setLang] = useState<"EN" | "BN">("EN");
 
   const walletNumber = method.includes("Bkash") ? "01967961725" : "01962778104";
   const bonusAmount = (amount * bonusPercent) / 100;
+  const totalAmount = amount + bonusAmount;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(walletNumber);
@@ -43,7 +43,7 @@ function DepositIframeContent() {
     setShowConfirmModal(true); 
   };
 
-  // ২. Confirm পপআপে ক্লিক
+  // ২. Confirm পপআপে ক্লিক (এডিট স্টেট অন হবে)
   const handleConfirmSubmit = () => {
     setShowConfirmModal(false);
     setShowModifyState(true); 
@@ -54,7 +54,7 @@ function DepositIframeContent() {
     setShowEditConfirmModal(true); 
   };
 
-  // ৪. Yes ক্লিক করলে ডাটাবেসে সেভ হবে
+  // ৪. ডাটাবেসে সেভ করার ফাংশন
   const handleFinalSubmit = async () => {
     setLoading(true);
     setShowEditConfirmModal(false);
@@ -95,7 +95,7 @@ function DepositIframeContent() {
     }
   };
 
-  // ৭ নম্বর ছবির Order Info ভিউ
+  // ৭ নম্বর ছবির Order Info ভিউ (এখানে Total Amount দেখানো হয়েছে)
   if (isOrderPlaced) {
     return (
       <div className="iframe-container">
@@ -127,14 +127,23 @@ function DepositIframeContent() {
             <button className="bg-blue-50 text-blue-500 px-4 py-2 rounded">Copy</button>
           </div>
 
-          {/* বোনাস ডিসপ্লে */}
+          {/* বোনাস এবং টোটাল ডিসপ্লে */}
           {bonusPercent > 0 && (
-            <div className="flex justify-between items-center mb-6 text-green-700 bg-green-50 p-3 rounded">
-              <div className="text-left">
-                <p className="text-sm font-semibold">Claimed Bonus ({bonusPercent}%)</p>
-                <p className="font-bold text-lg">৳ {bonusAmount.toFixed(2)}</p>
+            <>
+              <div className="flex justify-between items-center mb-2 text-green-700 bg-green-50 p-3 rounded">
+                <div className="text-left">
+                  <p className="text-sm font-semibold">Claimed Bonus ({bonusPercent}%)</p>
+                  <p className="font-bold text-lg">৳ {bonusAmount.toFixed(2)}</p>
+                </div>
               </div>
-            </div>
+              
+              <div className="flex justify-between items-center mb-6 text-black bg-gray-50 p-3 rounded border border-gray-200">
+                <div className="text-left">
+                  <p className="text-sm font-semibold">Total Amount (Deposit + Bonus)</p>
+                  <p className="font-bold text-lg">৳ {totalAmount.toFixed(2)}</p>
+                </div>
+              </div>
+            </>
           )}
 
           <div className="text-left text-sm text-gray-600 space-y-2">
@@ -156,7 +165,7 @@ function DepositIframeContent() {
 
   return (
     <div className="iframe-container">
-      {/* হেডার আপডেট (PAY SERVICE, EN/BN যুক্ত করা হয়েছে) */}
+      {/* হেডার */}
       <div className="iframe-header">
         <div>
           <h1>BDT {amount}</h1>
@@ -218,9 +227,9 @@ function DepositIframeContent() {
             {/* Submit বাটন লজিক আপডেট করা হয়েছে */}
             <button 
               className="submit-btn" 
-              onClick={showModifyState ? handleEditClick : handleInitialSubmit}
+              onClick={showModifyState ? handleFinalSubmit : handleInitialSubmit}
             >
-              Submit
+              {loading ? "Submitting..." : "Submit"}
             </button>
           </>
         ) : (
@@ -258,12 +267,11 @@ function DepositIframeContent() {
           <div className="modal-box text-left">
             <h3 className="text-center font-bold text-xl mb-6">Are you sure you want to change?</h3>
             <div className="flex justify-center gap-4">
-              {/* Yes ক্লিক করলে এখন সরাসরি সেভ না হয়ে ইনপুট বক্সে ফিরে যাবে */}
               <button 
                 className="btn-yes" 
                 onClick={() => {
                   setShowEditConfirmModal(false);
-                  setShowModifyState(false); // এখানে স্টেট false করায় আবার ইনপুট বক্স দেখাবে
+                  setShowModifyState(false); // এখানে false করায় আবার এডিটেবল ইনপুট বক্স দেখাবে
                 }}
               >
                 Yes
