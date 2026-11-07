@@ -16,11 +16,11 @@ function DepositIframeContent() {
   const bonusId = searchParams.get("bonus_id") || null;
 
   const [txnId, setTxnId] = useState("");
-  const [showConfirmModal, setShowConfirmModal] = useState(false); // ১ম পপআপ
-  const [showModifyState, setShowModifyState] = useState(false); // এডিট ইনপুট বক্স
-  const [showEditConfirmModal, setShowEditConfirmModal] = useState(false); // Yes/No পপআপ
-  const [isSubmitted, setIsSubmitted] = useState(false); // সাকসেস মার্ক
-  const [isOrderPlaced, setIsOrderPlaced] = useState(false); // ৭ম ছবি
+  const [showConfirmModal, setShowConfirmModal] = useState(false); 
+  const [showModifyState, setShowModifyState] = useState(false); 
+  const [showEditConfirmModal, setShowEditConfirmModal] = useState(false); 
+  const [isSubmitted, setIsSubmitted] = useState(false); 
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false); 
   const [loading, setLoading] = useState(false);
   
   const [lang, setLang] = useState<"EN" | "BN">("EN");
@@ -31,39 +31,34 @@ function DepositIframeContent() {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(walletNumber);
-    alert("Wallet number copied!");
+    alert(lang === "EN" ? "Wallet number copied!" : "ওয়ালেট নম্বর কপি করা হয়েছে!");
   };
 
-  // ১. প্রথম সাবমিট (Confirm পপআপ)
   const handleInitialSubmit = () => {
     if (!txnId) {
-      alert("Please enter Transaction ID");
+      alert(lang === "EN" ? "Please enter Transaction ID" : "অনুগ্রহ করে ট্রানজেকশন আইডি দিন");
       return;
     }
     setShowConfirmModal(true); 
   };
 
-  // ২. Confirm পপআপে ক্লিক (এডিট স্টেট অন হবে)
   const handleConfirmSubmit = () => {
     setShowConfirmModal(false);
     setShowModifyState(true); 
   };
 
-  // ৩. Modify বাটনে ক্লিক (Yes/No পপআপ)
   const handleEditClick = () => {
     setShowEditConfirmModal(true); 
   };
 
-  // ৪. ডাটাবেসে সেভ করার ফাংশন
   const handleFinalSubmit = async () => {
     setLoading(true);
     setShowEditConfirmModal(false);
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
       if (!session) {
-        alert("Please login first!");
+        alert(lang === "EN" ? "Please login first!" : "অনুগ্রহ করে আগে লগইন করুন!");
         setLoading(false);
         return;
       }
@@ -82,14 +77,12 @@ function DepositIframeContent() {
       });
 
       if (error) {
-        console.error("Database Error:", error);
         alert("Failed to submit: " + error.message);
       } else {
         setIsSubmitted(true); 
       }
     } catch (err) {
-      console.error(err);
-      alert("Something went wrong!");
+      alert(lang === "EN" ? "Something went wrong!" : "কিছু একটা সমস্যা হয়েছে!");
     } finally {
       setLoading(false);
     }
@@ -103,43 +96,41 @@ function DepositIframeContent() {
           <button onClick={() => router.push('/')} className="text-white">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <span className="text-white font-bold text-lg">Deposit Info</span>
+          <span className="text-white font-bold text-lg">{lang === "EN" ? "Deposit Info" : "ডিপোজিট তথ্য"}</span>
           <div></div>
         </div>
         
         <div className="iframe-content text-center pt-6">
           <h2 className="text-xl font-bold mb-6">{method}</h2>
-          <h3 className="text-lg font-bold text-left mb-4">Order placed</h3>
+          <h3 className="text-lg font-bold text-left mb-4">{lang === "EN" ? "Order placed" : "অর্ডার সম্পন্ন হয়েছে"}</h3>
           
           <div className="flex justify-between items-center mb-4">
             <div className="text-left">
-              <p className="text-gray-500 text-sm">Deposit account</p>
+              <p className="text-gray-500 text-sm">{lang === "EN" ? "Deposit account" : "ডিপোজিট একাউন্ট"}</p>
               <p className="font-bold text-lg">mdrashedul</p>
             </div>
-            <button className="bg-blue-50 text-blue-500 px-4 py-2 rounded" onClick={copyToClipboard}>Copy</button>
+            <button className="bg-blue-50 text-blue-500 px-4 py-2 rounded" onClick={copyToClipboard}>{lang === "EN" ? "Copy" : "কপি"}</button>
           </div>
           
           <div className="flex justify-between items-center mb-4 border-b pb-4">
             <div className="text-left">
-              <p className="text-gray-500 text-sm">Deposit Amounts</p>
+              <p className="text-gray-500 text-sm">{lang === "EN" ? "Deposit Amounts" : "ডিপোজিট এমাউন্ট"}</p>
               <p className="font-bold text-lg">৳ {amount}</p>
             </div>
-            <button className="bg-blue-50 text-blue-500 px-4 py-2 rounded">Copy</button>
+            <button className="bg-blue-50 text-blue-500 px-4 py-2 rounded">{lang === "EN" ? "Copy" : "কপি"}</button>
           </div>
 
-          {/* বোনাস এবং টোটাল ডিসপ্লে */}
           {bonusPercent > 0 && (
             <>
               <div className="flex justify-between items-center mb-2 text-green-700 bg-green-50 p-3 rounded">
                 <div className="text-left">
-                  <p className="text-sm font-semibold">Claimed Bonus ({bonusPercent}%)</p>
+                  <p className="text-sm font-semibold">{lang === "EN" ? `Claimed Bonus (${bonusPercent}%)` : `ক্লেইমড বোনাস (${bonusPercent}%)`}</p>
                   <p className="font-bold text-lg">৳ {bonusAmount.toFixed(2)}</p>
                 </div>
               </div>
-              
               <div className="flex justify-between items-center mb-6 text-black bg-gray-50 p-3 rounded border border-gray-200">
                 <div className="text-left">
-                  <p className="text-sm font-semibold">Total Amount (Deposit + Bonus)</p>
+                  <p className="text-sm font-semibold">{lang === "EN" ? "Total Amount (Deposit + Bonus)" : "সর্বমোট এমাউন্ট (ডিপোজিট + বোনাস)"}</p>
                   <p className="font-bold text-lg">৳ {totalAmount.toFixed(2)}</p>
                 </div>
               </div>
@@ -147,17 +138,17 @@ function DepositIframeContent() {
           )}
 
           <div className="text-left text-sm text-gray-600 space-y-2">
-            <p className="font-bold text-black">Tips</p>
-            <p>After the funds were transferred, kindly click on the "complete deposit" button</p>
-            <p className="mt-4">-Feel free to contact us if you have any questions.</p>
-            <a href="#" className="underline text-blue-600 font-semibold mt-2 block">Customer Service</a>
+            <p className="font-bold text-black">{lang === "EN" ? "Tips" : "নির্দেশনা"}</p>
+            <p>{lang === "EN" ? "After the funds were transferred, kindly click on the 'complete deposit' button" : "টাকা পাঠানোর পর 'কমপ্লিট ডিপোজিট' বাটনে ক্লিক করুন।"}</p>
+            <p className="mt-4">{lang === "EN" ? "-Feel free to contact us if you have any questions." : "-কোনো প্রশ্ন থাকলে আমাদের সাথে যোগাযোগ করুন।"}</p>
+            <a href="#" className="underline text-blue-600 font-semibold mt-2 block">{lang === "EN" ? "Customer Service" : "কাস্টমার সার্ভিস"}</a>
           </div>
         </div>
 
         <div className="bottom-bar">
-          <button onClick={() => router.push('/wallets/voucher-report')} className="bottom-bar-btn btn-white-outline">Transaction record</button>
-          <button onClick={() => router.push('/')} className="bottom-bar-btn btn-blue">Complete deposit</button>
-          <button onClick={() => window.location.reload()} className="bottom-bar-btn btn-white-outline">Another</button>
+          <button onClick={() => router.push('/wallets/voucher-report')} className="bottom-bar-btn btn-white-outline">{lang === "EN" ? "Transaction record" : "ট্রানজেকশন রেকর্ড"}</button>
+          <button onClick={() => router.push('/')} className="bottom-bar-btn btn-blue">{lang === "EN" ? "Complete deposit" : "কমপ্লিট ডিপোজিট"}</button>
+          <button onClick={() => window.location.reload()} className="bottom-bar-btn btn-white-outline">{lang === "EN" ? "Another" : "অন্য"}</button>
         </div>
       </div>
     );
@@ -165,10 +156,9 @@ function DepositIframeContent() {
 
   return (
     <div className="iframe-container">
-      {/* হেডার */}
       <div className="iframe-header">
         <div>
-          <h1>BDT {amount}</h1>
+          <h1>{lang === "EN" ? `BDT ${amount}` : `বিডিটি ${amount}`}</h1>
           <p>{lang === "EN" ? "Don't over or under cash out." : "ক্যাশ আউটের চেয়ে বেশি বা কম দিবেন না।"}</p>
         </div>
         <div className="text-right flex flex-col items-end">
@@ -182,7 +172,7 @@ function DepositIframeContent() {
 
       <div className="iframe-content">
         <div className="warning-text-red">
-          If you change the amount (BDT {amount}), you won't get the credit
+          {lang === "EN" ? `If you change the amount (BDT ${amount}), you won't get the credit` : `আপনি যদি এমাউন্ট পরিবর্তন করেন (বিডিটি ${amount}), তবে আপনি ক্রেডিট পাবেন না`}
         </div>
 
         <div className="bkash-card" style={{ backgroundColor: method.includes("Bkash") ? '#d10074' : '#f63' }}>
@@ -192,8 +182,8 @@ function DepositIframeContent() {
           <h2>{method} Deposit</h2>
         </div>
 
-        <div className="wallet-label">Wallet No*</div>
-        <div className="wallet-note">This {method} number only accepts Send Money.</div>
+        <div className="wallet-label">{lang === "EN" ? "Wallet No*" : "ওয়ালেট নম্বর*"}</div>
+        <div className="wallet-note">{lang === "EN" ? `This ${method} number only accepts Send Money.` : `এই ${method} নম্বরটি শুধুমাত্র সেন্ড মানি গ্রহণ করে।`}</div>
         <div className="wallet-box">
           <span>{walletNumber}</span>
           <span className="copy-btn" onClick={copyToClipboard}>
@@ -203,80 +193,70 @@ function DepositIframeContent() {
 
         {!isSubmitted ? (
           <>
-            <div className="txn-label">Transaction ID* <span>(Required)</span></div>
+            <div className="txn-label">{lang === "EN" ? "Transaction ID* (Required)" : "ট্রানজেকশন আইডি* (আবশ্যক)"}</div>
             
             {showModifyState ? (
-              // এডিট ভিউ (Modify বাটনসহ)
               <div className="modify-input-box">
                 <input type="text" value={txnId} readOnly />
                 <button className="btn-modify" onClick={handleEditClick}>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                  Modify
+                  {lang === "EN" ? "Modify" : "পরিবর্তন"}
                 </button>
               </div>
             ) : (
               <input
                 type="text"
                 className="txn-input"
-                placeholder="TrxID Required!"
+                placeholder={lang === "EN" ? "TrxID Required!" : "ট্রানজেকশন আইডি দিন!"}
                 value={txnId}
                 onChange={(e) => setTxnId(e.target.value)}
               />
             )}
 
-            {/* Submit বাটন লজিক আপডেট করা হয়েছে */}
             <button 
               className="submit-btn" 
               onClick={showModifyState ? handleFinalSubmit : handleInitialSubmit}
             >
-              {loading ? "Submitting..." : "Submit"}
+              {loading ? (lang === "EN" ? "Submitting..." : "সাবমিট হচ্ছে...") : (lang === "EN" ? "Submit" : "সাবমিট")}
             </button>
           </>
         ) : (
           <div className="success-mark">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
             <button className="submit-btn" style={{ borderColor: '#0b7a3e', color: '#0b7a3e', width: '80%' }} onClick={() => setIsOrderPlaced(true)}>
-              View Order Info
+              {lang === "EN" ? "View Order Info" : "অর্ডারের তথ্য দেখুন"}
             </button>
           </div>
         )}
 
         <div className="warning-section">
-          <h3>Warning:</h3>
-          <div className="red-subtext">Transaction ID must be filled in correctly, otherwise the score will fail!</div>
-          <p>Please note that you make deposit to {method} deposit. Be sure that you make the payment from the same wallet, otherwise it may be lost.</p>
+          <h3>{lang === "EN" ? "Warning:" : "সতর্কতা:"}</h3>
+          <div className="red-subtext">{lang === "EN" ? "Transaction ID must be filled in correctly, otherwise the score will fail!" : "ট্রানজেকশন আইডি সঠিকভাবে পূরণ করতে হবে, অন্যথায় স্কোর বাতিল হবে!"}</div>
+          <p>{lang === "EN" ? `Please note that you make deposit to ${method} deposit. Be sure that you make the payment from the same wallet, otherwise it may be lost.` : `অনুগ্রহ করে মনে রাখবেন যে আপনি ${method} এ ডিপোজিট করছেন। একই ওয়ালেট থেকে পেমেন্ট করেছেন কিনা নিশ্চিত করুন, অন্যথায় এটি হারিয়ে যেতে পারে।`}</p>
         </div>
       </div>
 
-      {/* ১ম পপআপ: Confirm Transaction ID */}
       {showConfirmModal && (
         <div className="modal-overlay">
           <div className="modal-box">
-            <h3>This order can only be submitted once, please confirm your Transaction ID: <span>{txnId}</span> is correct!</h3>
+            <h3>{lang === "EN" ? "This order can only be submitted once, please confirm your Transaction ID: " : "এই অর্ডারটি শুধুমাত্র একবার সাবমিট করা যাবে, অনুগ্রহ করে আপনার ট্রানজেকশন আইডি নিশ্চিত করুন: "}<span>{txnId}</span> {lang === "EN" ? "is correct!" : "সঠিক আছে!"}</h3>
             <div className="modal-btns">
-              <button className="btn-cancel" onClick={() => setShowConfirmModal(false)}>Cancel</button>
-              <button className="btn-confirm" onClick={handleConfirmSubmit}>Confirm</button>
+              <button className="btn-cancel" onClick={() => setShowConfirmModal(false)}>{lang === "EN" ? "Cancel" : "বাতিল"}</button>
+              <button className="btn-confirm" onClick={handleConfirmSubmit}>{lang === "EN" ? "Confirm" : "নিশ্চিত"}</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ৩য় পপআপ: Yes / No */}
       {showEditConfirmModal && (
         <div className="modal-overlay">
           <div className="modal-box text-left">
-            <h3 className="text-center font-bold text-xl mb-6">Are you sure you want to change?</h3>
+            <h3 className="text-center font-bold text-xl mb-6">{lang === "EN" ? "Are you sure you want to change?" : "আপনি কি নিশ্চিত যে আপনি পরিবর্তন করতে চান?"}</h3>
             <div className="flex justify-center gap-4">
-              <button 
-                className="btn-yes" 
-                onClick={() => {
-                  setShowEditConfirmModal(false);
-                  setShowModifyState(false); // এখানে false করায় আবার এডিটেবল ইনপুট বক্স দেখাবে
-                }}
-              >
-                Yes
+              <button className="btn-yes" onClick={() => { setShowEditConfirmModal(false); setShowModifyState(false); }}>
+                {lang === "EN" ? "Yes" : "হ্যাঁ"}
               </button>
-              <button className="btn-no" onClick={() => setShowEditConfirmModal(false)}>No</button>
+              <button className="btn-no" onClick={() => setShowEditConfirmModal(false)}>{lang === "EN" ? "No" : "না"}</button>
             </div>
           </div>
         </div>
