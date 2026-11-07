@@ -36,10 +36,10 @@ export default function InviteFriendPage() {
 
       setIsLoggedIn(true);
 
-      // ১. প্রোফাইল ডাটা
+      // ১. প্রোফাইল ডাটা (referral_earnings এবং balance আনা হচ্ছে)
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("id, game_id, bonus_balance, referral_earnings")
+        .select("id, game_id, balance, referral_earnings")
         .eq("id", user.id)
         .single();
       
@@ -80,8 +80,8 @@ export default function InviteFriendPage() {
       setMessage({ type: "error", text: t("Please enter a valid amount.", "সঠিক পরিমাণ লিখুন।") });
       return;
     }
-    if (amount > Number(profile.bonus_balance)) {
-      setMessage({ type: "error", text: t("Insufficient bonus balance.", "পর্যাপ্ত বোনাস নেই।") });
+    if (amount > Number(profile.referral_earnings)) {
+      setMessage({ type: "error", text: t("Insufficient referral earnings.", "পর্যাপ্ত রেফারেল আর্নিংস নেই।") });
       return;
     }
 
@@ -89,22 +89,21 @@ export default function InviteFriendPage() {
     setMessage({ type: "", text: "" });
 
     try {
-      // ১. বোনাস ব্যালেন্স থেকে কেটে মেইন ব্যালেন্সে যোগ করা
-      const newBonusBalance = Number(profile.bonus_balance) - amount;
-      const newMainBalance = Number(profile.balance || 0) + amount; // নিশ্চিত করুন balance কলামটি সিলেক্ট করেছেন
+      // ১. referral_earnings থেকে কেটে মেইন balance-এ যোগ করা
+      const newReferralEarnings = Number(profile.referral_earnings) - amount;
+      const newMainBalance = Number(profile.balance || 0) + amount;
 
-      // এখানে একটি ট্রানজ্যাকশন দরকার হতে পারে, তবে আপাতত সরাসরি আপডেট
       const { error: profileError } = await supabase
         .from("profiles")
         .update({ 
-          bonus_balance: newBonusBalance,
+          referral_earnings: newReferralEarnings,
           balance: newMainBalance 
         })
         .eq("id", profile.id);
 
       if (profileError) throw profileError;
 
-      setProfile({ ...profile, bonus_balance: newBonusBalance });
+      setProfile({ ...profile, referral_earnings: newReferralEarnings });
       setMessage({ type: "success", text: t("Transfer successful!", "ট্রান্সফার সফল হয়েছে!") });
       setShowTransferModal(false);
       setTransferAmount("");
@@ -182,17 +181,17 @@ export default function InviteFriendPage() {
               </div>
             </div>
 
-            {/* Bonus Wallet */}
+            {/* Bonus Wallet (referral_earnings) */}
             <div className="invite-bonus-card">
               <div>
-                <span>{t("Bonus Wallet Balance", "বোনাস ওয়ালেট ব্যালেন্স")}</span>
-                <strong>৳ {Number(profile.bonus_balance).toFixed(2)}</strong>
+                <span>{t("Referral Earnings", "রেফারেল আর্নিংস")}</span>
+                <strong>৳ {Number(profile.referral_earnings).toFixed(2)}</strong>
               </div>
               <button 
                 className="invite-transfer-btn"
                 onClick={() => {
-                  if (Number(profile.bonus_balance) <= 0) {
-                    setMessage({ type: "error", text: t("No bonus available to transfer.", "ট্রান্সফার করার মতো বোনাস নেই।") });
+                  if (Number(profile.referral_earnings) <= 0) {
+                    setMessage({ type: "error", text: t("No earnings available to transfer.", "ট্রান্সফার করার মতো আর্নিংস নেই।") });
                     return;
                   }
                   setShowTransferModal(true);
@@ -239,7 +238,7 @@ export default function InviteFriendPage() {
         <div className="invite-modal-overlay">
           <div className="invite-modal">
             <div className="invite-modal-header">
-              <h3>{t("Transfer Bonus", "বোনাস ট্রান্সফার")}</h3>
+              <h3>{t("Transfer Earnings", "আর্নিংস ট্রান্সফার")}</h3>
               <button onClick={() => setShowTransferModal(false)}>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
@@ -250,13 +249,13 @@ export default function InviteFriendPage() {
               </p>
               
               <div className="invite-input-group">
-                <label>{t("Amount", "পরিমাণ")} (Max: ৳{Number(profile.bonus_balance).toFixed(2)})</label>
+                <label>{t("Amount", "পরিমাণ")} (Max: ৳{Number(profile.referral_earnings).toFixed(2)})</label>
                 <input 
                   type="number" 
                   value={transferAmount}
                   onChange={(e) => setTransferAmount(e.target.value)}
                   placeholder={t("Enter amount", "পরিমাণ লিখুন")}
-                  max={profile.bonus_balance}
+                  max={profile.referral_earnings}
                   required
                 />
               </div>
