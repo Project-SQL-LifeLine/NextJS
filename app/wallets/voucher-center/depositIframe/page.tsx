@@ -31,16 +31,14 @@ function DepositIframeContent() {
   // মোবাইলের Back বাটন হ্যান্ডেল করার লজিক
   useEffect(() => {
     if (isOrderPlaced) {
-      // অর্ডার প্লেসড স্টেটে গেলে ব্রাউজারের হিস্ট্রিতে একটি ডামি স্টেট পুশ করবো
       window.history.pushState({ page: "orderPlaced" }, "");
     }
 
     const handlePopState = (event: PopStateEvent) => {
-      // ব্যাক বাটনে ক্লিক করলে এই ইভেন্টটি ফায়ার হবে
       if (isOrderPlaced) {
-        setIsOrderPlaced(false); // আবার সাকসেস পেজে (✔) ফিরে যাবে
+        setIsOrderPlaced(false); 
       } else if (isSubmitted) {
-        setIsSubmitted(false); // সাকসেস থেকে ইনপুট পেজে ফিরে যাবে
+        setIsSubmitted(false); 
       }
     };
 
@@ -168,7 +166,8 @@ function DepositIframeContent() {
         <div className="bottom-bar">
           <button onClick={() => router.push('/wallets/voucher-report')} className="bottom-bar-btn btn-white-outline">{lang === "EN" ? "Transaction record" : "ট্রানজেকশন রেকর্ড"}</button>
           <button onClick={() => router.push('/')} className="bottom-bar-btn btn-blue">{lang === "EN" ? "Complete deposit" : "কমপ্লিট ডিপোজিট"}</button>
-          <button onClick={() => window.location.reload()} className="bottom-bar-btn btn-white-outline">{lang === "EN" ? "Another" : "অন্য"}</button>
+          {/* Another বাটনে ক্লিক করলে সরাসরি Voucher Center এ যাবে */}
+          <button onClick={() => router.push('/wallets/voucher-center')} className="bottom-bar-btn btn-white-outline">{lang === "EN" ? "Another" : "অন্য"}</button>
         </div>
       </div>
     );
