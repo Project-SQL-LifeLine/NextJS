@@ -65,7 +65,7 @@ export default function AddBankCardPage() {
         account_name: fullName
       });
 
-      if (insertError) throw insertError;
+      if (insertError) throw new Error("Payment Method Save Error: " + insertError.message);
 
       // ২. profiles এ ট্রানজেকশন পাসওয়ার্ড আপডেট করা
       const { error: updateError } = await supabase
@@ -73,12 +73,13 @@ export default function AddBankCardPage() {
         .update({ transaction_password: password })
         .eq("id", session.user.id);
 
-      if (updateError) throw updateError;
+      if (updateError) throw new Error("Password Update Error: " + updateError.message);
 
       // সফল হলে withdrawal পেজে ফিরে যাবে
       router.push("/wallets/withdrawal");
       
     } catch (err: any) {
+      console.error(err);
       setError(err.message || t("Failed to save data.", "তথ্য সেভ করতে সমস্যা হয়েছে।"));
     } finally {
       setLoading(false);
