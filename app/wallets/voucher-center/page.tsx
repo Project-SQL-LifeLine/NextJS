@@ -18,7 +18,6 @@ export default function VoucherCenterPage() {
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [selectedChannel, setSelectedChannel] = useState("");
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
-  const [customAmount, setCustomAmount] = useState("");
   const [selectedPromo, setSelectedPromo] = useState<any>(null);
   const [bonuses, setBonuses] = useState<any[]>([]);
   const [methods, setMethods] = useState<any[]>([]);
@@ -52,6 +51,7 @@ export default function VoucherCenterPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-bgMain flex items-center justify-center">
+        {/* লোডিং এনিমেশন */}
         <div className="w-10 h-10 border-4 border-[#2F4553] border-t-primary rounded-full animate-spin"></div>
       </div>
     );
@@ -63,7 +63,6 @@ export default function VoucherCenterPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Head>
 
-      {/* pb-28 দেওয়া হয়েছে যাতে ফিক্সড বাটনের নিচে কনটেন্ট ঢাকা না পড়ে */}
       <div className={`min-h-screen bg-bgMain text-textMain flex flex-col pb-28 transition-opacity duration-700 ease-in-out ${isFadeIn ? 'opacity-100' : 'opacity-0'}`}>
         
         <header className="bg-bgSec px-4 py-3 flex items-center justify-between sticky top-0 z-50 border-b border-borderCol">
@@ -130,7 +129,7 @@ export default function VoucherCenterPage() {
               {[500, 1000, 2000, 5000, 10000, 20000, 30000].map((amt) => (
                 <button
                   key={amt}
-                  onClick={() => { setSelectedAmount(amt); setCustomAmount(amt.toString()); }}
+                  onClick={() => { setSelectedAmount(amt); }}
                   className={`py-3 rounded-lg border-2 font-bold transition-all ${selectedAmount === amt ? "border-danger text-danger" : "border-borderCol text-textSec"}`}
                 >
                   {amt.toLocaleString()}
@@ -138,16 +137,7 @@ export default function VoucherCenterPage() {
               ))}
             </div>
             
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-textSec font-bold">৳</span>
-              <input
-                type="number"
-                value={customAmount}
-                onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(Number(e.target.value)); }}
-                placeholder={`${selectedMethod?.min_deposit || 500} - ${selectedMethod?.max_deposit || 30000}`}
-                className="w-full bg-bgSec text-white border-2 border-borderCol rounded-lg pl-10 pr-4 py-3 text-lg font-bold focus:outline-none focus:border-primary transition-colors"
-              />
-            </div>
+            {/* কাস্টম ইনপুট বক্স সরিয়ে ফেলা হয়েছে */}
           </section>
 
           <section>
@@ -155,7 +145,6 @@ export default function VoucherCenterPage() {
               <span className="w-2 h-2 rounded-full bg-primary inline-block"></span> Promotions
             </h2>
             
-            {/* স্লিম বোনাস কার্ড গ্রিড (হলুদ কালার বাদ দেওয়া হয়েছে) */}
             <div className="grid grid-cols-3 gap-2 mb-3">
               {bonuses.map((bonus) => {
                 const dynamicBonusAmount = (selectedAmount * bonus.bonus_percentage) / 100;
@@ -170,7 +159,6 @@ export default function VoucherCenterPage() {
                         : "border-borderCol bg-gradient-to-br from-[#1d3b2b] to-[#14251c] hover:border-primary/50"
                     }`}
                   >
-                    {/* ব্যাজ (সাদা ব্যাকগ্রাউন্ড, কালো টেক্সট) */}
                     <div className="absolute top-0 right-0 bg-white text-black text-[10px] font-bold px-1.5 py-0.5 rounded-bl-md z-10">
                       +{bonus.bonus_percentage}%
                     </div>
@@ -181,7 +169,6 @@ export default function VoucherCenterPage() {
                       </span>
                     </div>
 
-                    {/* সিলেক্টেড টিক মার্ক */}
                     {selectedPromo?.id === bonus.id && (
                       <div className="absolute bottom-0 right-0 w-6 h-6 bg-[#00E701] rounded-tl-full flex items-end justify-end p-1 z-10">
                         <svg className="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
