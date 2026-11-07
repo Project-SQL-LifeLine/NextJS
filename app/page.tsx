@@ -76,7 +76,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#0F212E] pb-20 relative overflow-hidden">
       
-      {/* স্ক্রলিং অ্যানাউন্সমেন্ট স্টাইল */}
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(100%); }
@@ -106,29 +105,29 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ব্যানার স্লাইডার (Cross Fade & Fully Fitted) */}
+      {/* ব্যানার স্লাইডার (Free Size / Natural Aspect Ratio) */}
       <div className="px-3 mt-3">
-        <div className="bg-[#092238] border border-[#2F4553] rounded-xl overflow-hidden h-40 relative">
+        <div className="bg-[#092238] border border-[#2F4553] rounded-xl overflow-hidden relative flex items-center justify-center w-full min-h-[100px]">
           {banners.length > 0 ? (
             <>
               {banners.map((banner, index) => (
                 <a 
                   key={banner.id}
                   href={banner.redirect_url || "#"} 
-                  className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out block ${
-                    index === currentBanner ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                  className={`w-full transition-opacity duration-700 ease-in-out ${
+                    index === currentBanner ? "opacity-100 z-10 relative block" : "opacity-0 z-0 absolute pointer-events-none hidden"
                   }`}
                 >
                   <img 
                     src={banner.image_url} 
                     alt="Banner" 
-                    className="w-full h-full object-cover" 
+                    className="w-full h-auto object-contain" 
                   />
                 </a>
               ))}
               
               {/* ডট ইন্ডিকেটর */}
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
                 {banners.map((_, idx) => (
                   <div 
                     key={idx} 
@@ -140,7 +139,7 @@ export default function Home() {
               </div>
             </>
           ) : (
-            <div className="flex h-full items-center justify-center text-textSec text-sm">No banners available</div>
+            <div className="py-8 text-textSec text-sm">No banners available</div>
           )}
         </div>
       </div>
