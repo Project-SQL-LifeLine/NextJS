@@ -37,28 +37,38 @@ export default function AdminDepositsPage() {
 
       if (txnError) throw txnError;
 
-      // ২. ইউজারের প্রোফাইল আনা (ব্যালেন্স ও টার্নওভার আপডেটের জন্য)
+      // ২. ইউজারের প্রোফাইল আনা (ব্যালেন্স, বোনাস ব্যালেন্স ও টার্নওভার আপডেটের জন্য)
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("balance, total_required_turnover")
+        .select("balance, bonus_balance, total_required_turnover")
         .eq("id", txn.user_id)
         .single();
 
       if (profileError) throw profileError;
 
-      // ৩. ব্যালেন্স এবং টার্নওভার আপডেট
-      const newBalance = Number(profile.balance) + Number(txn.amount);
+      // ৩. ক্যালকুলেশন
+      const depositAmount = Number(txn.amount);
+      const bonusAmount = Number(txn.claimed_bonus_amount) || 0; 
+      
+      // মেইন ব্যালেন্সে ডিপোজিট + বোনাস দুটোই যোগ হবে (খেলার জন্য)
+      const newBalance = Number(profile.balance) + depositAmount + bonusAmount;
+      
+      // bonus_balance কলামে শুধু বোনাসের টাকা জমা হবে (ট্র্যাকিংয়ের জন্য)
+      const newBonusBalance = Number(profile.bonus_balance || 0) + bonusAmount;
+      
       const newReqTurnover = Number(profile.total_required_turnover) + Number(txn.required_turnover);
 
+      // ৪. ডাটাবেস আপডেট
       await supabase
         .from("profiles")
         .update({ 
           balance: newBalance,
+          bonus_balance: newBonusBalance,
           total_required_turnover: newReqTurnover 
         })
         .eq("id", txn.user_id);
 
-      alert("Deposit Approved Successfully!");
+      alert("Deposit Approved Successfully! Balance and Bonus Updated.");
       fetchDeposits(); // রিফ্রেশ লিস্ট
     } catch (err: any) {
       alert("Error: " + err.message);
