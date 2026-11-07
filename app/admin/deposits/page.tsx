@@ -29,7 +29,6 @@ export default function AdminDepositsPage() {
 
   const handleApprove = async (txn: any) => {
     try {
-      // ১. ট্রানজেকশন অ্যাপ্রুভ করা
       const { error: txnError } = await supabase
         .from("user_deposit_transaction")
         .update({ status: "approved" })
@@ -37,28 +36,30 @@ export default function AdminDepositsPage() {
 
       if (txnError) throw txnError;
 
-      // ২. ইউজারের প্রোফাইল আনা (ব্যালেন্স, বোনাস ব্যালেন্স ও টার্নওভার আপডেটের জন্য)
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("balance, bonus_balance, total_required_turnover")
+        .select("balance, bonus_balance, total_required_turnover, total_completed_turnover")
         .eq("id", txn.user_id)
         .single();
 
       if (profileError) throw profileError;
 
-      // ৩. ক্যালকুলেশন
       const depositAmount = Number(txn.amount);
       const bonusAmount = Number(txn.claimed_bonus_amount) || 0; 
       
-      // মেইন ব্যালেন্সে ডিপোজিট + বোনাস দুটোই যোগ হবে (খেলার জন্য)
+      // মেইন ব্যালেন্সে ডিপোজিট + বোনাস দুটোই যোগ হবে
       const newBalance = Number(profile.balance) + depositAmount + bonusAmount;
-      
-      // bonus_balance কলামে শুধু বোনাসের টাকা জমা হবে (ট্র্যাকিংয়ের জন্য)
+      // bonus_balance কলামে শুধু বোনাসের টাকা জমা হবে
       const newBonusBalance = Number(profile.bonus_balance || 0) + bonusAmount;
       
-      const newReqTurnover = Number(profile.total_required_turnover) + Number(txn.required_turnover);
+      // টার্নওভার লজিক: আগের টার্নওভার শেষ হলে নতুন টার্নওভার যোগ হবে, নাহলে হবে না।
+      const isPreviousTurnoverComplete = Number(profile.total_completed_turnover) >= Number(profile.total_required_turnover);
+      
+      let newReqTurnover = Number(profile.total_required_turnover);
+      if (isPreviousTurnoverComplete) {
+        newReqTurnover += Number(txn.required_turnover);
+      }
 
-      // ৪. ডাটাবেস আপডেট
       await supabase
         .from("profiles")
         .update({ 
@@ -68,8 +69,8 @@ export default function AdminDepositsPage() {
         })
         .eq("id", txn.user_id);
 
-      alert("Deposit Approved Successfully! Balance and Bonus Updated.");
-      fetchDeposits(); // রিফ্রেশ লিস্ট
+      alert("Deposit Approved Successfully! Balance and Turnover Updated.");
+      fetchDeposits();
     } catch (err: any) {
       alert("Error: " + err.message);
     }
@@ -77,12 +78,7 @@ export default function AdminDepositsPage() {
 
   const handleReject = async (id: string) => {
     if (!confirm("Are you sure you want to reject this deposit?")) return;
-    
-    const { error } = await supabase
-      .from("user_deposit_transaction")
-      .update({ status: "rejected" })
-      .eq("id", id);
-
+    const { error } = await supabase.from("user_deposit_transaction").update({ status: "rejected" }).eq("id", id);
     if (!error) {
       alert("Deposit Rejected.");
       fetchDeposits();
