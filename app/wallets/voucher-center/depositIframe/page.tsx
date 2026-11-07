@@ -16,13 +16,13 @@ function DepositIframeContent() {
   const bonusId = searchParams.get("bonus_id") || null;
 
   const [txnId, setTxnId] = useState("");
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showModifyState, setShowModifyState] = useState(false);
-  const [showEditConfirmModal, setShowEditConfirmModal] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false); // ১ম পপআপ
+  const [showModifyState, setShowModifyState] = useState(false); // ২য় ছবির ইনপুট বক্স
+  const [showEditConfirmModal, setShowEditConfirmModal] = useState(false); // ৩য় পপআপ
+  const [isSubmitted, setIsSubmitted] = useState(false); // সাকসেস মার্ক
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false); // ৭ম ছবি
+  const [loading, setLoading] = useState(false);
 
-  // ডাইনামিক ওয়ালেট নাম্বার (ডেমো)
   const walletNumber = method.includes("Bkash") ? "01967961725" : "01962778104";
 
   const copyToClipboard = () => {
@@ -30,6 +30,7 @@ function DepositIframeContent() {
     alert("Wallet number copied!");
   };
 
+  // ১. প্রথম সাবমিট বাটনে ক্লিক (কনফার্ম পপআপ ওপেন হবে)
   const handleInitialSubmit = () => {
     if (!txnId) {
       alert("Please enter Transaction ID");
@@ -38,37 +39,62 @@ function DepositIframeContent() {
     setShowConfirmModal(true); 
   };
 
+  // ২. Confirm পপআপে ক্লিক (এডিট স্টেট অন হবে)
   const handleConfirmSubmit = () => {
     setShowConfirmModal(false);
-    setShowModifyState(true); // ৪ নাম্বার ছবির মত এডিট বক্স দেখাবে
+    setShowModifyState(true); 
   };
 
+  // ৩. Modify বাটনে ক্লিক (Yes/No পপআপ ওপেন হবে)
   const handleEditClick = () => {
-    setShowEditConfirmModal(true); // ৫ নাম্বার ছবির মত পপআপ
+    setShowEditConfirmModal(true); 
   };
 
+  // ৪. Yes ক্লিক করলে ডাটাবেসে সেভ হবে এবং সাকসেস দেখাবে
   const handleFinalSubmit = async () => {
+    setLoading(true);
     setShowEditConfirmModal(false);
     
-    // ডাটাবেসে সেভ করা
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      await supabase.from("user_deposit_transaction").insert({
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        alert("Please login first!");
+        setLoading(false);
+        return;
+      }
+
+      // বোনাস ক্যালকুলেশন
+      const calculatedBonusAmount = (amount * bonusPercent) / 100;
+      
+      // ডাটাবেসে ইনসার্ট
+      const { error } = await supabase.from("user_deposit_transaction").insert({
         user_id: session.user.id,
         transaction_type: "deposit",
         method_code: method,
         amount: amount,
         transaction_reference: txnId,
         status: "pending",
+        is_bonus_claimed: bonusId ? true : false,
+        applied_bonus_id: bonusId ? Number(bonusId) : null, // bigint হতে হবে
+        claimed_bonus_amount: calculatedBonusAmount,
         claimed_bonus_percentage: bonusPercent,
-        applied_bonus_id: bonusId
       });
+
+      if (error) {
+        console.error("Database Error:", error);
+        alert("Failed to submit: " + error.message);
+      } else {
+        setIsSubmitted(true); // সাকসেস মার্ক দেখাবে
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong!");
+    } finally {
+      setLoading(false);
     }
-    
-    setIsSubmitted(true); // ৬ নাম্বার ছবির সফল টিক মার্ক
   };
 
-  // ৭ নাম্বার ছবির ভিউ
   if (isOrderPlaced) {
     return (
       <div className="iframe-container">
@@ -108,7 +134,6 @@ function DepositIframeContent() {
           </div>
         </div>
 
-        {/* ৭ নাম্বার ছবির লাল বটম বার */}
         <div className="bottom-bar">
           <button onClick={() => router.push('/wallets/voucher-report')} className="bottom-bar-btn btn-white-outline">Transaction record</button>
           <button onClick={() => router.push('/')} className="bottom-bar-btn btn-blue">Complete deposit</button>
@@ -156,7 +181,7 @@ function DepositIframeContent() {
             <div className="txn-label">Transaction ID* <span>(Required)</span></div>
             
             {showModifyState ? (
-              // ৪ নাম্বার ছবির এডিট ভিউ
+              // ২ নাম্বার ছবির এডিট ভিউ (Modify বাটনসহ)
               <div className="modify-input-box">
                 <input type="text" value={txnId} readOnly />
                 <button className="btn-modify" onClick={handleEditClick}>
@@ -179,7 +204,7 @@ function DepositIframeContent() {
             </button>
           </>
         ) : (
-          // ৬ নাম্বার ছবির সফল ভিউ
+          // ৬ নাম্বার ছবির সাকসেস ভিউ
           <div className="success-mark">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
             <button className="submit-btn" style={{ borderColor: '#0b7a3e', color: '#0b7a3e', width: '80%' }} onClick={() => setIsOrderPlaced(true)}>
@@ -195,7 +220,7 @@ function DepositIframeContent() {
         </div>
       </div>
 
-      {/* ৩ নাম্বার ছবির কনফার্ম মডাল */}
+      {/* ১ম পপআপ: Confirm Transaction ID */}
       {showConfirmModal && (
         <div className="modal-overlay">
           <div className="modal-box">
@@ -208,13 +233,15 @@ function DepositIframeContent() {
         </div>
       )}
 
-      {/* ৫ নাম্বার ছবির এডিট কনফার্ম মডাল */}
+      {/* ৩য় পপআপ: Are you sure you want to change? */}
       {showEditConfirmModal && (
         <div className="modal-overlay">
           <div className="modal-box text-left">
             <h3 className="text-center font-bold text-xl mb-6">Are you sure you want to change?</h3>
             <div className="flex justify-center gap-4">
-              <button className="btn-yes" onClick={handleFinalSubmit}>Yes</button>
+              <button className="btn-yes" onClick={handleFinalSubmit} disabled={loading}>
+                {loading ? "Saving..." : "Yes"}
+              </button>
               <button className="btn-no" onClick={() => setShowEditConfirmModal(false)}>No</button>
             </div>
           </div>
