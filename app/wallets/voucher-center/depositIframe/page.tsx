@@ -17,20 +17,24 @@ function DepositIframeContent() {
 
   const [txnId, setTxnId] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false); // ১ম পপআপ
-  const [showModifyState, setShowModifyState] = useState(false); // ২য় ছবির ইনপুট বক্স
-  const [showEditConfirmModal, setShowEditConfirmModal] = useState(false); // ৩য় পপআপ
+  const [showModifyState, setShowModifyState] = useState(false); // এডিট ইনপুট বক্স
+  const [showEditConfirmModal, setShowEditConfirmModal] = useState(false); // Yes/No পপআপ
   const [isSubmitted, setIsSubmitted] = useState(false); // সাকসেস মার্ক
   const [isOrderPlaced, setIsOrderPlaced] = useState(false); // ৭ম ছবি
   const [loading, setLoading] = useState(false);
+  
+  // ল্যাঙ্গুয়েজ স্টেট (EN / BN)
+  const [lang, setLang] = useState<"EN" | "BN">("EN");
 
   const walletNumber = method.includes("Bkash") ? "01967961725" : "01962778104";
+  const bonusAmount = (amount * bonusPercent) / 100;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(walletNumber);
     alert("Wallet number copied!");
   };
 
-  // ১. প্রথম সাবমিট বাটনে ক্লিক (কনফার্ম পপআপ ওপেন হবে)
+  // ১. প্রথম সাবমিট (Confirm পপআপ)
   const handleInitialSubmit = () => {
     if (!txnId) {
       alert("Please enter Transaction ID");
@@ -39,18 +43,18 @@ function DepositIframeContent() {
     setShowConfirmModal(true); 
   };
 
-  // ২. Confirm পপআপে ক্লিক (এডিট স্টেট অন হবে)
+  // ২. Confirm পপআপে ক্লিক
   const handleConfirmSubmit = () => {
     setShowConfirmModal(false);
     setShowModifyState(true); 
   };
 
-  // ৩. Modify বাটনে ক্লিক (Yes/No পপআপ ওপেন হবে)
+  // ৩. Modify বাটনে ক্লিক (Yes/No পপআপ)
   const handleEditClick = () => {
     setShowEditConfirmModal(true); 
   };
 
-  // ৪. Yes ক্লিক করলে ডাটাবেসে সেভ হবে এবং সাকসেস দেখাবে
+  // ৪. Yes ক্লিক করলে ডাটাবেসে সেভ হবে
   const handleFinalSubmit = async () => {
     setLoading(true);
     setShowEditConfirmModal(false);
@@ -64,10 +68,6 @@ function DepositIframeContent() {
         return;
       }
 
-      // বোনাস ক্যালকুলেশন
-      const calculatedBonusAmount = (amount * bonusPercent) / 100;
-      
-      // ডাটাবেসে ইনসার্ট
       const { error } = await supabase.from("user_deposit_transaction").insert({
         user_id: session.user.id,
         transaction_type: "deposit",
@@ -76,8 +76,8 @@ function DepositIframeContent() {
         transaction_reference: txnId,
         status: "pending",
         is_bonus_claimed: bonusId ? true : false,
-        applied_bonus_id: bonusId ? Number(bonusId) : null, // bigint হতে হবে
-        claimed_bonus_amount: calculatedBonusAmount,
+        applied_bonus_id: bonusId ? Number(bonusId) : null,
+        claimed_bonus_amount: bonusAmount,
         claimed_bonus_percentage: bonusPercent,
       });
 
@@ -85,7 +85,7 @@ function DepositIframeContent() {
         console.error("Database Error:", error);
         alert("Failed to submit: " + error.message);
       } else {
-        setIsSubmitted(true); // সাকসেস মার্ক দেখাবে
+        setIsSubmitted(true); 
       }
     } catch (err) {
       console.error(err);
@@ -95,6 +95,7 @@ function DepositIframeContent() {
     }
   };
 
+  // ৭ নম্বর ছবির Order Info ভিউ
   if (isOrderPlaced) {
     return (
       <div className="iframe-container">
@@ -106,7 +107,7 @@ function DepositIframeContent() {
           <div></div>
         </div>
         
-        <div className="iframe-content text-center pt-10">
+        <div className="iframe-content text-center pt-6">
           <h2 className="text-xl font-bold mb-6">{method}</h2>
           <h3 className="text-lg font-bold text-left mb-4">Order placed</h3>
           
@@ -118,13 +119,23 @@ function DepositIframeContent() {
             <button className="bg-blue-50 text-blue-500 px-4 py-2 rounded" onClick={copyToClipboard}>Copy</button>
           </div>
           
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between items-center mb-4 border-b pb-4">
             <div className="text-left">
               <p className="text-gray-500 text-sm">Deposit Amounts</p>
               <p className="font-bold text-lg">৳ {amount}</p>
             </div>
             <button className="bg-blue-50 text-blue-500 px-4 py-2 rounded">Copy</button>
           </div>
+
+          {/* বোনাস ডিসপ্লে */}
+          {bonusPercent > 0 && (
+            <div className="flex justify-between items-center mb-6 text-green-700 bg-green-50 p-3 rounded">
+              <div className="text-left">
+                <p className="text-sm font-semibold">Claimed Bonus ({bonusPercent}%)</p>
+                <p className="font-bold text-lg">৳ {bonusAmount.toFixed(2)}</p>
+              </div>
+            </div>
+          )}
 
           <div className="text-left text-sm text-gray-600 space-y-2">
             <p className="font-bold text-black">Tips</p>
@@ -145,13 +156,18 @@ function DepositIframeContent() {
 
   return (
     <div className="iframe-container">
+      {/* হেডার আপডেট (PAY SERVICE, EN/BN যুক্ত করা হয়েছে) */}
       <div className="iframe-header">
         <div>
           <h1>BDT {amount}</h1>
-          <p>Don't over or under cash out.</p>
+          <p>{lang === "EN" ? "Don't over or under cash out." : "ক্যাশ আউটের চেয়ে বেশি বা কম দিবেন না।"}</p>
         </div>
-        <div className="text-right text-xs">
-          <p>PAY SERVICE</p>
+        <div className="text-right flex flex-col items-end">
+          <p className="text-white font-bold text-sm">PAY SERVICE</p>
+          <div className="flex bg-white rounded mt-1 overflow-hidden">
+            <button onClick={() => setLang("EN")} className={`px-2 py-0.5 text-xs font-bold ${lang === "EN" ? "bg-gray-200 text-black" : "text-gray-500"}`}>EN</button>
+            <button onClick={() => setLang("BN")} className={`px-2 py-0.5 text-xs font-bold ${lang === "BN" ? "bg-gray-200 text-black" : "text-gray-500"}`}>বাং</button>
+          </div>
         </div>
       </div>
 
@@ -181,7 +197,7 @@ function DepositIframeContent() {
             <div className="txn-label">Transaction ID* <span>(Required)</span></div>
             
             {showModifyState ? (
-              // ২ নাম্বার ছবির এডিট ভিউ (Modify বাটনসহ)
+              // এডিট ভিউ (Modify বাটনসহ)
               <div className="modify-input-box">
                 <input type="text" value={txnId} readOnly />
                 <button className="btn-modify" onClick={handleEditClick}>
@@ -199,12 +215,15 @@ function DepositIframeContent() {
               />
             )}
 
-            <button className="submit-btn" onClick={showModifyState ? handleFinalSubmit : handleInitialSubmit}>
+            {/* Submit বাটন লজিক আপডেট করা হয়েছে */}
+            <button 
+              className="submit-btn" 
+              onClick={showModifyState ? handleEditClick : handleInitialSubmit}
+            >
               Submit
             </button>
           </>
         ) : (
-          // ৬ নাম্বার ছবির সাকসেস ভিউ
           <div className="success-mark">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
             <button className="submit-btn" style={{ borderColor: '#0b7a3e', color: '#0b7a3e', width: '80%' }} onClick={() => setIsOrderPlaced(true)}>
@@ -233,14 +252,21 @@ function DepositIframeContent() {
         </div>
       )}
 
-      {/* ৩য় পপআপ: Are you sure you want to change? */}
+      {/* ৩য় পপআপ: Yes / No */}
       {showEditConfirmModal && (
         <div className="modal-overlay">
           <div className="modal-box text-left">
             <h3 className="text-center font-bold text-xl mb-6">Are you sure you want to change?</h3>
             <div className="flex justify-center gap-4">
-              <button className="btn-yes" onClick={handleFinalSubmit} disabled={loading}>
-                {loading ? "Saving..." : "Yes"}
+              {/* Yes ক্লিক করলে এখন সরাসরি সেভ না হয়ে ইনপুট বক্সে ফিরে যাবে */}
+              <button 
+                className="btn-yes" 
+                onClick={() => {
+                  setShowEditConfirmModal(false);
+                  setShowModifyState(false); // এখানে স্টেট false করায় আবার ইনপুট বক্স দেখাবে
+                }}
+              >
+                Yes
               </button>
               <button className="btn-no" onClick={() => setShowEditConfirmModal(false)}>No</button>
             </div>
