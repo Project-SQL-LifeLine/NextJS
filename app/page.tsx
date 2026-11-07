@@ -10,9 +10,11 @@ export default function Home() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [banners, setBanners] = useState<any[]>([]);
   const [currentBanner, setCurrentBanner] = useState(0);
+  
+  // জ্যাকপট নাম্বার (ডেমো)
+  const [jackpotAmount, setJackpotAmount] = useState(372022775);
 
   useEffect(() => {
-    // ১. সেশন চেক
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -30,7 +32,6 @@ export default function Home() {
       }
     };
 
-    // ২. ব্যানার ডাটা আনা
     const fetchBanners = async () => {
       const { data, error } = await supabase
         .from("home_banners")
@@ -60,12 +61,20 @@ export default function Home() {
     };
   }, []);
 
-  // ৩. ব্যানার স্লাইডারের জন্য টাইমার
+  // জ্যাকপট নাম্বার বাড়ানোর ডেমো অ্যানিমেশন
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setJackpotAmount(prev => prev + Math.floor(Math.random() * 50));
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ব্যানার স্লাইডারের জন্য টাইমার
   useEffect(() => {
     if (banners.length > 1) {
       const interval = setInterval(() => {
         setCurrentBanner((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
-      }, 3000); // ৩ সেকেন্ড পর পর পরিবর্তন হবে
+      }, 3000);
 
       return () => clearInterval(interval);
     }
@@ -83,26 +92,19 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ডাইনামিক ব্যানার স্লাইডার */}
+      {/* ব্যানার স্লাইডার */}
       <div className="px-3 mt-3">
         <div className="bg-[#092238] border border-[#2F4553] rounded-lg p-2 h-36 flex items-center justify-center relative overflow-hidden">
           {banners.length > 0 ? (
-            <a 
-              href={banners[currentBanner].redirect_url || "#"} 
-              className="w-full h-full relative block"
-            >
+            <a href={banners[currentBanner].redirect_url || "#"} className="w-full h-full relative block">
               <img 
                 src={banners[currentBanner].image_url} 
                 alt="Banner" 
                 className="w-full h-full object-cover rounded-lg opacity-90 transition-opacity duration-500" 
               />
-              {/* স্লাইডার ডট ইন্ডিকেটর */}
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
                 {banners.map((_, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`w-1.5 h-1.5 rounded-full ${idx === currentBanner ? "bg-yellow-400" : "bg-white/50"}`}
-                  />
+                  <div key={idx} className={`w-1.5 h-1.5 rounded-full ${idx === currentBanner ? "bg-yellow-400" : "bg-white/50"}`} />
                 ))}
               </div>
             </a>
@@ -120,22 +122,41 @@ export default function Home() {
         ))}
       </div>
 
+      {/* Lottery Jackpot কার্ড (আপনার ছবির মতো ডিজাইন) */}
       <div className="px-3 mt-4">
-        <div className="relative bg-gradient-to-r from-blue-900 to-blue-700 rounded-lg border border-blue-400 p-3 flex flex-col items-center justify-center overflow-hidden">
-          <h2 className="text-yellow-400 font-extrabold text-2xl drop-shadow-md">JACKPOT</h2>
-          <div className="bg-blue-950/80 px-4 py-1 rounded-md border border-blue-500 mt-1">
-            <span className="text-white font-mono text-lg tracking-widest">
-              {(592182757).toLocaleString()}
-            </span>
+        <div className="relative bg-gradient-to-r from-[#1A2C38] via-[#253B49] to-[#1A2C38] rounded-xl border border-[#00E701] overflow-hidden shadow-[0_0_15px_rgba(0,231,1,0.2)] p-4 flex flex-col items-center justify-center">
+          
+          {/* গ্লো ইফেক্ট ব্যাকগ্রাউন্ড */}
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 pointer-events-none"></div>
+
+          {/* JACKPOT টাইটেল */}
+          <h2 className="relative text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-[#00E701] tracking-widest drop-shadow-md uppercase">
+            Lottery Jackpot
+          </h2>
+          
+          {/* জ্যাকপট নাম্বার ডিসপ্লে */}
+          <div className="relative mt-2 flex items-center justify-center gap-1">
+            {jackpotAmount.toString().padStart(9, '0').split('').map((digit, index) => (
+              <div key={index} className="flex items-center">
+                <div className="w-8 h-10 bg-[#0F212E] border border-[#2F4553] rounded flex items-center justify-center shadow-inner">
+                  <span className="text-white font-bold text-xl">{digit}</span>
+                </div>
+                {/* কমা বসানোর লজিক (৩ ডিজিট পর পর) */}
+                {(index + 1) % 3 === 0 && index !== 8 && (
+                  <span className="text-[#00E701] font-bold text-xl mx-1">,</span>
+                )}
+              </div>
+            ))}
           </div>
+          
         </div>
       </div>
 
       <div className="px-3 mt-4 grid grid-cols-4 gap-2">
         {["Hot", "Slot", "Live", "Fishing"].map((item, idx) => (
-          <div key={idx} className={`bg-[#1A2C38] rounded-md p-2 flex flex-col items-center justify-center border border-[#2F4553] ${idx === 0 ? 'bg-blue-600/30' : ''}`}>
+          <div key={idx} className={`bg-[#1A2C38] rounded-md p-2 flex flex-col items-center justify-center border border-[#2F4553] ${idx === 0 ? 'bg-[#00E701]/10' : ''}`}>
             <span className="text-xl mb-1">{["🔥", "🎰", "🎲", "🎣"][idx]}</span>
-            <span className="text-xs text-[#B1BAD3] font-semibold">{item}</span>
+            <span className={`text-xs font-semibold ${idx === 0 ? 'text-[#00E701]' : 'text-[#B1BAD3]'}`}>{item}</span>
           </div>
         ))}
       </div>
@@ -149,10 +170,10 @@ export default function Home() {
       </div>
 
       <div className="fixed right-3 bottom-24 flex flex-col gap-3 z-50">
-        <button className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg">✈️</button>
-        <button className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg">✈️</button>
-        <button className="w-10 h-10 rounded-full bg-blue-800 border border-blue-500 flex items-center justify-center text-white shadow-lg">f</button>
-        <button className="w-10 h-10 rounded-full bg-blue-800 border border-blue-500 flex items-center justify-center text-white shadow-lg">🎧</button>
+        <button className="w-10 h-10 rounded-full bg-[#00E701] flex items-center justify-center text-black shadow-lg">✈️</button>
+        <button className="w-10 h-10 rounded-full bg-[#00E701] flex items-center justify-center text-black shadow-lg">✈️</button>
+        <button className="w-10 h-10 rounded-full bg-[#1A2C38] border border-[#2F4553] flex items-center justify-center text-white shadow-lg">f</button>
+        <button className="w-10 h-10 rounded-full bg-[#1A2C38] border border-[#2F4553] flex items-center justify-center text-white shadow-lg">🎧</button>
       </div>
 
       <BottomNav />
