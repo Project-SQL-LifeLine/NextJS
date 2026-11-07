@@ -153,23 +153,36 @@ export default function VoucherCenterPage() {
             <h2 className="text-sm font-bold text-textSec mb-3 flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-primary inline-block"></span> Promotions
             </h2>
-            {/* বোনাস কার্ড ৩ কলামের গ্রিডে দেখানো হয়েছে */}
+            
+            {/* নতুন বোনাস কার্ড ডিজাইন */}
             <div className="grid grid-cols-3 gap-2 mb-3">
               {bonuses.map((bonus) => (
-                <label 
+                <div 
                   key={bonus.id} 
-                  className={`flex flex-col items-center justify-center p-3 rounded-lg border cursor-pointer transition-colors text-center ${selectedPromo?.id === bonus.id ? "border-primary bg-primary/5" : "border-borderCol hover:bg-bgSec/50"}`}
+                  onClick={() => setSelectedPromo(bonus)}
+                  className={`relative flex flex-col items-center justify-center p-3 h-24 rounded-md cursor-pointer transition-all overflow-hidden border-2 ${
+                    selectedPromo?.id === bonus.id 
+                      ? "border-primary bg-gradient-to-br from-[#0a5c29] to-[#0b3d1e]" 
+                      : "border-borderCol bg-gradient-to-br from-[#1d3b2b] to-[#14251c] hover:border-primary/50"
+                  }`}
                 >
-                  <input 
-                    type="radio" 
-                    name="promo" 
-                    checked={selectedPromo?.id === bonus.id} 
-                    onChange={() => setSelectedPromo(bonus)} 
-                    className="w-4 h-4 accent-primary mb-2" 
-                  />
-                  <span className="text-[11px] font-semibold text-textSec leading-tight">{bonus.bonus_name}</span>
-                  <span className="text-[11px] text-textSec mt-1 font-bold">{bonus.bonus_percentage}%</span>
-                </label>
+                  {/* হলুদ ব্যাজ (উপরে ডানে) */}
+                  <div className="absolute top-0 right-0 bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded-bl-lg z-10">
+                    +{bonus.bonus_percentage}%
+                  </div>
+
+                  {/* সাদা বড় লেখা (বোনাস নাম) */}
+                  <span className="text-white font-extrabold text-lg z-10">
+                    {bonus.bonus_name.replace(' BONUS', '')}
+                  </span>
+
+                  {/* সিলেক্টেড টিক মার্ক (নিচে ডানে) */}
+                  {selectedPromo?.id === bonus.id && (
+                    <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#00E701] rounded-tl-full flex items-end justify-end p-1 z-10">
+                      <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
             
