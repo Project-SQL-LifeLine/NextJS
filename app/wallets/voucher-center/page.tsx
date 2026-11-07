@@ -154,36 +154,47 @@ export default function VoucherCenterPage() {
               <span className="w-2 h-2 rounded-full bg-primary inline-block"></span> Promotions
             </h2>
             
-            {/* নতুন বোনাস কার্ড ডিজাইন */}
+            {/* বোনাস কার্ড গ্রিড (অতিরিক্ত ডাইনামিক এমাউন্টসহ) */}
             <div className="grid grid-cols-3 gap-2 mb-3">
-              {bonuses.map((bonus) => (
-                <div 
-                  key={bonus.id} 
-                  onClick={() => setSelectedPromo(bonus)}
-                  className={`relative flex flex-col items-center justify-center p-3 h-24 rounded-md cursor-pointer transition-all overflow-hidden border-2 ${
-                    selectedPromo?.id === bonus.id 
-                      ? "border-primary bg-gradient-to-br from-[#0a5c29] to-[#0b3d1e]" 
-                      : "border-borderCol bg-gradient-to-br from-[#1d3b2b] to-[#14251c] hover:border-primary/50"
-                  }`}
-                >
-                  {/* হলুদ ব্যাজ (উপরে ডানে) */}
-                  <div className="absolute top-0 right-0 bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded-bl-lg z-10">
-                    +{bonus.bonus_percentage}%
-                  </div>
+              {bonuses.map((bonus) => {
+                // এই নির্দিষ্ট বোনাসের জন্য ডাইনামিক এমাউন্ট
+                const dynamicBonusAmount = (selectedAmount * bonus.bonus_percentage) / 100;
 
-                  {/* সাদা বড় লেখা (বোনাস নাম) */}
-                  <span className="text-white font-extrabold text-lg z-10">
-                    {bonus.bonus_name.replace(' BONUS', '')}
-                  </span>
-
-                  {/* সিলেক্টেড টিক মার্ক (নিচে ডানে) */}
-                  {selectedPromo?.id === bonus.id && (
-                    <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#00E701] rounded-tl-full flex items-end justify-end p-1 z-10">
-                      <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                return (
+                  <div 
+                    key={bonus.id} 
+                    onClick={() => setSelectedPromo(bonus)}
+                    className={`relative flex flex-col items-center justify-center p-3 h-28 rounded-md cursor-pointer transition-all overflow-hidden border-2 ${
+                      selectedPromo?.id === bonus.id 
+                        ? "border-primary bg-gradient-to-br from-[#0a5c29] to-[#0b3d1e]" 
+                        : "border-borderCol bg-gradient-to-br from-[#1d3b2b] to-[#14251c] hover:border-primary/50"
+                    }`}
+                  >
+                    {/* হলুদ ব্যাজ (উপরে ডানে) */}
+                    <div className="absolute top-0 right-0 bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded-bl-lg z-10">
+                      +{bonus.bonus_percentage}%
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    <div className="flex flex-col items-center z-10 mt-2">
+                       {/* সাদা বড় লেখা (বোনাস নাম) */}
+                      <span className="text-white font-extrabold text-lg">
+                        {bonus.bonus_name.replace(' BONUS', '')}
+                      </span>
+                      {/* ডাইনামিক বোনাস এমাউন্ট */}
+                      <span className="text-[#00E701] font-bold text-xs mt-1">
+                        ৳{dynamicBonusAmount.toLocaleString()}
+                      </span>
+                    </div>
+
+                    {/* সিলেক্টেড টিক মার্ক (নিচে ডানে) */}
+                    {selectedPromo?.id === bonus.id && (
+                      <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#00E701] rounded-tl-full flex items-end justify-end p-1 z-10">
+                        <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
             
             <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${selectedPromo === null ? "border-primary bg-primary/5" : "border-borderCol hover:bg-bgSec/50"}`}>
