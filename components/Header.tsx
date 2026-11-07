@@ -72,8 +72,8 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
 
   return (
     <>
-      {/* ✅ এখানে bg-[#0d1e15] এর জায়গায় bg-bgMain ব্যবহার করা হয়েছে */}
-      <header className="bg-bgMain px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#26352e]">
+      {/* ✅ Header-এর ব্যাকগ্রাউন্ড কালার BottomNav-এর সাথে মিলিয়ে bg-[#184f35] করা হয়েছে */}
+      <header className="bg-[#184f35] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#26352e]">
         
         {/* Logo */}
         <div className="text-2xl font-extrabold text-primary tracking-wider">
