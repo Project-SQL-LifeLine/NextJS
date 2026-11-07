@@ -6,11 +6,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "../lib/LanguageContext";
 import { supabase } from "../lib/supabase/client";
 
-// Bottom Navbar Icons (text-white সরানো হয়েছে যাতে কালার ইনহেরিট করে)
+// Bottom Navbar Icons (ছবির স্টাইলের সাথে মিল রেখে)
 const NavIcons = {
-  Home: () => (
+  Casino: () => (
     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z M8 8h.01 M16 8h.01 M12 12h.01 M8 16h.01 M16 16h.01" />
     </svg>
   ),
   Promotion: () => (
@@ -20,12 +20,12 @@ const NavIcons = {
   ),
   Lottery: () => (
     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z" />
     </svg>
   ),
-  Reward: () => (
+  Sports: () => (
     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
     </svg>
   ),
   Profile: () => (
@@ -53,10 +53,13 @@ export default function BottomNav() {
   const router = useRouter();
   const { t } = useLanguage();
   
-  // Drawer স্টেট
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const isActive = (path: string) => pathname === path;
+  // পাথ পরিবর্তন করে দিয়েছি যাতে Casino বাটনটি ডিফল্ট হোম (/) হিসেবে কাজ করে
+  const isActive = (path: string) => {
+    if (path === "/") return pathname === "/" || pathname === "/casino";
+    return pathname.startsWith(path);
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -64,7 +67,6 @@ export default function BottomNav() {
     router.push("/user/login");
   };
 
-  // ড্রয়ার মেনু আইটেম
   const drawerMenu = [
     { name: t("Profile", "প্রোফাইল"), icon: <DrawerIcons.Profile />, path: "/member" },
     { name: t("VIP", "ভিআইপি"), icon: <DrawerIcons.VIP />, path: "/member/vip" },
@@ -78,7 +80,7 @@ export default function BottomNav() {
 
   return (
     <>
-      {/* Drawer Overlay (Background Dark) */}
+      {/* Drawer Overlay */}
       {isDrawerOpen && (
         <div 
           className="fixed inset-0 bg-black/60 z-[60] transition-opacity"
@@ -86,27 +88,25 @@ export default function BottomNav() {
         />
       )}
 
-      {/* Side Drawer (Right Side) */}
+      {/* Side Drawer */}
       <div 
-        className={`fixed top-0 right-0 h-full w-[80%] max-w-[300px] bg-bgSec border-l border-borderCol z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-[80%] max-w-[300px] bg-[#0d1e15] border-l border-[#1A2C38] z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
           isDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        {/* Drawer Header */}
-        <div className="flex items-center justify-between p-5 border-b border-borderCol">
-          <h2 className="text-xl font-bold text-textMain">{t("My Account", "আমার অ্যাকাউন্ট")}</h2>
-          <button onClick={() => setIsDrawerOpen(false)} className="text-textSec hover:text-textMain">
+        <div className="flex items-center justify-between p-5 border-b border-[#1A2C38]">
+          <h2 className="text-xl font-bold text-white">{t("My Account", "আমার অ্যাকাউন্ট")}</h2>
+          <button onClick={() => setIsDrawerOpen(false)} className="text-[#B1BAD3] hover:text-white">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
-        {/* Drawer Menu Items */}
         <div className="flex-1 overflow-y-auto py-2">
           {drawerMenu.map((item, idx) => (
             <div 
               key={idx}
               onClick={() => { setIsDrawerOpen(false); router.push(item.path); }}
-              className="flex items-center gap-4 px-6 py-4 text-textSec hover:text-textMain hover:bg-cardHover/50 cursor-pointer transition-colors"
+              className="flex items-center gap-4 px-6 py-4 text-[#B1BAD3] hover:text-white hover:bg-[#1A2C38]/50 cursor-pointer transition-colors"
             >
               {item.icon}
               <span className="font-medium text-sm">{item.name}</span>
@@ -114,8 +114,7 @@ export default function BottomNav() {
           ))}
         </div>
 
-        {/* Drawer Footer (Logout) */}
-        <div className="p-4 border-t border-borderCol">
+        <div className="p-4 border-t border-[#1A2C38]">
           <button 
             onClick={handleLogout}
             className="flex items-center gap-4 w-full px-4 py-3 text-[#ED4163] hover:bg-[#ED4163]/10 rounded-lg cursor-pointer transition-colors"
@@ -126,39 +125,47 @@ export default function BottomNav() {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <nav className="bg-[#0b1712] border-t border-borderCol fixed bottom-0 w-full flex justify-around items-center py-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+      {/* Bottom Navigation (ছবির মতো ডার্ক গ্রিন ব্যাকগ্রাউন্ড) */}
+      <nav className="bg-[#184f35] border-t border-[#26352e] fixed bottom-0 w-full flex justify-around items-center py-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
         
-        <Link href="/" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/") ? "text-primary" : "text-textSec hover:text-textMain"}`}>
-          <NavIcons.Home />
-          <span className={`text-[10px] font-bold mt-1 ${isActive("/") ? "text-primary" : "text-textSec"}`}>{t("Home", "হোম")}</span>
+        {/* 1. Casino */}
+        <Link href="/" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
+          <div className={`p-1.5 rounded-lg ${isActive("/") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
+            <NavIcons.Casino />
+          </div>
+          <span className={`text-[10px] font-bold mt-1 ${isActive("/") ? "text-[#00e701]" : "text-white/70"}`}>{t("Casino", "ক্যাসিনো")}</span>
         </Link>
 
-        <Link href="/promotion" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/promotion") ? "text-primary" : "text-textSec hover:text-textMain"}`}>
-          <NavIcons.Promotion />
-          <span className={`text-[10px] font-bold mt-1 ${isActive("/promotion") ? "text-primary" : "text-textSec"}`}>{t("Promotion", "প্রমোশন")}</span>
+        {/* 2. Promotion */}
+        <Link href="/promotion" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/promotion") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
+          <div className={`p-1.5 rounded-lg ${isActive("/promotion") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
+            <NavIcons.Promotion />
+          </div>
+          <span className={`text-[10px] font-bold mt-1 ${isActive("/promotion") ? "text-[#00e701]" : "text-white/70"}`}>{t("Promotion", "প্রমোশন")}</span>
         </Link>
         
-        {/* মাঝখানের বড় বাটন: Mega Lottery */}
-        <div className="relative -top-5 cursor-pointer">
-          <Link 
-            href="/lottery"
-            className="w-14 h-14 rounded-full bg-primary flex flex-col items-center justify-center shadow-lg border-4 border-[#07110f] hover:bg-[#00c701] transition-colors"
-          >
-            <span className="text-[#07110f] mb-0.5"><NavIcons.Lottery /></span>
-            <span className="text-[8px] font-extrabold text-[#07110f] leading-none uppercase tracking-wider">Mega</span>
-          </Link>
-        </div>
-
-        <Link href="/reward" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/reward") ? "text-primary" : "text-textSec hover:text-textMain"}`}>
-          <NavIcons.Reward />
-          <span className={`text-[10px] font-bold mt-1 ${isActive("/reward") ? "text-primary" : "text-textSec"}`}>{t("Reward", "রিওয়ার্ড")}</span>
+        {/* 3. Mega Lottery */}
+        <Link href="/lottery" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/lottery") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
+          <div className={`p-1.5 rounded-lg ${isActive("/lottery") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
+            <NavIcons.Lottery />
+          </div>
+          <span className={`text-[9px] font-bold mt-1 text-center leading-tight ${isActive("/lottery") ? "text-[#00e701]" : "text-white/70"}`}>{t("Mega Lottery", "মেগা লটারি")}</span>
         </Link>
 
-        {/* Member এর বদলে Profile বাটন */}
-        <button onClick={() => setIsDrawerOpen(true)} className="flex flex-col items-center relative cursor-pointer text-textSec hover:text-textMain transition-colors">
-          <NavIcons.Profile />
-          <span className="text-[10px] font-bold mt-1">{t("Profile", "প্রোফাইল")}</span>
+        {/* 4. Sports */}
+        <Link href="/sports" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/sports") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
+          <div className={`p-1.5 rounded-lg ${isActive("/sports") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
+            <NavIcons.Sports />
+          </div>
+          <span className={`text-[10px] font-bold mt-1 ${isActive("/sports") ? "text-[#00e701]" : "text-white/70"}`}>{t("Sports", "স্পোর্টস")}</span>
+        </Link>
+
+        {/* 5. Profiles (Drawer Opener) */}
+        <button onClick={() => setIsDrawerOpen(true)} className="flex flex-col items-center cursor-pointer text-white/70 hover:text-white transition-colors">
+          <div className="p-1.5 rounded-lg">
+            <NavIcons.Profile />
+          </div>
+          <span className="text-[10px] font-bold mt-1">{t("Profiles", "প্রোফাইল")}</span>
         </button>
       </nav>
     </>
