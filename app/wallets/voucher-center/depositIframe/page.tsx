@@ -14,6 +14,7 @@ function DepositIframeContent() {
   const amount = Number(searchParams.get("amount")) || 500;
   const bonusPercent = Number(searchParams.get("bonus")) || 0;
   const bonusId = searchParams.get("bonus_id") || null;
+  const turnoverMultiplier = Number(searchParams.get("turnover")) || 0;
 
   const [txnId, setTxnId] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false); 
@@ -28,24 +29,16 @@ function DepositIframeContent() {
   const bonusAmount = (amount * bonusPercent) / 100;
   const totalAmount = amount + bonusAmount;
 
-  // মোবাইলের Back বাটন হ্যান্ডেল করার লজিক
   useEffect(() => {
     if (isOrderPlaced) {
       window.history.pushState({ page: "orderPlaced" }, "");
     }
-
-    const handlePopState = (event: PopStateEvent) => {
-      if (isOrderPlaced) {
-        setIsOrderPlaced(false); 
-      } else if (isSubmitted) {
-        setIsSubmitted(false); 
-      }
+    const handlePopState = () => {
+      if (isOrderPlaced) setIsOrderPlaced(false); 
+      else if (isSubmitted) setIsSubmitted(false); 
     };
-
     window.addEventListener("popstate", handlePopState);
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
+    return () => window.removeEventListener("popstate", handlePopState);
   }, [isOrderPlaced, isSubmitted]);
 
   const copyToClipboard = () => {
@@ -66,9 +59,7 @@ function DepositIframeContent() {
     setShowModifyState(true); 
   };
 
-  const handleEditClick = () => {
-    setShowEditConfirmModal(true); 
-  };
+  const handleEditClick = () => setShowEditConfirmModal(true); 
 
   const handleFinalSubmit = async () => {
     setLoading(true);
@@ -82,6 +73,10 @@ function DepositIframeContent() {
         return;
       }
 
+      // টার্নওভার ক্যালকুলেশন
+      const calculatedBonusAmount = (amount * bonusPercent) / 100;
+      const reqTnv = (amount + calculatedBonusAmount) * (turnoverMultiplier || 1);
+
       const { error } = await supabase.from("user_deposit_transaction").insert({
         user_id: session.user.id,
         transaction_type: "deposit",
@@ -91,8 +86,12 @@ function DepositIframeContent() {
         status: "pending",
         is_bonus_claimed: bonusId ? true : false,
         applied_bonus_id: bonusId ? Number(bonusId) : null,
-        claimed_bonus_amount: bonusAmount,
+        claimed_bonus_amount: calculatedBonusAmount,
         claimed_bonus_percentage: bonusPercent,
+        applied_turnover_multiplier: turnoverMultiplier || 1,
+        required_turnover: reqTnv, // ডাটাবেসে টার্নওভার সেভ হচ্ছে
+        completed_turnover: 0,
+        turnover_status: 'pending'
       });
 
       if (error) {
@@ -135,7 +134,6 @@ function DepositIframeContent() {
               <p className="text-gray-500 text-sm">{lang === "EN" ? "Deposit Amounts" : "ডিপোজিট এমাউন্ট"}</p>
               <p className="font-bold text-lg">৳ {amount}</p>
             </div>
-            <button className="bg-blue-50 text-blue-500 px-4 py-2 rounded">{lang === "EN" ? "Copy" : "কপি"}</button>
           </div>
 
           {bonusPercent > 0 && (
@@ -158,15 +156,12 @@ function DepositIframeContent() {
           <div className="text-left text-sm text-gray-600 space-y-2">
             <p className="font-bold text-black">{lang === "EN" ? "Tips" : "নির্দেশনা"}</p>
             <p>{lang === "EN" ? "After the funds were transferred, kindly click on the 'complete deposit' button" : "টাকা পাঠানোর পর 'কমপ্লিট ডিপোজিট' বাটনে ক্লিক করুন।"}</p>
-            <p className="mt-4">{lang === "EN" ? "-Feel free to contact us if you have any questions." : "-কোনো প্রশ্ন থাকলে আমাদের সাথে যোগাযোগ করুন।"}</p>
-            <a href="#" className="underline text-blue-600 font-semibold mt-2 block">{lang === "EN" ? "Customer Service" : "কাস্টমার সার্ভিস"}</a>
           </div>
         </div>
 
         <div className="bottom-bar">
           <button onClick={() => router.push('/wallets/voucher-report')} className="bottom-bar-btn btn-white-outline">{lang === "EN" ? "Transaction record" : "ট্রানজেকশন রেকর্ড"}</button>
           <button onClick={() => router.push('/')} className="bottom-bar-btn btn-blue">{lang === "EN" ? "Complete deposit" : "কমপ্লিট ডিপোজিট"}</button>
-          {/* Another বাটনে ক্লিক করলে সরাসরি Voucher Center এ যাবে */}
           <button onClick={() => router.push('/wallets/voucher-center')} className="bottom-bar-btn btn-white-outline">{lang === "EN" ? "Another" : "অন্য"}</button>
         </div>
       </div>
@@ -251,7 +246,6 @@ function DepositIframeContent() {
         <div className="warning-section">
           <h3>{lang === "EN" ? "Warning:" : "সতর্কতা:"}</h3>
           <div className="red-subtext">{lang === "EN" ? "Transaction ID must be filled in correctly, otherwise the score will fail!" : "ট্রানজেকশন আইডি সঠিকভাবে পূরণ করতে হবে, অন্যথায় স্কোর বাতিল হবে!"}</div>
-          <p>{lang === "EN" ? `Please note that you make deposit to ${method} deposit. Be sure that you make the payment from the same wallet, otherwise it may be lost.` : `অনুগ্রহ করে মনে রাখবেন যে আপনি ${method} এ ডিপোজিট করছেন। একই ওয়ালেট থেকে পেমেন্ট করেছেন কিনা নিশ্চিত করুন, অন্যথায় এটি হারিয়ে যেতে পারে।`}</p>
         </div>
       </div>
 
