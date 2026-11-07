@@ -192,23 +192,54 @@ export default function WithdrawalPage() {
           </h3>
           
           {savedWallets.length > 0 ? (
-            <div className="flex overflow-x-auto gap-3 pb-4 snap-x snap-mandatory no-scrollbar">
+            <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory no-scrollbar">
               {savedWallets.map((wallet) => (
-                <div key={wallet.id} className="relative min-w-[85vw] sm:min-w-[300px] flex-shrink-0 snap-center bg-gradient-to-r from-[#6B4CFF] to-[#00E5FF] rounded-xl p-4 text-white shadow-md overflow-hidden">
-                  <div className="flex items-center gap-2 mb-3">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                    <span className="font-semibold text-lg uppercase">{selectedMethod}</span>
+                <div key={wallet.id} className="relative min-w-[90vw] sm:min-w-[320px] flex-shrink-0 snap-center bg-gradient-to-br from-[#7B5CFF] to-[#00D4FF] rounded-2xl p-5 text-white shadow-lg overflow-hidden h-[170px] flex flex-col justify-between">
+                  
+                  {/* কার্ডের পেছনের ওয়েভ ডিজাইন */}
+                  <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none">
+                    <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="100" cy="100" r="80" stroke="white" strokeWidth="20" opacity="0.5"/>
+                      <circle cx="100" cy="100" r="120" stroke="white" strokeWidth="20" opacity="0.3"/>
+                      <circle cx="100" cy="100" r="160" stroke="white" strokeWidth="20" opacity="0.1"/>
+                    </svg>
                   </div>
-                  <p className="text-xl font-bold tracking-widest mb-2">{maskNumber(wallet.account_number)}</p>
-                  <p className="text-xs text-white/80">
-                    {new Date(wallet.created_at).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(',', '')}
-                  </p>
+
+                  {/* কার্ডের উপরের অংশ */}
+                  <div className="flex items-center gap-3 relative z-10">
+                    <div className="bg-white/20 p-1.5 rounded-md backdrop-blur-sm">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                    </div>
+                    <span className="font-semibold text-xl tracking-wide">{selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)}</span>
+                  </div>
+
+                  {/* কার্ডের নাম্বার */}
+                  <div className="relative z-10">
+                    <p className="text-2xl font-bold tracking-[0.15em] mb-1">{maskNumber(wallet.account_number)}</p>
+                    <p className="text-xs text-white/80 font-medium">
+                      {new Date(wallet.created_at).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(',', '')}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="relative border border-gray-200 rounded-lg bg-gray-50 h-40 flex flex-col items-center justify-center w-full">
-              <span className="text-gray-400 text-sm">{t("No E-Wallet linked yet", "এখনও কোনো ই-ওয়ালেট যুক্ত করা হয়নি")}</span>
+            /* Empty State UI (কার্ড না থাকলে) */
+            <div className="relative border border-gray-100 bg-[#F8F9FA] rounded-2xl h-[170px] flex flex-col items-center justify-center w-full overflow-hidden">
+              {/* ব্যাকগ্রাউন্ড ইলাস্ট্রেশন */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-60">
+                <svg width="250" height="150" viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="65" y="30" width="120" height="75" rx="8" fill="#E5E7EB" />
+                  <rect x="75" y="45" width="40" height="6" rx="3" fill="#D1D5DB" />
+                  <rect x="75" y="60" width="30" height="6" rx="3" fill="#D1D5DB" />
+                  <circle cx="160" cy="50" r="12" fill="#D1D5DB" />
+                  <path d="M45 105 C 65 80, 85 80, 105 105" stroke="#F3F4F6" strokeWidth="15" strokeLinecap="round"/>
+                  <path d="M145 105 C 165 80, 185 80, 205 105" stroke="#F3F4F6" strokeWidth="15" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <span className="text-gray-400 text-sm font-medium relative z-10 mt-10">
+                {t("No E-Wallet linked yet", "এখনও কোনো ই-ওয়ালেট যুক্ত করা হয়নি")}
+              </span>
             </div>
           )}
 
@@ -216,14 +247,14 @@ export default function WithdrawalPage() {
           {savedWallets.length < 5 && (
             <button 
               onClick={() => router.push("/wallets/securityCenter/addBankCard")}
-              className="absolute bottom-6 right-0 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-red-700 transition z-10"
+              className="absolute bottom-2 right-2 w-14 h-14 bg-[#FF0000] rounded-full flex items-center justify-center text-white shadow-[0_4px_10px_rgba(255,0,0,0.4)] hover:bg-red-700 transition z-20"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
             </button>
           )}
         </div>
 
-        <div className="mt-2">
+        <div className="mt-8 border-t border-gray-100 pt-6">
           {/* ইনফরমেশন */}
           <div className="flex flex-col gap-2 mb-6 text-sm text-gray-500">
             <p>{t("Withdrawal time: 24 Hours", "উত্তোলনের সময়: ২৪ ঘন্টা")}</p>
