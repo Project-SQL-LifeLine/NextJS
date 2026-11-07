@@ -1,15 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import { supabase } from "../lib/supabase/client";
+import { useLanguage } from "../lib/LanguageContext";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [banners, setBanners] = useState<any[]>([]);
   const [currentBanner, setCurrentBanner] = useState(0);
+  const { t, language } = useLanguage();
+
+  // স্লাইডার টেনে দেখার জন্য রেফারেন্স
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const [startX, setStartX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -58,20 +65,39 @@ export default function Home() {
     };
   }, []);
 
-  // ব্যানার স্লাইডারের জন্য টাইমার
+  // অটো স্লাইডের জন্য টাইমার (৩ সেকেন্ড)
   useEffect(() => {
-    if (banners.length > 1) {
+    if (banners.length > 1 && !isDragging) {
       const interval = setInterval(() => {
         setCurrentBanner((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
       }, 3000);
-
       return () => clearInterval(interval);
     }
-  }, [banners.length]);
+  }, [banners.length, isDragging]);
 
-  const noticeText = banners.length > 0 && banners[0].notice_text 
-    ? banners[0].notice_text 
-    : "করুণ! 👑 দৈনিক প্রথম আমানত বোনাস ২০%! ✨";
+  // ড্র্যাগ ইভেন্ট (টাচ এবং মাউস)
+  const handleStart = (x: number) => {
+    setIsDragging(true);
+    setStartX(x);
+  };
+
+  const handleEnd = (x: number) => {
+    setIsDragging(false);
+    const diff = startX - x;
+    if (diff > 50) {
+      // বামে টানা -> পরের ব্যানার
+      setCurrentBanner((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
+    } else if (diff < -50) {
+      // ডানে টানা -> আগের ব্যানার
+      setCurrentBanner((prev) => (prev === 0 ? banners.length - 1 : prev - 1));
+    }
+  };
+
+  const noticeText = language === "EN" 
+    ? "Daily first deposit bonus 20%! ✨"
+    : (banners.length > 0 && banners[0].notice_text 
+        ? banners[0].notice_text 
+        : "করুণ! 👑 দৈনিক প্রথম আমানত বোনাস ২০%! ✨");
 
   return (
     <div className="min-h-screen bg-[#0F212E] pb-20 relative overflow-hidden">
@@ -90,7 +116,7 @@ export default function Home() {
 
       <Header isLoggedIn={isLoggedIn} userProfile={userProfile} />
 
-      {/* স্ক্রলিং অ্যানাউন্সমেন্ট */}
+      {/* স্ক্রলিং অ্যানাউন্সমেন্ট (ভাষা অনুযায়ী) */}
       <div className="px-3 mt-3">
         <div className="bg-[#1A2C38] border border-[#2F4553] rounded-full py-1.5 px-3 flex items-center justify-between overflow-hidden relative">
           <span className="flex items-center gap-1 text-white text-xs w-full overflow-hidden">
@@ -105,9 +131,17 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ব্যানার স্লাইডার (Free Size / Natural Aspect Ratio) */}
+      {/* ব্যানার স্লাইডার (Cross Fade এবং Drag Support) */}
       <div className="px-3 mt-3">
-        <div className="bg-[#092238] border border-[#2F4553] rounded-xl overflow-hidden relative flex items-center justify-center w-full min-h-[100px]">
+        <div 
+          ref={sliderRef}
+          className="bg-[#092238] border border-[#2F4553] rounded-xl overflow-hidden relative flex items-center justify-center w-full min-h-[100px] cursor-grab active:cursor-grabbing touch-pan-y"
+          onMouseDown={(e) => handleStart(e.clientX)}
+          onMouseUp={(e) => handleEnd(e.clientX)}
+          onMouseLeave={() => setIsDragging(false)}
+          onTouchStart={(e) => handleStart(e.touches[0].clientX)}
+          onTouchEnd={(e) => handleEnd(e.changedTouches[0].clientX)}
+        >
           {banners.length > 0 ? (
             <>
               {banners.map((banner, index) => (
@@ -121,13 +155,13 @@ export default function Home() {
                   <img 
                     src={banner.image_url} 
                     alt="Banner" 
-                    className="w-full h-auto object-contain" 
+                    className="w-full h-auto object-contain pointer-events-none" 
                   />
                 </a>
               ))}
               
-              {/* ডট ইন্ডিকেটর */}
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+              {/* স্লাইডার ইন্ডিকেটর ডট */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-20 pointer-events-none">
                 {banners.map((_, idx) => (
                   <div 
                     key={idx} 
@@ -144,12 +178,17 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ক্যাটাগরি বাটন */}
+      {/* ক্যাটাগরি বাটন (Language অনুযায়ী) */}
       <div className="px-3 mt-6 grid grid-cols-4 gap-2">
-        {["Hot", "Slot", "Live", "Fishing"].map((item, idx) => (
+        {[
+          { key: "Hot", label: t("Hot", "হট"), icon: "🔥" },
+          { key: "Slot", label: t("Slot", "স্লট"), icon: "🎰" },
+          { key: "Live", label: t("Live", "লাইভ"), icon: "🎲" },
+          { key: "Fishing", label: t("Fishing", "ফিশিং"), icon: "🎣" }
+        ].map((item, idx) => (
           <div key={idx} className={`bg-[#1A2C38] rounded-md p-2 flex flex-col items-center justify-center border border-[#2F4553] ${idx === 0 ? 'bg-[#1475E0]/10' : ''}`}>
-            <span className="text-xl mb-1">{["🔥", "🎰", "🎲", "🎣"][idx]}</span>
-            <span className={`text-xs font-semibold ${idx === 0 ? 'text-[#1475E0]' : 'text-[#B1BAD3]'}`}>{item}</span>
+            <span className="text-xl mb-1">{item.icon}</span>
+            <span className={`text-xs font-semibold ${idx === 0 ? 'text-[#1475E0]' : 'text-[#B1BAD3]'}`}>{item.label}</span>
           </div>
         ))}
       </div>
