@@ -4,8 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
+import Header from "../../../components/Header"; // Header ইমপোর্ট করা হলো
 import BottomNav from "../../../components/BottomNav";
-import "./settings.css"; // CSS ইমপোর্ট করা হলো
+import "./settings.css";
 
 type TabType = "account" | "verify" | "security" | "sessions";
 
@@ -16,6 +17,9 @@ export default function UserSettingsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("account");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
+  
+  // Header এর জন্য স্টেট
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const [profile, setProfile] = useState<any>(null);
 
@@ -37,6 +41,8 @@ export default function UserSettingsPage() {
         router.replace("/user/login"); 
         return; 
       }
+
+      setIsLoggedIn(true);
 
       const { data: profileData } = await supabase
         .from("profiles").select("*").eq("id", user.id).single();
@@ -120,16 +126,10 @@ export default function UserSettingsPage() {
   return (
     <div className="settings-page">
       
-      {/* Header */}
-      <header className="bg-[#0d1e15] px-4 py-3 flex items-center justify-between sticky top-0 z-50 border-b border-[#2B4236]">
-        <button onClick={() => router.back()} className="text-white">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-        </button>
-        <h1 className="text-lg font-bold text-white">{t("Settings", "সেটিংস")}</h1>
-        <div className="w-6"></div>
-      </header>
+      {/* গ্লোবাল Header কম্পোনেন্ট যুক্ত করা হলো */}
+      <Header isLoggedIn={isLoggedIn} userProfile={profile} />
 
-      <main className="settings-main">
+      <main className="settings-main pt-4">
         <h1 className="settings-title">{t("Account Settings", "অ্যাকাউন্ট সেটিংস")}</h1>
 
         {/* Tabs */}
