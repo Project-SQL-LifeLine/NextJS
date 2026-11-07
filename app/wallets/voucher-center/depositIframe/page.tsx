@@ -28,25 +28,23 @@ function DepositIframeContent() {
   const bonusAmount = (amount * bonusPercent) / 100;
   const totalAmount = amount + bonusAmount;
 
-  // মোবাইলের Back বাটন হ্যান্ডেল করার লজিক
+  // মোবাইলের Back বাটন সরাসরি আগের পেজে নিয়ে যাবে
   useEffect(() => {
     const handlePopState = () => {
-      if (isOrderPlaced) {
-        setIsOrderPlaced(false); // Order Info থেকে Success পেজে ফিরে যাবে
-      } else if (isSubmitted) {
-        setIsSubmitted(false); // Success থেকে ইনপুট পেজে ফিরে যাবে
-      }
+      // এখানে কোনো স্টেট চেঞ্জ না করে সরাসরি আগের পেজে (Router Back) পাঠানো হচ্ছে
+      // যা ব্রাউজারের স্বাভাবিক ব্যাক বাটনের মতো কাজ করবে
+      router.back(); 
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [isOrderPlaced, isSubmitted]);
+  }, [router]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(walletNumber);
-    alert(lang === "EN" ? "Wallet number copied!" : "ওয়ালেট নম্বর কপি করা হয়েছে!");
+    alert(lang === "EN" ? "Wallet number copied!" : "ওয়ালেট নম্বর কপি করা হয়েছে!");
   };
 
   const handleInitialSubmit = () => {
