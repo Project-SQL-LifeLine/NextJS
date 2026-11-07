@@ -14,9 +14,7 @@ export default function WithdrawalPage() {
   const [compTurnover, setCompTurnover] = useState(0);
   const [txnPasswordDb, setTxnPasswordDb] = useState<string | null>(null);
   
-  // সব ওয়ালেট একবারে লোড হবে, পরে ফিল্টার হবে
   const [allWallets, setAllWallets] = useState<any[]>([]);
-
   const [selectedMethod, setSelectedMethod] = useState("bkash");
   
   const [amount, setAmount] = useState("");
@@ -28,7 +26,6 @@ export default function WithdrawalPage() {
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // PNG লোগোসহ মেথড লিস্ট
   const methods = [
     { 
       id: "bkash", 
@@ -47,7 +44,6 @@ export default function WithdrawalPage() {
     }
   ];
 
-  // পেজ লোডের সময় একবারই ডাটা ফেচ হবে
   useEffect(() => {
     const fetchInitialData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -56,7 +52,6 @@ export default function WithdrawalPage() {
         return;
       }
 
-      // ১. প্রোফাইল ডাটা
       const { data: profile } = await supabase
         .from("profiles")
         .select("balance, total_required_turnover, total_completed_turnover, transaction_password")
@@ -70,7 +65,6 @@ export default function WithdrawalPage() {
         setTxnPasswordDb(profile.transaction_password);
       }
 
-      // ২. সব ওয়ালেট একবারে ফেচ করা (ফাস্ট লোডিংয়ের জন্য)
       const { data: wallets } = await supabase
         .from("user_payment_type_store")
         .select("*")
@@ -85,7 +79,6 @@ export default function WithdrawalPage() {
     fetchInitialData();
   }, [router]);
 
-  // selectedMethod পরিবর্তন হলে শুধু ফিল্টার হবে (ইনস্ট্যান্ট)
   const savedWallets = useMemo(() => {
     return allWallets.filter(w => w.method_code === selectedMethod);
   }, [allWallets, selectedMethod]);
@@ -171,10 +164,10 @@ export default function WithdrawalPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white pb-10 font-sans text-gray-800">
+    <div className="min-h-screen bg-white pb-10 font-sans text-gray-800 overflow-x-hidden w-full max-w-full">
       
-      {/* Top Bar (কালার আপডেট করা হয়েছে) */}
-      <header className="bg-[#1475E0] px-4 py-4 flex items-center justify-between sticky top-0 z-50">
+      {/* Top Bar */}
+      <header className="bg-[#1475E0] px-4 py-4 flex items-center justify-between sticky top-0 z-50 w-full">
         <button onClick={() => router.back()} className="text-white">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
         </button>
@@ -184,36 +177,42 @@ export default function WithdrawalPage() {
         </button>
       </header>
 
-      {/* ট্যাব (PNG লোগোসহ) */}
-      <div className="flex border-b border-gray-200">
+      {/* ট্যাব */}
+      <div className="flex border-b border-gray-200 w-full overflow-hidden">
         {methods.map((method) => (
           <button
             key={method.id}
             onClick={() => setSelectedMethod(method.id)}
-            className={`flex-1 py-3 text-center font-bold text-sm transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 py-3 text-center text-sm transition-all flex items-center justify-center gap-1 ${
               selectedMethod === method.id 
-                ? "text-red-600 border-b-2 border-red-600" 
-                : "text-gray-500"
+                ? "text-red-600 font-bold border-b-2 border-red-600" 
+                : "text-gray-500 font-medium"
             }`}
           >
-            <img src={method.logo} alt={method.name} className="h-5 object-contain" />
-            <span>{method.name}</span>
+            {/* ইমেজ লোড না হলে alt লেখা দেখাবে না, এটি হাইড হয়ে যাবে */}
+            <img 
+              src={method.logo} 
+              alt="" 
+              className="h-4 sm:h-5 object-contain" 
+              onError={(e) => { e.currentTarget.style.display = 'none'; }} 
+            />
+            <span className="truncate">{method.name}</span>
           </button>
         ))}
       </div>
 
-      <div className="p-4">
+      <div className="p-4 w-full max-w-full overflow-hidden">
         
         {/* E-wallet সেকশন */}
-        <div className="mb-6 relative">
+        <div className="mb-6 relative w-full">
           <h3 className="text-gray-700 text-base font-medium mb-3">
             {t("Registered E-wallet", "রেজিস্টার্ড ই-ওয়ালেট")} ({savedWallets.length}/5)
           </h3>
           
           {savedWallets.length > 0 ? (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 w-full">
               {savedWallets.map((wallet) => (
-                <div key={wallet.id} className="relative bg-gradient-to-r from-[#6B4CFF] to-[#00E5FF] rounded-xl p-4 text-white shadow-md">
+                <div key={wallet.id} className="relative bg-gradient-to-r from-[#6B4CFF] to-[#00E5FF] rounded-xl p-4 text-white shadow-md w-full overflow-hidden">
                   <div className="flex items-center gap-2 mb-3">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                     <span className="font-semibold text-lg uppercase">{selectedMethod}</span>
@@ -226,7 +225,7 @@ export default function WithdrawalPage() {
               ))}
             </div>
           ) : (
-            <div className="relative border border-gray-200 rounded-lg bg-gray-50 h-40 flex flex-col items-center justify-center">
+            <div className="relative border border-gray-200 rounded-lg bg-gray-50 h-40 flex flex-col items-center justify-center w-full">
               <span className="text-gray-400 text-sm">{t("No E-Wallet linked yet", "এখনও কোনো ই-ওয়ালেট যুক্ত করা হয়নি")}</span>
             </div>
           )}
@@ -235,7 +234,7 @@ export default function WithdrawalPage() {
           {savedWallets.length < 5 && (
             <button 
               onClick={() => router.push("/wallets/securityCenter/addBankCard")}
-              className="absolute -bottom-4 right-2 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-red-700 transition z-10"
+              className="absolute bottom-4 right-4 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-red-700 transition z-10"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             </button>
@@ -264,32 +263,32 @@ export default function WithdrawalPage() {
           </div>
 
           {/* ফর্ম */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
             
-            <div>
+            <div className="w-full">
               <label className="text-gray-700 text-sm font-medium mb-2 block">{t("Withdrawal Amount:", "উত্তোলনের পরিমাণ:")}</label>
-              <div className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50 focus-within:border-blue-500 transition">
+              <div className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50 focus-within:border-blue-500 transition w-full">
                 <span className="text-gray-500 font-semibold pr-4 border-r border-gray-300">{t("Amount", "পরিমাণ")}</span>
                 <input
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="100 ~ 25,000"
-                  className="flex-1 bg-transparent text-black py-1 px-4 outline-none"
+                  className="flex-1 bg-transparent text-black py-1 px-4 outline-none w-full"
                   required
                 />
               </div>
             </div>
 
-            <div>
-              <div className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50 focus-within:border-blue-500 transition">
+            <div className="w-full">
+              <div className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50 focus-within:border-blue-500 transition w-full">
                 <span className="text-gray-500 font-semibold pr-4 border-r border-gray-300 w-32 leading-tight">{t("Transaction Password", "ট্রানজেকশন পাসওয়ার্ড")}</span>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t("Transaction Password", "ট্রানজেকশন পাসওয়ার্ড")}
-                  className="flex-1 bg-transparent text-black py-1 px-4 outline-none"
+                  className="flex-1 bg-transparent text-black py-1 px-4 outline-none w-full"
                   required
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-gray-400 px-2">
@@ -303,13 +302,13 @@ export default function WithdrawalPage() {
             </div>
 
             {message && (
-              <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-lg text-center">
+              <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-lg text-center w-full">
                 {message}
               </div>
             )}
 
             {isSuccess && (
-              <div className="bg-green-50 border border-green-200 text-green-600 text-sm p-3 rounded-lg text-center">
+              <div className="bg-green-50 border border-green-200 text-green-600 text-sm p-3 rounded-lg text-center w-full">
                 {t("Withdrawal Request Submitted Successfully!", "উত্তোলন রিকোয়েস্ট সফলভাবে জমা হয়েছে!")}
               </div>
             )}
