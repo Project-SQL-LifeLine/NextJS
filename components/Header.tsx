@@ -43,6 +43,11 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
     </svg>
   ),
+  Copy: () => (
+    <svg className="w-4 h-4 text-primary hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+    </svg>
+  ),
 };
 
 export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolean, userProfile?: any }) {
@@ -58,9 +63,17 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
     router.push("/user/login");
   };
 
+  const copyGameId = () => {
+    if (userProfile?.game_id) {
+      navigator.clipboard.writeText(userProfile.game_id);
+      alert(t("Game ID Copied!", "গেম আইডি কপি হয়েছে!"));
+    }
+  };
+
   return (
     <>
-      <header className="bg-[#0d2b45] px-3 py-2 flex items-center justify-between sticky top-0 z-50 shadow-md">
+      {/* header আরও মোটা করা হয়েছে (py-3) এবং কালার ডার্ক গ্রিন করা হয়েছে */}
+      <header className="bg-[#0d1e15] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#26352e]">
         
         {/* Logo */}
         <div className="text-2xl font-extrabold text-primary tracking-wider">
@@ -70,19 +83,19 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
         <div className="flex items-center gap-3">
           {!isLoggedIn ? (
             <>
-              <Link href="/user/login" className="border border-primary text-primary px-3 py-1 rounded-full text-xs font-bold hover:bg-primary/10 transition">
+              <Link href="/user/login" className="border border-primary text-primary px-3 py-1.5 rounded-full text-xs font-bold hover:bg-primary/10 transition">
                 {t("Login", "লগইন")}
               </Link>
-              <Link href="/user/signup" className="bg-primary text-[#071A0B] px-3 py-1 rounded-full text-xs font-bold hover:opacity-90 transition">
+              <Link href="/user/signup" className="bg-primary text-[#07110f] px-3 py-1.5 rounded-full text-xs font-bold hover:opacity-90 transition">
                 {t("Register", "রেজিস্টার")}
               </Link>
             </>
           ) : (
             <div className="flex items-center gap-2">
               {/* Profile Info */}
-              <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-full border border-[#2F4553]">
+              <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-full border border-[#26352e]">
                 <span className="font-bold text-white text-xs">{userProfile?.game_id || "User"}</span>
-                <div className="w-px h-4 bg-[#2F4553]"></div>
+                <div className="w-px h-4 bg-[#26352e]"></div>
                 <div className="flex items-center gap-1">
                   <Icons.Wallet />
                   <span className="text-primary text-xs font-bold">
@@ -104,57 +117,70 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
 
       {/* Dropdown Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-black/50" onClick={() => setIsMenuOpen(false)}>
+        <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setIsMenuOpen(false)}>
           <div 
-            className="absolute top-14 right-3 w-56 bg-[#1A2C38] border border-[#2F4553] rounded-xl shadow-2xl overflow-hidden py-2"
+            className="absolute top-[60px] right-3 w-60 bg-[#111d19] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Game ID Copy Section (Deposit এর উপরে) */}
+            {isLoggedIn && userProfile && (
+              <div className="px-4 py-3 border-b border-[#26352e] flex flex-col gap-1 bg-[#0d1e15]/50">
+                <span className="text-[#9ca9a3] text-[10px] font-semibold uppercase tracking-wider">{t("Game ID", "গেম আইডি")}</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-white text-sm font-bold font-mono">{userProfile.game_id || "N/A"}</span>
+                  <button onClick={copyGameId} className="p-1.5 bg-[#26352e] rounded-md">
+                    <Icons.Copy />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Deposit & Withdraw Links */}
-            <Link href="/wallets/voucher-center" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#253B49] transition">
+            <Link href="/wallets/voucher-center" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#1a2c21] transition">
               <Icons.Deposit /> <span className="text-sm">{t("Deposit", "ডিপোজিট")}</span>
             </Link>
-            <Link href="/wallets/withdrawal" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#253B49] transition">
+            <Link href="/wallets/withdrawal" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#1a2c21] transition">
               <Icons.Withdraw /> <span className="text-sm">{t("Withdraw", "উত্তোলন")}</span>
             </Link>
             
-            <div className="h-px bg-[#2F4553] my-1"></div>
+            <div className="h-px bg-[#26352e] my-1"></div>
 
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#253B49] transition">
+            <button className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#1a2c21] transition">
               <Icons.Refresh /> <span className="text-sm">{t("Refresh Balance", "ব্যালেন্স রিফ্রেশ")}</span>
             </button>
             <button 
               onClick={() => setHideBalance(!hideBalance)}
-              className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#253B49] transition"
+              className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#1a2c21] transition"
             >
               <Icons.EyeOff /> <span className="text-sm">{hideBalance ? t("Show Balance", "ব্যালেন্স দেখান") : t("Hide Balance", "ব্যালেন্স লুকান")}</span>
             </button>
 
-            <div className="h-px bg-[#2F4553] my-1"></div>
+            <div className="h-px bg-[#26352e] my-1"></div>
 
             {/* Language Selector inside Menu */}
             <div className="px-4 py-2 flex flex-col gap-2">
-              <span className="text-xs text-[#B1BAD3] font-semibold flex items-center gap-2">
+              <span className="text-xs text-[#9ca9a3] font-semibold flex items-center gap-2">
                 <Icons.Globe /> {t("Language", "ভাষা")}
               </span>
               <div className="flex gap-2 mt-1">
                 <button 
                   onClick={() => setLanguage("BN")} 
-                  className={`flex-1 text-xs py-1.5 rounded border ${language === "BN" ? "border-primary text-primary" : "border-[#2F4553] text-white"}`}
+                  className={`flex-1 text-xs py-1.5 rounded border ${language === "BN" ? "border-primary text-primary" : "border-[#26352e] text-white"}`}
                 >
                   🇧🇩 বাংলা
                 </button>
                 <button 
                   onClick={() => setLanguage("EN")} 
-                  className={`flex-1 text-xs py-1.5 rounded border ${language === "EN" ? "border-primary text-primary" : "border-[#2F4553] text-white"}`}
+                  className={`flex-1 text-xs py-1.5 rounded border ${language === "EN" ? "border-primary text-primary" : "border-[#26352e] text-white"}`}
                 >
                   🇺🇸 English
                 </button>
               </div>
             </div>
 
-            <div className="h-px bg-[#2F4553] my-1"></div>
+            <div className="h-px bg-[#26352e] my-1"></div>
 
-            <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-[#ED4163]/20 transition">
+            <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-[#ED4163] hover:bg-[#ED4163]/10 transition">
               <Icons.Logout /> <span className="text-sm">{t("Logout", "লগআউট")}</span>
             </button>
           </div>
