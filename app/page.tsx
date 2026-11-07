@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import { supabase } from "../lib/supabase/client";
+import { useLanguage } from "../lib/LanguageContext";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
