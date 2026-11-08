@@ -28,7 +28,7 @@ export default function AdminUsersPage() {
 
   const fetchUsers = async () => {
     setLoading(true);
-    // সব কলাম সিলেক্ট করা হচ্ছে (যাতে VIP কলামগুলোও আসে)
+    // সব কলাম সিলেক্ট করা হচ্ছে (যাতে VIP এবং turnover কলামগুলোও আসে)
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
@@ -143,16 +143,17 @@ export default function AdminUsersPage() {
       {/* ইউজার টেবিল */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1000px]">
+          <table className="w-full text-left border-collapse min-w-[1100px]">
             <thead>
               <tr className="bg-gray-50 text-gray-600 text-sm border-b border-gray-200">
                 <th className="p-4 font-semibold">Game ID / Mobile</th>
                 <th className="p-4 font-semibold">Balance (৳)</th>
+                <th className="p-4 font-semibold">Bonus (৳)</th>
+                <th className="p-4 font-semibold">Turnover (Req/Comp)</th>
                 <th className="p-4 font-semibold">VIP Level</th>
                 <th className="p-4 font-semibold">VIP Wager (৳)</th>
                 <th className="p-4 font-semibold">VIP Bonus (৳)</th>
                 <th className="p-4 font-semibold">Rakeback (৳)</th>
-                <th className="p-4 font-semibold">Turnover (Req/Comp)</th>
                 <th className="p-4 font-semibold">Status</th>
                 <th className="p-4 font-semibold text-right">Actions</th>
               </tr>
@@ -160,7 +161,7 @@ export default function AdminUsersPage() {
             <tbody>
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-6 text-center text-gray-500">
+                  <td colSpan={10} className="p-6 text-center text-gray-500">
                     No users found.
                   </td>
                 </tr>
@@ -174,6 +175,13 @@ export default function AdminUsersPage() {
                     <td className="p-4 font-bold text-green-600">
                       ৳{Number(user.balance).toLocaleString()}
                     </td>
+                    <td className="p-4 text-blue-600">
+                      ৳{Number(user.bonus_balance || 0).toLocaleString()}
+                    </td>
+                    <td className="p-4 text-xs">
+                      <div className="text-gray-500">Req: ৳{Number(user.total_required_turnover).toLocaleString()}</div>
+                      <div className="text-green-500">Comp: ৳{Number(user.total_completed_turnover).toLocaleString()}</div>
+                    </td>
                     <td className="p-4 font-bold text-purple-600">
                       Level {user.current_vip_level || 0}
                     </td>
@@ -185,10 +193,6 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="p-4 text-orange-500">
                       ৳{Number(user.unclaimed_rakeback || 0).toLocaleString()}
-                    </td>
-                    <td className="p-4 text-xs">
-                      <div className="text-gray-500">Req: ৳{Number(user.total_required_turnover).toLocaleString()}</div>
-                      <div className="text-green-500">Comp: ৳{Number(user.total_completed_turnover).toLocaleString()}</div>
                     </td>
                     <td className="p-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-bold ${
