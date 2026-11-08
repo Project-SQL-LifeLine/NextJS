@@ -4,9 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
-import Header from "../../../components/Header"; // Header ইমপোর্ট করা হলো
+import Header from "../../../components/Header";
 import BottomNav from "../../../components/BottomNav";
 import "./settings.css";
+import "./settings-animations.css"; // নতুন পপ-আপ এনিমেশন ইমপোর্ট
 
 type TabType = "account" | "verify" | "security" | "sessions";
 
@@ -18,10 +19,9 @@ export default function UserSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
   
-  // Header এর জন্য স্টেট
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   const [profile, setProfile] = useState<any>(null);
+  const [paymentAccountName, setPaymentAccountName] = useState<string | null>(null);
 
   // Verify State
   const [email, setEmail] = useState("");
@@ -32,6 +32,16 @@ export default function UserSettingsPage() {
   // Security State
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // পপ-আপ মেসেজ অটো ক্লিয়ার করার জন্য
+  useEffect(() => {
+    if (message.text) {
+      const timer = setTimeout(() => {
+        setMessage({ type: "", text: "" });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -54,6 +64,19 @@ export default function UserSettingsPage() {
         setPostalCode(profileData.postal_code || "");
         setCity(profileData.city || "");
       }
+
+      // user_payment_type_store থেকে account_name আনা
+      const { data: paymentData } = await supabase
+        .from("user_payment_type_store")
+        .select("account_name")
+        .eq("user_id", user.id)
+        .limit(1)
+        .maybeSingle();
+      
+      if (paymentData && paymentData.account_name) {
+        setPaymentAccountName(paymentData.account_name);
+      }
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -64,6 +87,22 @@ export default function UserSettingsPage() {
   useEffect(() => { 
     void loadData(); 
   }, [loadData]);
+
+  // মোবাইল নাম্বার মাস্ক করার ফাংশন (যেমন: 017*****183)
+  const maskMobile = (mobile: string) => {
+    if (!mobile) return "-";
+    if (mobile.length < 7) return mobile;
+    return mobile.slice(0, 3) + '*****' + mobile.slice(-3);
+  };
+
+  // ইমেইল মাস্ক করার ফাংশন (যেমন: exa***@gmail.com)
+  const maskEmail = (emailStr: string) => {
+    if (!emailStr) return "-";
+    const [local, domain] = emailStr.split('@');
+    if (!domain) return emailStr;
+    const maskedLocal = local.length > 3 ? local.slice(0, 3) + '***' : local + '***';
+    return `${maskedLocal}@${domain}`;
+  };
 
   const handleSaveEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,12 +164,19 @@ export default function UserSettingsPage() {
 
   return (
     <div className="settings-page">
-      
-      {/* গ্লোবাল Header কম্পোনেন্ট যুক্ত করা হলো */}
       <Header isLoggedIn={isLoggedIn} userProfile={profile} />
 
       <main className="settings-main pt-4">
         <h1 className="settings-title">{t("Account Settings", "অ্যাকাউন্ট সেটিংস")}</h1>
+
+        {/* Pop-up Message Animation */}
+        {message.text && (
+          <div className="popup-overlay" onClick={() => setMessage({ type: "", text: "" })}>
+            <div className={`popup-box ${message.type}`} onClick={(e) => e.stopPropagation()}>
+              <p>{message.text}</p>
+            </div>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="settings-tabs">
@@ -150,10 +196,6 @@ export default function UserSettingsPage() {
           ))}
         </div>
 
-        {message.text && (
-          <div className={`settings-alert ${message.type}`}>{message.text}</div>
-        )}
-
         {/* --- Account Tab --- */}
         {activeTab === "account" && profile && (
           <div className="settings-card">
@@ -163,10 +205,28 @@ export default function UserSettingsPage() {
                 <span>{t("Please verify your email address to use all features.", "সব ফিচার ব্যবহার করতে ইমেইল ভেরিফাই করুন।")}</span>
               </div>
             )}
-            <div className="info-row"><span>{t("Full Name", "পূর্ণ নাম")}:</span> <strong>{profile.full_name || "-"}</strong></div>
-            <div className="info-row"><span>{t("Mobile", "মোবাইল")}:</span> <strong>{profile.mobile || "-"}</strong></div>
-            <div className="info-row"><span>{t("Game ID", "গেম আইডি")}:</span> <strong>{profile.game_id || "-"}</strong></div>
-            <div className="info-row"><span>{t("Balance", "ব্যালেন্স")}:</span> <strong className="text-green">৳ {Number(profile.balance).toLocaleString()}</strong></div>
+            
+            {/* Full Name এর জায়গায় account_name দেখানো হচ্ছে */}
+            <div className="info-row">
+              <span>{t("Full Name", "পূর্ণ নাম")}:</span> 
+              <strong>{paymentAccountName || profile.full_name || "-"}</strong>
+            </div>
+
+            {/* মোবাইল মাস্ক করা হচ্ছে */}
+            <div className="info-row">
+              <span>{t("Mobile", "মোবাইল")}:</span> 
+              <strong>{maskMobile(profile.mobile)}</strong>
+            </div>
+
+            <div className="info-row">
+              <span>{t("Game ID", "গেম আইডি")}:</span> 
+              <strong>{profile.game_id || "-"}</strong>
+            </div>
+            
+            <div className="info-row">
+              <span>{t("Balance", "ব্যালেন্স")}:</span> 
+              <strong className="text-green">৳ {Number(profile.balance).toLocaleString()}</strong>
+            </div>
           </div>
         )}
 
@@ -178,7 +238,7 @@ export default function UserSettingsPage() {
                 <h3>{t("Level 1: Number Verification", "লেভেল ১: নাম্বার ভেরিফিকেশন")}</h3>
                 <svg className="w-5 h-5 text-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
-              <p className="verify-desc">{t("Your mobile number is verified.", "আপনার মোবাইল নাম্বার ভেরিফাইড।")} ({profile.mobile})</p>
+              <p className="verify-desc">{t("Your mobile number is verified.", "আপনার মোবাইল নাম্বার ভেরিফাইড।")} ({maskMobile(profile.mobile)})</p>
             </div>
 
             <div className="verify-card">
@@ -192,7 +252,7 @@ export default function UserSettingsPage() {
                   <button type="submit">{t("Verify Email", "ভেরিফাই করুন")}</button>
                 </form>
               ) : (
-                <p className="verify-desc text-green"><svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {profile.email}</p>
+                <p className="verify-desc text-green"><svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {maskEmail(profile.email)}</p>
               )}
             </div>
 
