@@ -66,18 +66,17 @@ export default function BottomNav() {
     router.push("/user/login");
   };
 
-  // ✅ ড্রয়ার মেনুর পাথগুলো আমাদের তৈরি করা নতুন পেজের সাথে কানেক্ট করা হলো
   const drawerMenu = [
     { name: t("My Profile", "আমার প্রোফাইল"), icon: <DrawerIcons.Profile />, path: "/user/profile" },
-    { name: t("VIP", "ভিআইপি"), icon: <DrawerIcons.VIP />, path: "/member/vip" }, // পেজটি এখনো তৈরি হয়নি
+    { name: t("VIP", "ভিআইপি"), icon: <DrawerIcons.VIP />, path: "/member/vip" },
     { name: t("Deposit History", "ডিপোজিট হিস্ট্রি"), icon: <DrawerIcons.Transactions />, path: "/wallets/voucher-report" },
     { name: t("Withdrawal History", "উত্তোলন হিস্ট্রি"), icon: <DrawerIcons.Transactions />, path: "/wallets/withdrawal-report" },
-    { name: t("Notification", "নোটিফিকেশন"), icon: <DrawerIcons.Notification />, path: "/member/notification" }, // পেজটি এখনো তৈরি হয়নি
+    { name: t("Notification", "নোটিফিকেশন"), icon: <DrawerIcons.Notification />, path: "/member/notification" },
     { name: t("Redeem Code", "রিডিম কোড"), icon: <DrawerIcons.Redeem />, path: "/user/freeRedeemCode" },
     { name: t("Invite Friends", "বন্ধুদের আমন্ত্রণ"), icon: <DrawerIcons.Affiliate />, path: "/user/invitedFriend" },
-    { name: t("Tips", "টিপস"), icon: <DrawerIcons.Transactions />, path: "/user/tips" }, // নতুন যোগ করা হলো
+    { name: t("Tips", "টিপস"), icon: <DrawerIcons.Transactions />, path: "/user/tips" },
     { name: t("Settings", "সেটিংস"), icon: <DrawerIcons.Settings />, path: "/user/settings" },
-    { name: t("Live Support", "লাইভ সাপোর্ট"), icon: <DrawerIcons.Support />, path: "/member/support" }, // পেজটি এখনো তৈরি হয়নি
+    { name: t("Live Support", "লাইভ সাপোর্ট"), icon: <DrawerIcons.Support />, path: "/member/support" },
   ];
 
   return (
@@ -90,9 +89,9 @@ export default function BottomNav() {
         />
       )}
 
-      {/* Side Drawer */}
+      {/* Side Drawer (Full Screen & 11px Font) */}
       <div 
-        className={`fixed top-0 right-0 h-full w-[80%] max-w-[300px] bg-[#0d1e15] border-l border-[#1A2C38] z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-full bg-[#0d1e15] z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
           isDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -111,7 +110,8 @@ export default function BottomNav() {
               className="flex items-center gap-4 px-6 py-4 text-[#B1BAD3] hover:text-white hover:bg-[#1A2C38]/50 cursor-pointer transition-colors"
             >
               {item.icon}
-              <span className="font-medium text-sm">{item.name}</span>
+              {/* ফন্ট সাইজ 11px করা হলো */}
+              <span className="font-medium text-[11px]">{item.name}</span>
             </div>
           ))}
         </div>
@@ -122,12 +122,13 @@ export default function BottomNav() {
             className="flex items-center gap-4 w-full px-4 py-3 text-[#ED4163] hover:bg-[#ED4163]/10 rounded-lg cursor-pointer transition-colors"
           >
             <DrawerIcons.Logout />
-            <span className="font-bold text-sm">{t("Logout", "লগআউট")}</span>
+            {/* ফন্ট সাইজ 11px করা হলো */}
+            <span className="font-bold text-[11px]">{t("Logout", "লগআউট")}</span>
           </button>
         </div>
       </div>
 
-      {/* Bottom Navigation (আরও চিকন করা হয়েছে) */}
+      {/* Bottom Navigation (চিকন) */}
       <nav className="bg-[#184f35] border-t border-[#26352e] fixed bottom-0 w-full flex justify-around items-center py-1 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
         
         {/* 1. Casino */}
