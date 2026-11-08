@@ -16,7 +16,8 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const { action, mobile, password, game_id } = await req.json();
+    // এখানে ref (রেফারেল কোড) রিসিভ করা হচ্ছে
+    const { action, mobile, password, game_id, ref } = await req.json();
     const email = mobile ? `${mobile}@user.local` : "";
 
     // ১. সাইনআপ (Signup)
@@ -38,6 +39,34 @@ serve(async (req) => {
         await supabaseClient.auth.admin.deleteUser(authData.user.id);
         throw profileError;
       }
+
+      // === নতুন রেফারেল লজিক শুরু ===
+      if (ref) {
+        try {
+          // রেফারকারী ইউজারের আইডি খোঁজা (game_id দিয়ে)
+          const { data: referrerData } = await supabaseClient
+            .from("profiles")
+            .select("id")
+            .eq("game_id", ref)
+            .single();
+
+          if (referrerData) {
+            // রেফারেল টেবিলে Pending স্ট্যাটাসে ডাটা সেভ করা
+            await supabaseClient.from("user_invited_friend_referral").insert([{
+              referrer_id: referrerData.id,
+              referred_user_id: authData.user.id,
+              deposit_amount: 0,
+              bonus_amount: 0,
+              status: 'pending'
+            }]);
+          }
+        } catch (refError) {
+          // রেফারেল সেভ করতে সমস্যা হলেও সাইনআপ ফেইল হবে না
+          console.error("Referral save error:", refError);
+        }
+      }
+      // === নতুন রেফারেল লজিক শেষ ===
+
       return new Response(JSON.stringify({ message: "Signup successful" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200,
       });
