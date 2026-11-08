@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
+import "./withdrawal-loader.css"; // নতুন লোডার ইমপোর্ট
 
 export default function WithdrawalPage() {
   const router = useRouter();
@@ -14,6 +15,10 @@ export default function WithdrawalPage() {
   const [compTurnover, setCompTurnover] = useState(0);
   const [txnPasswordDb, setTxnPasswordDb] = useState<string | null>(null);
   
+  // ডাইনামিক লিমিট স্টেট
+  const [minWithdrawal, setMinWithdrawal] = useState(100);
+  const [maxWithdrawal, setMaxWithdrawal] = useState(25000);
+
   const [allWallets, setAllWallets] = useState<any[]>([]);
   const [selectedMethod, setSelectedMethod] = useState("bkash");
   
@@ -32,14 +37,16 @@ export default function WithdrawalPage() {
     { id: "rocket", name: "Rocket", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Rocket_Logo.svg/512px-Rocket_Logo.svg.png" }
   ];
 
-  useEffect(() => {
-    const fetchInitialData = async () => {
+  const fetchInitialData = useCallback(async () => {
+    setLoading(true);
+    try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.push("/user/login");
         return;
       }
 
+      // ১. প্রোফাইল ডাটা
       const { data: profile } = await supabase
         .from("profiles")
         .select("balance, total_required_turnover, total_completed_turnover, transaction_password")
@@ -53,6 +60,19 @@ export default function WithdrawalPage() {
         setTxnPasswordDb(profile.transaction_password);
       }
 
+      // ২. অ্যাডমিন সেটিংস থেকে লিমিট আনা
+      const { data: settings } = await supabase
+        .from("admin_settings")
+        .select("min_withdrawal, max_withdrawal")
+        .eq("id", 1)
+        .single();
+
+      if (settings) {
+        setMinWithdrawal(Number(settings.min_withdrawal) || 100);
+        setMaxWithdrawal(Number(settings.max_withdrawal) || 25000);
+      }
+
+      // ৩. ই-ওয়ালেট ডাটা
       const { data: wallets } = await supabase
         .from("user_payment_type_store")
         .select("*")
@@ -61,11 +81,34 @@ export default function WithdrawalPage() {
         .order("created_at", { ascending: false });
 
       if (wallets) setAllWallets(wallets);
+    } catch (error) {
+      console.error(error);
+    } finally {
       setLoading(false);
-    };
-    
-    fetchInitialData();
+    }
   }, [router]);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+  // শুধু ব্যালেন্স এবং টার্নওভার রিফ্রেশ করার ফাংশন
+  const refreshBalanceOnly = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("balance, total_required_turnover, total_completed_turnover")
+      .eq("id", session.user.id)
+      .single();
+
+    if (profile) {
+      setBalance(Number(profile.balance) || 0);
+      setReqTurnover(Number(profile.total_required_turnover) || 0);
+      setCompTurnover(Number(profile.total_completed_turnover) || 0);
+    }
+  };
 
   const savedWallets = useMemo(() => {
     return allWallets.filter(w => w.method_code === selectedMethod);
@@ -84,12 +127,12 @@ export default function WithdrawalPage() {
       setMessage(t("Your turnover is not complete.", "আপনার টার্নওভার সম্পূর্ণ হয়নি।"));
       return;
     }
-    if (numericAmount < 100) {
-      setMessage(t("Minimum withdrawal is 100 BDT.", "সর্বনিম্ন উইথড্র ১০০ টাকা।"));
+    if (numericAmount < minWithdrawal) {
+      setMessage(t(`Minimum withdrawal is ${minWithdrawal} BDT.`, `সর্বনিম্ন উইথড্র ${minWithdrawal} টাকা।`));
       return;
     }
-    if (numericAmount > 25000) {
-      setMessage(t("Maximum withdrawal is 25,000 BDT.", "সর্বোচ্চ উইথড্র ২৫,০০০ টাকা।"));
+    if (numericAmount > maxWithdrawal) {
+      setMessage(t(`Maximum withdrawal is ${maxWithdrawal.toLocaleString()} BDT.`, `সর্বোচ্চ উইথড্র ${maxWithdrawal.toLocaleString()} টাকা।`));
       return;
     }
     if (numericAmount > balance) {
@@ -136,20 +179,36 @@ export default function WithdrawalPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
   const isTurnoverComplete = compTurnover >= reqTurnover;
 
   const maskNumber = (num: string) => {
     if (!num) return "";
     return "*******" + num.slice(-4);
   };
+
+  // ==========================================
+  // নতুন উইথড্র ভিত্তিক সাদা লোডিং এনিমেশন
+  // ==========================================
+  if (loading) {
+    return (
+      <div className="withdrawal-loader-container">
+        <svg 
+          className="withdrawal-loader-svg" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          {/* মানি / ব্যাংকনোট আইকন */}
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={1.5} 
+            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" 
+          />
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white pb-10 font-sans text-gray-800 overflow-x-hidden w-full max-w-full">
@@ -160,7 +219,6 @@ export default function WithdrawalPage() {
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
         </button>
         <h1 className="text-xl font-bold text-white">{t("Withdrawal", "উত্তোলন")}</h1>
-        {/* এখানে লিংকটি withdrawal-report এ পরিবর্তন করা হয়েছে */}
         <button onClick={() => router.push("/wallets/withdrawal-report")} className="text-white">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
         </button>
@@ -172,7 +230,7 @@ export default function WithdrawalPage() {
           <button
             key={method.id}
             onClick={() => setSelectedMethod(method.id)}
-            className={`flex-1 py-3 text-center text-sm transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 py-3 text-center text-[11px] transition-all flex items-center justify-center gap-1 ${
               selectedMethod === method.id 
                 ? "text-red-600 font-bold border-b-2 border-red-600" 
                 : "text-gray-500 font-medium"
@@ -186,9 +244,9 @@ export default function WithdrawalPage() {
 
       <div className="p-4 w-full max-w-full overflow-hidden">
         
-        {/* E-wallet সেকশন (হরাইজন্টাল স্লাইডার) */}
+        {/* E-wallet সেকশন */}
         <div className="mb-6 relative w-full">
-          <h3 className="text-gray-700 text-base font-medium mb-3">
+          <h3 className="text-gray-700 text-[11px] font-medium mb-3">
             {t("Registered E-wallet", "রেজিস্টার্ড ই-ওয়ালেট")} ({savedWallets.length}/5)
           </h3>
           
@@ -197,7 +255,6 @@ export default function WithdrawalPage() {
               {savedWallets.map((wallet) => (
                 <div key={wallet.id} className="relative min-w-[90vw] sm:min-w-[320px] flex-shrink-0 snap-center bg-gradient-to-br from-[#7B5CFF] to-[#00D4FF] rounded-2xl p-5 text-white shadow-lg overflow-hidden h-[170px] flex flex-col justify-between">
                   
-                  {/* কার্ডের পেছনের ওয়েভ ডিজাইন */}
                   <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none">
                     <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <circle cx="100" cy="100" r="80" stroke="white" strokeWidth="20" opacity="0.5"/>
@@ -206,18 +263,16 @@ export default function WithdrawalPage() {
                     </svg>
                   </div>
 
-                  {/* কার্ডের উপরের অংশ */}
                   <div className="flex items-center gap-3 relative z-10">
                     <div className="bg-white/20 p-1.5 rounded-md backdrop-blur-sm">
                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                     </div>
-                    <span className="font-semibold text-xl tracking-wide">{selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)}</span>
+                    <span className="font-semibold text-lg tracking-wide">{selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)}</span>
                   </div>
 
-                  {/* কার্ডের নাম্বার */}
                   <div className="relative z-10">
-                    <p className="text-2xl font-bold tracking-[0.15em] mb-1">{maskNumber(wallet.account_number)}</p>
-                    <p className="text-xs text-white/80 font-medium">
+                    <p className="text-xl font-bold tracking-[0.15em] mb-1">{maskNumber(wallet.account_number)}</p>
+                    <p className="text-[11px] text-white/80 font-medium">
                       {new Date(wallet.created_at).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(',', '')}
                     </p>
                   </div>
@@ -225,9 +280,7 @@ export default function WithdrawalPage() {
               ))}
             </div>
           ) : (
-            /* Empty State UI (কার্ড না থাকলে) */
             <div className="relative border border-gray-100 bg-[#F8F9FA] rounded-2xl h-[170px] flex flex-col items-center justify-center w-full overflow-hidden">
-              {/* ব্যাকগ্রাউন্ড ইলাস্ট্রেশন */}
               <div className="absolute inset-0 flex items-center justify-center opacity-60">
                 <svg width="250" height="150" viewBox="0 0 250 150" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="65" y="30" width="120" height="75" rx="8" fill="#E5E7EB" />
@@ -238,13 +291,12 @@ export default function WithdrawalPage() {
                   <path d="M145 105 C 165 80, 185 80, 205 105" stroke="#F3F4F6" strokeWidth="15" strokeLinecap="round"/>
                 </svg>
               </div>
-              <span className="text-gray-400 text-sm font-medium relative z-10 mt-10">
+              <span className="text-gray-400 text-[11px] font-medium relative z-10 mt-10">
                 {t("No E-Wallet linked yet", "এখনও কোনো ই-ওয়ালেট যুক্ত করা হয়নি")}
               </span>
             </div>
           )}
 
-          {/* প্লাস বাটন */}
           {savedWallets.length < 5 && (
             <button 
               onClick={() => router.push("/wallets/securityCenter/addBankCard")}
@@ -256,22 +308,35 @@ export default function WithdrawalPage() {
         </div>
 
         <div className="mt-8 border-t border-gray-100 pt-6">
-          {/* ইনফরমেশন */}
-          <div className="flex flex-col gap-2 mb-6 text-sm text-gray-500">
-            <p>{t("Withdrawal time: 24 Hours", "উত্তোলনের সময়: ২৪ ঘন্টা")}</p>
-            <p>{t("Daily withdrawal Unlimited", "দৈনিক উত্তোলন আনলিমিটেড")}</p>
-            <p>{t("Main Wallet :", "মূল ওয়ালেট :")} <span className="text-gray-800 font-bold">৳ {balance.toLocaleString()}</span></p>
-            <p>{t("Available Amount :", "উপলব্ধ পরিমাণ :")} <span className="text-gray-800 font-bold">৳ {balance.toLocaleString()}</span></p>
-            <p>{t("Turnover:", "টার্নওভার:")} <span className={isTurnoverComplete ? "text-green-600" : "text-red-600"}>{compTurnover.toLocaleString()} / {reqTurnover.toLocaleString()}</span></p>
+          
+          {/* ইনফরমেশন & টার্নওভার হাইলাইট (গ্রিড আকারে) */}
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex flex-col justify-center">
+              <span className="text-gray-500 text-[11px] mb-1">{t("Main Wallet", "মূল ওয়ালেট")}</span>
+              <strong className="text-gray-900 text-sm">৳ {balance.toLocaleString()}</strong>
+            </div>
+            
+            <div className={`border rounded-lg p-3 flex flex-col justify-center ${isTurnoverComplete ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
+              <span className={`text-[11px] mb-1 ${isTurnoverComplete ? 'text-green-600' : 'text-orange-500'}`}>{t("Turnover", "টার্নওভার")}</span>
+              <strong className={`text-sm ${isTurnoverComplete ? 'text-green-700' : 'text-orange-600'}`}>
+                {compTurnover.toLocaleString()} / {reqTurnover.toLocaleString()}
+              </strong>
+            </div>
           </div>
 
-          {/* রিফ্রেশ বাটন */}
+          <div className="flex flex-col gap-1 mb-4 text-[11px] text-gray-500">
+            <p>{t("Withdrawal time: 24 Hours", "উত্তোলনের সময়: ২৪ ঘন্টা")}</p>
+            <p>{t("Daily withdrawal Unlimited", "দৈনিক উত্তোলন আনলিমিটেড")}</p>
+            <p>{t("Available Amount :", "উপলব্ধ পরিমাণ :")} <span className="text-gray-800 font-bold">৳ {balance.toLocaleString()}</span></p>
+          </div>
+
+          {/* রিফ্রেশ বাটন (পেজ রিলোড ছাড়া) */}
           <div className="flex justify-center mb-6">
             <button 
-              onClick={() => window.location.reload()}
-              className="bg-blue-50 text-blue-600 px-6 py-2 rounded-full text-sm font-bold flex items-center gap-2"
+              onClick={refreshBalanceOnly}
+              className="bg-blue-50 text-blue-600 px-6 py-2 rounded-full text-[11px] font-bold flex items-center gap-2 hover:bg-blue-100 transition"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
               {t("Refresh Balance", "ব্যালেন্স রিফ্রেশ করুন")}
             </button>
           </div>
@@ -279,15 +344,15 @@ export default function WithdrawalPage() {
           {/* ফর্ম */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
             <div className="w-full">
-              <label className="text-gray-700 text-sm font-medium mb-2 block">{t("Withdrawal Amount:", "উত্তোলনের পরিমাণ:")}</label>
+              <label className="text-gray-700 text-[11px] font-medium mb-2 block">{t("Withdrawal Amount:", "উত্তোলনের পরিমাণ:")}</label>
               <div className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50 focus-within:border-blue-500 transition w-full">
-                <span className="text-gray-500 font-semibold pr-4 border-r border-gray-300">{t("Amount", "পরিমাণ")}</span>
+                <span className="text-gray-500 font-semibold pr-4 border-r border-gray-300 text-[11px]">{t("Amount", "পরিমাণ")}</span>
                 <input
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="100 ~ 25,000"
-                  className="flex-1 bg-transparent text-black py-1 px-4 outline-none w-full"
+                  placeholder={`${minWithdrawal} ~ ${maxWithdrawal.toLocaleString()}`}
+                  className="flex-1 bg-transparent text-black py-1 px-4 outline-none w-full text-[11px]"
                   required
                 />
               </div>
@@ -295,13 +360,13 @@ export default function WithdrawalPage() {
 
             <div className="w-full">
               <div className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50 focus-within:border-blue-500 transition w-full">
-                <span className="text-gray-500 font-semibold pr-4 border-r border-gray-300 w-32 leading-tight">{t("Transaction Password", "ট্রানজেকশন পাসওয়ার্ড")}</span>
+                <span className="text-gray-500 font-semibold pr-4 border-r border-gray-300 w-32 leading-tight text-[11px]">{t("Transaction Password", "ট্রানজেকশন পাসওয়ার্ড")}</span>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t("Transaction Password", "ট্রানজেকশন পাসওয়ার্ড")}
-                  className="flex-1 bg-transparent text-black py-1 px-4 outline-none w-full"
+                  className="flex-1 bg-transparent text-black py-1 px-4 outline-none w-full text-[11px]"
                   required
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-gray-400 px-2">
@@ -315,25 +380,26 @@ export default function WithdrawalPage() {
             </div>
 
             {message && (
-              <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-lg text-center w-full">
+              <div className="bg-red-50 border border-red-200 text-red-600 text-[11px] p-3 rounded-lg text-center w-full">
                 {message}
               </div>
             )}
 
             {isSuccess && (
-              <div className="bg-green-50 border border-green-200 text-green-600 text-sm p-3 rounded-lg text-center w-full">
+              <div className="bg-green-50 border border-green-200 text-green-600 text-[11px] p-3 rounded-lg text-center w-full">
                 {t("Withdrawal Request Submitted Successfully!", "উত্তোলন রিকোয়েস্ট সফলভাবে জমা হয়েছে!")}
               </div>
             )}
 
+            {/* নতুন ৩ডি গ্লসি সাবমিট বাটন */}
             <button
               type="submit"
               disabled={submitting || !isTurnoverComplete || isSuccess || savedWallets.length === 0 || !amount || !password}
-              className={`w-full font-bold text-lg py-3 rounded-lg mt-4 transition-colors flex justify-center items-center ${
-                isTurnoverComplete && amount && password && savedWallets.length > 0
-                  ? "bg-[#007BFF] hover:bg-blue-600 text-white" 
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
-              }`}
+              className={`w-full font-bold text-[14px] py-3 rounded-full mt-4 transition-all flex justify-center items-center text-white
+                ${isTurnoverComplete && amount && password && savedWallets.length > 0
+                  ? "bg-gradient-to-b from-[#34f05f] to-[#1a9e4c] border border-[#117934] shadow-[inset_0_3px_5px_rgba(255,255,255,0.6),inset_0_-4px_6px_rgba(0,0,0,0.3),0_5px_0_#117934,0_8px_15px_rgba(0,0,0,0.3)] active:translate-y-[4px] active:shadow-[inset_0_2px_4px_rgba(255,255,255,0.4),inset_0_-2px_4px_rgba(0,0,0,0.2),0_1px_0_#117934,0_4px_8px_rgba(0,0,0,0.3)]" 
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
             >
               {submitting ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
