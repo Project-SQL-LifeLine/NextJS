@@ -1,0 +1,24 @@
+.vip-loader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #18221E;
+}
+
+.vip-loader-svg {
+  width: 30px;
+  height: 30px;
+  color: #FFFFFF; /* সাদা আইকন */
+  animation: vip-gear-spin 2s linear infinite; /* ২ সেকেন্ডে একবার ঘুরবে */
+}
+
+@keyframes vip-gear-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
