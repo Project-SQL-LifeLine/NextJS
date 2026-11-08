@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabase/client";
-import { useLanguage } from "../../lib/LanguageContext";
-import Header from "../../components/Header";
-import BottomNav from "../../components/BottomNav";
-import "./activity.css"; // আপনার CSS ফাইলের নাম
+import { supabase } from "../../../../lib/supabase/client";
+import { useLanguage } from "../../../../lib/LanguageContext";
+import Header from "../../../../components/Header";
+import BottomNav from "../../../../components/BottomNav";
+import "./activity.css";
 
 export default function ActivityPage() {
   const router = useRouter();
@@ -63,10 +63,9 @@ export default function ActivityPage() {
 
   return (
     <div className="min-h-screen bg-[#18221E] pb-20 font-sans">
-      {/* আপনার প্রজেক্টের কমন Header */}
       <Header isLoggedIn={isLoggedIn} userProfile={profile} />
 
-      {/* পেজের সাব-হেডার (Promotion লেখা সরানো হয়েছে) */}
+      {/* সাব-হেডার (Promotion লেখা সরানো হয়েছে) */}
       <div className="sticky top-[60px] z-40 bg-[#18221E] border-b border-[#263C32] px-4 py-3 flex items-center">
         <button
           onClick={() => router.back()}
@@ -130,7 +129,6 @@ export default function ActivityPage() {
         )}
       </div>
 
-      {/* আপনার প্রজেক্টের কমন BottomNav */}
       <BottomNav />
     </div>
   );
