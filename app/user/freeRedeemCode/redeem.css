@@ -1,3 +1,4 @@
+
 .redeem-page {
   --redeem-bg: #18221E;
   --redeem-card: #1B2A23;
@@ -32,8 +33,18 @@
   margin-bottom: 16px;
   line-height: 1.5;
 }
-.redeem-alert.success { background: rgba(0,231,1,0.1); color: var(--redeem-accent); border: 1px solid rgba(0,231,1,0.3); }
-.redeem-alert.error { background: rgba(255,77,77,0.1); color: #ff4d4d; border: 1px solid rgba(255,77,77,0.3); }
+
+.redeem-alert.success {
+  background: rgba(0,231,1,0.1);
+  color: var(--redeem-accent);
+  border: 1px solid rgba(0,231,1,0.3);
+}
+
+.redeem-alert.error {
+  background: rgba(255,77,77,0.1);
+  color: #ff4d4d;
+  border: 1px solid rgba(255,77,77,0.3);
+}
 
 .redeem-form-card {
   background: var(--redeem-card);
@@ -49,7 +60,10 @@
   margin-bottom: 16px;
   line-height: 1.6;
 }
-.redeem-desc strong { color: var(--redeem-text); }
+
+.redeem-desc strong {
+  color: var(--redeem-text);
+}
 
 .redeem-form {
   display: flex;
@@ -70,21 +84,36 @@
   font-weight: 700;
   letter-spacing: 1px;
 }
-.redeem-form input:focus { border-color: var(--redeem-accent); }
 
+.redeem-form input:focus {
+  border-color: var(--redeem-accent);
+}
+
+/* Green Gradient Redeem Button */
 .redeem-form button {
-  background: var(--redeem-accent);
-  color: #000;
+  background: linear-gradient(
+    90deg,
+    #008000 0%,
+    #228B22 100%
+  );
+  color: #FFFFFF;
   border: none;
   padding: 14px;
   border-radius: 8px;
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  transition: 0.2s;
+  transition: filter 0.2s ease, opacity 0.2s ease;
 }
-.redeem-form button:hover:not(:disabled) { background: #00c701; }
-.redeem-form button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.redeem-form button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.redeem-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .redeem-section-title {
   font-size: 1.1rem;
@@ -155,7 +184,11 @@
   border-radius: 4px;
   text-transform: uppercase;
 }
-.badge.approved { background: rgba(0,231,1,0.15); color: var(--redeem-accent); }
+
+.badge.approved {
+  background: rgba(0,231,1,0.15);
+  color: var(--redeem-accent);
+}
 
 .redeem-empty {
   display: flex;
