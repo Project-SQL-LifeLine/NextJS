@@ -9,8 +9,8 @@
 }
 
 .redeem-loader-svg {
-  width: 60px;
-  height: 60px;
+  width: 30px; /* ৫০% ছোট করা হয়েছে (আগে ৬০px ছিল) */
+  height: 30px; /* ৫০% ছোট করা হয়েছে */
   color: #FFFFFF; /* সাদা আইকন */
   animation: slow-spin 2s linear infinite; /* ২ সেকেন্ডে একবার ঘুরবে */
 }
