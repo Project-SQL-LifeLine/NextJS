@@ -28,7 +28,7 @@ export default function AdminDashboard() {
           .from("user_deposit_transaction")
           .select("amount")
           .eq("transaction_type", "deposit")
-          .eq("status", "approved"); // ধরে নিচ্ছি approved হলে টাকা যোগ হয়
+          .eq("status", "approved"); 
 
         // ৩. মোট উইথড্র (শুধু approved)
         const { data: withdrawals } = await supabase
@@ -153,27 +153,106 @@ export default function AdminDashboard() {
 
       </div>
 
-      {/* কুইক লিংকস (পেন্ডিং রিকোয়েস্টগুলোতে যাওয়ার জন্য) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <Link href="/admin/deposits" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-5 hover:border-[#1475E0] transition-colors flex items-center justify-between">
+      {/* কুইক লিংকস (সবগুলো নতুন অ্যাডমিন পেজের পাথ) */}
+      <h2 className="text-lg font-bold text-white mt-4">Quick Links</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <Link href="/admin/deposits" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
           <div>
-            <h3 className="text-white font-bold text-lg">Manage Deposits</h3>
-            <p className="text-[#B1BAD3] text-sm">Review and approve user deposit requests.</p>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">Deposit Requests</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">Approve/Reject deposits.</p>
           </div>
-          <div className="text-[#1475E0]">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
         </Link>
 
-        <Link href="/admin/withdrawals" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-5 hover:border-[#1475E0] transition-colors flex items-center justify-between">
+        <Link href="/admin/withdrawals" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
           <div>
-            <h3 className="text-white font-bold text-lg">Manage Withdrawals</h3>
-            <p className="text-[#B1BAD3] text-sm">Review and approve user withdrawal requests.</p>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">Withdraw Requests</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">Approve/Reject withdrawals.</p>
           </div>
-          <div className="text-[#1475E0]">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
         </Link>
+
+        <Link href="/admin/users" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
+          <div>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">User Management</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">Manage all users.</p>
+          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
+        <Link href="/admin/tips" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
+          <div>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">Tip Management</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">Approve/Reject user tips.</p>
+          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
+        <Link href="/admin/vip-settings" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
+          <div>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">VIP Settings</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">Manage VIP levels.</p>
+          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
+        <Link href="/admin/redeem-codes" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
+          <div>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">Redeem Codes</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">Create/Manage promo codes.</p>
+          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
+        <Link href="/admin/payment-methods" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
+          <div>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">Payment Methods</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">Manage deposit methods.</p>
+          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
+        <Link href="/admin/bonuses" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
+          <div>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">Bonus Settings</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">Manage deposit bonuses.</p>
+          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
+        <Link href="/admin/banners" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
+          <div>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">Banners & Notice</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">Manage homepage banners.</p>
+          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
+        <Link href="/admin/categories" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
+          <div>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">Categories</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">Manage homepage categories.</p>
+          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
+        <Link href="/admin/bets" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
+          <div>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">Bets History</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">View recent user bets.</p>
+          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
+        <Link href="/admin/settings" className="bg-[#1A2C38] border border-[#2F4553] rounded-xl p-4 hover:border-[#1475E0] transition-colors flex items-center justify-between group">
+          <div>
+            <h3 className="text-white font-bold text-sm group-hover:text-[#1475E0]">Website Settings</h3>
+            <p className="text-[#B1BAD3] text-xs mt-1">Site settings & limits.</p>
+          </div>
+          <svg className="w-5 h-5 text-[#B1BAD3] group-hover:text-[#1475E0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
       </div>
 
     </div>
