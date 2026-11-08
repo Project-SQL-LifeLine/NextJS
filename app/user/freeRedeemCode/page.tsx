@@ -105,7 +105,7 @@ export default function FreeRedeemCodePage() {
       <Header isLoggedIn={isLoggedIn} userProfile={profile} />
 
       <main className="redeem-main">
-        <h1 className="redeem-title">{t("Redeem Code", "রিডিম কোড")}</h1>
+        {/* H1 টাইটেল "Redeem Code" সরিয়ে দেওয়া হয়েছে */}
 
         {message.text && (
           <div className={`redeem-alert ${message.type}`}>{message.text}</div>
@@ -123,10 +123,13 @@ export default function FreeRedeemCodePage() {
               type="text" 
               value={code} 
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder={t("Enter Code (e.g. EID500)", "কোড দিন (যেমন: EID500)")}
+              placeholder={t("Enter Code", "কোড দিন")}
               required 
             />
-            <button type="submit" disabled={submitting}>
+            <button type="submit" disabled={submitting} className="redeem-submit-btn">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
               {submitting ? t("Checking...", "চেক করা হচ্ছে...") : t("Redeem Code", "রিডিম কোড")}
             </button>
           </form>
