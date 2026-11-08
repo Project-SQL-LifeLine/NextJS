@@ -30,39 +30,53 @@
 .invite-alert {
   padding: 10px;
   border-radius: 6px;
-  font-size: 11px; /* আপডেট করা হলো */
+  font-size: 11px;
   margin-bottom: 16px;
 }
 .invite-alert.success { background: rgba(0,231,1,0.1); color: var(--primary); border: 1px solid rgba(0,231,1,0.3); }
 .invite-alert.error { background: rgba(255,77,77,0.1); color: #ff4d4d; border: 1px solid rgba(255,77,77,0.3); }
 
+/* =========================================
+   নতুন হরাইজন্টাল এবং ছোট গ্রিড ডিজাইন
+   ========================================= */
 .invite-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
   margin-bottom: 1.5rem;
+  width: 100%;
 }
+
 .invite-stat-card {
+  flex: 1;
   background: var(--bg-card);
   border: 1px solid var(--border-col);
-  border-radius: 10px;
-  padding: 12px 8px;
+  border-radius: 8px;
+  padding: 6px 10px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
-  text-align: center;
-  gap: 6px;
+  height: 36px; /* ছোট উচ্চতা */
+  overflow: hidden;
 }
+
 .invite-stat-card span { 
-  font-size: 11px; /* আপডেট করা হলো */
+  font-size: 9px; 
   color: var(--text-muted); 
   text-transform: uppercase; 
   font-weight: 600; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .invite-stat-card strong { 
-  font-size: 16px; 
+  font-size: 12px; 
   color: var(--text-main); 
+  white-space: nowrap;
 }
+/* ========================================= */
 
 .invite-link-card {
   background: var(--bg-card);
@@ -78,7 +92,7 @@
 }
 .invite-link-card p { 
   margin: 0 0 12px; 
-  font-size: 11px; /* আপডেট করা হলো */
+  font-size: 11px; 
   color: var(--text-muted); 
   line-height: 1.5; 
 }
@@ -96,7 +110,7 @@
   border: none;
   color: var(--text-main);
   padding: 10px 12px;
-  font-size: 11px; /* আপডেট করা হলো */
+  font-size: 11px;
   outline: none;
 }
 .invite-link-box button {
@@ -105,7 +119,7 @@
   border: none;
   padding: 0 16px;
   font-weight: 700;
-  font-size: 11px; /* আপডেট করা হলো */
+  font-size: 11px;
   cursor: pointer;
 }
 
@@ -121,7 +135,7 @@
 }
 .invite-bonus-card span { 
   display: block; 
-  font-size: 11px; /* আপডেট করা হলো */
+  font-size: 11px; 
   color: var(--text-muted); 
   margin-bottom: 4px; 
 }
@@ -129,16 +143,59 @@
   font-size: 18px; 
   color: var(--primary); 
 }
-.invite-transfer-btn {
-  background: var(--primary);
-  color: #000;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 11px; /* আপডেট করা হলো */
+
+/* =========================================
+   নতুন ৩ডি গ্লসি বাটন স্টাইল (Transfer & Submit)
+   ========================================= */
+.invite-transfer-btn, .invite-modal-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #34f05f 0%, #1a9e4c 100%);
+  border: 2px solid #117934;
+  border-radius: 50px;
+  color: #FFFFFF;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   cursor: pointer;
+  transition: all 0.1s ease;
+  box-shadow: 
+    inset 0 3px 5px rgba(255, 255, 255, 0.5),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.2),
+    0 6px 12px rgba(0, 0, 0, 0.3);
 }
+
+.invite-transfer-btn {
+  padding: 8px 16px;
+  font-size: 11px;
+}
+
+.invite-modal-submit {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.invite-transfer-btn:hover:not(:disabled), .invite-modal-submit:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.invite-transfer-btn:active:not(:disabled), .invite-modal-submit:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+    0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.invite-transfer-btn:disabled, .invite-modal-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+/* ========================================= */
 
 .invite-section-title {
   font-size: 14px;
@@ -164,7 +221,7 @@
   color: var(--text-main); 
 }
 .invite-item-left span { 
-  font-size: 11px; /* আপডেট করা হলো */
+  font-size: 11px; 
   color: var(--text-muted); 
 }
 .invite-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
@@ -191,7 +248,7 @@
   border-radius: 12px; color: var(--text-muted); text-align: center; gap: 10px;
 }
 .invite-empty p {
-  font-size: 11px; /* আপডেট করা হলো */
+  font-size: 11px; 
   margin: 0;
 }
 
@@ -213,14 +270,10 @@
 
 .invite-input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .invite-input-group label { 
-  font-size: 11px; /* আপডেট করা হলো */
+  font-size: 11px; 
   color: var(--text-muted); 
 }
 .invite-input-group input {
   background: var(--input-bg); border: 1px solid var(--border-col);
   padding: 12px; border-radius: 8px; color: var(--text-main); font-size: 12px; outline: none;
-}
-.invite-modal-submit {
-  width: 100%; background: var(--primary); color: #000;
-  border: none; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer;
 }
