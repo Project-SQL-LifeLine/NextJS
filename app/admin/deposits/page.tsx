@@ -29,7 +29,7 @@ export default function AdminDepositsPage() {
 
   const handleApprove = async (txn: any) => {
     try {
-      // ১. ট্রানজেকশন অ্যাপ্রুভ করা
+      // ১. ট্রানজেকশন অ্যাপ্রুভ করা (এখানে আপডেট হলেই ডাটাবেসের ট্রিগার কাজ করবে)
       const { error: txnError } = await supabase
         .from("user_deposit_transaction")
         .update({ status: "approved" })
@@ -71,58 +71,7 @@ export default function AdminDepositsPage() {
         })
         .eq("id", txn.user_id);
 
-      // ==========================================
-      // ৪. নতুন রেফারেল লজিক (কমিশন ক্যালকুলেশন)
-      // ==========================================
-      const { data: referralData } = await supabase
-        .from("user_invited_friend_referral")
-        .select("*")
-        .eq("referred_user_id", txn.user_id)
-        .eq("status", "pending")
-        .maybeSingle();
-
-      if (referralData) {
-        // অ্যাডমিন প্যানেল থেকে কমিশন সেটিংস আনা
-        const { data: commissionSettings } = await supabase
-          .from("referral_commission_control")
-          .select("commission_value, min_deposit_required")
-          .eq("is_active", true)
-          .limit(1)
-          .maybeSingle();
-
-        // যদি সেটিংস থাকে এবং ডিপোজিট মিনিমাম লিমিট পার করে
-        if (commissionSettings && depositAmount >= commissionSettings.min_deposit_required) {
-          const commissionAmt = (depositAmount * commissionSettings.commission_value) / 100;
-          
-          // রেফারেল রেকর্ড আপডেট করা (status: approved, bonus_amount: হিসাবকৃত)
-          await supabase
-            .from("user_invited_friend_referral")
-            .update({ 
-              status: 'approved', 
-              deposit_amount: depositAmount,
-              bonus_amount: commissionAmt
-            })
-            .eq("id", referralData.id);
-
-          // রেফারারের প্রোফাইলে referral_earnings যোগ করা
-          const { data: referrerProfile } = await supabase
-            .from("profiles")
-            .select("referral_earnings")
-            .eq("id", referralData.referrer_id)
-            .single();
-
-          if (referrerProfile) {
-            const newReferralEarnings = Number(referrerProfile.referral_earnings || 0) + commissionAmt;
-            await supabase
-              .from("profiles")
-              .update({ referral_earnings: newReferralEarnings })
-              .eq("id", referralData.referrer_id);
-          }
-        }
-      }
-      // ==========================================
-
-      alert("Deposit Approved Successfully! Balance, Turnover, and Referral Earnings Updated.");
+      alert("Deposit Approved Successfully!");
       fetchDeposits();
     } catch (err: any) {
       alert("Error: " + err.message);
