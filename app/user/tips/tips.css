@@ -24,7 +24,7 @@
 .tips-alert {
   padding: 12px;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 11px; /* 11px আপডেট */
   margin-bottom: 16px;
   line-height: 1.5;
   text-align: center;
@@ -43,7 +43,7 @@
 
 .tips-card h2 {
   color: var(--text-primary);
-  font-size: 1.2rem;
+  font-size: 14px; /* হেডিং একটু বড় রাখা হলো */
   margin: 0 0 16px 0;
   display: flex;
   align-items: center;
@@ -52,13 +52,13 @@
 
 .tips-card h2 svg {
   color: var(--color-primary);
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 .tips-card p.tips-desc {
   color: var(--text-secondary);
-  font-size: 0.85rem;
+  font-size: 11px; /* 11px আপডেট */
   margin-bottom: 16px;
   line-height: 1.5;
 }
@@ -77,17 +77,17 @@
 
 .tips-input-group label {
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: 11px; /* 11px আপডেট */
   font-weight: 600;
 }
 
 .tips-input-group input {
   background: var(--bg-input);
   border: 1px solid var(--border-color);
-  padding: 14px;
+  padding: 12px 14px;
   border-radius: 10px;
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 11px; /* 11px আপডেট */
   outline: none;
   transition: border-color 0.2s;
 }
@@ -100,7 +100,7 @@
   background: var(--color-primary);
   color: #000;
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 11px; /* 11px আপডেট */
   padding: 14px;
   border: none;
   border-radius: 10px;
@@ -116,7 +116,7 @@
 /* History List */
 .tips-history-title {
   color: var(--text-primary);
-  font-size: 1.1rem;
+  font-size: 14px; /* হেডিং একটু বড় রাখা হলো */
   margin: 0 0 12px 0;
 }
 
@@ -144,12 +144,12 @@
 
 .tips-item-left strong {
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: 11px; /* 11px আপডেট */
 }
 
 .tips-item-left span {
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  font-size: 11px; /* 11px আপডেট */
 }
 
 .tips-item-right {
@@ -160,7 +160,7 @@
 }
 
 .tips-amount {
-  font-size: 1rem;
+  font-size: 11px; /* 11px আপডেট */
   font-weight: 700;
   color: var(--color-primary);
 }
@@ -169,7 +169,7 @@
 .badge {
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 0.65rem;
+  font-size: 9px; /* ব্যাজগুলো একটু ছোট রাখা হলো */
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -191,6 +191,12 @@
   text-align: center;
   gap: 10px;
 }
+
+.tips-empty p {
+  font-size: 11px; /* 11px আপডেট */
+  margin: 0;
+}
+
 .tips-empty svg {
   color: var(--border-color);
   width: 32px;
