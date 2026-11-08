@@ -7,14 +7,19 @@ export default function AdminReferralPage() {
   const [referrals, setReferrals] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState<string | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
 
   // সেটিংস ফর্ম স্টেট
-  const [commissionValue, setCommissionValue] = useState(5);
-  const [minDeposit, setMinDeposit] = useState(300);
+  const [formData, setFormData] = useState({
+    min_deposit_required: 300,
+    fixed_join_bonus: 50,
+    deposit_commission_percentage: 1,
+    withdraw_commission_percentage: 1,
+    wager_milestone_amount: 10000,
+    wager_bonus_amount: 100,
+  });
 
   useEffect(() => {
     fetchData();
@@ -23,7 +28,7 @@ export default function AdminReferralPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // ১. রেফারেল ডাটা আনা (রেফারার এবং রেফার্ড ইউজারের গেম আইডিসহ)
+      // ১. রেফারেল ডাটা আনা
       const { data: refData, error: refError } = await supabase
         .from("user_invited_friend_referral")
         .select(`
@@ -36,7 +41,7 @@ export default function AdminReferralPage() {
       if (refError) throw refError;
       if (refData) setReferrals(refData);
 
-      // ২. রেফারেল কমিশন সেটিংস আনা
+      // ২. রেফারেল সেটিংস আনা
       const { data: setData, error: setError } = await supabase
         .from("referral_commission_control")
         .select("*")
@@ -46,8 +51,14 @@ export default function AdminReferralPage() {
 
       if (!setError && setData) {
         setSettings(setData);
-        setCommissionValue(Number(setData.commission_value));
-        setMinDeposit(Number(setData.min_deposit_required));
+        setFormData({
+          min_deposit_required: Number(setData.min_deposit_required) || 300,
+          fixed_join_bonus: Number(setData.fixed_join_bonus) || 50,
+          deposit_commission_percentage: Number(setData.deposit_commission_percentage) || 1,
+          withdraw_commission_percentage: Number(setData.withdraw_commission_percentage) || 1,
+          wager_milestone_amount: Number(setData.wager_milestone_amount) || 10000,
+          wager_bonus_amount: Number(setData.wager_bonus_amount) || 100,
+        });
       }
 
     } catch (err: any) {
@@ -57,57 +68,9 @@ export default function AdminReferralPage() {
     }
   };
 
-  // রেফারেল Approve বা Reject করা
-  const handleAction = async (referral: any, status: "approved" | "rejected") => {
-    setProcessing(referral.id);
-    setMessage({ type: "", text: "" });
-
-    try {
-      if (status === "approved") {
-        // ১. রেফারেল স্ট্যাটাস আপডেট
-        const { error: statusError } = await supabase
-          .from("user_invited_friend_referral")
-          .update({ status: "approved" })
-          .eq("id", referral.id);
-        if (statusError) throw statusError;
-
-        // ২. রেফারারকে বোনাস দেওয়া (referral_earnings এ যোগ করা)
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("referral_earnings")
-          .eq("id", referral.referrer_id)
-          .single();
-
-        const currentEarnings = Number(profile?.referral_earnings || 0);
-        const newEarnings = currentEarnings + Number(referral.bonus_amount);
-
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({ referral_earnings: newEarnings })
-          .eq("id", referral.referrer_id);
-        
-        if (profileError) throw profileError;
-
-        setMessage({ type: "success", text: "Referral Approved and bonus added to referrer's earnings!" });
-
-      } else {
-        // Reject Logic
-        const { error } = await supabase
-          .from("user_invited_friend_referral")
-          .update({ status: "rejected" })
-          .eq("id", referral.id);
-        if (error) throw error;
-        setMessage({ type: "success", text: "Referral Rejected." });
-      }
-
-      fetchData(); // রিফ্রেশ লিস্ট
-
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message });
-    } finally {
-      setProcessing(null);
-      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: Number(value) });
   };
 
   // সেটিংস আপডেট করা
@@ -122,8 +85,12 @@ export default function AdminReferralPage() {
       const { error } = await supabase
         .from("referral_commission_control")
         .update({
-          commission_value: commissionValue,
-          min_deposit_required: minDeposit,
+          min_deposit_required: formData.min_deposit_required,
+          fixed_join_bonus: formData.fixed_join_bonus,
+          deposit_commission_percentage: formData.deposit_commission_percentage,
+          withdraw_commission_percentage: formData.withdraw_commission_percentage,
+          wager_milestone_amount: formData.wager_milestone_amount,
+          wager_bonus_amount: formData.wager_bonus_amount,
           updated_at: new Date().toISOString()
         })
         .eq("id", settings.id);
@@ -185,34 +152,91 @@ export default function AdminReferralPage() {
       {/* রেফারেল সেটিংস কার্ড */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
         <h2 className="text-lg font-bold text-gray-900 mb-4">Commission Settings</h2>
-        <form onSubmit={handleUpdateSettings} className="flex flex-col md:flex-row gap-4 items-end">
-          <div className="flex-1">
-            <label className="text-sm text-gray-600 font-semibold mb-1 block">Commission Percentage (%)</label>
-            <input
-              type="number"
-              value={commissionValue}
-              onChange={(e) => setCommissionValue(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
-              required
-            />
-          </div>
-          <div className="flex-1">
+        <form onSubmit={handleUpdateSettings} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          
+          <div>
             <label className="text-sm text-gray-600 font-semibold mb-1 block">Minimum Deposit Required (৳)</label>
             <input
               type="number"
-              value={minDeposit}
-              onChange={(e) => setMinDeposit(Number(e.target.value))}
+              name="min_deposit_required"
+              value={formData.min_deposit_required}
+              onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
               required
             />
           </div>
-          <button 
-            type="submit"
-            disabled={savingSettings}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
-          >
-            {savingSettings ? "Saving..." : "Update Settings"}
-          </button>
+
+          <div>
+            <label className="text-sm text-gray-600 font-semibold mb-1 block">Fixed Join Bonus (৳)</label>
+            <input
+              type="number"
+              name="fixed_join_bonus"
+              value={formData.fixed_join_bonus}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600 font-semibold mb-1 block">Deposit Commission (%)</label>
+            <input
+              type="number"
+              step="0.01"
+              name="deposit_commission_percentage"
+              value={formData.deposit_commission_percentage}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600 font-semibold mb-1 block">Withdraw Commission (%)</label>
+            <input
+              type="number"
+              step="0.01"
+              name="withdraw_commission_percentage"
+              value={formData.withdraw_commission_percentage}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600 font-semibold mb-1 block">Wager Milestone (৳)</label>
+            <input
+              type="number"
+              name="wager_milestone_amount"
+              value={formData.wager_milestone_amount}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600 font-semibold mb-1 block">Milestone Bonus (৳)</label>
+            <input
+              type="number"
+              name="wager_bonus_amount"
+              value={formData.wager_bonus_amount}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
+              required
+            />
+          </div>
+
+          <div className="md:col-span-2 lg:col-span-3 flex justify-end mt-2">
+            <button 
+              type="submit"
+              disabled={savingSettings}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
+            >
+              {savingSettings ? "Saving..." : "Update Settings"}
+            </button>
+          </div>
         </form>
       </div>
 
@@ -223,12 +247,12 @@ export default function AdminReferralPage() {
             <thead>
               <tr className="bg-gray-50 text-gray-600 text-sm border-b border-gray-200">
                 <th className="p-4 font-semibold">Date</th>
-                <th className="p-4 font-semibold">Referrer (Inviter)</th>
+                <th className="p-4 font-semibold">Referrer</th>
                 <th className="p-4 font-semibold">Referred User</th>
                 <th className="p-4 font-semibold">Deposit Amount</th>
                 <th className="p-4 font-semibold">Bonus Amount</th>
+                <th className="p-4 font-semibold">Total Wager</th>
                 <th className="p-4 font-semibold">Status</th>
-                <th className="p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -254,6 +278,9 @@ export default function AdminReferralPage() {
                     <td className="p-4 text-green-600 font-bold">
                       ৳{Number(ref.bonus_amount).toLocaleString()}
                     </td>
+                    <td className="p-4 text-gray-700">
+                      ৳{Number(ref.total_wager || 0).toLocaleString()}
+                    </td>
                     <td className="p-4">
                       <span className={`px-2 py-1 rounded text-xs font-bold ${
                         ref.status === "approved" ? "bg-green-100 text-green-700 border border-green-200" :
@@ -262,28 +289,6 @@ export default function AdminReferralPage() {
                       }`}>
                         {ref.status.toUpperCase()}
                       </span>
-                    </td>
-                    <td className="p-4 text-right flex gap-2 justify-end">
-                      {ref.status === "pending" ? (
-                        <>
-                          <button 
-                            onClick={() => handleAction(ref, "approved")}
-                            disabled={processing === ref.id}
-                            className="bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white px-3 py-1.5 rounded text-xs font-bold transition-colors"
-                          >
-                            {processing === ref.id ? "..." : "Approve"}
-                          </button>
-                          <button 
-                            onClick={() => handleAction(ref, "rejected")}
-                            disabled={processing === ref.id}
-                            className="bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white px-3 py-1.5 rounded text-xs font-bold transition-colors"
-                          >
-                            Reject
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-xs text-gray-400 italic">Processed</span>
-                      )}
                     </td>
                   </tr>
                 ))
