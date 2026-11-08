@@ -72,18 +72,19 @@ export default function AdminDepositsPage() {
         .eq("id", txn.user_id);
 
       // ==========================================
-      // ৪. রেফারেল লজিক (ম্যানুয়াল ক্যালকুলেশন)
+      // ৪. রেফারেল লজিক
       // ==========================================
-      // এখানে 'status', 'pending' শর্তটি সরিয়ে দেওয়া হয়েছে। 
-      // শুধু bonus_amount চেক করা হচ্ছে যাতে ডাবল বোনাস না যোগ হয়।
+      // referred_user_id দিয়ে রেকর্ড খোঁজা (স্ট্যাটাস যাই হোক)
       const { data: referralData } = await supabase
         .from("user_invited_friend_referral")
         .select("*")
         .eq("referred_user_id", txn.user_id)
         .maybeSingle();
 
+      // যদি রেকর্ড পাওয়া যায় এবং আগে থেকে বোনাস যোগ করা না থাকে
       if (referralData && Number(referralData.bonus_amount) === 0) {
-        // অ্যাডমিন প্যানেল থেকে নতুন কমিশন সেটিংস আনা
+        
+        // কমিশন সেটিংস আনা
         const { data: commissionSettings } = await supabase
           .from("referral_commission_control")
           .select("fixed_join_bonus, deposit_commission_percentage, min_deposit_required")
@@ -92,13 +93,13 @@ export default function AdminDepositsPage() {
           .maybeSingle();
 
         // যদি সেটিংস থাকে এবং ডিপোজিট মিনিমাম লিমিট পার করে
-        if (commissionSettings && depositAmount >= commissionSettings.min_deposit_required) {
+        if (commissionSettings && depositAmount >= Number(commissionSettings.min_deposit_required)) {
           
           const fixedBonus = Number(commissionSettings.fixed_join_bonus) || 0;
           const depComm = (depositAmount * Number(commissionSettings.deposit_commission_percentage)) / 100;
           const totalCommission = fixedBonus + depComm;
           
-          // রেফারেল রেকর্ড আপডেট করা (status: approved, bonus_amount: হিসাবকৃত)
+          // ৪.১. রেফারেল টেবিল আপডেট (স্ট্যাটাস: approved, বোনাস: totalCommission)
           await supabase
             .from("user_invited_friend_referral")
             .update({ 
@@ -108,15 +109,16 @@ export default function AdminDepositsPage() {
             })
             .eq("id", referralData.id);
 
-          // রেফারারের প্রোফাইলে referral_earnings যোগ করা
-          const { data: referrerProfile } = await supabase
+          // ৪.২. রেফারারের প্রোফাইলে referral_earnings যোগ করা
+          const { data: referrerProfile, error: referrerError } = await supabase
             .from("profiles")
             .select("referral_earnings")
             .eq("id", referralData.referrer_id)
             .single();
 
-          if (referrerProfile) {
+          if (!referrerError && referrerProfile) {
             const newReferralEarnings = Number(referrerProfile.referral_earnings || 0) + totalCommission;
+            
             await supabase
               .from("profiles")
               .update({ referral_earnings: newReferralEarnings })
