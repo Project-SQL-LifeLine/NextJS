@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -126,7 +127,14 @@ export default function FreeRedeemCodePage() {
               placeholder={t("Enter Code (e.g. EID500)", "কোড দিন (যেমন: EID500)")}
               required 
             />
-            <button type="submit" disabled={submitting}>
+            <button
+              type="submit"
+              disabled={submitting}
+              style={{
+                background: "linear-gradient(90deg, #008000 0%, #228B22 100%)",
+                color: "#FFFFFF"
+              }}
+            >
               {submitting ? t("Checking...", "চেক করা হচ্ছে...") : t("Redeem Code", "রিডিম কোড")}
             </button>
           </form>
