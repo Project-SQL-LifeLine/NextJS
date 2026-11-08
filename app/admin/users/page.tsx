@@ -11,8 +11,16 @@ export default function AdminUsersPage() {
   // মডাল স্টেট
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editBalance, setEditBalance] = useState("");
-  const [editTurnover, setEditTurnover] = useState("");
+  
+  // এডিট ফর্ম স্টেট
+  const [editData, setEditData] = useState({
+    balance: "",
+    turnover: "",
+    vip_level: "",
+    vip_wager: "",
+    vip_bonus: "",
+    rakeback: "",
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -20,6 +28,7 @@ export default function AdminUsersPage() {
 
   const fetchUsers = async () => {
     setLoading(true);
+    // সব কলাম সিলেক্ট করা হচ্ছে (যাতে VIP কলামগুলোও আসে)
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
@@ -38,7 +47,7 @@ export default function AdminUsersPage() {
 
     if (!error) {
       alert(`User ${newStatus === "blocked" ? "Blocked" : "Unblocked"} Successfully!`);
-      fetchUsers(); // Refresh list
+      fetchUsers(); 
     }
   };
 
@@ -57,8 +66,14 @@ export default function AdminUsersPage() {
 
   const openEditModal = (user: any) => {
     setSelectedUser(user);
-    setEditBalance(user.balance.toString());
-    setEditTurnover(user.total_required_turnover.toString());
+    setEditData({
+      balance: user.balance?.toString() || "0",
+      turnover: user.total_required_turnover?.toString() || "0",
+      vip_level: user.current_vip_level?.toString() || "0",
+      vip_wager: user.total_vip_wager?.toString() || "0",
+      vip_bonus: user.vip_bonus_balance?.toString() || "0",
+      rakeback: user.unclaimed_rakeback?.toString() || "0",
+    });
     setIsEditModalOpen(true);
   };
 
@@ -68,8 +83,12 @@ export default function AdminUsersPage() {
     const { error } = await supabase
       .from("profiles")
       .update({
-        balance: Number(editBalance),
-        total_required_turnover: Number(editTurnover),
+        balance: Number(editData.balance),
+        total_required_turnover: Number(editData.turnover),
+        current_vip_level: Number(editData.vip_level),
+        total_vip_wager: Number(editData.vip_wager),
+        vip_bonus_balance: Number(editData.vip_bonus),
+        unclaimed_rakeback: Number(editData.rakeback),
       })
       .eq("id", selectedUser.id);
 
@@ -80,6 +99,11 @@ export default function AdminUsersPage() {
     } else {
       alert("Error updating: " + error.message);
     }
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditData({ ...editData, [name]: value });
   };
 
   // সার্চ ফিল্টার
@@ -119,12 +143,15 @@ export default function AdminUsersPage() {
       {/* ইউজার টেবিল */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
+          <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
               <tr className="bg-gray-50 text-gray-600 text-sm border-b border-gray-200">
                 <th className="p-4 font-semibold">Game ID / Mobile</th>
                 <th className="p-4 font-semibold">Balance (৳)</th>
-                <th className="p-4 font-semibold">Bonus (৳)</th>
+                <th className="p-4 font-semibold">VIP Level</th>
+                <th className="p-4 font-semibold">VIP Wager (৳)</th>
+                <th className="p-4 font-semibold">VIP Bonus (৳)</th>
+                <th className="p-4 font-semibold">Rakeback (৳)</th>
                 <th className="p-4 font-semibold">Turnover (Req/Comp)</th>
                 <th className="p-4 font-semibold">Status</th>
                 <th className="p-4 font-semibold text-right">Actions</th>
@@ -133,7 +160,7 @@ export default function AdminUsersPage() {
             <tbody>
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-gray-500">
+                  <td colSpan={9} className="p-6 text-center text-gray-500">
                     No users found.
                   </td>
                 </tr>
@@ -147,8 +174,17 @@ export default function AdminUsersPage() {
                     <td className="p-4 font-bold text-green-600">
                       ৳{Number(user.balance).toLocaleString()}
                     </td>
+                    <td className="p-4 font-bold text-purple-600">
+                      Level {user.current_vip_level || 0}
+                    </td>
+                    <td className="p-4 text-gray-700">
+                      ৳{Number(user.total_vip_wager || 0).toLocaleString()}
+                    </td>
                     <td className="p-4 text-blue-600">
-                      ৳{Number(user.bonus_balance || 0).toLocaleString()}
+                      ৳{Number(user.vip_bonus_balance || 0).toLocaleString()}
+                    </td>
+                    <td className="p-4 text-orange-500">
+                      ৳{Number(user.unclaimed_rakeback || 0).toLocaleString()}
                     </td>
                     <td className="p-4 text-xs">
                       <div className="text-gray-500">Req: ৳{Number(user.total_required_turnover).toLocaleString()}</div>
@@ -200,25 +236,67 @@ export default function AdminUsersPage() {
       {/* Edit Modal */}
       {isEditModalOpen && selectedUser && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+          <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Edit User: {selectedUser.game_id}</h2>
             
-            <div className="flex flex-col gap-4">
-              <div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2 md:col-span-1">
                 <label className="text-sm text-gray-600 font-semibold mb-1 block">Main Balance (৳)</label>
                 <input
                   type="number"
-                  value={editBalance}
-                  onChange={(e) => setEditBalance(e.target.value)}
+                  name="balance"
+                  value={editData.balance}
+                  onChange={handleEditChange}
                   className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
                 />
               </div>
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <label className="text-sm text-gray-600 font-semibold mb-1 block">Required Turnover (৳)</label>
                 <input
                   type="number"
-                  value={editTurnover}
-                  onChange={(e) => setEditTurnover(e.target.value)}
+                  name="turnover"
+                  value={editData.turnover}
+                  onChange={handleEditChange}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="col-span-2 md:col-span-1">
+                <label className="text-sm text-gray-600 font-semibold mb-1 block">VIP Level (ID)</label>
+                <input
+                  type="number"
+                  name="vip_level"
+                  value={editData.vip_level}
+                  onChange={handleEditChange}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="col-span-2 md:col-span-1">
+                <label className="text-sm text-gray-600 font-semibold mb-1 block">Total VIP Wager (৳)</label>
+                <input
+                  type="number"
+                  name="vip_wager"
+                  value={editData.vip_wager}
+                  onChange={handleEditChange}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="col-span-2 md:col-span-1">
+                <label className="text-sm text-gray-600 font-semibold mb-1 block">VIP Bonus Balance (৳)</label>
+                <input
+                  type="number"
+                  name="vip_bonus"
+                  value={editData.vip_bonus}
+                  onChange={handleEditChange}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="col-span-2 md:col-span-1">
+                <label className="text-sm text-gray-600 font-semibold mb-1 block">Unclaimed Rakeback (৳)</label>
+                <input
+                  type="number"
+                  name="rakeback"
+                  value={editData.rakeback}
+                  onChange={handleEditChange}
                   className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
                 />
               </div>
