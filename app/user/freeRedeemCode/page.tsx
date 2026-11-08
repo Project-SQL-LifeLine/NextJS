@@ -7,6 +7,7 @@ import { useLanguage } from "../../../lib/LanguageContext";
 import Header from "../../../components/Header";
 import BottomNav from "../../../components/BottomNav";
 import "./redeem.css";
+import "./redeem-loader.css"; // নতুন লোডার CSS ইমপোর্ট
 
 export default function FreeRedeemCodePage() {
   const router = useRouter();
@@ -31,10 +32,12 @@ export default function FreeRedeemCodePage() {
 
       setIsLoggedIn(true);
 
+      // প্রোফাইল লোড
       const { data: profileData } = await supabase
         .from("profiles").select("*").eq("id", user.id).single();
       if (profileData) setProfile(profileData);
 
+      // রিডিম হিস্ট্রি লোড
       const { data: histData } = await supabase
         .from("user_redeem_code_usage_history")
         .select("*")
@@ -59,10 +62,12 @@ export default function FreeRedeemCodePage() {
     setMessage({ type: "", text: "" });
 
     try {
+      // ১. ইউজারের আইপি অ্যাড্রেস বের করা
       const ipRes = await fetch("https://api.ipify.org?format=json");
       const ipData = await ipRes.json();
       const userIp = ipData.ip || "unknown";
 
+      // ২. ডাটাবেস ফাংশন কল করা
       const { data, error } = await supabase.rpc("redeem_code_logic", {
         p_code: code.trim(),
         p_ip_address: userIp
@@ -77,7 +82,7 @@ export default function FreeRedeemCodePage() {
                   `সফল! আপনি ৳${data.bonus_amount} বোনাস পেয়েছেন। ${data.required_turnover} টার্নওভার যোগ হয়েছে।`)
         });
         setCode("");
-        loadData();
+        loadData(); // রিফ্রেশ
       } else {
         setMessage({ type: "error", text: data?.error || t("Failed to redeem code.", "কোড রিডিম ব্যর্থ হয়েছে।") });
       }
@@ -88,10 +93,25 @@ export default function FreeRedeemCodePage() {
     }
   };
 
+  // ==========================================
+  // নতুন লোডিং এনিমেশন (SVG টিকিট আইকন)
+  // ==========================================
   if (loading) {
     return (
-      <div className="redeem-page flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#263C32] border-t-[#00E701] rounded-full animate-spin"></div>
+      <div className="redeem-loader-container">
+        <svg 
+          className="redeem-loader-svg" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={1.5} 
+            d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z" 
+          />
+        </svg>
       </div>
     );
   }
@@ -101,6 +121,8 @@ export default function FreeRedeemCodePage() {
       <Header isLoggedIn={isLoggedIn} userProfile={profile} />
 
       <main className="redeem-main">
+        {/* H1 টাইটেল "Redeem Code" সরিয়ে দেওয়া হয়েছে */}
+
         {message.text && (
           <div className={`redeem-alert ${message.type}`}>{message.text}</div>
         )}
@@ -120,14 +142,7 @@ export default function FreeRedeemCodePage() {
               placeholder={t("Enter Code", "কোড দিন")}
               required 
             />
-            
-            {/* নতুন ৩ডি বাটন ডিজাইন (ছবির মতো) */}
             <button type="submit" disabled={submitting} className="redeem-submit-btn">
-              <div className="redeem-btn-icon-wrapper">
-                <svg className="w-5 h-5 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
               {submitting ? t("Checking...", "চেক করা হচ্ছে...") : t("Redeem Code", "রিডিম কোড")}
             </button>
           </form>
