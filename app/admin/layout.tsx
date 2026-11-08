@@ -26,8 +26,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    // ২৫% (০.২৫) জুম-আউট করা হয়েছে (আগের ০.৫ এর অর্ধেক)
-    <div style={{ zoom: 0.25 }} className="min-h-screen bg-gray-50 flex font-sans text-gray-800 overflow-hidden w-full">
+    // এখানে bg-white যোগ করা হয়েছে যাতে পুরো স্ক্রিন সাদা হয়ে যায়
+    <div style={{ zoom: 0.25 }} className="min-h-screen bg-white flex font-sans text-gray-800 overflow-hidden w-full">
       
       {/* Sidebar (Desktop Type) */}
       <aside className={`bg-white border-r border-gray-200 w-64 flex-shrink-0 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'block' : 'hidden md:flex'}`}>
@@ -75,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-white">
         
         {/* Top Header */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6">
@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-white">
           {children}
         </main>
 
