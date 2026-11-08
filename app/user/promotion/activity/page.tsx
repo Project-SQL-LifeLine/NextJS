@@ -2,28 +2,39 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../../../lib/supabase/client"; // পাথ আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী অ্যাডজাস্ট করুন
-import { useLanguage } from "../../../../lib/LanguageContext"; // পাথ অ্যাডজাস্ট করুন
-import Header from "../../../../components/Header"; // পাথ অ্যাডজাস্ট করুন
-import BottomNav from "../../../../components/BottomNav"; // পাথ অ্যাডজাস্ট করুন
-import "./activity.css";
-
-// ক্যাটাগরি লিস্ট (ইংরেজি)
-const CATEGORIES = [
-  { id: "all", label: "All" },
-  { id: "deposit", label: "Deposit" },
-  { id: "electronic", label: "Electronic" },
-  { id: "rebate", label: "Rebate" },
-  { id: "other", label: "Other" },
-];
+import { supabase } from "../../lib/supabase/client";
+import { useLanguage } from "../../lib/LanguageContext";
+import Header from "../../components/Header";
+import BottomNav from "../../components/BottomNav";
+import "./activity.css"; // আপনার CSS ফাইলের নাম
 
 export default function ActivityPage() {
   const router = useRouter();
-  const { t } = useLanguage(); // যদি আপনার LanguageContext-এ 't' ফাংশন থাকে
+  const { t } = useLanguage();
   
   const [promotions, setPromotions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
+
+  // সেশন চেক এবং প্রোফাইল লোড
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setIsLoggedIn(true);
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        if (profileData) setProfile(profileData);
+      } else {
+        setIsLoggedIn(false);
+      }
+    };
+    checkSession();
+  }, []);
 
   const fetchPromotions = useCallback(async () => {
     setLoading(true);
@@ -50,77 +61,61 @@ export default function ActivityPage() {
     fetchPromotions();
   }, [fetchPromotions]);
 
-  const filteredPromotions =
-    activeCategory === "all"
-      ? promotions
-      : promotions.filter((promo) => promo.category === activeCategory);
-
   return (
-    <div className="activity-page">
+    <div className="min-h-screen bg-[#18221E] pb-20 font-sans">
       {/* আপনার প্রজেক্টের কমন Header */}
-      <Header />
+      <Header isLoggedIn={isLoggedIn} userProfile={profile} />
 
-      {/* পেজের সাব-হেডার */}
-      <div className="activity-header">
+      {/* পেজের সাব-হেডার (Promotion লেখা সরানো হয়েছে) */}
+      <div className="sticky top-[60px] z-40 bg-[#18221E] border-b border-[#263C32] px-4 py-3 flex items-center">
         <button
           onClick={() => router.back()}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: "var(--gold-accent)",
-            fontSize: "18px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-          }}
+          className="text-[#00E701] text-xl font-bold flex items-center"
         >
-          &#8592;
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
-        <span style={{ flex: 1, textAlign: "center" }}>Promotion</span>
-        <div style={{ width: "18px" }}></div> {/* ব্যালেন্স করার জন্য */}
-      </div>
-
-      {/* ফিল্টার বার */}
-      <div className="filter-bar">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.id}
-            className={`filter-btn ${activeCategory === cat.id ? "active" : ""}`}
-            onClick={() => setActiveCategory(cat.id)}
-          >
-            {cat.label}
-          </button>
-        ))}
       </div>
 
       {/* প্রমোশন লিস্ট */}
-      <div className="promo-list">
+      <div className="p-4 flex flex-col gap-4">
         {loading ? (
-          <div className="loading-state">Loading promotions...</div>
-        ) : filteredPromotions.length === 0 ? (
-          <div className="empty-state">No promotions available in this category.</div>
+          <div className="text-center text-[#A0ADB0] text-sm py-10">Loading promotions...</div>
+        ) : promotions.length === 0 ? (
+          <div className="text-center text-[#A0ADB0] text-sm py-10">No promotions available.</div>
         ) : (
-          filteredPromotions.map((promo) => (
-            <div key={promo.id} className="promo-card">
-              <div className="promo-image-container">
+          promotions.map((promo) => (
+            <div key={promo.id} className="bg-[#1B2A23] border border-[#263C32] rounded-xl overflow-hidden shadow-lg">
+              
+              {/* প্রমোশন ইমেজ */}
+              <div className="w-full h-40 relative">
                 <img
                   src={promo.image_url}
                   alt={promo.title}
-                  className="promo-image"
+                  className="w-full h-full object-cover"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src =
-                      "https://via.placeholder.com/600x300/1E2D4A/D4AF37?text=Promotion";
+                      "https://placehold.co/600x300/1B2A23/00E701?text=Promotion";
                   }}
                 />
               </div>
 
-              <div className="promo-content">
-                <div className="promo-text-area">
-                  <div className="promo-title">{promo.title}</div>
-                  <div className="promo-date">{promo.valid_until || "Long-term"}</div>
+              {/* প্রমোশন কন্টেন্ট */}
+              <div className="p-4 flex flex-col gap-3">
+                <div>
+                  <h3 className="text-[#FFFFFF] text-sm font-bold mb-1">{promo.title}</h3>
+                  <p className="text-[#A0ADB0] text-[11px]">{promo.valid_until || "Long-term"}</p>
                 </div>
+                
+                {/* ৩ডি গ্লসি বাটন */}
                 <button
-                  className="promo-btn"
+                  className="w-full py-2.5 rounded-lg font-bold text-[12px] text-white transition-all active:translate-y-[2px]"
+                  style={{
+                    background: "linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%)",
+                    border: "1px solid #117934",
+                    boxShadow: "inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.2), 0 4px 0 #117934, 0 6px 10px rgba(0,0,0,0.3)",
+                  }}
                   onClick={() => {
                     if (promo.button_link) {
                       router.push(promo.button_link);
