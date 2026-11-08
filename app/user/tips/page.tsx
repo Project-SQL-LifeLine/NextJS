@@ -7,6 +7,7 @@ import { useLanguage } from "../../../lib/LanguageContext";
 import Header from "../../../components/Header";
 import BottomNav from "../../../components/BottomNav";
 import "./tips.css";
+import "./tips-loader.css"; // নতুন লোডার ইমপোর্ট
 
 export default function TipsPage() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function TipsPage() {
 
       setIsLoggedIn(true);
 
-      // ১. প্রোফাইল ডাটা (ব্যালেন্স দেখানোর জন্য)
+      // ১. প্রোফাইল ডাটা
       const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
@@ -42,7 +43,7 @@ export default function TipsPage() {
       
       if (profileData) setProfile(profileData);
 
-      // ২. টিপ হিস্ট্রি লোড করা
+      // ২. টিপ হিস্ট্রি
       const { data: historyData } = await supabase
         .from("user_tip_send_history")
         .select(`
@@ -69,7 +70,6 @@ export default function TipsPage() {
     setMessage({ type: "", text: "" });
 
     try {
-      // ৩. ডাটাবেস ফাংশন কল করা (সব চেক ব্যাকএন্ডে হবে, ব্রাউজার থেকে হ্যাক করা যাবে না)
       const { data, error } = await supabase.rpc("request_tip", {
         p_receiver_game_id: receiverGameId.trim(),
         p_amount: Number(amount)
@@ -81,6 +81,7 @@ export default function TipsPage() {
         setMessage({ type: "success", text: t(data.message, "টিপ রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে। অ্যাডমিন অ্যাপ্রুভ করার পর টাকা যোগ হবে।") });
         setReceiverGameId("");
         setAmount("");
+        
         // হিস্ট্রি রিফ্রেশ
         const { data: { user } } = await supabase.auth.getUser();
         const { data: historyData } = await supabase
@@ -90,7 +91,7 @@ export default function TipsPage() {
           .order("created_at", { ascending: false });
         if (historyData) setHistory(historyData);
         
-        // প্রোফাইল রিফ্রেশ (ব্যালেন্স আপডেট)
+        // প্রোফাইল রিফ্রেশ
         const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user?.id).single();
         if (profileData) setProfile(profileData);
 
@@ -104,10 +105,25 @@ export default function TipsPage() {
     }
   };
 
+  // ==========================================
+  // নতুন টিপ বেইজড সাদা লোডিং এনিমেশন
+  // ==========================================
   if (loading) {
     return (
-      <div className="tips-page flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#2B4236] border-t-[#00E701] rounded-full animate-spin"></div>
+      <div className="tips-loader-container">
+        <svg 
+          className="tips-loader-svg" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={1.5} 
+            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+          />
+        </svg>
       </div>
     );
   }
@@ -131,26 +147,27 @@ export default function TipsPage() {
             {t("Send Tip", "টিপ পাঠান")}
           </h2>
           <p className="tips-desc">
-            {t("Enter your friend's Game ID and amount to send a tip. Admin will verify and approve it. It may take some time.", "আপনার বন্ধুর গেম আইডি এবং পরিমাণ লিখে টিপ পাঠান। অ্যাডমিন ভেরিফাই করে অ্যাপ্রুভ করলে টাকা যোগ হবে।")}
+            {t("Enter your friend's Game ID and amount to send a tip. Admin will verify and approve it.", "আপনার বন্ধুর গেম আইডি এবং পরিমাণ লিখে টিপ পাঠান। অ্যাডমিন ভেরিফাই করে অ্যাপ্রুভ করলে টাকা যোগ হবে।")}
           </p>
 
           <form className="tips-form" onSubmit={handleSendTip}>
+            
+            {/* ১. Receiver Game ID (Label সরানো হয়েছে এবং Placeholder আপডেট করা হয়েছে) */}
             <div className="tips-input-group">
-              <label>{t("Receiver Game ID", "রিসিভারের গেম আইডি")}</label>
               <input 
                 type="text" 
-                placeholder={t("e.g. mdrashedul88", "যেমন: mdrashedul88")}
+                placeholder={t("Receiver Game ID", "রিসিভারের গেম আইডি")}
                 value={receiverGameId}
                 onChange={(e) => setReceiverGameId(e.target.value)}
                 required
               />
             </div>
             
+            {/* ২. Amount (Label সরানো হয়েছে এবং Placeholder আপডেট করা হয়েছে) */}
             <div className="tips-input-group">
-              <label>{t("Amount (৳)", "পরিমাণ (৳)")}</label>
               <input 
                 type="number" 
-                placeholder={t("Enter amount", "পরিমাণ লিখুন")}
+                placeholder={t("Amount (৳)", "পরিমাণ (৳)")}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 min="1"
@@ -191,7 +208,8 @@ export default function TipsPage() {
                     <span>{new Date(item.created_at).toLocaleString()}</span>
                   </div>
                   <div className="tips-item-right">
-                    <span className={`tips-amount ${isSender ? "text-[#ff4d4d]" : "text-[#00E701]"}`}>
+                    {/* ৪. টিপ হিস্ট্রির সবুজ রঙ সাদা করা হয়েছে (text-white) */}
+                    <span className={`tips-amount ${isSender ? "text-[#ff4d4d]" : "text-white"}`}>
                       {isSender ? "-" : "+"} ৳{Number(item.amount).toFixed(2)}
                     </span>
                     {getBadge(item.status)}
