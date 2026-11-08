@@ -26,8 +26,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    // ৭০% জুম-আউট (0.7) প্রয়োগ করা হয়েছে
-    <div style={{ zoom: 0.7 }} className="min-h-screen bg-gray-50 flex font-sans text-gray-800 overflow-hidden w-full">
+    // ৮০% জুম-আউট (0.8) প্রয়োগ করা হয়েছে
+    <div style={{ zoom: 0.8 }} className="min-h-screen bg-gray-50 flex font-sans text-gray-800 overflow-hidden w-full">
       
       {/* Sidebar (Desktop Type) */}
       <aside className={`bg-white border-r border-gray-200 w-64 flex-shrink-0 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'block' : 'hidden md:flex'}`}>
