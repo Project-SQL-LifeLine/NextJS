@@ -7,7 +7,8 @@ import { useLanguage } from "../../../lib/LanguageContext";
 import Header from "../../../components/Header";
 import BottomNav from "../../../components/BottomNav";
 import "./settings.css";
-import "./settings-animations.css"; // নতুন পপ-আপ এনিমেশন ইমপোর্ট
+import "./settings-animations.css";
+import "./settings-loader.css"; // নতুন লোডার CSS ইমপোর্ট
 
 type TabType = "account" | "verify" | "security" | "sessions";
 
@@ -33,7 +34,6 @@ export default function UserSettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // পপ-আপ মেসেজ অটো ক্লিয়ার করার জন্য
   useEffect(() => {
     if (message.text) {
       const timer = setTimeout(() => {
@@ -65,7 +65,6 @@ export default function UserSettingsPage() {
         setCity(profileData.city || "");
       }
 
-      // user_payment_type_store থেকে account_name আনা
       const { data: paymentData } = await supabase
         .from("user_payment_type_store")
         .select("account_name")
@@ -88,14 +87,12 @@ export default function UserSettingsPage() {
     void loadData(); 
   }, [loadData]);
 
-  // মোবাইল নাম্বার মাস্ক করার ফাংশন (যেমন: 017*****183)
   const maskMobile = (mobile: string) => {
     if (!mobile) return "-";
     if (mobile.length < 7) return mobile;
     return mobile.slice(0, 3) + '*****' + mobile.slice(-3);
   };
 
-  // ইমেইল মাস্ক করার ফাংশন (যেমন: exa***@gmail.com)
   const maskEmail = (emailStr: string) => {
     if (!emailStr) return "-";
     const [local, domain] = emailStr.split('@');
@@ -154,10 +151,32 @@ export default function UserSettingsPage() {
     }
   };
 
+  // ==========================================
+  // নতুন সেটিংস ভিত্তিক SVG লোডিং এনিমেশন
+  // ==========================================
   if (loading) {
     return (
-      <div className="settings-page flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#2B4236] border-t-[#00E701] rounded-full animate-spin"></div>
+      <div className="settings-loader-container">
+        <svg 
+          className="settings-loader-svg" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          {/* গিয়ার / সেটিংস আইকন */}
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={1.5} 
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
+          />
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={1.5} 
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
+          />
+        </svg>
       </div>
     );
   }
@@ -169,7 +188,6 @@ export default function UserSettingsPage() {
       <main className="settings-main pt-4">
         <h1 className="settings-title">{t("Account Settings", "অ্যাকাউন্ট সেটিংস")}</h1>
 
-        {/* Pop-up Message Animation */}
         {message.text && (
           <div className="popup-overlay" onClick={() => setMessage({ type: "", text: "" })}>
             <div className={`popup-box ${message.type}`} onClick={(e) => e.stopPropagation()}>
@@ -178,7 +196,6 @@ export default function UserSettingsPage() {
           </div>
         )}
 
-        {/* Tabs */}
         <div className="settings-tabs">
           {[
             { id: "account", label: t("Account", "অ্যাকাউন্ট") },
@@ -196,7 +213,6 @@ export default function UserSettingsPage() {
           ))}
         </div>
 
-        {/* --- Account Tab --- */}
         {activeTab === "account" && profile && (
           <div className="settings-card">
             {!profile.email_verified && (
@@ -206,13 +222,11 @@ export default function UserSettingsPage() {
               </div>
             )}
             
-            {/* Full Name এর জায়গায় account_name দেখানো হচ্ছে */}
             <div className="info-row">
               <span>{t("Full Name", "পূর্ণ নাম")}:</span> 
               <strong>{paymentAccountName || profile.full_name || "-"}</strong>
             </div>
 
-            {/* মোবাইল মাস্ক করা হচ্ছে */}
             <div className="info-row">
               <span>{t("Mobile", "মোবাইল")}:</span> 
               <strong>{maskMobile(profile.mobile)}</strong>
@@ -230,7 +244,6 @@ export default function UserSettingsPage() {
           </div>
         )}
 
-        {/* --- Verify Tab --- */}
         {activeTab === "verify" && profile && (
           <div className="verify-list">
             <div className="verify-card">
@@ -283,7 +296,6 @@ export default function UserSettingsPage() {
           </div>
         )}
 
-        {/* --- Security Tab --- */}
         {activeTab === "security" && (
           <div className="settings-card">
             <form onSubmit={handlePasswordChange} className="settings-form">
@@ -298,7 +310,6 @@ export default function UserSettingsPage() {
           </div>
         )}
 
-        {/* --- Sessions Tab --- */}
         {activeTab === "sessions" && (
           <div className="settings-card">
             <p className="verify-desc mb-4">{t("Your recent login sessions.", "আপনার সাম্প্রতিক লগইন সেশনগুলো।")}</p>
