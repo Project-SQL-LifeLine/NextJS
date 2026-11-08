@@ -8,7 +8,7 @@ import Header from "../../../components/Header";
 import BottomNav from "../../../components/BottomNav";
 import "./settings.css";
 import "./settings-animations.css";
-import "./settings-loader.css"; // নতুন লোডার CSS ইমপোর্ট
+import "./settings-animations.css"; // নতুন লোডার CSS ইমপোর্ট
 
 type TabType = "account" | "verify" | "security" | "sessions";
 
