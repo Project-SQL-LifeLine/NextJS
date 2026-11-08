@@ -1,0 +1,228 @@
+.vip-page {
+  --bg-main: #18221E;
+  --bg-card: #1B2A23;
+  --border-col: #263C32;
+  --text-main: #FFFFFF;
+  --text-muted: #A0ADB0;
+  --primary: #00E701;
+  --primary-dark: #117934;
+  --orange: #f58220;
+  --danger: #ff4d4d;
+
+  background-color: var(--bg-main);
+  min-height: 100vh;
+  width: 100%;
+  font-family: inherit;
+}
+
+.vip-main {
+  padding: 1rem 0.8rem 100px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.vip-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* স্ট্যাটাস কার্ড */
+.vip-status-card {
+  background: linear-gradient(135deg, #1f1b33 0%, #121016 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.vip-status-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(107, 76, 255, 0.15) 0%, transparent 60%);
+  z-index: 0;
+}
+
+.vip-current-level {
+  position: relative;
+  z-index: 1;
+  font-size: 24px;
+  font-weight: 800;
+  color: #FFFFFF;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.vip-tier-name {
+  position: relative;
+  z-index: 1;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+/* প্রোগ্রেস বার */
+.vip-progress-container {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 12px;
+}
+
+.vip-progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.vip-progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.vip-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34f05f 0%, #1a9e4c 100%);
+  border-radius: 10px;
+  transition: width 0.5s ease-in-out;
+}
+
+/* বোনাস কার্ড */
+.vip-bonus-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-col);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.vip-bonus-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.vip-bonus-row span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.vip-bonus-row strong {
+  font-size: 18px;
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.vip-transfer-box {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.vip-transfer-input {
+  flex: 1;
+  background: var(--bg-main);
+  border: 1px solid var(--border-col);
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #FFF;
+  font-size: 11px;
+  outline: none;
+}
+
+/* ৩ডি বাটন স্টাইল (Transfer & Claim) */
+.vip-btn-3d {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
+  border: 1px solid #117934;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: all 0.1s ease;
+  box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -3px 5px rgba(0, 0, 0, 0.2),
+    0 4px 0 #117934,
+    0 6px 10px rgba(0, 0, 0, 0.3);
+  padding: 10px 16px;
+  font-size: 11px;
+}
+
+.vip-btn-3d:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    0 1px 0 #117934,
+    0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.vip-btn-3d:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  background: #2B4236;
+  border-color: #2B4236;
+  color: #A0ADB0;
+}
+
+/* লেভেল লিস্ট */
+.vip-level-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vip-level-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-col);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vip-level-item.locked {
+  opacity: 0.6;
+}
+
+.vip-level-item.current {
+  border-color: var(--primary);
+  background: rgba(0, 231, 1, 0.05);
+}
+
+.vip-level-info h4 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: #FFF;
+}
+
+.vip-level-info p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
