@@ -226,3 +226,41 @@
   font-size: 11px;
   color: var(--text-muted);
 }
+
+/* নতুন ৪টি বোনাস বাটনের গ্রিড */
+.vip-grid-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.vip-grid-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #1B2A23 0%, #121016 100%);
+  border: 1px solid var(--border-col);
+  border-radius: 12px;
+  padding: 16px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.vip-grid-btn:hover {
+  border-color: var(--primary);
+  background: linear-gradient(180deg, #1f332a 0%, #121016 100%);
+}
+
+.vip-grid-btn:active {
+  transform: scale(0.97);
+}
+
+.vip-grid-btn span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+}
