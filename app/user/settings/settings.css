@@ -14,7 +14,7 @@
 }
 
 .settings-main {
-  padding: 1rem 0.8rem 100px; /* ফুটারের জন্য নিচে প্যাডিং */
+  padding: 1rem 0.8rem 100px;
   max-width: 600px;
   margin: 0 auto;
 }
@@ -49,7 +49,7 @@
   border: none;
   color: var(--set-muted);
   font-weight: 600;
-  font-size: 11px; /* 11px আপডেট */
+  font-size: 11px;
   border-radius: 6px;
   cursor: pointer;
   white-space: nowrap;
@@ -77,7 +77,7 @@
   color: #ffc107;
   padding: 12px;
   border-radius: 8px;
-  font-size: 11px; /* 11px আপডেট */
+  font-size: 11px;
   margin-bottom: 16px;
   border: 1px solid rgba(245, 193, 7, 0.2);
 }
@@ -88,7 +88,7 @@
   justify-content: space-between;
   padding: 12px 0;
   border-bottom: 1px solid var(--set-border);
-  font-size: 11px; /* 11px আপডেট */
+  font-size: 11px;
 }
 .info-row:last-child { border-bottom: none; }
 .info-row span { color: var(--set-muted); }
@@ -109,33 +109,40 @@
   padding: 12px; 
   border-radius: 6px; 
   color: var(--set-text); 
-  font-size: 11px; /* 11px আপডেট */
+  font-size: 11px;
   outline: none; 
 }
 .verify-form input:focus, .settings-form input:focus { border-color: var(--set-accent); }
 
 /* =========================================
-   ৩ডি গ্লসি বাটন স্টাইল
+   নতুন ৩ডি গ্লসি বাটন স্টাইল (ছবির মতো)
    ========================================= */
 .verify-form button, .settings-form button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(90deg, #34f05f 0%, #1a9e4c 100%);
-  border: 2px solid #117934;
-  border-radius: 50px;
-  color: #FFFFFF;
+  width: 100%;
+  padding: 14px;
+  font-size: 14px;
   font-weight: 800;
+  color: #FFFFFF;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   cursor: pointer;
-  transition: all 0.1s ease;
+  border: none;
+  border-radius: 50px; /* পিল শেপ */
+  
+  /* ছবির মত গ্রেডিয়েন্ট */
+  background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
+  
+  /* ৩ডি শ্যাডো এবং গ্লস */
   box-shadow: 
-    inset 0 3px 5px rgba(255, 255, 255, 0.5),
-    inset 0 -4px 6px rgba(0, 0, 0, 0.2),
-    0 6px 12px rgba(0, 0, 0, 0.3);
-  padding: 12px;
-  font-size: 11px; /* 11px আপডেট */
-  margin-top: 8px;
+    inset 0 3px 5px rgba(255, 255, 255, 0.6), /* ভেতরের ওপরের গ্লস */
+    inset 0 -4px 6px rgba(0, 0, 0, 0.3),      /* ভেতরের নিচের শ্যাডো */
+    0 5px 0 #117934,                         /* ৩ডি নিচের বেস (বর্ডার এর মত) */
+    0 8px 15px rgba(0, 0, 0, 0.3);           /* বাইরের ড্রপ শ্যাডো */
+
+  transition: all 0.1s ease;
+  margin-top: 10px;
 }
 
 .verify-form button:hover:not(:disabled), 
@@ -145,11 +152,12 @@
 
 .verify-form button:active:not(:disabled), 
 .settings-form button:active:not(:disabled) {
-  transform: translateY(2px);
+  transform: translateY(4px); /* ক্লিক করলে নিচে চলে যাবে */
   box-shadow: 
     inset 0 2px 4px rgba(255, 255, 255, 0.4),
     inset 0 -2px 4px rgba(0, 0, 0, 0.2),
-    0 3px 6px rgba(0, 0, 0, 0.3);
+    0 1px 0 #117934,
+    0 4px 8px rgba(0, 0, 0, 0.3);
 }
 /* ========================================= */
 
