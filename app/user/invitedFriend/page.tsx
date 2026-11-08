@@ -7,6 +7,7 @@ import { useLanguage } from "../../../lib/LanguageContext";
 import Header from "../../../components/Header";
 import BottomNav from "../../../components/BottomNav";
 import "./invitedFriend.css";
+import "./invitedFriend-loader.css"; // নতুন লোডার ইমপোর্ট
 
 export default function InviteFriendPage() {
   const router = useRouter();
@@ -36,7 +37,6 @@ export default function InviteFriendPage() {
 
       setIsLoggedIn(true);
 
-      // ১. প্রোফাইল ডাটা (referral_earnings এবং balance আনা হচ্ছে)
       const { data: profileData } = await supabase
         .from("profiles")
         .select("id, game_id, balance, referral_earnings")
@@ -45,7 +45,6 @@ export default function InviteFriendPage() {
       
       if (profileData) setProfile(profileData);
 
-      // ২. রেফারেল হিস্ট্রি (নতুন টেবিল)
       const { data: referData } = await supabase
         .from("user_invited_friend_referral")
         .select("*")
@@ -89,7 +88,6 @@ export default function InviteFriendPage() {
     setMessage({ type: "", text: "" });
 
     try {
-      // ১. referral_earnings থেকে কেটে মেইন balance-এ যোগ করা
       const newReferralEarnings = Number(profile.referral_earnings) - amount;
       const newMainBalance = Number(profile.balance || 0) + amount;
 
@@ -107,7 +105,7 @@ export default function InviteFriendPage() {
       setMessage({ type: "success", text: t("Transfer successful!", "ট্রান্সফার সফল হয়েছে!") });
       setShowTransferModal(false);
       setTransferAmount("");
-      loadData(); // রিফ্রেশ
+      loadData();
 
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
@@ -124,10 +122,25 @@ export default function InviteFriendPage() {
     return <span className="badge">{status}</span>;
   };
 
+  // ==========================================
+  // নতুন লোডিং এনিমেশন (SVG User-Plus আইকন)
+  // ==========================================
   if (loading) {
     return (
-      <div className="invite-page flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#263C32] border-t-[#00E701] rounded-full animate-spin"></div>
+      <div className="invite-loader-container">
+        <svg 
+          className="invite-loader-svg" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={1.5} 
+            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" 
+          />
+        </svg>
       </div>
     );
   }
@@ -148,7 +161,7 @@ export default function InviteFriendPage() {
 
         {profile && (
           <>
-            {/* Stats */}
+            {/* Stats (Horizontal & Small Height) */}
             <div className="invite-stats-grid">
               <div className="invite-stat-card">
                 <span>{t("Total Referrals", "মোট রেফারেল")}</span>
@@ -181,7 +194,7 @@ export default function InviteFriendPage() {
               </div>
             </div>
 
-            {/* Bonus Wallet (referral_earnings) */}
+            {/* Bonus Wallet */}
             <div className="invite-bonus-card">
               <div>
                 <span>{t("Referral Earnings", "রেফারেল আর্নিংস")}</span>
