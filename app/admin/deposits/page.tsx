@@ -72,16 +72,17 @@ export default function AdminDepositsPage() {
         .eq("id", txn.user_id);
 
       // ==========================================
-      // ৪. নতুন রেফারেল লজিক (ম্যানুয়াল ক্যালকুলেশন)
+      // ৪. রেফারেল লজিক (ম্যানুয়াল ক্যালকুলেশন)
       // ==========================================
+      // এখানে 'status', 'pending' শর্তটি সরিয়ে দেওয়া হয়েছে। 
+      // শুধু bonus_amount চেক করা হচ্ছে যাতে ডাবল বোনাস না যোগ হয়।
       const { data: referralData } = await supabase
         .from("user_invited_friend_referral")
         .select("*")
         .eq("referred_user_id", txn.user_id)
-        .eq("status", "pending")
         .maybeSingle();
 
-      if (referralData) {
+      if (referralData && Number(referralData.bonus_amount) === 0) {
         // অ্যাডমিন প্যানেল থেকে নতুন কমিশন সেটিংস আনা
         const { data: commissionSettings } = await supabase
           .from("referral_commission_control")
