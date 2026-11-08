@@ -10,16 +10,17 @@
   background-color: var(--set-bg);
   min-height: 100vh;
   width: 100%;
+  font-family: inherit;
 }
 
 .settings-main {
-  padding: 1rem 0.8rem 3rem;
+  padding: 1rem 0.8rem 100px; /* ফুটারের জন্য নিচে প্যাডিং */
   max-width: 600px;
   margin: 0 auto;
 }
 
 .settings-title {
-  font-size: 1.3rem;
+  font-size: 16px;
   font-weight: 800;
   color: var(--set-text);
   margin-bottom: 1rem;
@@ -48,7 +49,7 @@
   border: none;
   color: var(--set-muted);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 11px; /* 11px আপডেট */
   border-radius: 6px;
   cursor: pointer;
   white-space: nowrap;
@@ -68,16 +69,6 @@
   padding: 16px;
 }
 
-/* Alert / Warning */
-.settings-alert {
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  margin-bottom: 16px;
-}
-.settings-alert.success { background: rgba(0,231,1,0.1); color: var(--set-accent); border: 1px solid rgba(0,231,1,0.3); }
-.settings-alert.error { background: rgba(255,77,77,0.1); color: #ff4d4d; border: 1px solid rgba(255,77,77,0.3); }
-
 .verify-warning {
   display: flex;
   align-items: center;
@@ -86,7 +77,7 @@
   color: #ffc107;
   padding: 12px;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 11px; /* 11px আপডেট */
   margin-bottom: 16px;
   border: 1px solid rgba(245, 193, 7, 0.2);
 }
@@ -97,7 +88,7 @@
   justify-content: space-between;
   padding: 12px 0;
   border-bottom: 1px solid var(--set-border);
-  font-size: 0.9rem;
+  font-size: 11px; /* 11px আপডেট */
 }
 .info-row:last-child { border-bottom: none; }
 .info-row span { color: var(--set-muted); }
@@ -108,19 +99,63 @@
 .verify-list { display: flex; flex-direction: column; gap: 12px; }
 .verify-card { background: var(--set-card); border: 1px solid var(--set-border); border-radius: 12px; padding: 16px; }
 .verify-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.verify-header h3 { margin: 0; font-size: 0.95rem; color: var(--set-text); }
-.verify-desc { font-size: 0.8rem; color: var(--set-muted); margin: 0; }
+.verify-header h3 { margin: 0; font-size: 12px; color: var(--set-text); }
+.verify-desc { font-size: 11px; color: var(--set-muted); margin: 0; }
 .verify-form { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-.verify-form input { background: var(--set-input-bg); border: 1px solid var(--set-border); padding: 12px; border-radius: 6px; color: var(--set-text); font-size: 0.9rem; outline: none; }
-.verify-form input:focus { border-color: var(--set-accent); }
-.verify-form button { background: var(--set-accent); color: #000; font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; }
+
+.verify-form input, .settings-form input { 
+  background: var(--set-input-bg); 
+  border: 1px solid var(--set-border); 
+  padding: 12px; 
+  border-radius: 6px; 
+  color: var(--set-text); 
+  font-size: 11px; /* 11px আপডেট */
+  outline: none; 
+}
+.verify-form input:focus, .settings-form input:focus { border-color: var(--set-accent); }
+
+/* =========================================
+   ৩ডি গ্লসি বাটন স্টাইল
+   ========================================= */
+.verify-form button, .settings-form button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #34f05f 0%, #1a9e4c 100%);
+  border: 2px solid #117934;
+  border-radius: 50px;
+  color: #FFFFFF;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: all 0.1s ease;
+  box-shadow: 
+    inset 0 3px 5px rgba(255, 255, 255, 0.5),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.2),
+    0 6px 12px rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  font-size: 11px; /* 11px আপডেট */
+  margin-top: 8px;
+}
+
+.verify-form button:hover:not(:disabled), 
+.settings-form button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.verify-form button:active:not(:disabled), 
+.settings-form button:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+    0 3px 6px rgba(0, 0, 0, 0.3);
+}
+/* ========================================= */
 
 /* Security Form */
 .settings-form { display: flex; flex-direction: column; gap: 12px; }
-.settings-form label { font-size: 0.8rem; color: var(--set-muted); }
-.settings-form input { background: var(--set-input-bg); border: 1px solid var(--set-border); padding: 12px; border-radius: 6px; color: var(--set-text); outline: none; }
-.settings-form input:focus { border-color: var(--set-accent); }
-.settings-form button { background: var(--set-accent); color: #000; font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; margin-top: 8px; }
+.settings-form label { font-size: 11px; color: var(--set-muted); }
 
 /* Sessions */
 .session-list { display: flex; flex-direction: column; gap: 12px; }
