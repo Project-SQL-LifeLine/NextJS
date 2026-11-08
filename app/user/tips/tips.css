@@ -24,7 +24,7 @@
 .tips-alert {
   padding: 12px;
   border-radius: 8px;
-  font-size: 11px; /* 11px আপডেট */
+  font-size: 11px;
   margin-bottom: 16px;
   line-height: 1.5;
   text-align: center;
@@ -43,22 +43,23 @@
 
 .tips-card h2 {
   color: var(--text-primary);
-  font-size: 14px; /* হেডিং একটু বড় রাখা হলো */
+  font-size: 14px;
   margin: 0 0 16px 0;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
+/* ৩. Send Tip এর পাশের আইকন সাদা করা হলো */
 .tips-card h2 svg {
-  color: var(--color-primary);
+  color: #FFFFFF; 
   width: 20px;
   height: 20px;
 }
 
 .tips-card p.tips-desc {
   color: var(--text-secondary);
-  font-size: 11px; /* 11px আপডেট */
+  font-size: 11px;
   margin-bottom: 16px;
   line-height: 1.5;
 }
@@ -75,19 +76,13 @@
   gap: 6px;
 }
 
-.tips-input-group label {
-  color: var(--text-secondary);
-  font-size: 11px; /* 11px আপডেট */
-  font-weight: 600;
-}
-
 .tips-input-group input {
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   padding: 12px 14px;
   border-radius: 10px;
   color: var(--text-primary);
-  font-size: 11px; /* 11px আপডেট */
+  font-size: 11px;
   outline: none;
   transition: border-color 0.2s;
 }
@@ -96,27 +91,54 @@
   border-color: var(--color-primary);
 }
 
+/* =========================================
+   ৩ডি গ্লসি বাটন স্টাইল (Send Tip)
+   ========================================= */
 .tips-submit-btn {
-  background: var(--color-primary);
-  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #34f05f 0%, #1a9e4c 100%);
+  border: 2px solid #117934;
+  border-radius: 50px;
+  color: #FFFFFF;
   font-weight: 800;
-  font-size: 11px; /* 11px আপডেট */
-  padding: 14px;
-  border: none;
-  border-radius: 10px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.1s ease;
+  box-shadow: 
+    inset 0 3px 5px rgba(255, 255, 255, 0.5),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.2),
+    0 6px 12px rgba(0, 0, 0, 0.3);
+  padding: 14px;
+  font-size: 11px;
   margin-top: 8px;
 }
+
+.tips-submit-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.tips-submit-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+    0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
 .tips-submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+/* ========================================= */
 
 /* History List */
 .tips-history-title {
   color: var(--text-primary);
-  font-size: 14px; /* হেডিং একটু বড় রাখা হলো */
+  font-size: 14px;
   margin: 0 0 12px 0;
 }
 
@@ -144,12 +166,12 @@
 
 .tips-item-left strong {
   color: var(--text-primary);
-  font-size: 11px; /* 11px আপডেট */
+  font-size: 11px;
 }
 
 .tips-item-left span {
   color: var(--text-secondary);
-  font-size: 11px; /* 11px আপডেট */
+  font-size: 11px;
 }
 
 .tips-item-right {
@@ -160,16 +182,15 @@
 }
 
 .tips-amount {
-  font-size: 11px; /* 11px আপডেট */
+  font-size: 11px;
   font-weight: 700;
-  color: var(--color-primary);
 }
 
 /* Badges */
 .badge {
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 9px; /* ব্যাজগুলো একটু ছোট রাখা হলো */
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -193,7 +214,7 @@
 }
 
 .tips-empty p {
-  font-size: 11px; /* 11px আপডেট */
+  font-size: 11px;
   margin: 0;
 }
 
