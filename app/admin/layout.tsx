@@ -26,8 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    // এখানে bg-white যোগ করা হয়েছে যাতে পুরো স্ক্রিন সাদা হয়ে যায়
-    <div style={{ zoom: 0.25 }} className="min-h-screen bg-white flex font-sans text-gray-800 overflow-hidden w-full">
+    <div className="h-screen bg-white flex font-sans text-gray-800 overflow-hidden w-full">
       
       {/* Sidebar (Desktop Type) */}
       <aside className={`bg-white border-r border-gray-200 w-64 flex-shrink-0 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'block' : 'hidden md:flex'}`}>
@@ -75,10 +74,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 bg-white">
+      <div className="flex-1 flex flex-col min-w-0 h-full bg-white">
         
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 flex-shrink-0">
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-gray-600 hover:text-gray-900 focus:outline-none md:hidden">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
