@@ -1,32 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { supabase } from "../../../../lib/supabase/client"; // আপনার import পাথ অনুযায়ী অ্যাডজাস্ট করুন
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../../../lib/supabase/client"; // পাথ আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী অ্যাডজাস্ট করুন
+import { useLanguage } from "../../../../lib/LanguageContext"; // পাথ অ্যাডজাস্ট করুন
+import Header from "../../../../components/Header"; // পাথ অ্যাডজাস্ট করুন
+import BottomNav from "../../../../components/BottomNav"; // পাথ অ্যাডজাস্ট করুন
 import "./activity.css";
 
-// ক্যাটাগরি লিস্ট
+// ক্যাটাগরি লিস্ট (ইংরেজি)
 const CATEGORIES = [
-  { id: "all", label: "সব" },
-  { id: "deposit", label: "আমানত" },
-  { id: "electronic", label: "ইলেকট্রনিক" },
-  { id: "rebate", label: "রিবেট" },
-  { id: "other", label: "অন্যান্য" },
+  { id: "all", label: "All" },
+  { id: "deposit", label: "Deposit" },
+  { id: "electronic", label: "Electronic" },
+  { id: "rebate", label: "Rebate" },
+  { id: "other", label: "Other" },
 ];
 
 export default function ActivityPage() {
+  const router = useRouter();
+  const { t } = useLanguage(); // যদি আপনার LanguageContext-এ 't' ফাংশন থাকে
+  
   const [promotions, setPromotions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
 
-  useEffect(() => {
-    fetchPromotions();
-  }, []);
-
-  const fetchPromotions = async () => {
+  const fetchPromotions = useCallback(async () => {
     setLoading(true);
     try {
-      // Supabase থেকে শুধুমাত্র is_active = true ডাটা আনছি
       const { data, error } = await supabase
         .from("promotions")
         .select("*")
@@ -43,21 +44,40 @@ export default function ActivityPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // ক্যাটাগরি অনুযায়ী ফিল্টার
-  const filteredPromotions = activeCategory === "all"
-    ? promotions
-    : promotions.filter((promo) => promo.category === activeCategory);
+  useEffect(() => {
+    fetchPromotions();
+  }, [fetchPromotions]);
+
+  const filteredPromotions =
+    activeCategory === "all"
+      ? promotions
+      : promotions.filter((promo) => promo.category === activeCategory);
 
   return (
     <div className="activity-page">
-      {/* হেডার */}
+      {/* আপনার প্রজেক্টের কমন Header */}
+      <Header />
+
+      {/* পেজের সাব-হেডার */}
       <div className="activity-header">
-        <Link href="/user/promotion" style={{ color: "var(--gold-accent)", textDecoration: "none" }}>
+        <button
+          onClick={() => router.back()}
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "var(--gold-accent)",
+            fontSize: "18px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           &#8592;
-        </Link>
-        <span style={{ flex: 1 }}>প্রমোশন</span>
+        </button>
+        <span style={{ flex: 1, textAlign: "center" }}>Promotion</span>
+        <div style={{ width: "18px" }}></div> {/* ব্যালেন্স করার জন্য */}
       </div>
 
       {/* ফিল্টার বার */}
@@ -76,41 +96,47 @@ export default function ActivityPage() {
       {/* প্রমোশন লিস্ট */}
       <div className="promo-list">
         {loading ? (
-          <div className="loading-state">প্রমোশন লোড হচ্ছে...</div>
+          <div className="loading-state">Loading promotions...</div>
         ) : filteredPromotions.length === 0 ? (
-          <div className="empty-state">এই ক্যাটাগরিতে কোনো প্রমোশন নেই।</div>
+          <div className="empty-state">No promotions available in this category.</div>
         ) : (
           filteredPromotions.map((promo) => (
             <div key={promo.id} className="promo-card">
-              {/* ব্যানার ইমেজ */}
               <div className="promo-image-container">
-                <img 
-                  src={promo.image_url} 
-                  alt={promo.title} 
+                <img
+                  src={promo.image_url}
+                  alt={promo.title}
                   className="promo-image"
                   onError={(e) => {
-                    // ইমেজ লোড না হলে একটি ডিফল্ট ইমেজ দেখাবে
-                    (e.target as HTMLImageElement).src = "https://via.placeholder.com/600x300/1E2D4A/D4AF37?text=Dada8+Promotion";
+                    (e.target as HTMLImageElement).src =
+                      "https://via.placeholder.com/600x300/1E2D4A/D4AF37?text=Promotion";
                   }}
                 />
               </div>
-              
-              {/* টেক্সট ও বাটন */}
+
               <div className="promo-content">
                 <div className="promo-text-area">
                   <div className="promo-title">{promo.title}</div>
-                  <div className="promo-date">{promo.valid_until || "দীর্ঘমেয়াদি"}</div>
+                  <div className="promo-date">{promo.valid_until || "Long-term"}</div>
                 </div>
-                <Link href={promo.button_link || "#"}>
-                  <button className="promo-btn">
-                    সব দেখুন
-                  </button>
-                </Link>
+                <button
+                  className="promo-btn"
+                  onClick={() => {
+                    if (promo.button_link) {
+                      router.push(promo.button_link);
+                    }
+                  }}
+                >
+                  View All
+                </button>
               </div>
             </div>
           ))
         )}
       </div>
+
+      {/* আপনার প্রজেক্টের কমন BottomNav */}
+      <BottomNav />
     </div>
   );
 }
