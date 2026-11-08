@@ -31,12 +31,10 @@ export default function FreeRedeemCodePage() {
 
       setIsLoggedIn(true);
 
-      // প্রোফাইল লোড
       const { data: profileData } = await supabase
         .from("profiles").select("*").eq("id", user.id).single();
       if (profileData) setProfile(profileData);
 
-      // রিডিম হিস্ট্রি লোড
       const { data: histData } = await supabase
         .from("user_redeem_code_usage_history")
         .select("*")
@@ -61,12 +59,10 @@ export default function FreeRedeemCodePage() {
     setMessage({ type: "", text: "" });
 
     try {
-      // ১. ইউজারের আইপি অ্যাড্রেস বের করা
       const ipRes = await fetch("https://api.ipify.org?format=json");
       const ipData = await ipRes.json();
       const userIp = ipData.ip || "unknown";
 
-      // ২. ডাটাবেস ফাংশন কল করা
       const { data, error } = await supabase.rpc("redeem_code_logic", {
         p_code: code.trim(),
         p_ip_address: userIp
@@ -81,7 +77,7 @@ export default function FreeRedeemCodePage() {
                   `সফল! আপনি ৳${data.bonus_amount} বোনাস পেয়েছেন। ${data.required_turnover} টার্নওভার যোগ হয়েছে।`)
         });
         setCode("");
-        loadData(); // রিফ্রেশ
+        loadData();
       } else {
         setMessage({ type: "error", text: data?.error || t("Failed to redeem code.", "কোড রিডিম ব্যর্থ হয়েছে।") });
       }
@@ -105,8 +101,6 @@ export default function FreeRedeemCodePage() {
       <Header isLoggedIn={isLoggedIn} userProfile={profile} />
 
       <main className="redeem-main">
-        {/* H1 টাইটেল "Redeem Code" সরিয়ে দেওয়া হয়েছে */}
-
         {message.text && (
           <div className={`redeem-alert ${message.type}`}>{message.text}</div>
         )}
@@ -126,10 +120,14 @@ export default function FreeRedeemCodePage() {
               placeholder={t("Enter Code", "কোড দিন")}
               required 
             />
+            
+            {/* নতুন ৩ডি বাটন ডিজাইন (ছবির মতো) */}
             <button type="submit" disabled={submitting} className="redeem-submit-btn">
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
+              <div className="redeem-btn-icon-wrapper">
+                <svg className="w-5 h-5 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
               {submitting ? t("Checking...", "চেক করা হচ্ছে...") : t("Redeem Code", "রিডিম কোড")}
             </button>
           </form>
