@@ -26,13 +26,12 @@
   margin-bottom: 1rem;
 }
 
-/* Tabs */
+/* =========================================
+   নতুন ৩ডি ট্যাব ডিজাইন
+   ========================================= */
 .settings-tabs {
   display: flex;
-  background: var(--set-card);
-  border: 1px solid var(--set-border);
-  border-radius: 8px;
-  padding: 4px;
+  gap: 8px; /* বাটনগুলোর মাঝে গ্যাপ */
   margin-bottom: 1.5rem;
   overflow-x: auto;
   -ms-overflow-style: none;
@@ -45,21 +44,40 @@
 .settings-tabs button {
   flex: 1;
   padding: 10px 12px;
-  background: transparent;
-  border: none;
+  background: var(--set-card); /* ইনঅ্যাক্টিভ বাটনের ব্যাকগ্রাউন্ড */
+  border: 1px solid var(--set-border);
   color: var(--set-muted);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 11px;
-  border-radius: 6px;
+  border-radius: 50px; /* পিল শেপ */
   cursor: pointer;
   white-space: nowrap;
-  transition: 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* হালকা শ্যাডো */
 }
 
+/* অ্যাক্টিভ ট্যাবের জন্য ৩ডি গ্লসি ইফেক্ট */
 .settings-tabs button.active {
-  background: var(--set-accent);
-  color: #000;
+  background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
+  border: 1px solid #117934;
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 
+    inset 0 2px 3px rgba(255, 255, 255, 0.5), /* ভেতরের গ্লস */
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2),      /* ভেতরের শ্যাডো */
+    0 4px 0 #117934,                         /* ৩ডি বেস */
+    0 6px 10px rgba(0, 0, 0, 0.3);           /* বাইরের শ্যাডো */
+  transform: translateY(-2px); /* হালকা উপরে ওঠা */
 }
+
+.settings-tabs button:active {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    0 1px 0 #117934,
+    0 2px 4px rgba(0, 0, 0, 0.2);
+}
+/* ========================================= */
 
 /* Card */
 .settings-card {
@@ -115,7 +133,7 @@
 .verify-form input:focus, .settings-form input:focus { border-color: var(--set-accent); }
 
 /* =========================================
-   নতুন ৩ডি গ্লসি বাটন স্টাইল (ছবির মতো)
+   ৩ডি গ্লসি বাটন স্টাইল (Submit/Verify)
    ========================================= */
 .verify-form button, .settings-form button {
   display: flex;
@@ -129,18 +147,13 @@
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   cursor: pointer;
   border: none;
-  border-radius: 50px; /* পিল শেপ */
-  
-  /* ছবির মত গ্রেডিয়েন্ট */
+  border-radius: 50px;
   background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
-  
-  /* ৩ডি শ্যাডো এবং গ্লস */
   box-shadow: 
-    inset 0 3px 5px rgba(255, 255, 255, 0.6), /* ভেতরের ওপরের গ্লস */
-    inset 0 -4px 6px rgba(0, 0, 0, 0.3),      /* ভেতরের নিচের শ্যাডো */
-    0 5px 0 #117934,                         /* ৩ডি নিচের বেস (বর্ডার এর মত) */
-    0 8px 15px rgba(0, 0, 0, 0.3);           /* বাইরের ড্রপ শ্যাডো */
-
+    inset 0 3px 5px rgba(255, 255, 255, 0.6), 
+    inset 0 -4px 6px rgba(0, 0, 0, 0.3),      
+    0 5px 0 #117934,                         
+    0 8px 15px rgba(0, 0, 0, 0.3);           
   transition: all 0.1s ease;
   margin-top: 10px;
 }
@@ -152,7 +165,7 @@
 
 .verify-form button:active:not(:disabled), 
 .settings-form button:active:not(:disabled) {
-  transform: translateY(4px); /* ক্লিক করলে নিচে চলে যাবে */
+  transform: translateY(4px);
   box-shadow: 
     inset 0 2px 4px rgba(255, 255, 255, 0.4),
     inset 0 -2px 4px rgba(0, 0, 0, 0.2),
