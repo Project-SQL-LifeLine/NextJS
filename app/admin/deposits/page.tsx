@@ -74,25 +74,21 @@ export default function AdminDepositsPage() {
       // ==========================================
       // ৪. রেফারেল লজিক
       // ==========================================
-      // referred_user_id দিয়ে রেকর্ড খোঁজা (স্ট্যাটাস যাই হোক)
       const { data: referralData } = await supabase
         .from("user_invited_friend_referral")
         .select("*")
         .eq("referred_user_id", txn.user_id)
         .maybeSingle();
 
-      // যদি রেকর্ড পাওয়া যায় এবং আগে থেকে বোনাস যোগ করা না থাকে
       if (referralData && Number(referralData.bonus_amount) === 0) {
-        
-        // কমিশন সেটিংস আনা
+        // এখানে .select("*") ব্যবহার করা হয়েছে যাতে সব কলামের ডাটা পাওয়া যায়
         const { data: commissionSettings } = await supabase
           .from("referral_commission_control")
-          .select("fixed_join_bonus, deposit_commission_percentage, min_deposit_required")
+          .select("*")
           .eq("is_active", true)
           .limit(1)
           .maybeSingle();
 
-        // যদি সেটিংস থাকে এবং ডিপোজিট মিনিমাম লিমিট পার করে
         if (commissionSettings && depositAmount >= Number(commissionSettings.min_deposit_required)) {
           
           const fixedBonus = Number(commissionSettings.fixed_join_bonus) || 0;
