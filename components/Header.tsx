@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase/client";
 import { useLanguage } from "../lib/LanguageContext";
+import { useSiteSettings } from "../lib/SiteSettingsContext"; // নতুন ইমপোর্ট
 
 // SVG আইকন সেট (সব সাদা রঙের)
 const Icons = {
@@ -55,8 +56,8 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hideBalance, setHideBalance] = useState(false);
   
-  // গ্লোবাল ল্যাঙ্গুয়েজ কনটেক্সট
   const { language, setLanguage, t } = useLanguage();
+  const { siteName } = useSiteSettings(); // সাইটের নাম ডাইনামিক করা হলো
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -72,12 +73,11 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
 
   return (
     <>
-      {/* ✅ Header-এর ব্যাকগ্রাউন্ড কালার BottomNav-এর সাথে মিলিয়ে bg-[#184f35] করা হয়েছে */}
       <header className="bg-[#184f35] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#26352e]">
         
-        {/* Logo */}
+        {/* Logo (এখন ডাটাবেস থেকে আসা নাম দেখাবে) */}
         <div className="text-2xl font-extrabold text-primary tracking-wider">
-          Casino
+          {siteName}
         </div>
         
         <div className="flex items-center gap-3">
@@ -122,7 +122,7 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
             className="absolute top-[60px] right-3 w-60 bg-[#111d19] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Game ID Copy Section (Deposit এর উপরে) */}
+            {/* Game ID Copy Section */}
             {isLoggedIn && userProfile && (
               <div className="px-4 py-3 border-b border-[#26352e] flex flex-col gap-1 bg-[#0d1e15]/50">
                 <span className="text-[#9ca9a3] text-[10px] font-semibold uppercase tracking-wider">{t("Game ID", "গেম আইডি")}</span>
