@@ -29,7 +29,7 @@ export default function AdminDepositsPage() {
 
   const handleApprove = async (txn: any) => {
     try {
-      // ১. ট্রানজেকশন অ্যাপ্রুভ করা (এখানে আপডেট হলেই ডাটাবেসের ট্রিগার কাজ করবে)
+      // ১. ট্রানজেকশন অ্যাপ্রুভ করা
       const { error: txnError } = await supabase
         .from("user_deposit_transaction")
         .update({ status: "approved" })
@@ -71,7 +71,61 @@ export default function AdminDepositsPage() {
         })
         .eq("id", txn.user_id);
 
-      alert("Deposit Approved Successfully!");
+      // ==========================================
+      // ৪. নতুন রেফারেল লজিক (ম্যানুয়াল ক্যালকুলেশন)
+      // ==========================================
+      const { data: referralData } = await supabase
+        .from("user_invited_friend_referral")
+        .select("*")
+        .eq("referred_user_id", txn.user_id)
+        .eq("status", "pending")
+        .maybeSingle();
+
+      if (referralData) {
+        // অ্যাডমিন প্যানেল থেকে নতুন কমিশন সেটিংস আনা
+        const { data: commissionSettings } = await supabase
+          .from("referral_commission_control")
+          .select("fixed_join_bonus, deposit_commission_percentage, min_deposit_required")
+          .eq("is_active", true)
+          .limit(1)
+          .maybeSingle();
+
+        // যদি সেটিংস থাকে এবং ডিপোজিট মিনিমাম লিমিট পার করে
+        if (commissionSettings && depositAmount >= commissionSettings.min_deposit_required) {
+          
+          const fixedBonus = Number(commissionSettings.fixed_join_bonus) || 0;
+          const depComm = (depositAmount * Number(commissionSettings.deposit_commission_percentage)) / 100;
+          const totalCommission = fixedBonus + depComm;
+          
+          // রেফারেল রেকর্ড আপডেট করা (status: approved, bonus_amount: হিসাবকৃত)
+          await supabase
+            .from("user_invited_friend_referral")
+            .update({ 
+              status: 'approved', 
+              deposit_amount: depositAmount,
+              bonus_amount: totalCommission
+            })
+            .eq("id", referralData.id);
+
+          // রেফারারের প্রোফাইলে referral_earnings যোগ করা
+          const { data: referrerProfile } = await supabase
+            .from("profiles")
+            .select("referral_earnings")
+            .eq("id", referralData.referrer_id)
+            .single();
+
+          if (referrerProfile) {
+            const newReferralEarnings = Number(referrerProfile.referral_earnings || 0) + totalCommission;
+            await supabase
+              .from("profiles")
+              .update({ referral_earnings: newReferralEarnings })
+              .eq("id", referralData.referrer_id);
+          }
+        }
+      }
+      // ==========================================
+
+      alert("Deposit Approved Successfully! Balance, Turnover, and Referral Updated.");
       fetchDeposits();
     } catch (err: any) {
       alert("Error: " + err.message);
