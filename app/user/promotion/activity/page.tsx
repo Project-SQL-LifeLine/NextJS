@@ -65,20 +65,8 @@ export default function ActivityPage() {
     <div className="min-h-screen bg-[#18221E] pb-20 font-sans">
       <Header isLoggedIn={isLoggedIn} userProfile={profile} />
 
-      {/* সাব-হেডার (Promotion লেখা সরানো হয়েছে) */}
-      <div className="sticky top-[60px] z-40 bg-[#18221E] border-b border-[#263C32] px-4 py-3 flex items-center">
-        <button
-          onClick={() => router.back()}
-          className="text-[#00E701] text-xl font-bold flex items-center"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-      </div>
-
-      {/* প্রমোশন লিস্ট */}
-      <div className="p-4 flex flex-col gap-4">
+      {/* প্রমোশন লিস্ট (হেডারের ঠিক নিচে) */}
+      <div className="p-4 flex flex-col gap-4 mt-2">
         {loading ? (
           <div className="text-center text-[#A0ADB0] text-sm py-10">Loading promotions...</div>
         ) : promotions.length === 0 ? (
