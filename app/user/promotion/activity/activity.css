@@ -1,0 +1,70 @@
+/* activity.css */
+.activity-page {
+  --bg-primary: #18221E; /* আপনার সাইটের ডার্ক ব্যাকগ্রাউন্ড */
+  --bg-card: #1B2A23;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0AAB2;
+  --gold-accent: #F5B041; /* ছবির মতো গোল্ডেন বর্ডার */
+  --color-primary: #00E701;
+  
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* ফিল্টার বাটন */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px;
+}
+.filter-btn {
+  background: transparent;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-secondary);
+  padding: 6px 16px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.filter-btn.active {
+  border-color: var(--gold-accent);
+  color: var(--gold-accent);
+}
+
+/* ব্যানার কার্ড */
+.promo-card {
+  background: var(--bg-card);
+  border: 2px solid var(--gold-accent); /* ছবির মতো গোল্ডেন বর্ডার */
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 12px;
+}
+.promo-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.promo-content {
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.promo-title {
+  color: var(--text-primary);
+  font-weight: bold;
+}
+.promo-date {
+  color: var(--text-secondary);
+  font-size: 11px;
+  margin-top: 4px;
+}
+.promo-btn {
+  background: linear-gradient(180deg, #f6d365 0%, #fda085 100%); /* গোল্ডেন বাটন */
+  color: #000;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  border: none;
+}
