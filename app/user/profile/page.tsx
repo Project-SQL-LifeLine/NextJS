@@ -9,7 +9,7 @@ import BottomNav from "../../../components/BottomNav";
 
 export default function MyProfilePage() {
   const router = useRouter();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
 
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -68,59 +68,90 @@ export default function MyProfilePage() {
           max-width: 600px;
           margin: 0 auto;
         }
+        
+        /* নতুন প্রিমিয়াম প্রোফাইল কার্ড ডিজাইন */
         .profile-header-card {
-          background: var(--bg-card);
+          position: relative;
+          background: linear-gradient(135deg, #1B2A23 0%, #18221E 100%);
           border: 1px solid var(--border-color);
-          border-radius: 16px;
-          padding: 24px 16px;
+          border-radius: 20px;
+          padding: 30px 16px;
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
           margin-bottom: 16px;
+          overflow: hidden;
         }
+        /* কার্ডের পেছনের হালকা গ্লো */
+        .profile-header-card::before {
+          content: "";
+          position: absolute;
+          top: -50px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 150px;
+          height: 150px;
+          background: radial-gradient(circle, rgba(0, 231, 1, 0.15) 0%, rgba(0,0,0,0) 70%);
+          pointer-events: none;
+        }
+
         .profile-avatar {
-          width: 80px;
-          height: 80px;
-          background: var(--bg-input);
-          border: 2px solid var(--color-primary);
+          position: relative;
+          width: 90px;
+          height: 90px;
+          background: #2A3730;
+          border: 2px solid rgba(255, 255, 255, 0.1);
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 2rem;
-          font-weight: bold;
-          color: var(--color-primary);
+          margin-bottom: 16px;
+          z-index: 1;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .profile-avatar svg {
+          width: 45px;
+          height: 45px;
+          color: #FFFFFF;
+          opacity: 0.9;
+        }
+
+        .profile-header-card h2 {
+          margin: 0 0 12px 0;
+          color: var(--text-primary);
+          font-size: 1.5rem;
+          font-weight: 700;
+          z-index: 1;
+        }
+
+        /* ভিআইপি বা স্ট্যাটাস ব্যাজ (২য় ছবির স্টাইলে) */
+        .profile-status-badge {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 16px;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 700;
+          background: #222D27;
+          color: #FFFFFF;
+          border: 1px solid #33443A;
+          z-index: 1;
           margin-bottom: 12px;
         }
-        .profile-header-card h2 {
-          margin: 0 0 4px 0;
-          color: var(--text-primary);
-          font-size: 1.4rem;
+        .profile-status-badge svg {
+          width: 16px;
+          height: 16px;
         }
-        .profile-game-id {
-          color: var(--text-secondary);
-          font-size: 0.9rem;
-          margin-bottom: 10px;
-        }
+
         .profile-join-date {
           color: var(--text-secondary);
           font-size: 0.75rem;
-          margin-bottom: 12px;
-          background: var(--bg-input);
-          padding: 4px 10px;
-          border-radius: 12px;
-          border: 1px solid var(--border-color);
+          z-index: 1;
         }
-        .profile-status-badge {
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: bold;
-          text-transform: uppercase;
-        }
-        .status-active { background: rgba(0, 231, 1, 0.1); color: var(--color-primary); border: 1px solid rgba(0, 231, 1, 0.3); }
-        .status-blocked { background: rgba(255, 77, 77, 0.1); color: var(--color-danger); border: 1px solid rgba(255, 77, 77, 0.3); }
+
+        /* বাকি কার্ডগুলো আগের মতোই */
         .profile-section-card {
           background: var(--bg-card);
           border: 1px solid var(--border-color);
@@ -176,22 +207,37 @@ export default function MyProfilePage() {
 
         <main className="my-profile-main">
           
-          {/* প্রোফাইল হেডার */}
+          {/* নতুন প্রিমিয়াম প্রোফাইল কার্ড */}
           <div className="profile-header-card">
+            {/* ২য় ছবির মতো ইউজার SVG আইকন */}
             <div className="profile-avatar">
-              {profile?.game_id ? profile.game_id.charAt(0).toUpperCase() : "U"}
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
             </div>
-            <h2>{profile?.full_name || t("No Name", "নাম নেই")}</h2>
-            <p className="profile-game-id">@{profile?.game_id || "N/A"}</p>
             
-            {/* Join Date যোগ করা হয়েছে */}
+            {/* শুধু ইউজারনেম */}
+            <h2>{profile?.game_id || "User"}</h2>
+            
+            {/* স্ট্যাটাস ব্যাজ */}
+            <div className="profile-status-badge">
+              {profile?.account_status === "active" ? (
+                <>
+                  <svg fill="none" stroke="#00E701" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  {t("Active", "সক্রিয়")}
+                </>
+              ) : (
+                <>
+                  <svg fill="none" stroke="#ff4d4d" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  {t("Blocked", "ব্লকড")}
+                </>
+              )}
+            </div>
+
+            {/* Join Date */}
             <div className="profile-join-date">
               {t("Joined", "যোগদান")}: {new Date(profile?.created_at).toLocaleDateString('en-GB')}
             </div>
-
-            <span className={`profile-status-badge ${profile?.account_status === "active" ? "status-active" : "status-blocked"}`}>
-              {profile?.account_status === "active" ? t("Active", "সক্রিয়") : t("Blocked", "ব্লকড")}
-            </span>
           </div>
 
           {/* টার্নওভার ইনফো */}
