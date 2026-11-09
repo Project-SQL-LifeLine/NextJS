@@ -12,6 +12,7 @@ const PaymentIcon = () => (
   </svg>
 );
 
+// ডিপোজিট ক্যাশ-ইন SVG আইকন
 const LoadingDepositIcon = () => (
   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -56,9 +57,8 @@ export default function VoucherCenterPage() {
   const totalAmount = selectedAmount + bonusAmount;
 
   if (loading) {
-    // মেইন ব্যাকগ্রাউন্ড #183f34 করা হলো
     return (
-      <div className="min-h-screen bg-[#183f34] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
         <div className="animate-spin">
           <LoadingDepositIcon />
         </div>
@@ -72,10 +72,10 @@ export default function VoucherCenterPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Head>
 
-      {/* মেইন ব্যাকগ্রাউন্ড #183f34 করা হলো */}
-      <div className={`min-h-screen bg-[#183f34] text-textMain flex flex-col pb-28 transition-opacity duration-700 ease-in-out ${isFadeIn ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Main Background Color updated to #0d241e */}
+      <div className={`min-h-screen bg-[#0d241e] text-textMain flex flex-col pb-28 transition-opacity duration-700 ease-in-out ${isFadeIn ? 'opacity-100' : 'opacity-0'}`}>
         
-        {/* টপ বার ব্যাকগ্রাউন্ড #183f35 করা হলো */}
+        {/* Top Bar Background Color updated to #183f35 */}
         <header className="bg-[#183f35] px-4 py-3 flex items-center justify-between sticky top-0 z-50 border-b border-borderCol">
           <button onClick={() => router.back()} className="text-white">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
@@ -230,8 +230,7 @@ export default function VoucherCenterPage() {
           </div>
         )}
 
-        {/* নিচের ফিক্সড বার ব্যাকগ্রাউন্ড #183f34 করা হলো */}
-        <div className="fixed bottom-0 left-0 w-full p-4 bg-[#183f34] border-t border-borderCol z-50">
+        <div className="fixed bottom-0 left-0 w-full p-4 bg-[#0d241e] border-t border-borderCol z-50">
           <Link 
             href={`/wallets/voucher-center/depositIframe?method=${selectedMethod?.method_name}&logo=${selectedMethod?.method_logo_url}&amount=${selectedAmount}&bonus=${selectedPromo?.bonus_percentage || 0}&bonus_id=${selectedPromo?.id || ''}&turnover=${selectedPromo?.turnover_multiplier || 0}`} 
             onClick={(e) => {
