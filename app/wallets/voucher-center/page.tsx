@@ -12,7 +12,7 @@ const PaymentIcon = () => (
   </svg>
 );
 
-// নতুন ডিপোজিট ক্যাশ-ইন SVG আইকন
+// ডিপোজিট ক্যাশ-ইন SVG আইকন (সাইজ ছোট করা হয়েছে)
 const LoadingDepositIcon = () => (
   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -31,7 +31,7 @@ export default function VoucherCenterPage() {
   const [methods, setMethods] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFadeIn, setIsFadeIn] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false); // Next বাটনের স্টেট
+  const [isProcessing, setIsProcessing] = useState(false); 
 
   useEffect(() => {
     const timer = setTimeout(() => setIsFadeIn(true), 100);
@@ -78,7 +78,7 @@ export default function VoucherCenterPage() {
           <button onClick={() => router.back()} className="text-white">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <h1 className="text-lg font-bold text-white">Deposit</h1>
+          <h1 className="text-[11px] font-bold text-white">Deposit</h1>
           <Link href="/wallets/voucher-report" className="text-white relative hover:text-primary transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
           </Link>
@@ -87,7 +87,7 @@ export default function VoucherCenterPage() {
         <div className="p-4 flex flex-col gap-6" style={{ zoom: "0.75" }}>
           
           <section>
-            <h2 className="text-sm font-bold text-textSec mb-3 flex items-center gap-1">
+            <h2 className="text-[11px] font-bold text-textSec mb-3 flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-primary inline-block"></span> Deposit Method
             </h2>
             <div className="grid grid-cols-4 gap-2">
@@ -103,7 +103,7 @@ export default function VoucherCenterPage() {
                 >
                   <div className="absolute top-0 left-0 p-1 rounded-br-lg bg-danger"><PaymentIcon /></div>
                   <img src={method.method_logo_url} alt="" className="w-10 h-10 object-contain mb-1 mt-3" />
-                  <span className={`text-[10px] font-semibold text-center leading-tight ${selectedMethod?.id === method.id ? "text-white" : "text-white"}`}>{method.method_name}</span>
+                  <span className={`text-[11px] font-semibold text-center leading-tight ${selectedMethod?.id === method.id ? "text-white" : "text-white"}`}>{method.method_name}</span>
                   {selectedMethod?.id === method.id && (
                     <div className="absolute -bottom-1.5 -right-1.5 bg-white text-[#184f35] rounded-full p-0.5"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg></div>
                   )}
@@ -113,7 +113,7 @@ export default function VoucherCenterPage() {
           </section>
 
           <section>
-            <h2 className="text-sm font-bold text-textSec mb-3 flex items-center gap-1">
+            <h2 className="text-[11px] font-bold text-textSec mb-3 flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-primary inline-block"></span> Payment Channel
             </h2>
             <div className="grid grid-cols-3 gap-3">
@@ -121,7 +121,7 @@ export default function VoucherCenterPage() {
                 <button
                   key={channel}
                   onClick={() => setSelectedChannel(channel)}
-                  className={`relative p-3 rounded-lg border font-bold text-sm transition-all ${
+                  className={`relative p-3 rounded-lg border font-bold text-[11px] transition-all ${
                     selectedChannel === channel 
                     ? "border-white text-white bg-[#184f35] shadow-[0_0_10px_rgba(255,255,255,0.15)]" 
                     : "border-borderCol text-textSec bg-bgSec"
@@ -134,12 +134,12 @@ export default function VoucherCenterPage() {
             </div>
           </section>
 
-          <p className="text-xs text-textSec leading-relaxed">
+          <p className="text-[11px] text-textSec leading-relaxed">
             Deposit Info: To avoid duplicate deposit payments, please make the payment only once during the deposit process.
           </p>
 
           <section>
-            <h2 className="text-sm font-bold text-textSec mb-3 flex items-center gap-1">
+            <h2 className="text-[11px] font-bold text-textSec mb-3 flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-danger inline-block"></span> Deposit Amounts
             </h2>
             <div className="grid grid-cols-3 gap-3 mb-3">
@@ -147,7 +147,7 @@ export default function VoucherCenterPage() {
                 <button
                   key={amt}
                   onClick={() => { setSelectedAmount(amt); setCustomAmount(amt.toString()); }}
-                  className={`py-3 rounded-lg border font-bold transition-all ${
+                  className={`py-3 rounded-lg border font-bold text-[11px] transition-all ${
                     selectedAmount === amt 
                     ? "border-white text-white bg-[#184f35] shadow-[0_0_10px_rgba(255,255,255,0.15)]" 
                     : "border-borderCol text-textSec"
@@ -159,19 +159,19 @@ export default function VoucherCenterPage() {
             </div>
             
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-textSec font-bold">৳</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-textSec font-bold text-[11px]">৳</span>
               <input
                 type="number"
                 value={customAmount}
                 onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(Number(e.target.value)); }}
                 placeholder={`${selectedMethod?.min_deposit || 500} - ${selectedMethod?.max_deposit || 30000}`}
-                className="w-full bg-bgSec text-white border border-borderCol rounded-lg pl-10 pr-4 py-3 text-lg font-bold focus:outline-none focus:border-white transition-colors"
+                className="w-full bg-bgSec text-white border border-borderCol rounded-lg pl-10 pr-4 py-3 text-[11px] font-bold focus:outline-none focus:border-white transition-colors"
               />
             </div>
           </section>
 
           <section>
-            <h2 className="text-sm font-bold text-textSec mb-3 flex items-center gap-1">
+            <h2 className="text-[11px] font-bold text-textSec mb-3 flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-primary inline-block"></span> Promotions
             </h2>
             <div className="grid grid-cols-3 gap-2 mb-3">
@@ -187,9 +187,9 @@ export default function VoucherCenterPage() {
                       : "border-borderCol bg-gradient-to-br from-[#1d3b2b] to-[#14251c] hover:border-white/50"
                     }`}
                   >
-                    <div className="absolute top-0 right-0 bg-white text-black text-[10px] font-bold px-1.5 py-0.5 rounded-bl-md z-10">+{bonus.bonus_percentage}%</div>
+                    <div className="absolute top-0 right-0 bg-white text-black text-[11px] font-bold px-1.5 py-0.5 rounded-bl-md z-10">+{bonus.bonus_percentage}%</div>
                     <div className="flex flex-col items-center z-10 mt-3">
-                      <span className="text-[#00E701] font-extrabold text-sm">৳{dynamicBonusAmount.toLocaleString()}</span>
+                      <span className="text-[#00E701] font-extrabold text-[11px]">৳{dynamicBonusAmount.toLocaleString()}</span>
                     </div>
                     {selectedPromo?.id === bonus.id && (
                       <div className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-tl-full flex items-end justify-end p-1 z-10">
@@ -203,25 +203,25 @@ export default function VoucherCenterPage() {
             
             <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${selectedPromo === null ? "border-white bg-[#184f35] shadow-[0_0_10px_rgba(255,255,255,0.15)]" : "border-borderCol hover:bg-bgSec/50"}`}>
               <input type="radio" name="promo" checked={selectedPromo === null} onChange={() => setSelectedPromo(null)} className="w-5 h-5 accent-white" />
-              <span className="text-sm font-bold text-white">Do not participate in any promotions</span>
+              <span className="text-[11px] font-bold text-white">Do not participate in any promotions</span>
             </label>
           </section>
         </div>
 
         {selectedAmount > 0 && (
           <div className="mx-4 mb-4 p-4 rounded-lg bg-bgSec border border-borderCol flex flex-col gap-2">
-            <div className="flex justify-between text-sm text-textSec">
+            <div className="flex justify-between text-[11px] text-textSec">
               <span>Deposit Amount:</span>
               <span>৳ {selectedAmount.toLocaleString()}</span>
             </div>
             {selectedPromo && (
-              <div className="flex justify-between text-sm text-primary">
+              <div className="flex justify-between text-[11px] text-primary">
                 <span>{selectedPromo.bonus_name} Bonus:</span>
                 <span>+ ৳ {bonusAmount.toLocaleString()}</span>
               </div>
             )}
             <div className="h-px bg-borderCol my-1"></div>
-            <div className="flex justify-between text-base font-bold text-white">
+            <div className="flex justify-between text-[11px] font-bold text-white">
               <span>Total Amount:</span>
               <span className="text-danger">৳ {totalAmount.toLocaleString()}</span>
             </div>
@@ -233,12 +233,12 @@ export default function VoucherCenterPage() {
             href={`/wallets/voucher-center/depositIframe?method=${selectedMethod?.method_name}&logo=${selectedMethod?.method_logo_url}&amount=${selectedAmount}&bonus=${selectedPromo?.bonus_percentage || 0}&bonus_id=${selectedPromo?.id || ''}&turnover=${selectedPromo?.turnover_multiplier || 0}`} 
             onClick={(e) => {
               if (isProcessing || selectedAmount <= 0) {
-                e.preventDefault(); // অ্যামাউন্ট ০ হলে বা প্রসেসিং হলে লিংকে যাবে না
+                e.preventDefault(); 
               } else {
                 setIsProcessing(true);
               }
             }}
-            className={`w-full block text-center font-bold text-lg py-3 rounded-lg border transition-all ${
+            className={`w-full block text-center font-bold text-[11px] py-3 rounded-lg border transition-all ${
               isProcessing || selectedAmount <= 0 
               ? "bg-borderCol text-textSec border-borderCol cursor-not-allowed" 
               : "bg-[#184f35] text-white border-white hover:bg-[#143d2a] shadow-[0_0_10px_rgba(255,255,255,0.15)]"
