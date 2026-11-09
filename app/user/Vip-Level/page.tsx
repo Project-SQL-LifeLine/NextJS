@@ -157,7 +157,7 @@ export default function VipLevelPage() {
     }
   };
 
-  // টাইম বোনাস স্ট্যাটাস (কাউন্টডাউন টাইমারসহ)
+  // টাইম বোনাস স্ট্যাটাস (ছবির মতো ডেইজ ও আওয়ার্স ফরম্যাটে)
   const getTimeBonusStatus = (type: string, requiredHours: number) => {
     const lastClaim = timeClaims[type];
     if (!lastClaim) return { canClaim: true, timeLeft: "" };
@@ -170,13 +170,24 @@ export default function VipLevelPage() {
     }
 
     const diff = nextClaimTime - currentTime;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const hoursTotal = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hoursTotal / 24);
+    const remainingHours = hoursTotal % 24;
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
+    let timeLeftString = "";
+    if (days > 0) {
+      timeLeftString = `${days.toString().padStart(2, '0')}d ${remainingHours.toString().padStart(2, '0')}h`;
+    } else if (hoursTotal > 0) {
+      timeLeftString = `${hoursTotal.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
+    } else {
+      timeLeftString = `${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+    }
+
     return { 
       canClaim: false, 
-      timeLeft: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` 
+      timeLeft: timeLeftString
     };
   };
 
@@ -273,93 +284,127 @@ export default function VipLevelPage() {
           </div>
         </div>
 
-        {/* ৫টি বোনাস বাটনের গ্রিড (SVG আইকনসহ) */}
+        {/* ৪টি বোনাস বাটনের গ্রিড (ছবির মতো ডিজাইন) */}
         <div className="vip-grid-buttons">
           
           {/* ১. Instant Rakeback */}
           <div className="vip-grid-card">
-            <svg className="vip-svg-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-            <span className="vip-btn-title">Instant Rakeback</span>
-            <span className="vip-btn-value">৳{Number(profile?.unclaimed_rakeback || 0).toFixed(2)}</span>
+            <div className="vip-card-top">
+              <span className="vip-card-label">
+                {Number(profile?.unclaimed_rakeback) > 0 ? "Ready to Claim" : "Wager to Unlock"}
+              </span>
+              <svg className="vip-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+              </svg>
+            </div>
+            
+            <div className="vip-card-middle">
+              {/* র‍্যাকে/ব্রাশ SVG */}
+              <svg className="vip-center-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+              </svg>
+              <span className="vip-card-title">Instant Rakeback</span>
+            </div>
+
             {Number(profile?.unclaimed_rakeback) > 0 ? (
-              <button onClick={() => handleClaimTimeBonus("instant_rakeback")} className="vip-mini-claim-btn" disabled={submitting}>
+              <button onClick={() => handleClaimTimeBonus("instant_rakeback")} className="vip-claim-btn" disabled={submitting}>
                 Claim
               </button>
             ) : (
-              <span className="vip-wait-text">No Rakeback</span>
+              <button className="vip-disabled-btn" disabled>
+                Claim
+              </button>
             )}
           </div>
 
           {/* ২. Daily Bonus */}
           <div className="vip-grid-card">
-            <svg className="vip-svg-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
-            <span className="vip-btn-title">Daily Bonus</span>
-            <span className="vip-btn-value">৳{Number(currentLevelData?.daily_bonus_amount || 0).toFixed(2)}</span>
+            <div className="vip-card-top">
+              <span className="vip-card-label">
+                {dailyStatus.canClaim ? "Ready to Claim" : "Claim Soon!"}
+              </span>
+              <svg className="vip-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+              </svg>
+            </div>
+            
+            <div className="vip-card-middle">
+              {/* কয়েন/গিফট SVG */}
+              <svg className="vip-center-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="vip-card-title">Daily Bonus</span>
+            </div>
+
             {dailyStatus.canClaim ? (
-              <button onClick={() => handleClaimTimeBonus("daily")} className="vip-mini-claim-btn" disabled={submitting}>
+              <button onClick={() => handleClaimTimeBonus("daily")} className="vip-claim-btn" disabled={submitting}>
                 Claim
               </button>
             ) : (
-              <span className="vip-timer">{dailyStatus.timeLeft}</span>
+              <button className="vip-timer-btn" disabled>
+                {dailyStatus.timeLeft}
+              </button>
             )}
           </div>
 
           {/* ৩. Weekly Bonus */}
           <div className="vip-grid-card">
-            <svg className="vip-svg-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
-            </svg>
-            <span className="vip-btn-title">Weekly Bonus</span>
-            <span className="vip-btn-value">৳{Number(currentLevelData?.weekly_bonus_amount || 0).toFixed(2)}</span>
+            <div className="vip-card-top">
+              <span className="vip-card-label">
+                {weeklyStatus.canClaim ? "Ready to Claim" : "Claim Soon!"}
+              </span>
+              <svg className="vip-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+              </svg>
+            </div>
+            
+            <div className="vip-card-middle">
+              {/* মানি/ক্যাশ SVG */}
+              <svg className="vip-center-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+              </svg>
+              <span className="vip-card-title">Weekly Bonus</span>
+            </div>
+
             {weeklyStatus.canClaim ? (
-              <button onClick={() => handleClaimTimeBonus("weekly")} className="vip-mini-claim-btn" disabled={submitting}>
+              <button onClick={() => handleClaimTimeBonus("weekly")} className="vip-claim-btn" disabled={submitting}>
                 Claim
               </button>
             ) : (
-              <span className="vip-timer">{weeklyStatus.timeLeft}</span>
+              <button className="vip-timer-btn" disabled>
+                {weeklyStatus.timeLeft}
+              </button>
             )}
           </div>
 
           {/* ৪. Monthly Bonus */}
           <div className="vip-grid-card">
-            <svg className="vip-svg-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
-              <path d="M15 10l-2 2-2-2" />
-            </svg>
-            <span className="vip-btn-title">Monthly Bonus</span>
-            <span className="vip-btn-value">৳{Number(currentLevelData?.monthly_bonus_amount || 0).toFixed(2)}</span>
+            <div className="vip-card-top">
+              <span className="vip-card-label">
+                {monthlyStatus.canClaim ? "Ready to Claim" : "Claim Soon!"}
+              </span>
+              <svg className="vip-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+              </svg>
+            </div>
+            
+            <div className="vip-card-middle">
+              {/* ডায়মন্ড SVG */}
+              <svg className="vip-center-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-2.25-3.75H5.25L3 7.5m18 0l-9 13.5m9-13.5H3m9 13.5L3 7.5" />
+              </svg>
+              <span className="vip-card-title">Monthly Bonus</span>
+            </div>
+
             {monthlyStatus.canClaim ? (
-              <button onClick={() => handleClaimTimeBonus("monthly")} className="vip-mini-claim-btn" disabled={submitting}>
+              <button onClick={() => handleClaimTimeBonus("monthly")} className="vip-claim-btn" disabled={submitting}>
                 Claim
               </button>
             ) : (
-              <span className="vip-timer">{monthlyStatus.timeLeft}</span>
+              <button className="vip-timer-btn" disabled>
+                {monthlyStatus.timeLeft}
+              </button>
             )}
-          </div>
-
-          {/* ৫. Level Up Bonus */}
-          <div className="vip-grid-card">
-            <svg className="vip-svg-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-            <span className="vip-btn-title">Level Up Bonus</span>
-            <span className="vip-btn-value">৳{Number(currentLevelData?.bonus_amount || 0).toFixed(2)}</span>
-            <span className="vip-wait-text">View Below</span>
           </div>
 
         </div>
@@ -427,7 +472,6 @@ export default function VipLevelPage() {
                                 Claim ৳{level.bonus_amount}
                               </button>
                             ) : (
-                              // Lock এর পরিবর্তে বোনাস অ্যামাউন্ট দেখানো হলো
                               <span className="text-[12px] text-[#f58220] font-bold">
                                 ৳ {Number(level.bonus_amount).toLocaleString()}
                               </span>
