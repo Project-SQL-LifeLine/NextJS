@@ -1,11 +1,12 @@
 .redeem-page {
-  --redeem-bg: #18221E;
+  --redeem-bg: #0d241e; /* মেইন ব্যাকগ্রাউন্ড আপডেট */
   --redeem-card: #1B2A23;
   --redeem-border: #263C32;
   --redeem-text: #FFFFFF;
   --redeem-muted: #A0ADB0;
   --redeem-accent: #00E701;
   --redeem-input-bg: #121816;
+  --btn-bg: #184f35; /* সেটিংস পেজের বাটন কালার */
 
   background-color: var(--redeem-bg);
   min-height: 100vh;
@@ -84,30 +85,32 @@
 }
 
 /* =========================================
-   নতুন বাটন ডিজাইন (সলিড সবুজ + সাদা বর্ডার)
+   সেটিংস পেজের হুবহু বাটন ডিজাইন
    ========================================= */
 .redeem-submit-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 14px 20px;
-  background: #184f35; /* সলিড সবুজ */
+  padding: 12px 20px;
+  background: var(--btn-bg); /* #184f35 */
   border: 1px solid #FFFFFF; /* সাদা বর্ডার ১ পিক্সেল */
-  border-radius: 50px; /* পিল শেপ */
+  border-radius: 8px; /* সেটিংস পেজের মতো 8px */
   color: #FFFFFF;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
 .redeem-submit-btn:hover:not(:disabled) {
-  background: #143d2a;
+  background: #0f2e1f;
 }
 
 .redeem-submit-btn:active:not(:disabled) {
   transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .redeem-submit-btn:disabled {
@@ -120,7 +123,7 @@
 /* ======================================== */
 
 .redeem-section-title {
-  font-size: 14px;
+  font-size: 11px;
   color: var(--redeem-text);
   margin: 0 0 12px;
 }
@@ -182,7 +185,7 @@
 }
 
 .badge {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
