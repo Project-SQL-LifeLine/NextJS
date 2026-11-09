@@ -7,7 +7,7 @@ import { useLanguage } from "../../../lib/LanguageContext";
 import Header from "../../../components/Header";
 import BottomNav from "../../../components/BottomNav";
 import "./invitedFriend.css";
-import "./invitedFriend-loader.css"; // নতুন লোডার ইমপোর্ট
+import "./invitedFriend-loader.css";
 
 export default function InviteFriendPage() {
   const router = useRouter();
@@ -45,9 +45,13 @@ export default function InviteFriendPage() {
       
       if (profileData) setProfile(profileData);
 
+      // profiles টেবিল থেকে game_id জয়েন করা হয়েছে
       const { data: referData } = await supabase
         .from("user_invited_friend_referral")
-        .select("*")
+        .select(`
+          *,
+          referred:referred_user_id (game_id)
+        `)
         .eq("referrer_id", user.id)
         .order("created_at", { ascending: false });
       
@@ -61,6 +65,14 @@ export default function InviteFriendPage() {
   }, [router]);
 
   useEffect(() => { void loadData(); }, [loadData]);
+
+  // গেম আইডি মাস্ক করার ফাংশন (যেমন: MD****88)
+  const maskGameId = (gameId: string) => {
+    if (!gameId) return "N/A";
+    const id = gameId.toUpperCase();
+    if (id.length <= 4) return id;
+    return `${id.slice(0, 2)}****${id.slice(-2)}`;
+  };
 
   const copyReferralLink = () => {
     if (!profile) return;
@@ -122,9 +134,6 @@ export default function InviteFriendPage() {
     return <span className="badge">{status}</span>;
   };
 
-  // ==========================================
-  // নতুন লোডিং এনিমেশন (SVG User-Plus আইকন)
-  // ==========================================
   if (loading) {
     return (
       <div className="invite-loader-container">
@@ -161,7 +170,7 @@ export default function InviteFriendPage() {
 
         {profile && (
           <>
-            {/* Stats (Horizontal & Small Height) */}
+            {/* Stats */}
             <div className="invite-stats-grid">
               <div className="invite-stat-card">
                 <span>{t("Total Referrals", "মোট রেফারেল")}</span>
@@ -169,11 +178,11 @@ export default function InviteFriendPage() {
               </div>
               <div className="invite-stat-card">
                 <span>{t("Pending", "অপেক্ষমাণ")}</span>
-                <strong className="text-[#f58220]">{pendingClaims}</strong>
+                <strong style={{ color: '#f58220' }}>{pendingClaims}</strong>
               </div>
               <div className="invite-stat-card">
                 <span>{t("Earnings", "আর্নিংস")}</span>
-                <strong className="text-[#00E701]">৳ {Number(profile.referral_earnings).toFixed(2)}</strong>
+                <strong className="text-white">৳ {Number(profile.referral_earnings).toFixed(2)}</strong>
               </div>
             </div>
 
@@ -198,7 +207,7 @@ export default function InviteFriendPage() {
             <div className="invite-bonus-card">
               <div>
                 <span>{t("Referral Earnings", "রেফারেল আর্নিংস")}</span>
-                <strong>৳ {Number(profile.referral_earnings).toFixed(2)}</strong>
+                <strong className="text-white">৳ {Number(profile.referral_earnings).toFixed(2)}</strong>
               </div>
               <button 
                 className="invite-transfer-btn"
@@ -226,9 +235,14 @@ export default function InviteFriendPage() {
                 {referrals.map(r => (
                   <div className="invite-item" key={r.id}>
                     <div className="invite-item-left">
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+                      {/* প্রিমিয়াম সাদা SVG */}
+                      <div className="premium-svg-box">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </div>
                       <div>
-                        <strong>{t("New User Referred", "নতুন ইউজার রেফারেল")}</strong>
+                        <strong>{maskGameId(r.referred?.game_id)}</strong>
                         <span>{new Date(r.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
@@ -257,7 +271,7 @@ export default function InviteFriendPage() {
               </button>
             </div>
             <form onSubmit={handleTransferRequest}>
-              <p className="text-[#A0ADB0] text-xs mb-4">
+              <p className="text-[#A0ADB0] text-[11px] mb-4">
                 {t("Enter the amount you want to transfer to your main balance.", "আপনি মেইন ব্যালেন্সে যত টাকা ট্রান্সফার করতে চান তা লিখুন।")}
               </p>
               
