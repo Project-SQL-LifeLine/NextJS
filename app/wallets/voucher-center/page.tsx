@@ -56,8 +56,9 @@ export default function VoucherCenterPage() {
   const totalAmount = selectedAmount + bonusAmount;
 
   if (loading) {
+    // মেইন ব্যাকগ্রাউন্ড #183f34 করা হলো
     return (
-      <div className="min-h-screen bg-bgMain flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#183f34] flex flex-col items-center justify-center">
         <div className="animate-spin">
           <LoadingDepositIcon />
         </div>
@@ -71,9 +72,10 @@ export default function VoucherCenterPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Head>
 
-      <div className={`min-h-screen bg-bgMain text-textMain flex flex-col pb-28 transition-opacity duration-700 ease-in-out ${isFadeIn ? 'opacity-100' : 'opacity-0'}`}>
+      {/* মেইন ব্যাকগ্রাউন্ড #183f34 করা হলো */}
+      <div className={`min-h-screen bg-[#183f34] text-textMain flex flex-col pb-28 transition-opacity duration-700 ease-in-out ${isFadeIn ? 'opacity-100' : 'opacity-0'}`}>
         
-        {/* টপ বার কালার আপডেট করা হয়েছে */}
+        {/* টপ বার ব্যাকগ্রাউন্ড #183f35 করা হলো */}
         <header className="bg-[#183f35] px-4 py-3 flex items-center justify-between sticky top-0 z-50 border-b border-borderCol">
           <button onClick={() => router.back()} className="text-white">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
@@ -228,7 +230,8 @@ export default function VoucherCenterPage() {
           </div>
         )}
 
-        <div className="fixed bottom-0 left-0 w-full p-4 bg-bgMain border-t border-borderCol z-50">
+        {/* নিচের ফিক্সড বার ব্যাকগ্রাউন্ড #183f34 করা হলো */}
+        <div className="fixed bottom-0 left-0 w-full p-4 bg-[#183f34] border-t border-borderCol z-50">
           <Link 
             href={`/wallets/voucher-center/depositIframe?method=${selectedMethod?.method_name}&logo=${selectedMethod?.method_logo_url}&amount=${selectedAmount}&bonus=${selectedPromo?.bonus_percentage || 0}&bonus_id=${selectedPromo?.id || ''}&turnover=${selectedPromo?.turnover_multiplier || 0}`} 
             onClick={(e) => {
