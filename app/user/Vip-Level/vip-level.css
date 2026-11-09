@@ -43,25 +43,14 @@
 
 /* স্ট্যাটাস কার্ড */
 .vip-status-card {
-  background: linear-gradient(135deg, #1f1b33 0%, #121016 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-card); /* ব্যাকগ্রাউন্ড কালার ঠিক করা হলো */
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-}
-
-.vip-status-card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(107, 76, 255, 0.15) 0%, transparent 60%);
-  z-index: 0;
 }
 
 .vip-current-level {
@@ -103,10 +92,10 @@
 .vip-progress-bar-bg {
   width: 100%;
   height: 8px;
-  background: rgba(0,0,0,0.5);
+  background: var(--bg-input); /* tips.css কালার ব্যবহার করা হলো */
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--border-color);
 }
 
 .vip-progress-bar-fill {
@@ -116,7 +105,7 @@
   transition: width 0.5s ease-in-out;
 }
 
-/* বোনাস কার্ড */
+/* বোনাস কার্ড (Transfer Section) */
 .vip-bonus-card {
   background: var(--bg-card);
   border: 1px solid var(--border-col);
@@ -151,7 +140,7 @@
 
 .vip-transfer-input {
   flex: 1;
-  background: var(--bg-input); /* tips.css কালার */
+  background: var(--bg-input);
   border: 1px solid var(--border-col);
   padding: 10px 12px;
   border-radius: 8px;
@@ -160,41 +149,43 @@
   outline: none;
 }
 
-/* ৩ডি বাটন স্টাইল (Transfer & Claim) */
+/* =========================================
+   ৩ডি গ্লসি রাউন্ডেড বাটন (ছবির মতো হুবহু)
+   ========================================= */
 .vip-btn-3d {
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
-  border: 1px solid #117934;
-  border-radius: 8px;
+  border: 2px solid #117934;
+  border-radius: 50px; /* সম্পূর্ণ রাউন্ডেড */
   color: #FFFFFF;
   font-weight: 800;
+  font-size: 13px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   cursor: pointer;
   transition: all 0.1s ease;
   box-shadow: 
-    inset 0 2px 4px rgba(255, 255, 255, 0.5),
-    inset 0 -3px 5px rgba(0, 0, 0, 0.2),
-    0 4px 0 #117934,
-    0 6px 10px rgba(0, 0, 0, 0.3);
-  padding: 10px 16px;
-  font-size: 11px;
+    inset 0 3px 5px rgba(255, 255, 255, 0.5),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.3);
+  padding: 12px 24px;
+  width: 100%;
 }
 
 .vip-btn-3d:active:not(:disabled) {
-  transform: translateY(3px);
+  transform: translateY(2px);
   box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.4),
-    0 1px 0 #117934,
-    0 2px 4px rgba(0, 0, 0, 0.2);
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .vip-btn-3d:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   box-shadow: none;
-  background: var(--border-col); /* tips.css কালার */
+  background: var(--border-col);
   border-color: var(--border-col);
   color: var(--text-muted);
 }
@@ -270,76 +261,89 @@
 }
 
 /* =========================================
-   নতুন ৪টি বোনাস কার্ডের গ্রিড (tips.css কালার অনুযায়ী)
+   বোনাস কার্ডের গ্রিড (পাশাপাশি ৪টি)
    ========================================= */
 .vip-grid-buttons {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(4, 1fr); /* ৪টি কলাম */
+  gap: 8px;
   margin-bottom: 20px;
 }
 
+@media (max-width: 480px) {
+  /* মোবাইলে টেক্সট ছোট হয়ে গেলে যাতে ভেঙে না যায় */
+  .vip-grid-buttons {
+    gap: 6px;
+  }
+}
+
 .vip-new-card {
-  background: var(--bg-card); /* tips.css কালার ব্যবহার করা হলো */
-  border: 1px solid var(--border-color); /* tips.css কালার ব্যবহার করা হলো */
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 14px;
+  padding: 10px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between; /* বাটন নিচে রাখার জন্য */
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  min-height: 170px;
 }
 
 .vip-card-header {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  gap: 2px;
 }
 
 .vip-card-top-text {
-  font-size: 12px;
+  font-size: 9px; /* ছোট সাইজ */
   font-weight: 600;
   color: #E2E8F0;
+  line-height: 1.2;
 }
 
 .vip-top-icon {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   color: #FFFFFF;
 }
 
 .vip-card-center-icon {
-  font-size: 32px;
+  font-size: 28px;
   margin-bottom: 8px;
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
 }
 
 .vip-new-card-title {
-  font-size: 14px;
+  font-size: 11px; /* ছোট সাইজ */
   font-weight: 700;
   color: #FFFFFF;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
+  text-align: center;
+  flex-grow: 1; /* জায়গা দখল করবে যাতে বাটন নিচে থাকে */
 }
 
 .vip-card-value-box {
   width: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 40px;
+  align-items: flex-end; /* নিচে অ্যালাইন */
+  margin-top: auto;
 }
 
 .vip-new-claim-btn {
   width: 100%;
   background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
   border: 1px solid #117934;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #FFFFFF;
   font-weight: 700;
-  font-size: 12px;
-  padding: 10px 0;
+  font-size: 10px;
+  padding: 8px 0;
   cursor: pointer;
   box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 2px 0 #117934;
   transition: all 0.1s ease;
@@ -358,13 +362,13 @@
 
 .vip-new-timer {
   width: 100%;
-  background: var(--bg-input); /* tips.css কালার */
+  background: var(--bg-input);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text-secondary);
   font-weight: 600;
-  font-size: 13px;
-  padding: 10px 0;
+  font-size: 10px;
+  padding: 8px 0;
   text-align: center;
   font-family: monospace;
 }
