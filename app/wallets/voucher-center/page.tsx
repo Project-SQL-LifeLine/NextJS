@@ -12,10 +12,10 @@ const PaymentIcon = () => (
   </svg>
 );
 
-const LoadingWalletIcon = () => (
-  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 10h2v4h-2z" />
+// নতুন ডিপোজিট ক্যাশ-ইন SVG আইকন
+const LoadingDepositIcon = () => (
+  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
@@ -31,6 +31,7 @@ export default function VoucherCenterPage() {
   const [methods, setMethods] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFadeIn, setIsFadeIn] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false); // Next বাটনের স্টেট
 
   useEffect(() => {
     const timer = setTimeout(() => setIsFadeIn(true), 100);
@@ -57,9 +58,10 @@ export default function VoucherCenterPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bgMain flex flex-col items-center justify-center gap-4">
-        <div className="animate-spin"><LoadingWalletIcon /></div>
-        <span className="text-primary text-sm font-bold mt-2">Loading...</span>
+      <div className="min-h-screen bg-bgMain flex flex-col items-center justify-center">
+        <div className="animate-spin">
+          <LoadingDepositIcon />
+        </div>
       </div>
     );
   }
@@ -93,13 +95,17 @@ export default function VoucherCenterPage() {
                 <button
                   key={method.id}
                   onClick={() => { setSelectedMethod(method); setSelectedChannel(method.payment_channels[0]); }}
-                  className={`relative flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all ${selectedMethod?.id === method.id ? "border-danger bg-danger/10" : "border-borderCol bg-bgSec"}`}
+                  className={`relative flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${
+                    selectedMethod?.id === method.id 
+                    ? "border-white bg-[#184f35] shadow-[0_0_10px_rgba(255,255,255,0.15)]" 
+                    : "border-borderCol bg-bgSec"
+                  }`}
                 >
                   <div className="absolute top-0 left-0 p-1 rounded-br-lg bg-danger"><PaymentIcon /></div>
                   <img src={method.method_logo_url} alt="" className="w-10 h-10 object-contain mb-1 mt-3" />
-                  <span className={`text-[10px] font-semibold text-center leading-tight ${selectedMethod?.id === method.id ? "text-danger" : "text-white"}`}>{method.method_name}</span>
+                  <span className={`text-[10px] font-semibold text-center leading-tight ${selectedMethod?.id === method.id ? "text-white" : "text-white"}`}>{method.method_name}</span>
                   {selectedMethod?.id === method.id && (
-                    <div className="absolute -bottom-1.5 -right-1.5 bg-danger text-white rounded-full p-0.5"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg></div>
+                    <div className="absolute -bottom-1.5 -right-1.5 bg-white text-[#184f35] rounded-full p-0.5"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg></div>
                   )}
                 </button>
               ))}
@@ -115,7 +121,11 @@ export default function VoucherCenterPage() {
                 <button
                   key={channel}
                   onClick={() => setSelectedChannel(channel)}
-                  className={`relative p-3 rounded-lg border-2 font-bold text-sm transition-all ${selectedChannel === channel ? "border-danger text-danger bg-danger/10" : "border-borderCol text-textSec bg-bgSec"}`}
+                  className={`relative p-3 rounded-lg border font-bold text-sm transition-all ${
+                    selectedChannel === channel 
+                    ? "border-white text-white bg-[#184f35] shadow-[0_0_10px_rgba(255,255,255,0.15)]" 
+                    : "border-borderCol text-textSec bg-bgSec"
+                  }`}
                 >
                   <div className="absolute top-0 left-0 p-1 rounded-br-lg bg-danger"><PaymentIcon /></div>
                   {channel}
@@ -137,7 +147,11 @@ export default function VoucherCenterPage() {
                 <button
                   key={amt}
                   onClick={() => { setSelectedAmount(amt); setCustomAmount(amt.toString()); }}
-                  className={`py-3 rounded-lg border-2 font-bold transition-all ${selectedAmount === amt ? "border-danger text-danger" : "border-borderCol text-textSec"}`}
+                  className={`py-3 rounded-lg border font-bold transition-all ${
+                    selectedAmount === amt 
+                    ? "border-white text-white bg-[#184f35] shadow-[0_0_10px_rgba(255,255,255,0.15)]" 
+                    : "border-borderCol text-textSec"
+                  }`}
                 >
                   {amt.toLocaleString()}
                 </button>
@@ -151,7 +165,7 @@ export default function VoucherCenterPage() {
                 value={customAmount}
                 onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(Number(e.target.value)); }}
                 placeholder={`${selectedMethod?.min_deposit || 500} - ${selectedMethod?.max_deposit || 30000}`}
-                className="w-full bg-bgSec text-white border-2 border-borderCol rounded-lg pl-10 pr-4 py-3 text-lg font-bold focus:outline-none focus:border-primary transition-colors"
+                className="w-full bg-bgSec text-white border border-borderCol rounded-lg pl-10 pr-4 py-3 text-lg font-bold focus:outline-none focus:border-white transition-colors"
               />
             </div>
           </section>
@@ -167,8 +181,10 @@ export default function VoucherCenterPage() {
                   <div 
                     key={bonus.id} 
                     onClick={() => setSelectedPromo(bonus)}
-                    className={`relative flex flex-col items-center justify-center p-2 h-20 rounded-md cursor-pointer transition-all overflow-hidden border-2 ${
-                      selectedPromo?.id === bonus.id ? "border-primary bg-gradient-to-br from-[#0a5c29] to-[#0b3d1e]" : "border-borderCol bg-gradient-to-br from-[#1d3b2b] to-[#14251c] hover:border-primary/50"
+                    className={`relative flex flex-col items-center justify-center p-2 h-20 rounded-md cursor-pointer transition-all overflow-hidden border ${
+                      selectedPromo?.id === bonus.id 
+                      ? "border-white bg-[#184f35] shadow-[0_0_10px_rgba(255,255,255,0.15)]" 
+                      : "border-borderCol bg-gradient-to-br from-[#1d3b2b] to-[#14251c] hover:border-white/50"
                     }`}
                   >
                     <div className="absolute top-0 right-0 bg-white text-black text-[10px] font-bold px-1.5 py-0.5 rounded-bl-md z-10">+{bonus.bonus_percentage}%</div>
@@ -176,8 +192,8 @@ export default function VoucherCenterPage() {
                       <span className="text-[#00E701] font-extrabold text-sm">৳{dynamicBonusAmount.toLocaleString()}</span>
                     </div>
                     {selectedPromo?.id === bonus.id && (
-                      <div className="absolute bottom-0 right-0 w-6 h-6 bg-[#00E701] rounded-tl-full flex items-end justify-end p-1 z-10">
-                        <svg className="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                      <div className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-tl-full flex items-end justify-end p-1 z-10">
+                        <svg className="w-3 h-3 text-[#184f35]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                       </div>
                     )}
                   </div>
@@ -185,8 +201,8 @@ export default function VoucherCenterPage() {
               })}
             </div>
             
-            <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${selectedPromo === null ? "border-primary bg-primary/5" : "border-borderCol hover:bg-bgSec/50"}`}>
-              <input type="radio" name="promo" checked={selectedPromo === null} onChange={() => setSelectedPromo(null)} className="w-5 h-5 accent-primary" />
+            <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${selectedPromo === null ? "border-white bg-[#184f35] shadow-[0_0_10px_rgba(255,255,255,0.15)]" : "border-borderCol hover:bg-bgSec/50"}`}>
+              <input type="radio" name="promo" checked={selectedPromo === null} onChange={() => setSelectedPromo(null)} className="w-5 h-5 accent-white" />
               <span className="text-sm font-bold text-white">Do not participate in any promotions</span>
             </label>
           </section>
@@ -213,12 +229,22 @@ export default function VoucherCenterPage() {
         )}
 
         <div className="fixed bottom-0 left-0 w-full p-4 bg-bgMain border-t border-borderCol z-50">
-          {/* এখানে turnover প্যারামিটার যোগ করা হয়েছে */}
           <Link 
             href={`/wallets/voucher-center/depositIframe?method=${selectedMethod?.method_name}&logo=${selectedMethod?.method_logo_url}&amount=${selectedAmount}&bonus=${selectedPromo?.bonus_percentage || 0}&bonus_id=${selectedPromo?.id || ''}&turnover=${selectedPromo?.turnover_multiplier || 0}`} 
-            className="w-full block text-center bg-primary text-[#071A0B] font-bold text-lg py-3 rounded-lg hover:bg-[#00c701] transition-colors"
+            onClick={(e) => {
+              if (isProcessing || selectedAmount <= 0) {
+                e.preventDefault(); // অ্যামাউন্ট ০ হলে বা প্রসেসিং হলে লিংকে যাবে না
+              } else {
+                setIsProcessing(true);
+              }
+            }}
+            className={`w-full block text-center font-bold text-lg py-3 rounded-lg border transition-all ${
+              isProcessing || selectedAmount <= 0 
+              ? "bg-borderCol text-textSec border-borderCol cursor-not-allowed" 
+              : "bg-[#184f35] text-white border-white hover:bg-[#143d2a] shadow-[0_0_10px_rgba(255,255,255,0.15)]"
+            }`}
           >
-            Next
+            {isProcessing ? "Processing..." : "Next"}
           </Link>
         </div>
       </div>
