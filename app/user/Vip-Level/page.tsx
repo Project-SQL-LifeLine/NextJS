@@ -16,6 +16,7 @@ export default function VipLevelPage() {
   const [profile, setProfile] = useState<any>(null);
   const [vipLevels, setVipLevels] = useState<any[]>([]);
   const [claimedLevels, setClaimedLevels] = useState<number[]>([]);
+  const [timeClaims, setTimeClaims] = useState<any>({}); // { daily: timestamp, weekly: timestamp, monthly: timestamp }
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
@@ -70,6 +71,23 @@ export default function VipLevelPage() {
         setClaimedLevels(claimsData.map(c => c.vip_level_id));
       }
 
+      // ৪. টাইম বোনাস (Daily, Weekly, Monthly) এর শেষ ক্লেইম কবে হয়েছে তা আনা
+      const { data: timeClaimsData } = await supabase
+        .from("user_vip_time_bonus_claims")
+        .select("bonus_type, claimed_at")
+        .eq("user_id", user.id)
+        .order("claimed_at", { ascending: false });
+
+      if (timeClaimsData) {
+        const claimsMap: any = {};
+        timeClaimsData.forEach((c) => {
+          if (!claimsMap[c.bonus_type]) {
+            claimsMap[c.bonus_type] = c.claimed_at;
+          }
+        });
+        setTimeClaims(claimsMap);
+      }
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -81,8 +99,8 @@ export default function VipLevelPage() {
     loadData();
   }, [router]);
 
-  // হ্যান্ডেল VIP বোনাস ক্লেইম
-  const handleClaim = async (levelId: number) => {
+  // লেভেল আপ বোনাস ক্লেইম
+  const handleClaimLevelUp = async (levelId: number) => {
     setSubmitting(true);
     setMessage({ type: "", text: "" });
 
@@ -95,7 +113,7 @@ export default function VipLevelPage() {
 
       if (data.success) {
         setMessage({ type: "success", text: data.message });
-        loadData(); // রিফ্রেশ
+        loadData();
       } else {
         setMessage({ type: "error", text: data.error });
       }
@@ -106,7 +124,52 @@ export default function VipLevelPage() {
     }
   };
 
-  // হ্যান্ডেল VIP বোনাস থেকে মেইন ব্যালেন্সে ট্রান্সফার
+  // টাইম বোনাস (Daily, Weekly, Monthly) ক্লেইম
+  const handleClaimTimeBonus = async (bonusType: string) => {
+    setSubmitting(true);
+    setMessage({ type: "", text: "" });
+
+    try {
+      const { data, error } = await supabase.rpc("claim_vip_time_bonus", {
+        p_bonus_type: bonusType
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setMessage({ type: "success", text: data.message });
+        loadData();
+      } else {
+        setMessage({ type: "error", text: data.error });
+      }
+    } catch (err: any) {
+      setMessage({ type: "error", text: err.message });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // টাইম বোনাসের জন্য অপেক্ষার সময় ক্যালকুলেশন
+  const getTimeBonusStatus = (type: string, requiredHours: number) => {
+    const lastClaim = timeClaims[type];
+    if (!lastClaim) return { canClaim: true, text: "Claim" };
+
+    const lastClaimDate = new Date(lastClaim);
+    const nextClaimDate = new Date(lastClaimDate.getTime() + requiredHours * 60 * 60 * 1000);
+    const now = new Date();
+
+    if (now >= nextClaimDate) {
+      return { canClaim: true, text: "Claim" };
+    }
+
+    const diffMs = nextClaimDate.getTime() - now.getTime();
+    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    return { canClaim: false, text: `Wait ${diffHrs}h ${diffMins}m` };
+  };
+
+  // VIP বোনাস থেকে মেইন ব্যালেন্সে ট্রান্সফার
   const handleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!transferAmount || Number(transferAmount) <= 0) {
@@ -127,7 +190,7 @@ export default function VipLevelPage() {
       if (data.success) {
         setMessage({ type: "success", text: data.message });
         setTransferAmount("");
-        loadData(); // রিফ্রেশ
+        loadData();
       } else {
         setMessage({ type: "error", text: data.error });
       }
@@ -136,11 +199,6 @@ export default function VipLevelPage() {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  // হ্যান্ডেল অন্যান্য বোনাস ক্লেইম (আপাতত মেসেজ দেখাবে)
-  const handleOtherBonus = (type: string) => {
-    setMessage({ type: "error", text: `${type} bonus feature is coming soon!` });
   };
 
   if (loading) {
@@ -153,7 +211,6 @@ export default function VipLevelPage() {
     );
   }
 
-  // কারেন্ট এবং নেক্সট লেভেল ক্যালকুলেশন
   const currentLevelId = profile?.current_vip_level || 0;
   const currentLevelData = vipLevels.find(v => v.id === currentLevelId);
   const nextLevelData = vipLevels.find(v => v.id === currentLevelId + 1);
@@ -165,6 +222,11 @@ export default function VipLevelPage() {
   if (nextLevelData) {
     progressPercent = Math.min((currentWager / nextWagerReq) * 100, 100);
   }
+
+  // ৫টি বাটনের ডাটা
+  const dailyStatus = getTimeBonusStatus("daily", 24);
+  const weeklyStatus = getTimeBonusStatus("weekly", 168);
+  const monthlyStatus = getTimeBonusStatus("monthly", 720);
 
   return (
     <div className="vip-page pb-20">
@@ -201,24 +263,49 @@ export default function VipLevelPage() {
           </div>
         </div>
 
-        {/* নতুন ৪টি বোনাস বাটনের গ্রিড */}
+        {/* ৫টি বোনাস বাটনের গ্রিড */}
         <div className="vip-grid-buttons">
-          <button className="vip-grid-btn" onClick={() => handleOtherBonus("Instant Rakeback")}>
-            <svg className="w-6 h-6 mb-1 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <span>Instant Rakeback</span>
+          
+          {/* ১. Instant Rakeback */}
+          <button className="vip-grid-btn" onClick={() => handleClaimTimeBonus("instant_rakeback")} disabled={Number(profile?.unclaimed_rakeback) <= 0}>
+            <span className="vip-btn-icon">💰</span>
+            <span className="vip-btn-title">Instant Rakeback</span>
+            <span className="vip-btn-value">৳{Number(profile?.unclaimed_rakeback || 0).toFixed(2)}</span>
+            <span className="vip-btn-action">{Number(profile?.unclaimed_rakeback) > 0 ? "Claim" : "No Rakeback"}</span>
           </button>
-          <button className="vip-grid-btn" onClick={() => handleOtherBonus("Daily")}>
-            <svg className="w-6 h-6 mb-1 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-            <span>Daily Bonus</span>
+
+          {/* ২. Daily Bonus */}
+          <button className="vip-grid-btn" onClick={() => handleClaimTimeBonus("daily")} disabled={!dailyStatus.canClaim || submitting}>
+            <span className="vip-btn-icon">📅</span>
+            <span className="vip-btn-title">Daily Bonus</span>
+            <span className="vip-btn-value">৳{Number(currentLevelData?.daily_bonus_amount || 0).toFixed(2)}</span>
+            <span className="vip-btn-action">{dailyStatus.text}</span>
           </button>
-          <button className="vip-grid-btn" onClick={() => handleOtherBonus("Weekly")}>
-            <svg className="w-6 h-6 mb-1 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-            <span>Weekly Bonus</span>
+
+          {/* ৩. Weekly Bonus */}
+          <button className="vip-grid-btn" onClick={() => handleClaimTimeBonus("weekly")} disabled={!weeklyStatus.canClaim || submitting}>
+            <span className="vip-btn-icon">📆</span>
+            <span className="vip-btn-title">Weekly Bonus</span>
+            <span className="vip-btn-value">৳{Number(currentLevelData?.weekly_bonus_amount || 0).toFixed(2)}</span>
+            <span className="vip-btn-action">{weeklyStatus.text}</span>
           </button>
-          <button className="vip-grid-btn" onClick={() => handleOtherBonus("Monthly")}>
-            <svg className="w-6 h-6 mb-1 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-            <span>Monthly Bonus</span>
+
+          {/* ৪. Monthly Bonus */}
+          <button className="vip-grid-btn" onClick={() => handleClaimTimeBonus("monthly")} disabled={!monthlyStatus.canClaim || submitting}>
+            <span className="vip-btn-icon">🗓️</span>
+            <span className="vip-btn-title">Monthly Bonus</span>
+            <span className="vip-btn-value">৳{Number(currentLevelData?.monthly_bonus_amount || 0).toFixed(2)}</span>
+            <span className="vip-btn-action">{monthlyStatus.text}</span>
           </button>
+
+          {/* ৫. Level Up Bonus (সরাসরি নিচের লিস্ট থেকে ক্লেইম হবে) */}
+          <button className="vip-grid-btn" onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}>
+            <span className="vip-btn-icon">⭐</span>
+            <span className="vip-btn-title">Level Up Bonus</span>
+            <span className="vip-btn-value">৳{Number(currentLevelData?.bonus_amount || 0).toFixed(2)}</span>
+            <span className="vip-btn-action">View Levels</span>
+          </button>
+
         </div>
 
         {/* VIP বোনাস ট্রান্সফার সেকশন */}
@@ -245,17 +332,6 @@ export default function VipLevelPage() {
           </form>
         </div>
 
-        {/* ইনস্ট্যান্ট রিবেট ডিসপ্লে */}
-        <div className="vip-bonus-card" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <span className="text-[11px] text-[#A0ADB0] block mb-1">Unclaimed Rakeback</span>
-            <strong className="text-[16px] text-white">৳ {Number(profile?.unclaimed_rakeback || 0).toFixed(2)}</strong>
-          </div>
-          <div className="text-[10px] text-[#A0ADB0] text-right w-1/2">
-            Based on your losses in games.
-          </div>
-        </div>
-
         {/* লেভেল লিস্ট */}
         <h2 className="text-[14px] text-white font-bold mb-3 mt-6">All VIP Levels</h2>
         <div className="vip-level-list">
@@ -273,7 +349,7 @@ export default function VipLevelPage() {
                   {isClaimed ? (
                     <span className="text-[11px] text-[#00E701] font-bold">Claimed</span>
                   ) : isUnlocked ? (
-                    <button onClick={() => handleClaim(level.id)} className="vip-btn-3d" disabled={submitting}>
+                    <button onClick={() => handleClaimLevelUp(level.id)} className="vip-btn-3d" disabled={submitting}>
                       Claim ৳{level.bonus_amount}
                     </button>
                   ) : (
