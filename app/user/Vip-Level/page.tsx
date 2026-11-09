@@ -273,12 +273,14 @@ export default function VipLevelPage() {
           </div>
         </div>
 
-        {/* ৫টি বোনাস বাটনের গ্রিড (কাউন্টডাউন সহ) */}
+        {/* ৫টি বোনাস বাটনের গ্রিড (SVG আইকনসহ) */}
         <div className="vip-grid-buttons">
           
           {/* ১. Instant Rakeback */}
           <div className="vip-grid-card">
-            <span className="vip-btn-icon">💰</span>
+            <svg className="vip-svg-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
             <span className="vip-btn-title">Instant Rakeback</span>
             <span className="vip-btn-value">৳{Number(profile?.unclaimed_rakeback || 0).toFixed(2)}</span>
             {Number(profile?.unclaimed_rakeback) > 0 ? (
@@ -292,7 +294,12 @@ export default function VipLevelPage() {
 
           {/* ২. Daily Bonus */}
           <div className="vip-grid-card">
-            <span className="vip-btn-icon">📅</span>
+            <svg className="vip-svg-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
             <span className="vip-btn-title">Daily Bonus</span>
             <span className="vip-btn-value">৳{Number(currentLevelData?.daily_bonus_amount || 0).toFixed(2)}</span>
             {dailyStatus.canClaim ? (
@@ -306,7 +313,13 @@ export default function VipLevelPage() {
 
           {/* ৩. Weekly Bonus */}
           <div className="vip-grid-card">
-            <span className="vip-btn-icon">📆</span>
+            <svg className="vip-svg-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
+            </svg>
             <span className="vip-btn-title">Weekly Bonus</span>
             <span className="vip-btn-value">৳{Number(currentLevelData?.weekly_bonus_amount || 0).toFixed(2)}</span>
             {weeklyStatus.canClaim ? (
@@ -320,7 +333,14 @@ export default function VipLevelPage() {
 
           {/* ৪. Monthly Bonus */}
           <div className="vip-grid-card">
-            <span className="vip-btn-icon">🗓️</span>
+            <svg className="vip-svg-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
+              <path d="M15 10l-2 2-2-2" />
+            </svg>
             <span className="vip-btn-title">Monthly Bonus</span>
             <span className="vip-btn-value">৳{Number(currentLevelData?.monthly_bonus_amount || 0).toFixed(2)}</span>
             {monthlyStatus.canClaim ? (
@@ -334,10 +354,12 @@ export default function VipLevelPage() {
 
           {/* ৫. Level Up Bonus */}
           <div className="vip-grid-card">
-            <span className="vip-btn-icon">⭐</span>
+            <svg className="vip-svg-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
             <span className="vip-btn-title">Level Up Bonus</span>
             <span className="vip-btn-value">৳{Number(currentLevelData?.bonus_amount || 0).toFixed(2)}</span>
-            <span className="vip-wait-text">View Levels Below</span>
+            <span className="vip-wait-text">View Below</span>
           </div>
 
         </div>
@@ -389,9 +411,10 @@ export default function VipLevelPage() {
                     {tierLevels.map((level) => {
                       const isClaimed = claimedLevels.includes(level.id);
                       const isUnlocked = currentLevelId >= level.id;
+                      const isCurrent = currentLevelId === level.id;
 
                       return (
-                        <div key={level.id} className={`vip-level-item ${isUnlocked ? "" : "locked"} ${currentLevelId === level.id ? "current" : ""}`}>
+                        <div key={level.id} className={`vip-level-item ${isUnlocked ? "" : "locked"} ${isCurrent ? "current" : ""}`}>
                           <div className="vip-level-info">
                             <h4>{level.level_name}</h4>
                             <p>Wager: ৳ {Number(level.required_wager).toLocaleString()}</p>
@@ -404,7 +427,10 @@ export default function VipLevelPage() {
                                 Claim ৳{level.bonus_amount}
                               </button>
                             ) : (
-                              <span className="text-[11px] text-[#A0ADB0]">Locked</span>
+                              // Lock এর পরিবর্তে বোনাস অ্যামাউন্ট দেখানো হলো
+                              <span className="text-[12px] text-[#f58220] font-bold">
+                                ৳ {Number(level.bonus_amount).toLocaleString()}
+                              </span>
                             )}
                           </div>
                         </div>
