@@ -23,7 +23,11 @@ export default function VipLevelPage() {
   const [expandedTier, setExpandedTier] = useState<string | null>(null);
   const [transferAmount, setTransferAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [isTransferring, setIsTransferring] = useState(false); // Processing স্টেট
+  
+  // Transfer স্টেট
+  const [isTransferring, setIsTransferring] = useState(false); 
+  const [isTransferSuccess, setIsTransferSuccess] = useState(false); 
+  
   const [message, setMessage] = useState({ type: "", text: "" });
   const [currentTime, setCurrentTime] = useState(Date.now());
 
@@ -196,14 +200,15 @@ export default function VipLevelPage() {
     return { canClaim: true, timeLeft: "" };
   };
 
-  const handleTransfer = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Transfer Handler (Refresh বন্ধ করে দেওয়া হয়েছে)
+  const handleTransfer = async () => {
     if (!transferAmount || Number(transferAmount) <= 0) {
-      setMessage({ type: "error", text: "Enter a valid amount." });
+      setMessage({ type: "error", text: t("Enter a valid amount.", "সঠিক পরিমাণ লিখুন।") });
       return;
     }
 
-    setIsTransferring(true); // Processing স্টেট চালু
+    setIsTransferring(true);
+    setIsTransferSuccess(false);
     setMessage({ type: "", text: "" });
 
     try {
@@ -214,16 +219,23 @@ export default function VipLevelPage() {
       if (error) throw error;
 
       if (data.success) {
-        setMessage({ type: "success", text: data.message });
+        // সফল হলে পপ-আপ মেসেজ দেখাবে না, শুধু টিক মার্ক দেখাবে
+        setIsTransferSuccess(true);
         setTransferAmount("");
         loadData();
+        
+        // ৩ সেকেন্ড পর আবার আগের অবস্থায় ফিরে যাবে
+        setTimeout(() => {
+          setIsTransferSuccess(false);
+        }, 3000);
       } else {
+        // শুধু এরর হলে মেসেজ দেখাবে
         setMessage({ type: "error", text: data.error });
       }
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
     } finally {
-      setIsTransferring(false); // স্টেট বন্ধ
+      setIsTransferring(false);
     }
   };
 
@@ -394,7 +406,9 @@ export default function VipLevelPage() {
           <p className="text-[11px] text-[#A0ADB0] mb-3">
             {t("Transfer to main balance will require 1x turnover.", "মেইন ব্যালেন্সে ট্রান্সফার করতে ১x টার্নওভার প্রয়োজন হবে।")}
           </p>
-          <form onSubmit={handleTransfer} className="vip-transfer-box">
+          
+          {/* Form এর বদলে div ব্যবহার করা হলো যাতে রিফ্রেশ না হয় */}
+          <div className="vip-transfer-box">
             <input 
               type="number" 
               placeholder={t("Enter amount", "পরিমাণ লিখুন")} 
@@ -403,10 +417,21 @@ export default function VipLevelPage() {
               onChange={(e) => setTransferAmount(e.target.value)}
               max={profile?.vip_bonus_balance || 0}
             />
-            <button type="submit" className="vip-btn-3d" disabled={isTransferring || Number(profile?.vip_bonus_balance) <= 0}>
-              {isTransferring ? "Processing..." : t("Transfer to Main", "মেইনে ট্রান্সফার করুন")}
+            <button 
+              type="button" 
+              onClick={handleTransfer} 
+              className={`vip-btn-3d ${isTransferSuccess ? 'bg-[#00E701] border-[#00E701]' : ''}`} 
+              disabled={isTransferring || isTransferSuccess || Number(profile?.vip_bonus_balance) <= 0}
+            >
+              {isTransferring ? (
+                "Processing..."
+              ) : isTransferSuccess ? (
+                <svg className="w-5 h-5 text-white animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+              ) : (
+                t("Transfer to Main", "মেইনে ট্রান্সফার করুন")
+              )}
             </button>
-          </form>
+          </div>
         </div>
 
         <h2 className="text-[11px] text-white font-bold mb-3 mt-6">{t("All VIP Levels", "সব ভিআইপি লেভেল")}</h2>
