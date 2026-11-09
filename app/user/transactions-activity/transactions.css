@@ -88,7 +88,6 @@
   gap: 8px;
 }
 
-/* ফিল্টার বাটন আপডেট */
 .tx-filter-btn {
   flex: 1;
   padding: 10px 0;
@@ -106,7 +105,7 @@
   background: var(--btn-bg);
   border-color: #FFFFFF;
   color: #FFFFFF;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15), inset 0 0 8px rgba(255, 255, 255, 0.1); /* সাদা হালকা গ্লো */
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15), inset 0 0 8px rgba(255, 255, 255, 0.1);
 }
 
 .tx-date-filter {
@@ -174,21 +173,31 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: var(--bg-input); /* লোগোর ব্যাকগ্রাউন্ড */
+  background: #FFFFFF; /* লোগো স্পষ্ট দেখানোর জন্য */
 }
 
-.tx-icon svg { width: 18px; height: 18px; }
+.tx-icon svg { 
+  width: 18px; 
+  height: 18px; 
+}
+
+/* ডিফল্ট প্লাস/মাইনাস আইকনের জন্য ব্যাকগ্রাউন্ড ডার্ক */
+.tx-icon.deposit { 
+  background: rgba(0, 231, 1, 0.1); 
+  color: var(--color-primary); 
+}
+.tx-icon.withdraw { 
+  background: rgba(255, 77, 77, 0.1); 
+  color: var(--color-danger); 
+}
 
 /* লোগো ইমেজ স্টাইল */
 .tx-logo-img {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* লোগো ফিট করার জন্য */
+  object-fit: contain;
   padding: 4px;
 }
-
-.tx-icon.deposit { color: var(--color-primary); }
-.tx-icon.withdraw { color: var(--color-danger); }
 
 .tx-info {
   display: flex;
@@ -261,43 +270,3 @@
 }
 
 .tx-empty p { font-size: 12px; margin: 0; }
-
-/* =========================================
-   লোডিং ডিজাইন (৫০% ছোট)
-   ========================================= */
-.tx-loader-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  width: 100%;
-  background-color: var(--bg-primary);
-  gap: 10px;
-}
-
-.tx-loader-svg {
-  width: 24px; /* ৫০% ছোট */
-  height: 24px; /* ৫০% ছোট */
-  color: #FFFFFF;
-  animation: pulse-tx 1.5s linear infinite;
-}
-
-.tx-loader-container p {
-  color: var(--text-secondary);
-  font-size: 10px; /* ৫০% ছোট */
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  animation: fade-tx 1.5s ease-in-out infinite alternate;
-}
-
-@keyframes pulse-tx {
-  0% { transform: scale(1) rotate(0deg); opacity: 0.7; }
-  50% { transform: scale(1.1) rotate(10deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0deg); opacity: 0.7; }
-}
-
-@keyframes fade-tx {
-  from { opacity: 0.5; }
-  to { opacity: 1; }
-}
