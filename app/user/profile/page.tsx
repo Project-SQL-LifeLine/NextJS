@@ -39,23 +39,24 @@ export default function MyProfilePage() {
     loadProfile();
   }, [router]);
 
+  // ১. প্রোফাইল লোডিং এনিমেশন (সাদা SVG)
   if (loading) {
     return (
-      <div className="my-profile-page flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#2B4236] border-t-[#00E701] rounded-full animate-spin"></div>
+      <div className="profile-loader-container">
+        <svg className="profile-loader-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
       </div>
     );
   }
 
   return (
-    <div className="my-profile-page pb-20">
+    <div className="my-profile-page">
       <Header isLoggedIn={isLoggedIn} userProfile={profile} />
 
       <main className="my-profile-main">
         
-        {/* =========================================
-            এক্সক্লুসিভ প্রোফাইল অ্যাক্টিভেশন কার্ড
-            ========================================= */}
+        {/* এক্সক্লুসিভ প্রোফাইল অ্যাক্টিভেশন কার্ড */}
         <div className="activation-card-wrapper">
           <div className="activation-card">
             <div className="card-glow"></div>
@@ -93,7 +94,7 @@ export default function MyProfilePage() {
               </div>
             </div>
 
-            {/* কার্ডের নিচের অংশ (পাশাপাশি অ্যালাইন করা) */}
+            {/* কার্ডের নিচের অংশ */}
             <div className="activation-footer">
               <div className="status-badge">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
