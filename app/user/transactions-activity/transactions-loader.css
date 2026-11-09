@@ -6,21 +6,21 @@
   height: 100vh;
   width: 100%;
   background-color: #18221E;
-  gap: 16px;
+  gap: 8px; /* গ্যাপও একটু কমিয়ে দেওয়া হলো */
 }
 
 .tx-loader-svg {
-  width: 48px;
-  height: 48px;
+  width: 24px; /* ৫০% ছোট (আগে ছিল 48px) */
+  height: 24px; /* ৫০% ছোট (আগে ছিল 48px) */
   color: #FFFFFF;
   animation: pulse-tx 1.5s linear infinite;
 }
 
 .tx-loader-container p {
   color: #A0AAB2;
-  font-size: 12px;
+  font-size: 6px; /* ৫০% ছোট (আগে ছিল 12px) */
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   animation: fade-tx 1.5s ease-in-out infinite alternate;
 }
 
