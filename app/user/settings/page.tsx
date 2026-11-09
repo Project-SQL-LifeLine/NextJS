@@ -8,6 +8,7 @@ import Header from "../../../components/Header";
 import BottomNav from "../../../components/BottomNav";
 import "./settings.css";
 import "./settings-animations.css";
+import "./settings-animations.css"; // নতুন লোডার CSS ইমপোর্ট
 
 type TabType = "account" | "verify" | "security" | "sessions";
 
@@ -150,6 +151,9 @@ export default function UserSettingsPage() {
     }
   };
 
+  // ==========================================
+  // নতুন সেটিংস ভিত্তিক SVG লোডিং এনিমেশন
+  // ==========================================
   if (loading) {
     return (
       <div className="settings-loader-container">
@@ -159,6 +163,7 @@ export default function UserSettingsPage() {
           stroke="currentColor" 
           viewBox="0 0 24 24"
         >
+          {/* গিয়ার / সেটিংস আইকন */}
           <path 
             strokeLinecap="round" 
             strokeLinejoin="round" 
