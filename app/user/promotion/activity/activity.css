@@ -1,18 +1,14 @@
 .activity-page {
-  --bg-primary: #18221E;
+  --bg-primary: #0d241e; /* মেইন ব্যাকগ্রাউন্ড আপডেট */
   --bg-card: #1B2A23;
   --border-color: #2B4236;
   --text-primary: #FFFFFF;
   --text-secondary: #A0AAB2;
-  --gold-accent: #D4AF37; 
-  --gold-gradient: linear-gradient(180deg, #F3E5AB 0%, #D4AF37 100%);
-  --btn-bg: #184f35; /* সেটিংস পেজের বাটন কালার */
   
   background-color: var(--bg-primary);
   min-height: 100vh;
   width: 100%;
   font-family: inherit;
-  font-size: 11px; /* সব টেক্সট 11px */
   padding-bottom: 80px;
 }
 
@@ -40,38 +36,24 @@
   display: none;
 }
 
-/* =========================================
-   সেটিংস পেজের হুবহু বাটন ডিজাইন (ফিল্টার)
-   ========================================= */
 .filter-btn {
-  background: var(--btn-bg);
-  border: 1px solid #FFFFFF; /* সাদা বর্ডার */
-  color: #FFFFFF;
-  padding: 8px 16px;
-  border-radius: 8px; /* সেটিংস পেজের মতো 8px */
+  background: transparent;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-secondary);
+  padding: 6px 16px;
+  border-radius: 8px;
   font-size: 11px;
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .filter-btn.active {
-  background: linear-gradient(180deg, #184f35 0%, #0f2e1f 100%);
+  background: #184f35;
   border-color: #FFFFFF;
   color: #FFFFFF;
-  font-weight: 800;
-  box-shadow: 
-    inset 0 2px 4px rgba(255, 255, 255, 0.2),
-    0 4px 8px rgba(0, 0, 0, 0.4);
-  transform: translateY(-2px);
+  font-weight: bold;
 }
-
-.filter-btn:active {
-  transform: translateY(1px);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-}
-/* ========================================= */
 
 /* ব্যানার কার্ড লিস্ট */
 .promo-list {
@@ -86,7 +68,7 @@
 /* মেইন কার্ড ডিজাইন */
 .promo-card {
   background: var(--bg-card);
-  border: 2px solid var(--gold-accent);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -109,12 +91,12 @@
 
 /* কার্ডের নিচের টেক্সট পার্ট */
 .promo-content {
-  background: #1E2D4A; 
+  background: var(--bg-card);
   padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 2px solid var(--gold-accent);
+  border-top: 1px solid var(--border-color);
 }
 
 .promo-text-area {
@@ -134,31 +116,25 @@
   font-size: 11px;
 }
 
-/* =========================================
-   সেটিংস পেজের হুবহু বাটন ডিজাইন (প্রমোশন)
-   ========================================= */
+/* সেটিংস পেজের হুবহু বাটন ডিজাইন */
 .promo-btn {
-  background: var(--btn-bg); /* #184f35 */
+  background: #184f35; /* সলিড সবুজ */
   color: #FFFFFF;
   padding: 8px 16px;
-  border-radius: 8px; /* সেটিংস পেজের মতো 8px */
+  border-radius: 8px; /* 8px রেডিয়াস */
   font-size: 11px;
   font-weight: 800;
   border: 1px solid #FFFFFF; /* সাদা বর্ডার */
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  transition: all 0.2s ease;
-}
-
-.promo-btn:hover {
-  background: #0f2e1f;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3); /* শ্যাডো */
+  text-transform: uppercase;
+  transition: all 0.1s ease;
 }
 
 .promo-btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
-/* ========================================= */
 
 /* লোডিং ও এমপ্টি স্টেট */
 .loading-state, .empty-state {
