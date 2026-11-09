@@ -21,9 +21,10 @@ export default function TransactionsActivityPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [totalDeposit, setTotalDeposit] = useState(0);
   const [totalWithdraw, setTotalWithdraw] = useState(0);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]); // পেমেন্ট মেথড লোগোর জন্য
 
   // ফিল্টার স্টেট
-  const [filterType, setFilterType] = useState("all"); // all, deposit, withdrawal
+  const [filterType, setFilterType] = useState("all"); 
   const [selectedDate, setSelectedDate] = useState("");
 
   const loadData = useCallback(async () => {
@@ -37,6 +38,7 @@ export default function TransactionsActivityPage() {
 
       setIsLoggedIn(true);
 
+      // ১. প্রোফাইল ডাটা
       const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
@@ -44,7 +46,14 @@ export default function TransactionsActivityPage() {
         .single();
       if (profileData) setProfile(profileData);
 
-      // ডাটাবেস থেকে সব ট্রানজেকশন আনা
+      // ২. পেমেন্ট মেথড ডাটা (লোগোর জন্য)
+      const { data: methodsData } = await supabase
+        .from("control_payment_method")
+        .select("method_code, method_logo_url");
+      
+      if (methodsData) setPaymentMethods(methodsData);
+
+      // ৩. ট্রানজেকশন ডাটা
       const { data: txData, error } = await supabase
         .from("user_deposit_transaction")
         .select("*")
@@ -57,9 +66,7 @@ export default function TransactionsActivityPage() {
         let depTotal = 0;
         let withTotal = 0;
         
-        // মোট ডিপোজিট এবং উইথড্র ক্যালকুলেশন
         txData.forEach(tx => {
-          // এখানে 'withdrawal' চেক করা হয়েছে
           if (tx.transaction_type === 'deposit') {
             depTotal += Number(tx.amount);
           } else if (tx.transaction_type === 'withdrawal' || tx.transaction_type === 'withdraw') {
@@ -70,10 +77,10 @@ export default function TransactionsActivityPage() {
         setTotalDeposit(depTotal);
         setTotalWithdraw(withTotal);
 
-        // ডাটা ফরম্যাট করা
         const formatted = txData.map(d => ({
           id: d.id,
-          type: d.transaction_type, // deposit or withdrawal
+          type: d.transaction_type,
+          method_code: d.method_code, // লোগো ম্যাচ করার জন্য
           amount: Number(d.amount),
           status: d.status,
           date: d.created_at,
@@ -94,17 +101,11 @@ export default function TransactionsActivityPage() {
     loadData();
   }, [loadData]);
 
-  // ফিল্টার লজিক (এখানেও 'withdrawal' চেক করা হয়েছে)
   const filteredTransactions = transactions.filter((tx) => {
     let matchType = false;
-    
-    if (filterType === "all") {
-      matchType = true;
-    } else if (filterType === "deposit") {
-      matchType = tx.type === "deposit";
-    } else if (filterType === "withdrawal") {
-      matchType = tx.type === "withdrawal" || tx.type === "withdraw";
-    }
+    if (filterType === "all") matchType = true;
+    else if (filterType === "deposit") matchType = tx.type === "deposit";
+    else if (filterType === "withdrawal") matchType = tx.type === "withdrawal" || tx.type === "withdraw";
 
     let matchDate = true;
     if (selectedDate) {
@@ -121,7 +122,7 @@ export default function TransactionsActivityPage() {
         <svg className="tx-loader-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
         </svg>
-        <p>{t("Loading Transactions...", "লেনদেন লোড হচ্ছে...")}</p>
+        <p>{t("Loading...", "লোড হচ্ছে...")}</p>
       </div>
     );
   }
@@ -133,7 +134,6 @@ export default function TransactionsActivityPage() {
       <main className="tx-main">
         <h1 className="tx-title">{t("Transactions Activity", "লেনদেনের বিবরণ")}</h1>
 
-        {/* সামারি কার্ড */}
         <div className="tx-summary-grid">
           <div className="tx-summary-card">
             <span>{t("Total Deposit", "মোট ডিপোজিট")}</span>
@@ -145,7 +145,6 @@ export default function TransactionsActivityPage() {
           </div>
         </div>
 
-        {/* ফিল্টার সেকশন */}
         <div className="tx-filter-section">
           <div className="tx-type-filters">
             <button 
@@ -179,7 +178,6 @@ export default function TransactionsActivityPage() {
           </div>
         </div>
 
-        {/* লিস্ট সেকশন */}
         <div className="tx-list">
           {filteredTransactions.length === 0 ? (
             <div className="tx-empty">
@@ -192,14 +190,22 @@ export default function TransactionsActivityPage() {
             filteredTransactions.map((tx) => {
               const isWithdraw = tx.type === "withdrawal" || tx.type === "withdraw";
               
+              // লোগো খোঁজা
+              const matchedMethod = paymentMethods.find(m => m.method_code === tx.method_code);
+              const logoUrl = matchedMethod?.method_logo_url;
+
               return (
                 <div key={tx.id} className="tx-item">
                   <div className="tx-item-left">
                     <div className={`tx-icon ${isWithdraw ? "withdraw" : "deposit"}`}>
-                      {!isWithdraw ? (
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                      {logoUrl ? (
+                        <img src={logoUrl} alt={tx.method_code} className="tx-logo-img" />
                       ) : (
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
+                        !isWithdraw ? (
+                          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                        ) : (
+                          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
+                        )
                       )}
                     </div>
                     <div className="tx-info">
