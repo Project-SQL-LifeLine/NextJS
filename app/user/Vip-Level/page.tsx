@@ -16,14 +16,20 @@ export default function VipLevelPage() {
   const [profile, setProfile] = useState<any>(null);
   const [vipLevels, setVipLevels] = useState<any[]>([]);
   const [claimedLevels, setClaimedLevels] = useState<number[]>([]);
-  const [timeClaims, setTimeClaims] = useState<any>({}); // { daily: timestamp, weekly: timestamp, monthly: timestamp }
+  const [timeClaims, setTimeClaims] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
+  // Accordion State
+  const [expandedTier, setExpandedTier] = useState<string | null>(null);
+
   // Form & Message State
   const [transferAmount, setTransferAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+
+  // কাউন্টডাউন টাইমার আপডেট করার জন্য স্টেট
+  const [currentTime, setCurrentTime] = useState(Date.now());
 
   useEffect(() => {
     if (message.text) {
@@ -31,6 +37,14 @@ export default function VipLevelPage() {
       return () => clearTimeout(timer);
     }
   }, [message]);
+
+  // প্রতি সেকেন্ডে টাইমার আপডেট হবে
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -43,7 +57,6 @@ export default function VipLevelPage() {
 
       setIsLoggedIn(true);
 
-      // ১. প্রোফাইল ডাটা
       const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
@@ -52,7 +65,6 @@ export default function VipLevelPage() {
       
       if (profileData) setProfile(profileData);
 
-      // ২. VIP লেভেল সেটিংস
       const { data: levelsData } = await supabase
         .from("vip_level_settings_amount_control")
         .select("*")
@@ -61,7 +73,6 @@ export default function VipLevelPage() {
 
       if (levelsData) setVipLevels(levelsData);
 
-      // ৩. ইউজারের ক্লেইম করা লেভেলগুলো
       const { data: claimsData } = await supabase
         .from("user_vip_level_amount_claims_history")
         .select("vip_level_id")
@@ -71,7 +82,6 @@ export default function VipLevelPage() {
         setClaimedLevels(claimsData.map(c => c.vip_level_id));
       }
 
-      // ৪. টাইম বোনাস (Daily, Weekly, Monthly) এর শেষ ক্লেইম কবে হয়েছে তা আনা
       const { data: timeClaimsData } = await supabase
         .from("user_vip_time_bonus_claims")
         .select("bonus_type, claimed_at")
@@ -99,7 +109,6 @@ export default function VipLevelPage() {
     loadData();
   }, [router]);
 
-  // লেভেল আপ বোনাস ক্লেইম
   const handleClaimLevelUp = async (levelId: number) => {
     setSubmitting(true);
     setMessage({ type: "", text: "" });
@@ -124,7 +133,6 @@ export default function VipLevelPage() {
     }
   };
 
-  // টাইম বোনাস (Daily, Weekly, Monthly) ক্লেইম
   const handleClaimTimeBonus = async (bonusType: string) => {
     setSubmitting(true);
     setMessage({ type: "", text: "" });
@@ -149,27 +157,29 @@ export default function VipLevelPage() {
     }
   };
 
-  // টাইম বোনাসের জন্য অপেক্ষার সময় ক্যালকুলেশন
+  // টাইম বোনাস স্ট্যাটাস (কাউন্টডাউন টাইমারসহ)
   const getTimeBonusStatus = (type: string, requiredHours: number) => {
     const lastClaim = timeClaims[type];
-    if (!lastClaim) return { canClaim: true, text: "Claim" };
+    if (!lastClaim) return { canClaim: true, timeLeft: "" };
 
-    const lastClaimDate = new Date(lastClaim);
-    const nextClaimDate = new Date(lastClaimDate.getTime() + requiredHours * 60 * 60 * 1000);
-    const now = new Date();
+    const lastClaimDate = new Date(lastClaim).getTime();
+    const nextClaimTime = lastClaimDate + requiredHours * 60 * 60 * 1000;
 
-    if (now >= nextClaimDate) {
-      return { canClaim: true, text: "Claim" };
+    if (currentTime >= nextClaimTime) {
+      return { canClaim: true, timeLeft: "" };
     }
 
-    const diffMs = nextClaimDate.getTime() - now.getTime();
-    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    const diff = nextClaimTime - currentTime;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-    return { canClaim: false, text: `Wait ${diffHrs}h ${diffMins}m` };
+    return { 
+      canClaim: false, 
+      timeLeft: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` 
+    };
   };
 
-  // VIP বোনাস থেকে মেইন ব্যালেন্সে ট্রান্সফার
   const handleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!transferAmount || Number(transferAmount) <= 0) {
@@ -223,10 +233,12 @@ export default function VipLevelPage() {
     progressPercent = Math.min((currentWager / nextWagerReq) * 100, 100);
   }
 
-  // ৫টি বাটনের ডাটা
   const dailyStatus = getTimeBonusStatus("daily", 24);
   const weeklyStatus = getTimeBonusStatus("weekly", 168);
   const monthlyStatus = getTimeBonusStatus("monthly", 720);
+
+  // টায়ার অনুযায়ী লেভেল গ্রুপ করা
+  const tiers = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Obsidian"];
 
   return (
     <div className="vip-page pb-20">
@@ -238,7 +250,6 @@ export default function VipLevelPage() {
           VIP Program
         </h1>
 
-        {/* পপ-আপ মেসেজ */}
         {message.text && (
           <div className={`fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4`} onClick={() => setMessage({ type: "", text: "" })}>
             <div className={`bg-[#1C2A24] border ${message.type === 'success' ? 'border-[#00E701] text-[#00E701]' : 'border-[#ff4d4d] text-[#ff4d4d]'} p-5 rounded-xl shadow-2xl text-center min-w-[200px]`}>
@@ -247,7 +258,6 @@ export default function VipLevelPage() {
           </div>
         )}
 
-        {/* স্ট্যাটাস কার্ড */}
         <div className="vip-status-card">
           <div className="vip-tier-name">{currentLevelData?.tier_name || "No Tier"}</div>
           <div className="vip-current-level">{currentLevelData?.level_name || "Unranked"}</div>
@@ -263,52 +273,75 @@ export default function VipLevelPage() {
           </div>
         </div>
 
-        {/* ৫টি বোনাস বাটনের গ্রিড */}
+        {/* ৫টি বোনাস বাটনের গ্রিড (কাউন্টডাউন সহ) */}
         <div className="vip-grid-buttons">
           
           {/* ১. Instant Rakeback */}
-          <button className="vip-grid-btn" onClick={() => handleClaimTimeBonus("instant_rakeback")} disabled={Number(profile?.unclaimed_rakeback) <= 0}>
+          <div className="vip-grid-card">
             <span className="vip-btn-icon">💰</span>
             <span className="vip-btn-title">Instant Rakeback</span>
             <span className="vip-btn-value">৳{Number(profile?.unclaimed_rakeback || 0).toFixed(2)}</span>
-            <span className="vip-btn-action">{Number(profile?.unclaimed_rakeback) > 0 ? "Claim" : "No Rakeback"}</span>
-          </button>
+            {Number(profile?.unclaimed_rakeback) > 0 ? (
+              <button onClick={() => handleClaimTimeBonus("instant_rakeback")} className="vip-mini-claim-btn" disabled={submitting}>
+                Claim
+              </button>
+            ) : (
+              <span className="vip-wait-text">No Rakeback</span>
+            )}
+          </div>
 
           {/* ২. Daily Bonus */}
-          <button className="vip-grid-btn" onClick={() => handleClaimTimeBonus("daily")} disabled={!dailyStatus.canClaim || submitting}>
+          <div className="vip-grid-card">
             <span className="vip-btn-icon">📅</span>
             <span className="vip-btn-title">Daily Bonus</span>
             <span className="vip-btn-value">৳{Number(currentLevelData?.daily_bonus_amount || 0).toFixed(2)}</span>
-            <span className="vip-btn-action">{dailyStatus.text}</span>
-          </button>
+            {dailyStatus.canClaim ? (
+              <button onClick={() => handleClaimTimeBonus("daily")} className="vip-mini-claim-btn" disabled={submitting}>
+                Claim
+              </button>
+            ) : (
+              <span className="vip-timer">{dailyStatus.timeLeft}</span>
+            )}
+          </div>
 
           {/* ৩. Weekly Bonus */}
-          <button className="vip-grid-btn" onClick={() => handleClaimTimeBonus("weekly")} disabled={!weeklyStatus.canClaim || submitting}>
+          <div className="vip-grid-card">
             <span className="vip-btn-icon">📆</span>
             <span className="vip-btn-title">Weekly Bonus</span>
             <span className="vip-btn-value">৳{Number(currentLevelData?.weekly_bonus_amount || 0).toFixed(2)}</span>
-            <span className="vip-btn-action">{weeklyStatus.text}</span>
-          </button>
+            {weeklyStatus.canClaim ? (
+              <button onClick={() => handleClaimTimeBonus("weekly")} className="vip-mini-claim-btn" disabled={submitting}>
+                Claim
+              </button>
+            ) : (
+              <span className="vip-timer">{weeklyStatus.timeLeft}</span>
+            )}
+          </div>
 
           {/* ৪. Monthly Bonus */}
-          <button className="vip-grid-btn" onClick={() => handleClaimTimeBonus("monthly")} disabled={!monthlyStatus.canClaim || submitting}>
+          <div className="vip-grid-card">
             <span className="vip-btn-icon">🗓️</span>
             <span className="vip-btn-title">Monthly Bonus</span>
             <span className="vip-btn-value">৳{Number(currentLevelData?.monthly_bonus_amount || 0).toFixed(2)}</span>
-            <span className="vip-btn-action">{monthlyStatus.text}</span>
-          </button>
+            {monthlyStatus.canClaim ? (
+              <button onClick={() => handleClaimTimeBonus("monthly")} className="vip-mini-claim-btn" disabled={submitting}>
+                Claim
+              </button>
+            ) : (
+              <span className="vip-timer">{monthlyStatus.timeLeft}</span>
+            )}
+          </div>
 
-          {/* ৫. Level Up Bonus (সরাসরি নিচের লিস্ট থেকে ক্লেইম হবে) */}
-          <button className="vip-grid-btn" onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}>
+          {/* ৫. Level Up Bonus */}
+          <div className="vip-grid-card">
             <span className="vip-btn-icon">⭐</span>
             <span className="vip-btn-title">Level Up Bonus</span>
             <span className="vip-btn-value">৳{Number(currentLevelData?.bonus_amount || 0).toFixed(2)}</span>
-            <span className="vip-btn-action">View Levels</span>
-          </button>
+            <span className="vip-wait-text">View Levels Below</span>
+          </div>
 
         </div>
 
-        {/* VIP বোনাস ট্রান্সফার সেকশন */}
         <div className="vip-bonus-card">
           <div className="vip-bonus-row">
             <span>VIP Bonus Balance</span>
@@ -332,30 +365,53 @@ export default function VipLevelPage() {
           </form>
         </div>
 
-        {/* লেভেল লিস্ট */}
+        {/* Accordion VIP Level List */}
         <h2 className="text-[14px] text-white font-bold mb-3 mt-6">All VIP Levels</h2>
-        <div className="vip-level-list">
-          {vipLevels.map((level) => {
-            const isClaimed = claimedLevels.includes(level.id);
-            const isUnlocked = currentLevelId >= level.id;
+        <div className="vip-tier-list">
+          {tiers.map((tier) => {
+            const tierLevels = vipLevels.filter((level) => level.tier_name === tier);
+            if (tierLevels.length === 0) return null;
 
             return (
-              <div key={level.id} className={`vip-level-item ${isUnlocked ? "" : "locked"} ${currentLevelId === level.id ? "current" : ""}`}>
-                <div className="vip-level-info">
-                  <h4>{level.level_name}</h4>
-                  <p>Wager: ৳ {Number(level.required_wager).toLocaleString()}</p>
-                </div>
-                <div>
-                  {isClaimed ? (
-                    <span className="text-[11px] text-[#00E701] font-bold">Claimed</span>
-                  ) : isUnlocked ? (
-                    <button onClick={() => handleClaimLevelUp(level.id)} className="vip-btn-3d" disabled={submitting}>
-                      Claim ৳{level.bonus_amount}
-                    </button>
-                  ) : (
-                    <span className="text-[11px] text-[#A0ADB0]">Locked</span>
-                  )}
-                </div>
+              <div key={tier} className="vip-tier-group">
+                <button 
+                  className="vip-tier-header"
+                  onClick={() => setExpandedTier(expandedTier === tier ? null : tier)}
+                >
+                  <span>{tier}</span>
+                  <svg className={`w-5 h-5 transition-transform ${expandedTier === tier ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {expandedTier === tier && (
+                  <div className="vip-tier-content">
+                    {tierLevels.map((level) => {
+                      const isClaimed = claimedLevels.includes(level.id);
+                      const isUnlocked = currentLevelId >= level.id;
+
+                      return (
+                        <div key={level.id} className={`vip-level-item ${isUnlocked ? "" : "locked"} ${currentLevelId === level.id ? "current" : ""}`}>
+                          <div className="vip-level-info">
+                            <h4>{level.level_name}</h4>
+                            <p>Wager: ৳ {Number(level.required_wager).toLocaleString()}</p>
+                          </div>
+                          <div>
+                            {isClaimed ? (
+                              <span className="text-[11px] text-[#00E701] font-bold">Claimed</span>
+                            ) : isUnlocked ? (
+                              <button onClick={() => handleClaimLevelUp(level.id)} className="vip-btn-3d" disabled={submitting}>
+                                Claim ৳{level.bonus_amount}
+                              </button>
+                            ) : (
+                              <span className="text-[11px] text-[#A0ADB0]">Locked</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
