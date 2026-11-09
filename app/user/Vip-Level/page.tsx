@@ -201,7 +201,7 @@ export default function VipLevelPage() {
     // টাইম পার হয়েছে, এখন ওয়েজার চেক
     if (currentWager <= lastClaim.wager_at_claim) {
       // টাইম পার হয়েছে কিন্তু নতুন ওয়েজার নেই
-      return { canClaim: false, timeLeft: "Wager more to unlock" };
+      return { canClaim: false, timeLeft: "Wager more" };
     }
 
     // টাইম পার হয়েছে এবং নতুন ওয়েজারও আছে
@@ -301,7 +301,7 @@ export default function VipLevelPage() {
           </div>
         </div>
 
-        {/* ৪টি বোনাস কার্ডের গ্রিড */}
+        {/* ৪টি বোনাস কার্ডের গ্রিড (পাশাপাশি) */}
         <div className="vip-grid-buttons">
           
           {/* ১. Instant Rakeback */}
@@ -319,7 +319,7 @@ export default function VipLevelPage() {
             <div className="vip-card-value-box">
                {Number(profile?.unclaimed_rakeback) > 0 ? (
                 <button onClick={() => handleClaimTimeBonus("instant_rakeback")} className="vip-new-claim-btn" disabled={submitting}>
-                  ৳{Number(profile?.unclaimed_rakeback).toFixed(2)} Claim
+                  Claim
                 </button>
               ) : (
                 <span className="vip-new-timer">No Rakeback</span>
@@ -331,7 +331,7 @@ export default function VipLevelPage() {
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
-                {dailyStatus.canClaim ? "Available Now" : "Claim Soon!"}
+                {dailyStatus.canClaim ? "Available" : "Claim Soon!"}
               </span>
               <svg className="vip-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
@@ -342,7 +342,7 @@ export default function VipLevelPage() {
             <div className="vip-card-value-box">
               {dailyStatus.canClaim ? (
                 <button onClick={() => handleClaimTimeBonus("daily")} className="vip-new-claim-btn" disabled={submitting}>
-                  Claim Bonus
+                  Claim
                 </button>
               ) : (
                 <span className="vip-new-timer">{dailyStatus.timeLeft}</span>
@@ -354,7 +354,7 @@ export default function VipLevelPage() {
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
-                {weeklyStatus.canClaim ? "Available Now" : "Claim Soon!"}
+                {weeklyStatus.canClaim ? "Available" : "Claim Soon!"}
               </span>
               <svg className="vip-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
@@ -365,7 +365,7 @@ export default function VipLevelPage() {
             <div className="vip-card-value-box">
               {weeklyStatus.canClaim ? (
                 <button onClick={() => handleClaimTimeBonus("weekly")} className="vip-new-claim-btn" disabled={submitting}>
-                  Claim Bonus
+                  Claim
                 </button>
               ) : (
                 <span className="vip-new-timer">{weeklyStatus.timeLeft}</span>
@@ -377,7 +377,7 @@ export default function VipLevelPage() {
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
-                {monthlyStatus.canClaim ? "Available Now" : "Claim Soon!"}
+                {monthlyStatus.canClaim ? "Available" : "Claim Soon!"}
               </span>
               <svg className="vip-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
@@ -388,7 +388,7 @@ export default function VipLevelPage() {
             <div className="vip-card-value-box">
               {monthlyStatus.canClaim ? (
                 <button onClick={() => handleClaimTimeBonus("monthly")} className="vip-new-claim-btn" disabled={submitting}>
-                  Claim Bonus
+                  Claim
                 </button>
               ) : (
                 <span className="vip-new-timer">{monthlyStatus.timeLeft}</span>
@@ -416,69 +416,9 @@ export default function VipLevelPage() {
               max={profile?.vip_bonus_balance || 0}
             />
             <button type="submit" className="vip-btn-3d" disabled={submitting || Number(profile?.vip_bonus_balance) <= 0}>
-              Transfer
+              Transfer to Main
             </button>
           </form>
         </div>
 
-        {/* Accordion VIP Level List */}
-        <h2 className="text-[14px] text-white font-bold mb-3 mt-6">All VIP Levels</h2>
-        <div className="vip-tier-list">
-          {tiers.map((tier) => {
-            const tierLevels = vipLevels.filter((level) => level.tier_name === tier);
-            if (tierLevels.length === 0) return null;
-
-            return (
-              <div key={tier} className="vip-tier-group">
-                <button 
-                  className="vip-tier-header"
-                  onClick={() => setExpandedTier(expandedTier === tier ? null : tier)}
-                >
-                  <span>{tier}</span>
-                  <svg className={`w-5 h-5 transition-transform ${expandedTier === tier ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                
-                {expandedTier === tier && (
-                  <div className="vip-tier-content">
-                    {tierLevels.map((level) => {
-                      const isClaimed = claimedLevels.includes(level.id);
-                      const isUnlocked = currentLevelId >= level.id;
-                      const isCurrent = currentLevelId === level.id;
-
-                      return (
-                        <div key={level.id} className={`vip-level-item ${isUnlocked ? "" : "locked"} ${isCurrent ? "current" : ""}`}>
-                          <div className="vip-level-info">
-                            <h4>{level.level_name}</h4>
-                            <p>Wager: ৳ {Number(level.required_wager).toLocaleString()}</p>
-                          </div>
-                          <div>
-                            {isClaimed ? (
-                              <span className="text-[11px] text-[#00E701] font-bold">Claimed</span>
-                            ) : isUnlocked ? (
-                              <button onClick={() => handleClaimLevelUp(level.id)} className="vip-btn-3d" disabled={submitting}>
-                                Claim ৳{level.bonus_amount}
-                              </button>
-                            ) : (
-                              <span className="text-[12px] text-[#f58220] font-bold">
-                                ৳ {Number(level.bonus_amount).toLocaleString()}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-      </main>
-
-      <BottomNav />
-    </div>
-  );
-}
+        {/* Accord
