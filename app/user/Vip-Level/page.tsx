@@ -84,7 +84,7 @@ export default function VipLevelPage() {
 
       const { data: timeClaimsData } = await supabase
         .from("user_vip_time_bonus_claims")
-        .select("bonus_type, claimed_at, wager_at_claim") // wager_at_claim যুক্ত করা হলো
+        .select("bonus_type, claimed_at, wager_at_claim")
         .eq("user_id", user.id)
         .order("claimed_at", { ascending: false });
 
@@ -148,6 +148,7 @@ export default function VipLevelPage() {
       if (error) throw error;
 
       if (data.success) {
+        // সফল হলে মেসেজে কত টাকা পেল তা দেখানো যেতে পারে (ঐচ্ছিক)
         setMessage({ type: "success", text: data.message });
         loadData();
       } else {
@@ -160,7 +161,7 @@ export default function VipLevelPage() {
     }
   };
 
-  // টাইম বোনাস স্ট্যাটাস (এখন টাইম এবং ওয়েজার দুটোই চেক হবে)
+  // টাইম বোনাস স্ট্যাটাস (নতুন ওয়েজার চেকসহ)
   const getTimeBonusStatus = (type: string, requiredHours: number) => {
     const lastClaim = timeClaims[type];
     const currentWager = Number(profile?.total_vip_wager) || 0;
@@ -294,10 +295,10 @@ export default function VipLevelPage() {
           </div>
         </div>
 
-        {/* ৪টি বোনাস কার্ডের নতুন গ্রিড */}
+        {/* ৪টি বোনাস কার্ডের গ্রিড */}
         <div className="vip-grid-buttons">
           
-          {/* ১. Instant Rakeback */}
+          {/* ১. Instant Rakeback (এটি আগের মতোই আছে, কারণ এটি আলাদা লজিক) */}
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
@@ -335,7 +336,7 @@ export default function VipLevelPage() {
             <div className="vip-card-value-box">
               {dailyStatus.canClaim ? (
                 <button onClick={() => handleClaimTimeBonus("daily")} className="vip-new-claim-btn" disabled={submitting}>
-                  ৳{Number(currentLevelData?.daily_bonus_amount || 0).toFixed(2)} Claim
+                  Claim Bonus
                 </button>
               ) : (
                 <span className="vip-new-timer">{dailyStatus.timeLeft}</span>
@@ -358,7 +359,7 @@ export default function VipLevelPage() {
             <div className="vip-card-value-box">
               {weeklyStatus.canClaim ? (
                 <button onClick={() => handleClaimTimeBonus("weekly")} className="vip-new-claim-btn" disabled={submitting}>
-                  ৳{Number(currentLevelData?.weekly_bonus_amount || 0).toFixed(2)} Claim
+                  Claim Bonus
                 </button>
               ) : (
                 <span className="vip-new-timer">{weeklyStatus.timeLeft}</span>
@@ -381,7 +382,7 @@ export default function VipLevelPage() {
             <div className="vip-card-value-box">
               {monthlyStatus.canClaim ? (
                 <button onClick={() => handleClaimTimeBonus("monthly")} className="vip-new-claim-btn" disabled={submitting}>
-                  ৳{Number(currentLevelData?.monthly_bonus_amount || 0).toFixed(2)} Claim
+                  Claim Bonus
                 </button>
               ) : (
                 <span className="vip-new-timer">{monthlyStatus.timeLeft}</span>
@@ -454,7 +455,6 @@ export default function VipLevelPage() {
                                 Claim ৳{level.bonus_amount}
                               </button>
                             ) : (
-                              // Lock এর পরিবর্তে বোনাস অ্যামাউন্ট দেখানো হলো
                               <span className="text-[12px] text-[#f58220] font-bold">
                                 ৳ {Number(level.bonus_amount).toLocaleString()}
                               </span>
