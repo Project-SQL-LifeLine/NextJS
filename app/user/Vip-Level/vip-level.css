@@ -264,4 +264,111 @@
 /* =========================================
    বোনাস কার্ডের গ্রিড (পাশাপাশি ২টি)
    ========================================= */
-.vip-grid-b
+.vip-grid-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px; 
+  margin-bottom: 20px;
+}
+
+.vip-new-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 10px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  min-height: 140px;
+}
+
+.vip-card-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 2px;
+}
+
+.vip-card-top-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: #E2E8F0;
+  line-height: 1.2;
+}
+
+.vip-top-icon {
+  width: 16px;
+  height: 16px;
+  color: #FFFFFF;
+}
+
+.vip-card-center-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+}
+
+.vip-new-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 12px;
+  text-align: center;
+  flex-grow: 1;
+  line-height: 1.2;
+}
+
+.vip-card-value-box {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-top: auto;
+}
+
+/* Claim Button (বর্ডার ১ পিক্সেল) */
+.vip-new-claim-btn {
+  width: 100%;
+  padding: 8px 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: #FFFFFF;
+  cursor: pointer;
+  border: 1px solid #FFFFFF;
+  border-radius: 8px;
+  background: var(--btn-bg);
+  transition: all 0.2s ease;
+}
+
+.vip-new-claim-btn:hover:not(:disabled) {
+  background: #0f2e1f;
+}
+
+.vip-new-claim-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.vip-new-claim-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--border-col);
+  border-color: var(--border-col);
+  color: var(--text-muted);
+}
+
+.vip-new-timer {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 11px;
+  padding: 8px 0;
+  text-align: center;
+  font-family: monospace;
+}
