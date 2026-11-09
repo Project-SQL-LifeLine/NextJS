@@ -329,3 +329,121 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+
+/* নতুন গ্রিড কার্ড স্টাইল */
+.vip-grid-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.vip-grid-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #1B2A23 0%, #121016 100%);
+  border: 1px solid var(--border-col);
+  border-radius: 12px;
+  padding: 14px 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  text-align: center;
+  min-height: 120px;
+}
+
+.vip-btn-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.vip-btn-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+}
+
+.vip-btn-value {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+/* ক্লেইম বাটন (গ্রিডের ভেতরে) */
+.vip-mini-claim-btn {
+  background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
+  border: 1px solid #117934;
+  border-radius: 6px;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 6px 16px;
+  cursor: pointer;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 2px 0 #117934;
+  transition: all 0.1s ease;
+}
+
+.vip-mini-claim-btn:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 0px 0 #117934;
+}
+
+/* কাউন্টডাউন টাইমার */
+.vip-timer {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f58220;
+  background: rgba(245, 130, 32, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(245, 130, 32, 0.3);
+  font-family: monospace;
+}
+
+.vip-wait-text {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Accordion List */
+.vip-tier-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vip-tier-group {
+  background: var(--bg-card);
+  border: 1px solid var(--border-col);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.vip-tier-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: transparent;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+}
+
+.vip-tier-header:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+.vip-tier-content {
+  padding: 0 10px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
