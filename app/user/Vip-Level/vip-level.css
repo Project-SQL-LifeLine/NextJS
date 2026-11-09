@@ -270,7 +270,7 @@
 }
 
 .vip-new-card {
-  background: #181B23; /* ছবির মতো ডার্ক ব্লু/গ্রে */
+  background: #181B23;
   border: 1px solid #2B3040;
   border-radius: 12px;
   padding: 14px;
@@ -301,7 +301,7 @@
 }
 
 .vip-card-center-icon {
-  font-size: 32px; /* ইমোজি সাইজ */
+  font-size: 32px;
   margin-bottom: 8px;
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
 }
@@ -313,5 +313,51 @@
   margin-bottom: 16px;
 }
 
+/* =========================================
+   এখান থেকে নিচের অংশটুকু আগে কেটে গিয়েছিল
+   ========================================= */
 .vip-card-value-box {
-  width: 100
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 40px;
+}
+
+.vip-new-claim-btn {
+  width: 100%;
+  background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
+  border: 1px solid #117934;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 2px 0 #117934;
+  transition: all 0.1s ease;
+  text-align: center;
+}
+
+.vip-new-claim-btn:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 0px 0 #117934;
+}
+
+.vip-new-claim-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vip-new-timer {
+  width: 100%;
+  background: transparent;
+  border: 1px solid #4A5568;
+  border-radius: 8px;
+  color: #A0AEC0;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 0;
+  text-align: center;
+  font-family: monospace;
+}
