@@ -62,15 +62,15 @@ export default function ActivityPage() {
   }, [fetchPromotions]);
 
   return (
-    <div className="min-h-screen bg-[#18221E] pb-20 font-sans">
+    <div className="min-h-screen bg-[#0d241e] pb-20 font-sans">
       <Header isLoggedIn={isLoggedIn} userProfile={profile} />
 
       {/* প্রমোশন লিস্ট (হেডারের ঠিক নিচে) */}
       <div className="p-4 flex flex-col gap-4 mt-2">
         {loading ? (
-          <div className="text-center text-[#A0ADB0] text-sm py-10">Loading promotions...</div>
+          <div className="text-center text-[#A0ADB0] text-[11px] py-10">Loading promotions...</div>
         ) : promotions.length === 0 ? (
-          <div className="text-center text-[#A0ADB0] text-sm py-10">No promotions available.</div>
+          <div className="text-center text-[#A0ADB0] text-[11px] py-10">No promotions available.</div>
         ) : (
           promotions.map((promo) => (
             <div key={promo.id} className="bg-[#1B2A23] border border-[#263C32] rounded-xl overflow-hidden shadow-lg">
@@ -91,17 +91,17 @@ export default function ActivityPage() {
               {/* প্রমোশন কন্টেন্ট */}
               <div className="p-4 flex flex-col gap-3">
                 <div>
-                  <h3 className="text-[#FFFFFF] text-sm font-bold mb-1">{promo.title}</h3>
+                  <h3 className="text-[#FFFFFF] text-[11px] font-bold mb-1">{promo.title}</h3>
                   <p className="text-[#A0ADB0] text-[11px]">{promo.valid_until || "Long-term"}</p>
                 </div>
                 
-                {/* ৩ডি গ্লসি বাটন */}
+                {/* সেটিংস পেজের হুবহু বাটন ডিজাইন */}
                 <button
-                  className="w-full py-2.5 rounded-lg font-bold text-[12px] text-white transition-all active:translate-y-[2px]"
+                  className="w-full py-3 rounded-lg font-bold text-[11px] text-white transition-all active:translate-y-[1px]"
                   style={{
-                    background: "linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%)",
-                    border: "1px solid #117934",
-                    boxShadow: "inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.2), 0 4px 0 #117934, 0 6px 10px rgba(0,0,0,0.3)",
+                    background: "#184f35", /* সলিড সবুজ */
+                    border: "1px solid #FFFFFF", /* সাদা বর্ডার */
+                    boxShadow: "0 4px 6px rgba(0,0,0,0.3)", /* শ্যাডো */
                   }}
                   onClick={() => {
                     if (promo.button_link) {
