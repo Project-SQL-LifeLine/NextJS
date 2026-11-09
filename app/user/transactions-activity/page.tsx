@@ -44,7 +44,7 @@ export default function TransactionsActivityPage() {
         .single();
       if (profileData) setProfile(profileData);
 
-      // ডাটাবেস থেকে সব ট্রানজেকশন আনা (user_deposit_transaction টেবিল)
+      // ডাটাবেস থেকে সব ট্রানজেকশন আনা
       const { data: txData, error } = await supabase
         .from("user_deposit_transaction")
         .select("*")
@@ -54,14 +54,14 @@ export default function TransactionsActivityPage() {
       if (error) throw error;
 
       if (txData) {
-        // মোট ডিপোজিট এবং উইথড্র ক্যালকুলেশন
+        // মোট ডিপোজিট এবং উইথড্র ক্যালকুলেশন (স্ট্যাটাস চেক ছাড়াই)
         let depTotal = 0;
         let withTotal = 0;
         
         txData.forEach(tx => {
-          if (tx.transaction_type === 'deposit' && tx.status !== 'rejected') {
+          if (tx.transaction_type === 'deposit') {
             depTotal += Number(tx.amount);
-          } else if (tx.transaction_type === 'withdraw' && tx.status !== 'rejected') {
+          } else if (tx.transaction_type === 'withdraw') {
             withTotal += Number(tx.amount);
           }
         });
@@ -165,6 +165,7 @@ export default function TransactionsActivityPage() {
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="tx-date-input"
+              placeholder={t("Filter by Date", "তারিখ অনুযায়ী ফিল্টার")}
             />
           </div>
         </div>
@@ -200,7 +201,7 @@ export default function TransactionsActivityPage() {
                     {tx.type === "deposit" ? "+" : "-"} ৳ {tx.amount.toLocaleString()}
                   </span>
                   <span className={`tx-badge ${tx.status.toLowerCase()}`}>
-                    {t(tx.status, tx.status)}
+                    {tx.status}
                   </span>
                 </div>
               </div>
