@@ -122,10 +122,9 @@
   font-size: 12px;
   outline: none;
   font-family: inherit;
-  appearance: none; /* ডিফল্ট ব্রাউজার স্টাইল সরাতে */
+  appearance: none;
 }
 
-/* ডেট পিকারে প্লেসহোল্ডার দেখানোর জন্য */
 .tx-date-input::before {
   content: attr(placeholder);
   color: var(--text-secondary);
