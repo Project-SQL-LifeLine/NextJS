@@ -84,7 +84,7 @@ export default function VipLevelPage() {
 
       const { data: timeClaimsData } = await supabase
         .from("user_vip_time_bonus_claims")
-        .select("bonus_type, claimed_at")
+        .select("bonus_type, claimed_at, wager_at_claim") // wager_at_claim যুক্ত করা হলো
         .eq("user_id", user.id)
         .order("claimed_at", { ascending: false });
 
@@ -92,7 +92,10 @@ export default function VipLevelPage() {
         const claimsMap: any = {};
         timeClaimsData.forEach((c) => {
           if (!claimsMap[c.bonus_type]) {
-            claimsMap[c.bonus_type] = c.claimed_at;
+            claimsMap[c.bonus_type] = {
+              claimed_at: c.claimed_at,
+              wager_at_claim: Number(c.wager_at_claim) || 0
+            };
           }
         });
         setTimeClaims(claimsMap);
@@ -157,37 +160,45 @@ export default function VipLevelPage() {
     }
   };
 
-  // টাইম বোনাস স্ট্যাটাস (কাউন্টডাউন টাইমারসহ ফরম্যাট পরিবর্তন করা হয়েছে)
+  // টাইম বোনাস স্ট্যাটাস (এখন টাইম এবং ওয়েজার দুটোই চেক হবে)
   const getTimeBonusStatus = (type: string, requiredHours: number) => {
     const lastClaim = timeClaims[type];
+    const currentWager = Number(profile?.total_vip_wager) || 0;
+
+    // যদি আগে কখনো ক্লেইম না করে থাকে
     if (!lastClaim) return { canClaim: true, timeLeft: "" };
 
-    const lastClaimDate = new Date(lastClaim).getTime();
+    const lastClaimDate = new Date(lastClaim.claimed_at).getTime();
     const nextClaimTime = lastClaimDate + requiredHours * 60 * 60 * 1000;
 
-    if (currentTime >= nextClaimTime) {
-      return { canClaim: true, timeLeft: "" };
+    // টাইম চেক
+    if (currentTime < nextClaimTime) {
+      const diff = nextClaimTime - currentTime;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const days = Math.floor(hours / 24);
+      const remHours = hours % 24;
+
+      let timeLeftStr = "";
+      if (days > 0) {
+        timeLeftStr = `${days.toString().padStart(2, '0')}d ${remHours.toString().padStart(2, '0')}h`;
+      } else if (hours > 0) {
+        timeLeftStr = `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
+      } else {
+        timeLeftStr = `${minutes.toString().padStart(2, '0')}m`;
+      }
+
+      return { canClaim: false, timeLeft: timeLeftStr };
     }
 
-    const diff = nextClaimTime - currentTime;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const days = Math.floor(hours / 24);
-    const remHours = hours % 24;
-
-    let timeLeftStr = "";
-    if (days > 0) {
-      timeLeftStr = `${days.toString().padStart(2, '0')}d ${remHours.toString().padStart(2, '0')}h`;
-    } else if (hours > 0) {
-      timeLeftStr = `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
-    } else {
-      timeLeftStr = `${minutes.toString().padStart(2, '0')}m`;
+    // টাইম পার হয়েছে, এখন ওয়েজার চেক
+    if (currentWager <= lastClaim.wager_at_claim) {
+      // টাইম পার হয়েছে কিন্তু নতুন ওয়েজার নেই
+      return { canClaim: false, timeLeft: "Wager more to unlock" };
     }
 
-    return { 
-      canClaim: false, 
-      timeLeft: timeLeftStr
-    };
+    // টাইম পার হয়েছে এবং নতুন ওয়েজারও আছে
+    return { canClaim: true, timeLeft: "" };
   };
 
   const handleTransfer = async (e: React.FormEvent) => {
@@ -283,7 +294,7 @@ export default function VipLevelPage() {
           </div>
         </div>
 
-        {/* ৪টি বোনাস কার্ডের নতুন গ্রিড (ছবির মতো ডিজাইন) */}
+        {/* ৪টি বোনাস কার্ডের নতুন গ্রিড */}
         <div className="vip-grid-buttons">
           
           {/* ১. Instant Rakeback */}
