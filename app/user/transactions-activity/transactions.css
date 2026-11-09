@@ -21,7 +21,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 16px; /* সব এলিমেন্টের মাঝে গ্যাপ */
+  gap: 16px;
 }
 
 .tx-title {
@@ -31,9 +31,7 @@
   margin-bottom: 0;
 }
 
-/* =========================================
-   সামারি কার্ড (উন্নত ডিজাইন)
-   ========================================= */
+/* সামারি কার্ড */
 .tx-summary-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -52,7 +50,6 @@
   overflow: hidden;
 }
 
-/* কার্ডের বাম পাশে হালকা কালার ইন্ডিকেটর */
 .tx-summary-card::before {
   content: '';
   position: absolute;
@@ -79,9 +76,7 @@
 .text-deposit { color: var(--color-primary); }
 .text-withdraw { color: var(--color-danger); }
 
-/* =========================================
-   ফিল্টার সেকশন (রেসপন্সিভ ও ক্লিন)
-   ========================================= */
+/* ফিল্টার সেকশন */
 .tx-filter-section {
   display: flex;
   flex-direction: column;
@@ -114,6 +109,7 @@
 
 .tx-date-filter {
   width: 100%;
+  position: relative;
 }
 
 .tx-date-input {
@@ -121,22 +117,32 @@
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
-  padding: 10px 12px;
+  padding: 12px;
   border-radius: 8px;
   font-size: 12px;
   outline: none;
   font-family: inherit;
+  appearance: none; /* ডিফল্ট ব্রাউজার স্টাইল সরাতে */
 }
 
-/* ক্যালেন্ডার আইকন সাদা করতে */
+/* ডেট পিকারে প্লেসহোল্ডার দেখানোর জন্য */
+.tx-date-input::before {
+  content: attr(placeholder);
+  color: var(--text-secondary);
+  margin-right: 10px;
+}
+
 .tx-date-input::-webkit-calendar-picker-indicator {
   filter: invert(1);
   cursor: pointer;
+  opacity: 0.7;
 }
 
-/* =========================================
-   লিস্ট সেকশন
-   ========================================= */
+.tx-date-input:focus {
+  border-color: var(--color-primary);
+}
+
+/* লিস্ট সেকশন */
 .tx-list {
   display: flex;
   flex-direction: column;
@@ -191,7 +197,7 @@
 
 .tx-info .tx-order-id {
   font-size: 9px;
-  color: #6b7c72; /* হালকা ধূসর */
+  color: #6b7c72;
   font-family: monospace;
 }
 
@@ -210,7 +216,6 @@
 .tx-amount.deposit { color: var(--color-primary); }
 .tx-amount.withdraw { color: var(--color-danger); }
 
-/* ব্যাজ স্টাইল */
 .tx-badge {
   padding: 2px 8px;
   border-radius: 4px;
