@@ -4,7 +4,6 @@
   --border-col: #263C32;
   --text-main: #FFFFFF;
   --text-muted: #A0ADB0;
-  --primary: #00E701;
   --orange: #f58220;
   --input-bg: #121816;
   --btn-bg: #184f35; /* সেটিংস পেজের বাটন কালার */
@@ -35,7 +34,7 @@
   font-size: 11px;
   margin-bottom: 16px;
 }
-.invite-alert.success { background: rgba(0,231,1,0.1); color: var(--primary); border: 1px solid rgba(0,231,1,0.3); }
+.invite-alert.success { background: rgba(255,255,255,0.1); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.3); }
 .invite-alert.error { background: rgba(255,77,77,0.1); color: #ff4d4d; border: 1px solid rgba(255,77,77,0.3); }
 
 /* হরাইজন্টাল এবং ছোট গ্রিড ডিজাইন */
@@ -119,8 +118,8 @@
 
 /* বোনাস কার্ড */
 .invite-bonus-card {
-  background: linear-gradient(135deg, rgba(0,231,1,0.1), rgba(0,0,0,0));
-  border: 1px solid rgba(0,231,1,0.3);
+  background: var(--bg-card);
+  border: 1px solid var(--border-col);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -135,8 +134,8 @@
   margin-bottom: 4px; 
 }
 .invite-bonus-card strong { 
-  font-size: 11px; 
-  color: var(--primary); 
+  font-size: 14px; 
+  color: #FFFFFF; /* সবুজ সরিয়ে সাদা করা হলো */
 }
 
 /* =========================================
@@ -213,22 +212,42 @@
   justify-content: space-between;
   align-items: center;
 }
+
 .invite-item-left { display: flex; align-items: center; gap: 12px; }
-.invite-item-left svg { width: 32px; height: 32px; padding: 6px; background: rgba(255,255,255,0.05); border-radius: 50%; color: var(--primary); }
+
+/* প্রিমিয়াম সাদা SVG এর বক্স */
+.premium-svg-box {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05); /* হালকা সাদা গ্লো */
+  border-radius: 50%;
+}
+.premium-svg-box svg {
+  width: 20px;
+  height: 20px;
+  color: #FFFFFF; /* টেক্সট সাদা */
+  stroke-width: 1.5;
+}
+
 .invite-item-left strong { 
   display: block; 
   font-size: 11px; 
   color: var(--text-main); 
+  letter-spacing: 0.5px;
 }
 .invite-item-left span { 
   font-size: 11px; 
   color: var(--text-muted); 
 }
 .invite-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
 .invite-amount { 
   font-size: 11px; 
   font-weight: 700; 
-  color: var(--primary); 
+  color: #FFFFFF; /* সবুজ সরিয়ে সাদা করা হলো */
 }
 
 .badge { 
@@ -239,7 +258,7 @@
   text-transform: uppercase; 
 }
 .badge.pending { background: rgba(245,130,32,0.15); color: var(--orange); }
-.badge.approved { background: rgba(0,231,1,0.15); color: var(--primary); }
+.badge.approved { background: rgba(255,255,255,0.15); color: #FFFFFF; }
 .badge.rejected { background: rgba(255,77,77,0.15); color: #ff4d4d; }
 
 .invite-empty {
