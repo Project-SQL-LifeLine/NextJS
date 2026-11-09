@@ -1,0 +1,242 @@
+.tx-page {
+  --bg-primary: #18221E;
+  --bg-card: #1B2A23;
+  --bg-input: #111815;
+  --border-color: #2B4236;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0AAB2;
+  --color-primary: #00E701;
+  --color-danger: #ff4d4d;
+  --btn-bg: #184f35;
+
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+  width: 100%;
+  font-family: inherit;
+}
+
+.tx-main {
+  padding: 1rem 0.8rem 100px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.tx-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+/* সামারি কার্ড */
+.tx-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.tx-summary-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tx-summary-card.deposit {
+  border-left: 4px solid var(--color-primary);
+}
+
+.tx-summary-card.withdraw {
+  border-left: 4px solid var(--color-danger);
+}
+
+.tx-summary-card span {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.tx-summary-card strong {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.tx-summary-card.deposit strong { color: var(--color-primary); }
+.tx-summary-card.withdraw strong { color: var(--color-danger); }
+
+/* ফিল্টার সেকশন */
+.tx-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.tx-type-filters {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+
+.tx-filter-btn {
+  padding: 8px 14px;
+  background: var(--btn-bg);
+  border: 1px solid #FFFFFF;
+  color: #FFFFFF;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tx-filter-btn:hover {
+  background: #143d2a;
+}
+
+.tx-filter-btn.active {
+  background: var(--color-primary);
+  color: #000;
+  border-color: var(--color-primary);
+  font-weight: 800;
+}
+
+.tx-date-filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tx-date-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  outline: none;
+  width: 120px;
+}
+
+.tx-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+.tx-clear-date {
+  position: absolute;
+  right: -20px;
+  background: transparent;
+  border: none;
+  color: var(--color-danger);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* লিস্ট সেকশন */
+.tx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tx-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tx-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tx-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tx-icon svg { width: 18px; height: 18px; }
+
+.tx-icon.deposit { background: rgba(0, 231, 1, 0.1); color: var(--color-primary); }
+.tx-icon.withdraw { background: rgba(255, 77, 77, 0.1); color: var(--color-danger); }
+
+.tx-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tx-info strong {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.tx-info span {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.tx-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.tx-amount {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.tx-amount.deposit { color: var(--color-primary); }
+.tx-amount.withdraw { color: var(--color-danger); }
+
+/* ব্যাজ */
+.badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge.pending { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
+.badge.approved, .badge.success, .badge.completed { background: rgba(0, 231, 1, 0.15); color: var(--color-primary); }
+.badge.rejected, .badge.failed { background: rgba(255, 77, 77, 0.15); color: var(--color-danger); }
+
+/* এমপ্টি স্টেট */
+.tx-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  background: var(--bg-card);
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  gap: 12px;
+}
+
+.tx-empty svg {
+  width: 40px;
+  height: 40px;
+  color: var(--border-color);
+}
+
+.tx-empty p { font-size: 12px; margin: 0; }
