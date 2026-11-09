@@ -35,7 +35,7 @@ const NavIcons = {
   ),
 };
 
-// Drawer Icons
+// Drawer Icons (Logout আইকন বাদ দেওয়া হয়েছে)
 const DrawerIcons = {
   Profile: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>,
   VIP: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>,
@@ -45,7 +45,6 @@ const DrawerIcons = {
   Affiliate: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>,
   Settings: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
   Support: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
-  Logout: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>,
 };
 
 export default function BottomNav() {
@@ -60,18 +59,12 @@ export default function BottomNav() {
     return pathname.startsWith(path);
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsDrawerOpen(false);
-    router.push("/user/login");
-  };
-
   const drawerMenu = [
     { name: t("My Profile", "আমার প্রোফাইল"), icon: <DrawerIcons.Profile />, path: "/user/profile" },
-    { name: t("VIP", "ভিআইপি"), icon: <DrawerIcons.VIP />, path: "/member/vip" },
+    { name: t("VIP", "ভিআইপি"), icon: <DrawerIcons.VIP />, path: "/user/Vip-Level" }, // VIP পাথ আপডেট করা হলো
     { name: t("Deposit History", "ডিপোজিট হিস্ট্রি"), icon: <DrawerIcons.Transactions />, path: "/wallets/voucher-report" },
     { name: t("Withdrawal History", "উত্তোলন হিস্ট্রি"), icon: <DrawerIcons.Transactions />, path: "/wallets/withdrawal-report" },
-    { name: t("Notification", "নোটিফিকেশন"), icon: <DrawerIcons.Notification />, path: "/member/notification" },
+    { name: t("Notification", "নোটিফিকেশন"), icon: <DrawerIcons.Notification />, path: "/user/notification" }, // Notification পাথ আপডেট করা হলো
     { name: t("Redeem Code", "রিডিম কোড"), icon: <DrawerIcons.Redeem />, path: "/user/freeRedeemCode" },
     { name: t("Invite Friends", "বন্ধুদের আমন্ত্রণ"), icon: <DrawerIcons.Affiliate />, path: "/user/invitedFriend" },
     { name: t("Tips", "টিপস"), icon: <DrawerIcons.Transactions />, path: "/user/tips" },
@@ -89,7 +82,7 @@ export default function BottomNav() {
         />
       )}
 
-      {/* Side Drawer (Full Screen & 11px Font) */}
+      {/* Side Drawer */}
       <div 
         className={`fixed top-0 right-0 h-full w-full bg-[#0d1e15] z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
           isDrawerOpen ? "translate-x-0" : "translate-x-full"
@@ -110,26 +103,15 @@ export default function BottomNav() {
               className="flex items-center gap-4 px-6 py-4 text-[#B1BAD3] hover:text-white hover:bg-[#1A2C38]/50 cursor-pointer transition-colors"
             >
               {item.icon}
-              {/* ফন্ট সাইজ 11px করা হলো */}
               <span className="font-medium text-[11px]">{item.name}</span>
             </div>
           ))}
         </div>
-
-        <div className="p-4 border-t border-[#1A2C38]">
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-4 w-full px-4 py-3 text-[#ED4163] hover:bg-[#ED4163]/10 rounded-lg cursor-pointer transition-colors"
-          >
-            <DrawerIcons.Logout />
-            {/* ফন্ট সাইজ 11px করা হলো */}
-            <span className="font-bold text-[11px]">{t("Logout", "লগআউট")}</span>
-          </button>
-        </div>
+        {/* Logout বাটনটি এখান থেকে সরিয়ে দেওয়া হয়েছে */}
       </div>
 
-      {/* Bottom Navigation (চিকন) */}
-      <nav className="bg-[#184f35] border-t border-[#26352e] fixed bottom-0 w-full flex justify-around items-center py-1 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+      {/* Bottom Navigation */}
+      <nav className="bg-[#0d1e15] border-t border-[#26352e] fixed bottom-0 w-full flex justify-around items-center py-1 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
         
         {/* 1. Casino */}
         <Link href="/" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
