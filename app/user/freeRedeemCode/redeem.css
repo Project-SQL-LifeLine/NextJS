@@ -83,45 +83,39 @@
   border-color: var(--redeem-accent);
 }
 
-/* ====== নতুন ৩ডি গ্লসি বাটন স্টাইল ====== */
+/* =========================================
+   নতুন বাটন ডিজাইন (সলিড সবুজ + সাদা বর্ডার)
+   ========================================= */
 .redeem-submit-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 16px 20px;
-  /* ৩ডি গ্রেডিয়েন্ট এবং বর্ডার */
-  background: linear-gradient(90deg, #34f05f 0%, #1a9e4c 100%);
-  border: 3px solid #117934; 
+  padding: 14px 20px;
+  background: #184f35; /* সলিড সবুজ */
+  border: 1px solid #FFFFFF; /* সাদা বর্ডার ১ পিক্সেল */
   border-radius: 50px; /* পিল শেপ */
   color: #FFFFFF;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   cursor: pointer;
   transition: all 0.1s ease;
-  /* ৩ডি শ্যাডো এবং গ্লস ইফেক্ট */
-  box-shadow: 
-    inset 0 3px 5px rgba(255, 255, 255, 0.5), /* ভেতরের ওপরের হাইলাইট */
-    inset 0 -4px 6px rgba(0, 0, 0, 0.2),      /* ভেতরের নিচের শ্যাডো */
-    0 8px 15px rgba(0, 0, 0, 0.3);            /* বাইরের ড্রপ শ্যাডো */
 }
 
 .redeem-submit-btn:hover:not(:disabled) {
-  filter: brightness(1.05);
+  background: #143d2a;
 }
 
 .redeem-submit-btn:active:not(:disabled) {
-  transform: translateY(3px); /* ক্লিক করলে নিচে চলে যাবে */
-  box-shadow: 
-    inset 0 2px 4px rgba(255, 255, 255, 0.4),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
-    0 4px 8px rgba(0, 0, 0, 0.3);
+  transform: translateY(2px);
 }
 
 .redeem-submit-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  background: var(--redeem-border);
+  border-color: var(--redeem-border);
+  color: var(--redeem-muted);
 }
 /* ======================================== */
 
