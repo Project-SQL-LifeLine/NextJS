@@ -23,7 +23,7 @@ export default function TransactionsActivityPage() {
   const [totalWithdraw, setTotalWithdraw] = useState(0);
 
   // ফিল্টার স্টেট
-  const [filterType, setFilterType] = useState("all"); // all, deposit, withdraw
+  const [filterType, setFilterType] = useState("all"); // all, deposit, withdrawal
   const [selectedDate, setSelectedDate] = useState("");
 
   const loadData = useCallback(async () => {
@@ -54,14 +54,15 @@ export default function TransactionsActivityPage() {
       if (error) throw error;
 
       if (txData) {
-        // মোট ডিপোজিট এবং উইথড্র ক্যালকুলেশন (স্ট্যাটাস চেক ছাড়াই)
         let depTotal = 0;
         let withTotal = 0;
         
+        // মোট ডিপোজিট এবং উইথড্র ক্যালকুলেশন
         txData.forEach(tx => {
+          // এখানে 'withdrawal' চেক করা হয়েছে
           if (tx.transaction_type === 'deposit') {
             depTotal += Number(tx.amount);
-          } else if (tx.transaction_type === 'withdraw') {
+          } else if (tx.transaction_type === 'withdrawal' || tx.transaction_type === 'withdraw') {
             withTotal += Number(tx.amount);
           }
         });
@@ -72,7 +73,7 @@ export default function TransactionsActivityPage() {
         // ডাটা ফরম্যাট করা
         const formatted = txData.map(d => ({
           id: d.id,
-          type: d.transaction_type, // deposit or withdraw
+          type: d.transaction_type, // deposit or withdrawal
           amount: Number(d.amount),
           status: d.status,
           date: d.created_at,
@@ -93,10 +94,18 @@ export default function TransactionsActivityPage() {
     loadData();
   }, [loadData]);
 
-  // ফিল্টার লজিক
+  // ফিল্টার লজিক (এখানেও 'withdrawal' চেক করা হয়েছে)
   const filteredTransactions = transactions.filter((tx) => {
-    const matchType = filterType === "all" || tx.type === filterType;
+    let matchType = false;
     
+    if (filterType === "all") {
+      matchType = true;
+    } else if (filterType === "deposit") {
+      matchType = tx.type === "deposit";
+    } else if (filterType === "withdrawal") {
+      matchType = tx.type === "withdrawal" || tx.type === "withdraw";
+    }
+
     let matchDate = true;
     if (selectedDate) {
       const txDate = new Date(tx.date).toISOString().split('T')[0];
@@ -152,8 +161,8 @@ export default function TransactionsActivityPage() {
               {t("Deposits", "ডিপোজিট")}
             </button>
             <button 
-              className={`tx-filter-btn ${filterType === "withdraw" ? "active" : ""}`}
-              onClick={() => setFilterType("withdraw")}
+              className={`tx-filter-btn ${filterType === "withdrawal" ? "active" : ""}`}
+              onClick={() => setFilterType("withdrawal")}
             >
               {t("Withdraws", "উত্তোলন")}
             </button>
@@ -180,32 +189,36 @@ export default function TransactionsActivityPage() {
               <p>{t("No transactions found.", "কোনো লেনদেন পাওয়া যায়নি।")}</p>
             </div>
           ) : (
-            filteredTransactions.map((tx) => (
-              <div key={tx.id} className="tx-item">
-                <div className="tx-item-left">
-                  <div className={`tx-icon ${tx.type}`}>
-                    {tx.type === "deposit" ? (
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                    ) : (
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
-                    )}
+            filteredTransactions.map((tx) => {
+              const isWithdraw = tx.type === "withdrawal" || tx.type === "withdraw";
+              
+              return (
+                <div key={tx.id} className="tx-item">
+                  <div className="tx-item-left">
+                    <div className={`tx-icon ${isWithdraw ? "withdraw" : "deposit"}`}>
+                      {!isWithdraw ? (
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                      ) : (
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
+                      )}
+                    </div>
+                    <div className="tx-info">
+                      <strong>{!isWithdraw ? t("Deposit", "ডিপোজিট") : t("Withdraw", "উত্তোলন")}</strong>
+                      <span>{new Date(tx.date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                      {tx.order_number && <span className="tx-order-id">ID: {tx.order_number}</span>}
+                    </div>
                   </div>
-                  <div className="tx-info">
-                    <strong>{tx.type === "deposit" ? t("Deposit", "ডিপোজিট") : t("Withdraw", "উত্তোলন")}</strong>
-                    <span>{new Date(tx.date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                    {tx.order_number && <span className="tx-order-id">ID: {tx.order_number}</span>}
+                  <div className="tx-item-right">
+                    <span className={`tx-amount ${isWithdraw ? "withdraw" : "deposit"}`}>
+                      {!isWithdraw ? "+" : "-"} ৳ {tx.amount.toLocaleString()}
+                    </span>
+                    <span className={`tx-badge ${tx.status.toLowerCase()}`}>
+                      {tx.status}
+                    </span>
                   </div>
                 </div>
-                <div className="tx-item-right">
-                  <span className={`tx-amount ${tx.type}`}>
-                    {tx.type === "deposit" ? "+" : "-"} ৳ {tx.amount.toLocaleString()}
-                  </span>
-                  <span className={`tx-badge ${tx.status.toLowerCase()}`}>
-                    {tx.status}
-                  </span>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </main>
