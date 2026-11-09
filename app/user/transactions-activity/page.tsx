@@ -44,48 +44,43 @@ export default function TransactionsActivityPage() {
         .single();
       if (profileData) setProfile(profileData);
 
-      // ১. ডিপোজিট ডাটা আনা (আপনার টেবিলের নাম অনুযায়ী পরিবর্তন করুন)
-      const { data: depositsData } = await supabase
-        .from("deposits")
-        .select("id, amount, status, created_at")
-        .eq("user_id", user.id);
+      // ডাটাবেস থেকে সব ট্রানজেকশন আনা (user_deposit_transaction টেবিল)
+      const { data: txData, error } = await supabase
+        .from("user_deposit_transaction")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
-      // ২. উইথড্র ডাটা আনা (আপনার টেবিলের নাম অনুযায়ী পরিবর্তন করুন)
-      const { data: withdrawsData } = await supabase
-        .from("withdrawals")
-        .select("id, amount, status, created_at")
-        .eq("user_id", user.id);
+      if (error) throw error;
 
-      // ডাটা ফরম্যাট করা
-      const formattedDeposits = (depositsData || []).map(d => ({
-        id: d.id,
-        type: "deposit",
-        amount: Number(d.amount),
-        status: d.status,
-        date: d.created_at
-      }));
+      if (txData) {
+        // মোট ডিপোজিট এবং উইথড্র ক্যালকুলেশন
+        let depTotal = 0;
+        let withTotal = 0;
+        
+        txData.forEach(tx => {
+          if (tx.transaction_type === 'deposit' && tx.status !== 'rejected') {
+            depTotal += Number(tx.amount);
+          } else if (tx.transaction_type === 'withdraw' && tx.status !== 'rejected') {
+            withTotal += Number(tx.amount);
+          }
+        });
 
-      const formattedWithdraws = (withdrawsData || []).map(w => ({
-        id: w.id,
-        type: "withdraw",
-        amount: Number(w.amount),
-        status: w.status,
-        date: w.created_at
-      }));
+        setTotalDeposit(depTotal);
+        setTotalWithdraw(withTotal);
 
-      // সব ডাটা একসাথে করে তারিখ অনুযায়ী সাজানো (নতুন আগে)
-      const allTx = [...formattedDeposits, ...formattedWithdraws].sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
+        // ডাটা ফরম্যাট করা
+        const formatted = txData.map(d => ({
+          id: d.id,
+          type: d.transaction_type, // deposit or withdraw
+          amount: Number(d.amount),
+          status: d.status,
+          date: d.created_at,
+          order_number: d.order_number
+        }));
 
-      setTransactions(allTx);
-
-      // মোট ডিপোজিট এবং উইথড্র ক্যালকুলেশন
-      const totalDep = formattedDeposits.reduce((sum, item) => sum + item.amount, 0);
-      const totalWith = formattedWithdraws.reduce((sum, item) => sum + item.amount, 0);
-      
-      setTotalDeposit(totalDep);
-      setTotalWithdraw(totalWith);
+        setTransactions(formatted);
+      }
 
     } catch (err) {
       console.error("Error loading transactions:", err);
@@ -117,7 +112,7 @@ export default function TransactionsActivityPage() {
         <svg className="tx-loader-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
         </svg>
-        <p>Loading Transactions...</p>
+        <p>{t("Loading Transactions...", "লেনদেন লোড হচ্ছে...")}</p>
       </div>
     );
   }
@@ -131,18 +126,18 @@ export default function TransactionsActivityPage() {
 
         {/* সামারি কার্ড */}
         <div className="tx-summary-grid">
-          <div className="tx-summary-card deposit">
+          <div className="tx-summary-card">
             <span>{t("Total Deposit", "মোট ডিপোজিট")}</span>
-            <strong>৳ {totalDeposit.toLocaleString()}</strong>
+            <strong className="text-deposit">৳ {totalDeposit.toLocaleString()}</strong>
           </div>
-          <div className="tx-summary-card withdraw">
+          <div className="tx-summary-card">
             <span>{t("Total Withdraw", "মোট উত্তোলন")}</span>
-            <strong>৳ {totalWithdraw.toLocaleString()}</strong>
+            <strong className="text-withdraw">৳ {totalWithdraw.toLocaleString()}</strong>
           </div>
         </div>
 
         {/* ফিল্টার সেকশন */}
-        <div className="tx-filters">
+        <div className="tx-filter-section">
           <div className="tx-type-filters">
             <button 
               className={`tx-filter-btn ${filterType === "all" ? "active" : ""}`}
@@ -171,11 +166,6 @@ export default function TransactionsActivityPage() {
               onChange={(e) => setSelectedDate(e.target.value)}
               className="tx-date-input"
             />
-            {selectedDate && (
-              <button className="tx-clear-date" onClick={() => setSelectedDate("")}>
-                ✕
-              </button>
-            )}
           </div>
         </div>
 
@@ -190,7 +180,7 @@ export default function TransactionsActivityPage() {
             </div>
           ) : (
             filteredTransactions.map((tx) => (
-              <div key={`${tx.type}-${tx.id}`} className="tx-item">
+              <div key={tx.id} className="tx-item">
                 <div className="tx-item-left">
                   <div className={`tx-icon ${tx.type}`}>
                     {tx.type === "deposit" ? (
@@ -201,14 +191,17 @@ export default function TransactionsActivityPage() {
                   </div>
                   <div className="tx-info">
                     <strong>{tx.type === "deposit" ? t("Deposit", "ডিপোজিট") : t("Withdraw", "উত্তোলন")}</strong>
-                    <span>{new Date(tx.date).toLocaleString()}</span>
+                    <span>{new Date(tx.date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                    {tx.order_number && <span className="tx-order-id">ID: {tx.order_number}</span>}
                   </div>
                 </div>
                 <div className="tx-item-right">
                   <span className={`tx-amount ${tx.type}`}>
                     {tx.type === "deposit" ? "+" : "-"} ৳ {tx.amount.toLocaleString()}
                   </span>
-                  <span className={`badge ${tx.status}`}>{tx.status}</span>
+                  <span className={`tx-badge ${tx.status.toLowerCase()}`}>
+                    {t(tx.status, tx.status)}
+                  </span>
                 </div>
               </div>
             ))
