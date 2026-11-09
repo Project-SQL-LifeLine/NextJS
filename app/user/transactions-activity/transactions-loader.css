@@ -1,0 +1,36 @@
+.tx-loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+  background-color: #18221E;
+  gap: 16px;
+}
+
+.tx-loader-svg {
+  width: 48px;
+  height: 48px;
+  color: #FFFFFF;
+  animation: pulse-tx 1.5s linear infinite;
+}
+
+.tx-loader-container p {
+  color: #A0AAB2;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  animation: fade-tx 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-tx {
+  0% { transform: scale(1) rotate(0deg); opacity: 0.7; }
+  50% { transform: scale(1.1) rotate(10deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 0.7; }
+}
+
+@keyframes fade-tx {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
