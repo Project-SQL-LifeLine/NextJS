@@ -20,15 +20,11 @@ export default function VipLevelPage() {
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
-  // Accordion State
   const [expandedTier, setExpandedTier] = useState<string | null>(null);
-
-  // Form & Message State
   const [transferAmount, setTransferAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [isTransferring, setIsTransferring] = useState(false); // Processing স্টেট
   const [message, setMessage] = useState({ type: "", text: "" });
-
-  // কাউন্টডাউন টাইমার আপডেট করার জন্য স্টেট
   const [currentTime, setCurrentTime] = useState(Date.now());
 
   useEffect(() => {
@@ -38,7 +34,6 @@ export default function VipLevelPage() {
     }
   }, [message]);
 
-  // প্রতি সেকেন্ডে টাইমার আপডেট হবে
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(Date.now());
@@ -144,10 +139,9 @@ export default function VipLevelPage() {
       let rpcName = "claim_vip_time_bonus";
       let params: any = { p_bonus_type: bonusType };
 
-      // Instant Rakeback এর জন্য আলাদা ফাংশন কল হবে
       if (bonusType === "instant_rakeback") {
         rpcName = "claim_instant_rakeback";
-        params = {}; // এই ফাংশনে কোনো প্যারামিটার লাগবে না
+        params = {};
       }
 
       const { data, error } = await supabase.rpc(rpcName, params);
@@ -167,18 +161,15 @@ export default function VipLevelPage() {
     }
   };
 
-  // টাইম বোনাস স্ট্যাটাস (নতুন ওয়েজার চেকসহ)
   const getTimeBonusStatus = (type: string, requiredHours: number) => {
     const lastClaim = timeClaims[type];
     const currentWager = Number(profile?.total_vip_wager) || 0;
 
-    // যদি আগে কখনো ক্লেইম না করে থাকে
     if (!lastClaim) return { canClaim: true, timeLeft: "" };
 
     const lastClaimDate = new Date(lastClaim.claimed_at).getTime();
     const nextClaimTime = lastClaimDate + requiredHours * 60 * 60 * 1000;
 
-    // টাইম চেক
     if (currentTime < nextClaimTime) {
       const diff = nextClaimTime - currentTime;
       const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -198,13 +189,10 @@ export default function VipLevelPage() {
       return { canClaim: false, timeLeft: timeLeftStr };
     }
 
-    // টাইম পার হয়েছে, এখন ওয়েজার চেক
     if (currentWager <= lastClaim.wager_at_claim) {
-      // টাইম পার হয়েছে কিন্তু নতুন ওয়েজার নেই
       return { canClaim: false, timeLeft: t("Wager more", "আরও ওয়েজার করুন") };
     }
 
-    // টাইম পার হয়েছে এবং নতুন ওয়েজারও আছে
     return { canClaim: true, timeLeft: "" };
   };
 
@@ -215,7 +203,7 @@ export default function VipLevelPage() {
       return;
     }
 
-    setSubmitting(true);
+    setIsTransferring(true); // Processing স্টেট চালু
     setMessage({ type: "", text: "" });
 
     try {
@@ -235,7 +223,7 @@ export default function VipLevelPage() {
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
     } finally {
-      setSubmitting(false);
+      setIsTransferring(false); // স্টেট বন্ধ
     }
   };
 
@@ -265,7 +253,6 @@ export default function VipLevelPage() {
   const weeklyStatus = getTimeBonusStatus("weekly", 168);
   const monthlyStatus = getTimeBonusStatus("monthly", 720);
 
-  // টায়ার অনুযায়ী লেভেল গ্রুপ করা
   const tiers = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Obsidian"];
 
   return (
@@ -281,7 +268,7 @@ export default function VipLevelPage() {
         {message.text && (
           <div className={`fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4`} onClick={() => setMessage({ type: "", text: "" })}>
             <div className={`bg-[#1C2A24] border ${message.type === 'success' ? 'border-[#00E701] text-[#00E701]' : 'border-[#ff4d4d] text-[#ff4d4d]'} p-5 rounded-xl shadow-2xl text-center min-w-[200px]`}>
-              <p className="font-bold text-sm m-0">{message.text}</p>
+              <p className="font-bold text-[11px] m-0">{message.text}</p>
             </div>
           </div>
         )}
@@ -301,10 +288,7 @@ export default function VipLevelPage() {
           </div>
         </div>
 
-        {/* ৪টি বোনাস কার্ডের গ্রিড */}
         <div className="vip-grid-buttons">
-          
-          {/* ১. Instant Rakeback */}
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
@@ -329,7 +313,6 @@ export default function VipLevelPage() {
             </div>
           </div>
 
-          {/* ২. Daily Bonus */}
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
@@ -354,7 +337,6 @@ export default function VipLevelPage() {
             </div>
           </div>
 
-          {/* ৩. Weekly Bonus */}
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
@@ -379,7 +361,6 @@ export default function VipLevelPage() {
             </div>
           </div>
 
-          {/* ৪. Monthly Bonus */}
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
@@ -403,7 +384,6 @@ export default function VipLevelPage() {
               )}
             </div>
           </div>
-
         </div>
 
         <div className="vip-bonus-card">
@@ -411,7 +391,7 @@ export default function VipLevelPage() {
             <span>{t("VIP Bonus Balance", "ভিআইপি বোনাস ব্যালেন্স")}</span>
             <strong>৳ {Number(profile?.vip_bonus_balance || 0).toFixed(2)}</strong>
           </div>
-          <p className="text-[10px] text-[#A0ADB0] mb-3">
+          <p className="text-[11px] text-[#A0ADB0] mb-3">
             {t("Transfer to main balance will require 1x turnover.", "মেইন ব্যালেন্সে ট্রান্সফার করতে ১x টার্নওভার প্রয়োজন হবে।")}
           </p>
           <form onSubmit={handleTransfer} className="vip-transfer-box">
@@ -423,14 +403,13 @@ export default function VipLevelPage() {
               onChange={(e) => setTransferAmount(e.target.value)}
               max={profile?.vip_bonus_balance || 0}
             />
-            <button type="submit" className="vip-btn-3d" disabled={submitting || Number(profile?.vip_bonus_balance) <= 0}>
-              {t("Transfer to Main", "মেইনে ট্রান্সফার করুন")}
+            <button type="submit" className="vip-btn-3d" disabled={isTransferring || Number(profile?.vip_bonus_balance) <= 0}>
+              {isTransferring ? "Processing..." : t("Transfer to Main", "মেইনে ট্রান্সফার করুন")}
             </button>
           </form>
         </div>
 
-        {/* Accordion VIP Level List */}
-        <h2 className="text-[14px] text-white font-bold mb-3 mt-6">{t("All VIP Levels", "সব ভিআইপি লেভেল")}</h2>
+        <h2 className="text-[11px] text-white font-bold mb-3 mt-6">{t("All VIP Levels", "সব ভিআইপি লেভেল")}</h2>
         <div className="vip-tier-list">
           {tiers.map((tier) => {
             const tierLevels = vipLevels.filter((level) => level.tier_name === tier);
@@ -469,7 +448,7 @@ export default function VipLevelPage() {
                                 {t("Claim", "ক্লেইম")} ৳{level.bonus_amount}
                               </button>
                             ) : (
-                              <span className="text-[12px] text-[#f58220] font-bold">
+                              <span className="text-[11px] text-[#f58220] font-bold">
                                 ৳ {Number(level.bonus_amount).toLocaleString()}
                               </span>
                             )}
