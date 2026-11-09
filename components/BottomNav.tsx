@@ -77,8 +77,7 @@ export default function BottomNav() {
   const loggedInMenu = [
     { name: t("My Profile", "আমার প্রোফাইল"), icon: <DrawerIcons.Profile />, path: "/user/profile" },
     { name: t("VIP", "ভিআইপি"), icon: <DrawerIcons.VIP />, path: "/user/Vip-Level" },
-    { name: t("Deposit History", "ডিপোজিট হিস্ট্রি"), icon: <DrawerIcons.Transactions />, path: "/wallets/voucher-report" },
-    { name: t("Withdrawal History", "উত্তোলন হিস্ট্রি"), icon: <DrawerIcons.Transactions />, path: "/wallets/withdrawal-report" },
+    { name: t("Transactions", "লেনদেন"), icon: <DrawerIcons.Transactions />, path: "/user/transactions-activity" }, // নতুন আপডেট
     { name: t("Notification", "নোটিফিকেশন"), icon: <DrawerIcons.Notification />, path: "/user/notification" },
     { name: t("Redeem Code", "রিডিম কোড"), icon: <DrawerIcons.Redeem />, path: "/user/freeRedeemCode" },
     { name: t("Invite Friends", "বন্ধুদের আমন্ত্রণ"), icon: <DrawerIcons.Affiliate />, path: "/user/invitedFriend" },
@@ -108,7 +107,7 @@ export default function BottomNav() {
         />
       )}
 
-      {/* Side Drawer (Full Screen & 11px Font) - কালার আপডেট করা হলো */}
+      {/* Side Drawer (Full Screen & 11px Font) */}
       <div 
         className={`fixed top-0 right-0 h-full w-full bg-[#184f35] z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
           isDrawerOpen ? "translate-x-0" : "translate-x-full"
@@ -116,7 +115,7 @@ export default function BottomNav() {
       >
         <div className="flex items-center justify-between p-5 border-b border-[#1A2C38]">
           <h2 className="text-xl font-bold text-white">{t("My Account", "আমার অ্যাকাউন্ট")}</h2>
-          <button onClick={() => setIsDrawerOpen(false)} className="text-[#B1BAD3] hover:text-white">
+          <button onClick={() => setIsDrawerOpen(false)} className="text-white hover:text-gray-300">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -126,17 +125,17 @@ export default function BottomNav() {
             <div 
               key={idx}
               onClick={() => { setIsDrawerOpen(false); router.push(item.path); }}
-              className="flex items-center gap-4 px-6 py-4 text-[#B1BAD3] hover:text-white hover:bg-black/20 cursor-pointer transition-colors"
+              className="flex items-center gap-4 px-6 py-4 text-white hover:bg-black/20 cursor-pointer transition-colors" // টেক্সট কালার সাদা করা হলো
             >
               {item.icon}
               <span className="font-medium text-[11px]">{item.name}</span>
             </div>
           ))}
         </div>
-        {/* Logout বাটন সরিয়ে দেওয়া হয়েছে */}
+        {/* Logout বাটন সরানো হয়েছে */}
       </div>
 
-      {/* Bottom Navigation (চিকন) - কালার আপডেট করা হলো */}
+      {/* Bottom Navigation (চিকন) */}
       <nav className="bg-[#184f35] border-t border-[#26352e] fixed bottom-0 w-full flex justify-around items-center py-1 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
         
         {/* 1. Casino */}
