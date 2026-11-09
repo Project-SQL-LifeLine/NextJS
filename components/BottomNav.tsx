@@ -77,7 +77,7 @@ export default function BottomNav() {
   const loggedInMenu = [
     { name: t("My Profile", "আমার প্রোফাইল"), icon: <DrawerIcons.Profile />, path: "/user/profile" },
     { name: t("VIP", "ভিআইপি"), icon: <DrawerIcons.VIP />, path: "/user/Vip-Level" },
-    { name: t("Transactions", "লেনদেন"), icon: <DrawerIcons.Transactions />, path: "/user/transactions-activity" }, // নতুন আপডেট
+    { name: t("Transactions", "লেনদেন"), icon: <DrawerIcons.Transactions />, path: "/user/transactions-activity" },
     { name: t("Notification", "নোটিফিকেশন"), icon: <DrawerIcons.Notification />, path: "/user/notification" },
     { name: t("Redeem Code", "রিডিম কোড"), icon: <DrawerIcons.Redeem />, path: "/user/freeRedeemCode" },
     { name: t("Invite Friends", "বন্ধুদের আমন্ত্রণ"), icon: <DrawerIcons.Affiliate />, path: "/user/invitedFriend" },
@@ -125,7 +125,7 @@ export default function BottomNav() {
             <div 
               key={idx}
               onClick={() => { setIsDrawerOpen(false); router.push(item.path); }}
-              className="flex items-center gap-4 px-6 py-4 text-white hover:bg-black/20 cursor-pointer transition-colors" // টেক্সট কালার সাদা করা হলো
+              className="flex items-center gap-4 px-6 py-4 text-white hover:bg-black/20 cursor-pointer transition-colors"
             >
               {item.icon}
               <span className="font-medium text-[11px]">{item.name}</span>
@@ -146,28 +146,28 @@ export default function BottomNav() {
           <span className={`text-[9px] font-bold mt-0.5 ${isActive("/") ? "text-[#00e701]" : "text-white/70"}`}>{t("Casino", "ক্যাসিনো")}</span>
         </Link>
 
-        {/* 2. Promotion */}
-        <Link href="/promotion" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/promotion") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
-          <div className={`p-1 rounded-lg ${isActive("/promotion") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
+        {/* 2. Promotion (আপডেট করা পাথ) */}
+        <Link href="/user/promotion/activity" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/user/promotion/activity") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
+          <div className={`p-1 rounded-lg ${isActive("/user/promotion/activity") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
             <NavIcons.Promotion />
           </div>
-          <span className={`text-[9px] font-bold mt-0.5 ${isActive("/promotion") ? "text-[#00e701]" : "text-white/70"}`}>{t("Promotion", "প্রমোশন")}</span>
+          <span className={`text-[9px] font-bold mt-0.5 ${isActive("/user/promotion/activity") ? "text-[#00e701]" : "text-white/70"}`}>{t("Promotion", "প্রমোশন")}</span>
         </Link>
         
-        {/* 3. Mega Lottery */}
-        <Link href="/lottery" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/lottery") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
-          <div className={`p-1 rounded-lg ${isActive("/lottery") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
+        {/* 3. Mega Lottery (আপডেট করা পাথ) */}
+        <Link href="/Lottery/my-lottery-tickets" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/Lottery/my-lottery-tickets") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
+          <div className={`p-1 rounded-lg ${isActive("/Lottery/my-lottery-tickets") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
             <NavIcons.Lottery />
           </div>
-          <span className={`text-[8px] font-bold mt-0.5 text-center leading-tight ${isActive("/lottery") ? "text-[#00e701]" : "text-white/70"}`}>{t("Mega Lottery", "মেগা লটারি")}</span>
+          <span className={`text-[8px] font-bold mt-0.5 text-center leading-tight ${isActive("/Lottery/my-lottery-tickets") ? "text-[#00e701]" : "text-white/70"}`}>{t("Mega Lottery", "মেগা লটারি")}</span>
         </Link>
 
-        {/* 4. Sports */}
-        <Link href="/sports" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/sports") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
-          <div className={`p-1 rounded-lg ${isActive("/sports") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
+        {/* 4. Sports (আপডেট করা পাথ) */}
+        <Link href="/Sports/sport" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/Sports/sport") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
+          <div className={`p-1 rounded-lg ${isActive("/Sports/sport") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
             <NavIcons.Sports />
           </div>
-          <span className={`text-[9px] font-bold mt-0.5 ${isActive("/sports") ? "text-[#00e701]" : "text-white/70"}`}>{t("Sports", "স্পোর্টস")}</span>
+          <span className={`text-[9px] font-bold mt-0.5 ${isActive("/Sports/sport") ? "text-[#00e701]" : "text-white/70"}`}>{t("Sports", "স্পোর্টস")}</span>
         </Link>
 
         {/* 5. Profiles (Drawer Opener) */}
