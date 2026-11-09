@@ -88,12 +88,12 @@ export default function MyProfilePage() {
               <div className="status-info">
                 <span className="label">{t("LEVEL", "লেভেল")}</span>
                 <strong className="value level-value">
-                  {t("Gold III", "গোল্ড ৩")} {/* আপনি চাইলে ডাটাবেস থেকে ডাইনামিক করতে পারেন */}
+                  {t("Gold III", "গোল্ড ৩")}
                 </strong>
               </div>
             </div>
 
-            {/* কার্ডের নিচের অংশ */}
+            {/* কার্ডের নিচের অংশ (পাশাপাশি অ্যালাইন করা) */}
             <div className="activation-footer">
               <div className="status-badge">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
