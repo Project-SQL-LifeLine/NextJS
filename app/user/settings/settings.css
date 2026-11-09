@@ -27,50 +27,52 @@
 }
 
 /* =========================================
-   নতুন ট্যাব ডিজাইন (আপনার কালার অনুযায়ী)
+   ট্যাব ডিজাইন ফিক্স (সাদা টেক্সট ও স্ক্রল সমস্যা সমাধান)
    ========================================= */
 .settings-tabs {
   display: flex;
-  gap: 8px; 
+  gap: 8px;
   margin-bottom: 1.5rem;
-  overflow-x: auto;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.settings-tabs::-webkit-scrollbar {
-  display: none;
+  /* overflow-x: auto; সরিয়ে দেওয়া হয়েছে যাতে ঢুকে না যায় */
+  flex-wrap: wrap; 
+  justify-content: flex-start;
+  padding-bottom: 4px; /* নিচে একটু জায়গা রাখা হলো */
 }
 
 .settings-tabs button {
   flex: 1;
+  min-width: 80px; /* বাটন যাতে ছোট হয়ে ভেঙে না যায় */
   padding: 10px 12px;
-  background: #184f35; /* আপনার দেওয়া মেইন ব্যাকগ্রাউন্ড */
-  border: 1px solid white; /* আপনার দেওয়া বর্ডার কালার */
-  color: #FFFFFF;
-  font-weight: 700;
-  font-size: 11px;
-  border-radius: 50px; 
+  background: #184f35;
+  border: 1px solid #FFFFFF;
+  color: #FFFFFF; /* টেক্সট সাদা করা হলো */
+  font-weight: 600;
+  font-size: 12px;
+  border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
-  opacity: 0.7; /* ইনঅ্যাক্টিভ বাটন হালকা দেখা যাবে */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* অ্যাক্টিভ ট্যাবের ডিজাইন */
+/* অ্যাক্টিভ ট্যাব (৩ডি গ্লসি ইফেক্ট) */
 .settings-tabs button.active {
-  opacity: 1;
-  background: #184f35;
-  border: 1px solid white;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 4px 6px rgba(0,0,0,0.3); /* হোয়াইট গ্লো */
-  transform: translateY(-2px); 
+  background: linear-gradient(180deg, #184f35 0%, #0f2e1f 100%);
+  border: 1px solid #FFFFFF;
+  color: #FFFFFF;
+  font-weight: 800;
+  box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
 }
 
 .settings-tabs button:active {
   transform: translateY(1px);
-  box-shadow: none;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
 }
 /* ========================================= */
+
 
 /* Card */
 .settings-card {
@@ -123,10 +125,10 @@
   font-size: 11px;
   outline: none; 
 }
-.verify-form input:focus, .settings-form input:focus { border-color: white; }
+.verify-form input:focus, .settings-form input:focus { border-color: var(--set-accent); }
 
 /* =========================================
-   নতুন সাবমিট বাটন ডিজাইন (আপনার কালার অনুযায়ী)
+   সাবমিট / আপডেট বাটন
    ========================================= */
 .verify-form button, .settings-form button {
   display: flex;
@@ -134,29 +136,27 @@
   justify-content: center;
   width: 100%;
   padding: 14px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   color: #FFFFFF;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   cursor: pointer;
-  border-radius: 50px;
-  background: #184f35; /* আপনার দেওয়া মেইন ব্যাকগ্রাউন্ড */
-  border: 1px solid white; /* আপনার দেওয়া বর্ডার কালার */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid #FFFFFF;
+  border-radius: 8px;
+  background: #184f35;
   transition: all 0.1s ease;
-  margin-top: 10px;
+  margin-top: 15px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
 .verify-form button:hover:not(:disabled), 
 .settings-form button:hover:not(:disabled) {
-  filter: brightness(1.2);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* হোভার করলে হোয়াইট গ্লো */
+  background: #0f2e1f;
 }
 
 .verify-form button:active:not(:disabled), 
 .settings-form button:active:not(:disabled) {
   transform: translateY(2px);
-  box-shadow: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 /* ========================================= */
 
