@@ -1,184 +1,190 @@
 .my-profile-page {
-  --bg-primary: #18221E;
-  --bg-card: #1B2A23;
-  --bg-input: #111815;
-  --border-color: #2B4236;
-  --text-primary: #FFFFFF;
-  --text-secondary: #A0AAB2;
-  --color-primary: #00E701;
-  --color-danger: #ff4d4d;
-
-  background-color: var(--bg-primary);
+  background-color: #18221E;
   min-height: 100vh;
   width: 100%;
-  font-family: inherit;
 }
 
 .my-profile-main {
-  padding: 1rem 0.8rem 100px;
+  padding: 2rem 1rem 100px;
   max-width: 600px;
   margin: 0 auto;
-}
-
-/* নতুন প্রিমিয়াম প্রোফাইল কার্ড ডিজাইন */
-.profile-header-card {
-  position: relative;
-  background: linear-gradient(135deg, #1f1b33 0%, #121016 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 30px 20px;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  text-align: center;
-  margin-bottom: 20px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+  min-height: calc(100vh - 150px);
 }
 
-.profile-header-card::before {
-  content: '';
+/* =========================================
+   Activation Card Styles
+   ========================================= */
+.activation-card-wrapper {
+  width: 100%;
+  max-width: 380px;
+  perspective: 1000px; /* 3D effect এর জন্য */
+}
+
+.activation-card {
+  position: relative;
+  background: linear-gradient(135deg, #1B2A23 0%, #111815 100%);
+  border: 1px solid #2B4236;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.activation-card:hover {
+  transform: translateY(-5px);
+}
+
+/* গোল্ডেন গ্লো ইফেক্ট */
+.card-glow {
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(107, 76, 255, 0.15) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(245, 130, 32, 0.15) 0%, transparent 60%);
+  pointer-events: none;
   z-index: 0;
 }
 
-/* ডিফল্ট অ্যাভাটার আইকন */
-.profile-avatar {
+/* হেডার সেকশন */
+.activation-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
   position: relative;
   z-index: 1;
-  width: 90px;
-  height: 90px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
+}
+
+.activation-logo {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #f58220, #d46912);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
-  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 10px rgba(245, 130, 32, 0.4);
 }
 
-.profile-avatar svg {
-  width: 45px;
-  height: 45px;
-  color: rgba(255, 255, 255, 0.8);
+.activation-logo svg {
+  width: 24px;
+  height: 24px;
+  color: #FFFFFF;
 }
 
-.profile-header-card h2 {
-  position: relative;
-  z-index: 1;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-  font-size: 1.5rem;
-  font-weight: 700;
+.activation-title {
+  flex: 1;
 }
 
-/* ভিআইপি / সিলভার ব্যাজ */
-.profile-badge {
-  position: relative;
-  z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 6px 14px;
-  border-radius: 20px;
-  color: #E2E8F0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.profile-badge svg {
-  width: 14px;
-  height: 14px;
-  color: #A0AAB2;
-}
-
-.profile-join-date {
-  position: relative;
-  z-index: 1;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.75rem;
-  margin-bottom: 16px;
-}
-
-.profile-status-badge {
-  position: relative;
-  z-index: 1;
-  padding: 5px 16px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: bold;
+.activation-title h2 {
+  font-size: 14px;
+  font-weight: 900;
+  color: #FFFFFF;
+  margin: 0;
+  letter-spacing: 1px;
   text-transform: uppercase;
+}
+
+.activation-title span {
+  font-size: 9px;
+  color: #A0AAB2;
   letter-spacing: 0.5px;
 }
 
-.status-active { background: rgba(0, 231, 1, 0.15); color: var(--color-primary); border: 1px solid rgba(0, 231, 1, 0.3); }
-.status-blocked { background: rgba(255, 77, 77, 0.15); color: var(--color-danger); border: 1px solid rgba(255, 77, 77, 0.3); }
-
-/* Cards */
-.profile-section-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-.profile-section-card h3 {
-  color: var(--text-primary);
-  font-size: 1.05rem;
-  margin: 0 0 16px 0;
+/* হলোগ্রাম চিপ */
+.hologram-chip {
+  width: 36px;
+  height: 28px;
+  background: linear-gradient(135deg, #e0e0e0, #a0a0a0);
+  border-radius: 6px;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 0 4px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
 }
 
-.profile-section-card h3 svg {
-  color: var(--color-primary);
-  width: 20px;
-  height: 20px;
+.chip-line {
+  height: 2px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 1px;
 }
 
-/* Info Rows */
-.profile-info-row {
+/* বডি সেকশন (User ID & Level) */
+.activation-body {
   display: flex;
   justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 0.9rem;
+  align-items: center;
+  margin-bottom: 30px;
+  position: relative;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.profile-info-row:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+.user-info, .status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.profile-info-row span {
-  color: var(--text-secondary);
+.label {
+  font-size: 9px;
+  color: #A0AAB2;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
-.profile-info-row strong {
-  color: var(--text-primary);
-  text-align: right;
-  max-width: 60%;
-  word-break: break-all;
+.value {
+  font-size: 16px;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-family: monospace;
 }
 
-/* Verification Badges */
-.verify-badge {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: bold;
+.level-value {
+  color: #F5B041; /* গোল্ডেন কালার */
+  font-family: inherit;
 }
-.verify-yes { background: rgba(0, 231, 1, 0.15); color: var(--color-primary); }
-.verify-no { background: rgba(255, 77, 77, 0.15); color: var(--color-danger); }
+
+/* ফুটার সেকশন (Status & Date) */
+.activation-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+  z-index: 1;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 230, 1, 0.1);
+  color: #00E701;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 800;
+  border: 1px solid rgba(0, 230, 1, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.status-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+.join-date {
+  font-size: 10px;
+  color: #A0AAB2;
+  font-weight: 500;
+}
