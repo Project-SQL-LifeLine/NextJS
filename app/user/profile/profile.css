@@ -1,190 +1,117 @@
-.my-profile-page {
-  background-color: #18221E;
-  min-height: 100vh;
-  width: 100%;
-}
+"use client";
 
-.my-profile-main {
-  padding: 2rem 1rem 100px;
-  max-width: 600px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 150px);
-}
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../../lib/supabase/client";
+import { useLanguage } from "../../../lib/LanguageContext";
+import Header from "../../../components/Header";
+import BottomNav from "../../../components/BottomNav";
+import "./profile.css";
 
-/* =========================================
-   Activation Card Styles
-   ========================================= */
-.activation-card-wrapper {
-  width: 100%;
-  max-width: 380px;
-  perspective: 1000px; /* 3D effect এর জন্য */
-}
+export default function MyProfilePage() {
+  const router = useRouter();
+  const { t } = useLanguage();
 
-.activation-card {
-  position: relative;
-  background: linear-gradient(135deg, #1B2A23 0%, #111815 100%);
-  border: 1px solid #2B4236;
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  overflow: hidden;
-  transition: transform 0.3s ease;
-}
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-.activation-card:hover {
-  transform: translateY(-5px);
-}
+  useEffect(() => {
+    const loadProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/user/login");
+        return;
+      }
 
-/* গোল্ডেন গ্লো ইফেক্ট */
-.card-glow {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(245, 130, 32, 0.15) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-}
+      setIsLoggedIn(true);
 
-/* হেডার সেকশন */
-.activation-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 30px;
-  position: relative;
-  z-index: 1;
-}
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
 
-.activation-logo {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #f58220, #d46912);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(245, 130, 32, 0.4);
-}
+      if (data) setProfile(data);
+      setLoading(false);
+    };
 
-.activation-logo svg {
-  width: 24px;
-  height: 24px;
-  color: #FFFFFF;
-}
+    loadProfile();
+  }, [router]);
 
-.activation-title {
-  flex: 1;
-}
+  if (loading) {
+    return (
+      <div className="my-profile-page flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-[#2B4236] border-t-[#00E701] rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
-.activation-title h2 {
-  font-size: 14px;
-  font-weight: 900;
-  color: #FFFFFF;
-  margin: 0;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
+  return (
+    <div className="my-profile-page pb-20">
+      <Header isLoggedIn={isLoggedIn} userProfile={profile} />
 
-.activation-title span {
-  font-size: 9px;
-  color: #A0AAB2;
-  letter-spacing: 0.5px;
-}
+      <main className="my-profile-main">
+        
+        {/* =========================================
+            এক্সক্লুসিভ প্রোফাইল অ্যাক্টিভেশন কার্ড
+            ========================================= */}
+        <div className="activation-card-wrapper">
+          <div className="activation-card">
+            <div className="card-glow"></div>
+            
+            {/* কার্ডের উপরের অংশ */}
+            <div className="activation-header">
+              <div className="activation-logo">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </div>
+              <div className="activation-title">
+                <h2>{t("PROFILE ACTIVATION", "প্রোফাইল অ্যাক্টিভেশন")}</h2>
+                <span>Official Member Card</span>
+              </div>
+              <div className="hologram-chip">
+                <div className="chip-line"></div>
+                <div className="chip-line"></div>
+                <div className="chip-line"></div>
+              </div>
+            </div>
 
-/* হলোগ্রাম চিপ */
-.hologram-chip {
-  width: 36px;
-  height: 28px;
-  background: linear-gradient(135deg, #e0e0e0, #a0a0a0);
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  padding: 0 4px;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
-}
+            {/* কার্ডের মাঝের অংশ */}
+            <div className="activation-body">
+              <div className="user-info">
+                <span className="label">{t("USER ID", "ইউজার আইডি")}</span>
+                <strong className="value">{profile?.game_id || "N/A"}</strong>
+              </div>
 
-.chip-line {
-  height: 2px;
-  background: rgba(0,0,0,0.15);
-  border-radius: 1px;
-}
+              <div className="status-info">
+                <span className="label">{t("LEVEL", "লেভেল")}</span>
+                <strong className="value level-value">
+                  {t("Gold III", "গোল্ড ৩")}
+                </strong>
+              </div>
+            </div>
 
-/* বডি সেকশন (User ID & Level) */
-.activation-body {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  position: relative;
-  z-index: 1;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
+            {/* কার্ডের নিচের অংশ (পাশাপাশি অ্যালাইন করা) */}
+            <div className="activation-footer">
+              <div className="status-badge">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {profile?.account_status === "active" ? t("VERIFIED & ACTIVE", "ভেরিফাইড ও অ্যাক্টিভ") : t("PENDING", "পেন্ডিং")}
+              </div>
+              
+              <div className="join-date">
+                {t("Member Since", "সদস্য হয়েছেন")}: {new Date(profile?.created_at).toLocaleDateString('en-GB')}
+              </div>
+            </div>
+          </div>
+        </div>
 
-.user-info, .status-info {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+      </main>
 
-.label {
-  font-size: 9px;
-  color: #A0AAB2;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.value {
-  font-size: 16px;
-  color: #FFFFFF;
-  font-weight: 800;
-  font-family: monospace;
-}
-
-.level-value {
-  color: #F5B041; /* গোল্ডেন কালার */
-  font-family: inherit;
-}
-
-/* ফুটার সেকশন (Status & Date) */
-.activation-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  position: relative;
-  z-index: 1;
-}
-
-.status-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(0, 230, 1, 0.1);
-  color: #00E701;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 800;
-  border: 1px solid rgba(0, 230, 1, 0.3);
-  letter-spacing: 0.5px;
-}
-
-.status-badge svg {
-  width: 14px;
-  height: 14px;
-}
-
-.join-date {
-  font-size: 10px;
-  color: #A0AAB2;
-  font-weight: 500;
+      <BottomNav />
+    </div>
+  );
 }
