@@ -264,3 +264,68 @@
   color: var(--text-main);
   text-align: center;
 }
+
+
+/* ৫টি বাটনের গ্রিড */
+.vip-grid-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.vip-grid-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #1B2A23 0%, #121016 100%);
+  border: 1px solid var(--border-col);
+  border-radius: 12px;
+  padding: 14px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+.vip-grid-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vip-grid-btn:not(:disabled):hover {
+  border-color: var(--primary);
+  background: linear-gradient(180deg, #1f332a 0%, #121016 100%);
+}
+
+.vip-grid-btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.vip-btn-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.vip-btn-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 2px;
+}
+
+.vip-btn-value {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.vip-btn-action {
+  font-size: 10px;
+  font-weight: 700;
+  color: #A0ADB0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
