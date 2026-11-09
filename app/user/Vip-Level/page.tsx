@@ -141,14 +141,20 @@ export default function VipLevelPage() {
     setMessage({ type: "", text: "" });
 
     try {
-      const { data, error } = await supabase.rpc("claim_vip_time_bonus", {
-        p_bonus_type: bonusType
-      });
+      let rpcName = "claim_vip_time_bonus";
+      let params: any = { p_bonus_type: bonusType };
+
+      // Instant Rakeback এর জন্য আলাদা ফাংশন কল হবে
+      if (bonusType === "instant_rakeback") {
+        rpcName = "claim_instant_rakeback";
+        params = {}; // এই ফাংশনে কোনো প্যারামিটার লাগবে না
+      }
+
+      const { data, error } = await supabase.rpc(rpcName, params);
 
       if (error) throw error;
 
       if (data.success) {
-        // সফল হলে মেসেজে কত টাকা পেল তা দেখানো যেতে পারে (ঐচ্ছিক)
         setMessage({ type: "success", text: data.message });
         loadData();
       } else {
@@ -298,7 +304,7 @@ export default function VipLevelPage() {
         {/* ৪টি বোনাস কার্ডের গ্রিড */}
         <div className="vip-grid-buttons">
           
-          {/* ১. Instant Rakeback (এটি আগের মতোই আছে, কারণ এটি আলাদা লজিক) */}
+          {/* ১. Instant Rakeback */}
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
