@@ -1,5 +1,5 @@
 .tx-page {
-  --bg-primary: #18221E;
+  --bg-primary: #0d241e; /* মেইন ব্যাকগ্রাউন্ড আপডেট করা হলো */
   --bg-card: #1B2A23;
   --bg-input: #111815;
   --border-color: #2B4236;
@@ -7,12 +7,13 @@
   --text-secondary: #A0AAB2;
   --color-primary: #00E701;
   --color-danger: #ff4d4d;
-  --btn-bg: #184f35;
+  --btn-bg: #184f35; /* সেটিংস পেজের বাটন কালার */
 
   background-color: var(--bg-primary);
   min-height: 100vh;
   width: 100%;
   font-family: inherit;
+  font-size: 11px; /* সব টেক্সট 11px */
 }
 
 .tx-main {
@@ -25,7 +26,7 @@
 }
 
 .tx-title {
-  font-size: 16px;
+  font-size: 11px; /* 11px */
   font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 0;
@@ -63,13 +64,13 @@
 .tx-summary-card:nth-child(2)::before { background: var(--color-danger); }
 
 .tx-summary-card span {
-  font-size: 11px;
+  font-size: 11px; /* 11px */
   color: var(--text-secondary);
   font-weight: 600;
 }
 
 .tx-summary-card strong {
-  font-size: 18px;
+  font-size: 11px; /* 11px */
   font-weight: 800;
 }
 
@@ -88,24 +89,34 @@
   gap: 8px;
 }
 
+/* সেটিংস পেজের হুবহু বাটন ডিজাইন */
 .tx-filter-btn {
   flex: 1;
   padding: 10px 0;
   background: var(--btn-bg);
-  border: 1px solid transparent;
+  border: 1px solid #FFFFFF; /* সাদা বর্ডার */
   color: #FFFFFF;
-  border-radius: 50px;
-  font-size: 12px;
-  font-weight: 700;
+  border-radius: 8px; /* সেটিংস পেজের মতো 8px */
+  font-size: 11px; /* 11px */
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .tx-filter-btn.active {
-  background: var(--btn-bg);
-  border-color: #FFFFFF;
+  background: linear-gradient(180deg, #184f35 0%, #0f2e1f 100%);
   color: #FFFFFF;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15), inset 0 0 8px rgba(255, 255, 255, 0.1);
+  font-weight: 800;
+  box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+.tx-filter-btn:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .tx-date-filter {
@@ -120,7 +131,7 @@
   color: var(--text-primary);
   padding: 12px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 11px; /* 11px */
   outline: none;
   font-family: inherit;
   appearance: none;
@@ -173,7 +184,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #FFFFFF; /* লোগো স্পষ্ট দেখানোর জন্য */
+  background: #FFFFFF;
 }
 
 .tx-icon svg { 
@@ -181,7 +192,6 @@
   height: 18px; 
 }
 
-/* ডিফল্ট প্লাস/মাইনাস আইকনের জন্য ব্যাকগ্রাউন্ড ডার্ক */
 .tx-icon.deposit { 
   background: rgba(0, 231, 1, 0.1); 
   color: var(--color-primary); 
@@ -191,7 +201,6 @@
   color: var(--color-danger); 
 }
 
-/* লোগো ইমেজ স্টাইল */
 .tx-logo-img {
   width: 100%;
   height: 100%;
@@ -206,17 +215,17 @@
 }
 
 .tx-info strong {
-  font-size: 13px;
+  font-size: 11px; /* 11px */
   color: var(--text-primary);
 }
 
 .tx-info span {
-  font-size: 10px;
+  font-size: 11px; /* 11px */
   color: var(--text-secondary);
 }
 
 .tx-info .tx-order-id {
-  font-size: 9px;
+  font-size: 11px; /* 11px */
   color: #6b7c72;
   font-family: monospace;
 }
@@ -229,7 +238,7 @@
 }
 
 .tx-amount {
-  font-size: 14px;
+  font-size: 11px; /* 11px */
   font-weight: 800;
 }
 
@@ -239,7 +248,7 @@
 .tx-badge {
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 9px;
+  font-size: 11px; /* 11px */
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -269,4 +278,4 @@
   color: var(--border-color);
 }
 
-.tx-empty p { font-size: 12px; margin: 0; }
+.tx-empty p { font-size: 11px; margin: 0; } /* 11px */
