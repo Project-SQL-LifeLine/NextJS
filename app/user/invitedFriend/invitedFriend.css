@@ -1,5 +1,5 @@
 .invite-page {
-  --bg-main: #18221E;
+  --bg-main: #0d241e; /* মেইন ব্যাকগ্রাউন্ড আপডেট */
   --bg-card: #1B2A23;
   --border-col: #263C32;
   --text-main: #FFFFFF;
@@ -7,11 +7,13 @@
   --primary: #00E701;
   --orange: #f58220;
   --input-bg: #121816;
+  --btn-bg: #184f35; /* সেটিংস পেজের বাটন কালার */
 
   background-color: var(--bg-main);
   min-height: 100vh;
   width: 100%;
   font-family: inherit;
+  font-size: 11px; /* সব টেক্সট 11px */
 }
 
 .invite-main {
@@ -21,7 +23,7 @@
 }
 
 .invite-title {
-  font-size: 16px;
+  font-size: 11px;
   font-weight: 800;
   color: var(--text-main);
   margin-bottom: 1rem;
@@ -60,7 +62,7 @@
 }
 
 .invite-stat-card span { 
-  font-size: 9px; 
+  font-size: 11px; 
   color: var(--text-muted); 
   text-transform: uppercase; 
   font-weight: 600; 
@@ -70,7 +72,7 @@
 }
 
 .invite-stat-card strong { 
-  font-size: 12px; 
+  font-size: 11px; 
   color: var(--text-main); 
   white-space: nowrap;
 }
@@ -85,7 +87,7 @@
 }
 .invite-link-card h3 { 
   margin: 0 0 8px; 
-  font-size: 14px; 
+  font-size: 11px; 
   color: var(--text-main); 
 }
 .invite-link-card p { 
@@ -133,12 +135,12 @@
   margin-bottom: 4px; 
 }
 .invite-bonus-card strong { 
-  font-size: 18px; 
+  font-size: 11px; 
   color: var(--primary); 
 }
 
 /* =========================================
-   নতুন বাটন ডিজাইন (সলিড সবুজ + সাদা বর্ডার)
+   সেটিংস পেজের হুবহু বাটন ডিজাইন
    ========================================= */
 .invite-transfer-btn, 
 .invite-modal-submit, 
@@ -146,43 +148,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #184f35; /* সলিড সবুজ */
+  background: var(--btn-bg); /* #184f35 */
   border: 1px solid #FFFFFF; /* সাদা বর্ডার ১ পিক্সেল */
-  border-radius: 50px; /* পিল শেপ */
+  border-radius: 8px; /* সেটিংস পেজের মতো 8px */
   color: #FFFFFF;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  font-size: 11px;
 }
 
 .invite-transfer-btn {
   padding: 8px 16px;
-  font-size: 11px;
 }
 
 .invite-modal-submit {
   width: 100%;
   padding: 12px;
-  font-size: 14px;
   margin-top: 8px;
 }
 
 /* Copy বাটনের স্পেসিফিক স্টাইল */
 .invite-link-box button {
   padding: 0 16px;
-  font-size: 11px;
 }
 
 .invite-transfer-btn:hover:not(:disabled), 
 .invite-modal-submit:hover:not(:disabled), 
 .invite-link-box button:hover:not(:disabled) {
-  background: #143d2a;
+  background: #0f2e1f;
 }
 
 .invite-transfer-btn:active:not(:disabled), 
 .invite-modal-submit:active:not(:disabled), 
 .invite-link-box button:active:not(:disabled) {
-  transform: translateY(2px);
+  transform: translateY(1px);
 }
 
 .invite-transfer-btn:disabled, 
@@ -197,7 +198,7 @@
 /* ========================================= */
 
 .invite-section-title {
-  font-size: 14px;
+  font-size: 11px;
   color: var(--text-main);
   margin: 0 0 12px;
 }
@@ -216,7 +217,7 @@
 .invite-item-left svg { width: 32px; height: 32px; padding: 6px; background: rgba(255,255,255,0.05); border-radius: 50%; color: var(--primary); }
 .invite-item-left strong { 
   display: block; 
-  font-size: 12px; 
+  font-size: 11px; 
   color: var(--text-main); 
 }
 .invite-item-left span { 
@@ -225,13 +226,13 @@
 }
 .invite-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .invite-amount { 
-  font-size: 12px; 
+  font-size: 11px; 
   font-weight: 700; 
   color: var(--primary); 
 }
 
 .badge { 
-  font-size: 9px; 
+  font-size: 11px; 
   font-weight: 700; 
   padding: 2px 6px; 
   border-radius: 4px; 
@@ -263,7 +264,7 @@
 .invite-modal-header h3 { 
   margin: 0; 
   color: var(--text-main); 
-  font-size: 14px; 
+  font-size: 11px; 
 }
 .invite-modal-header button { background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
 
@@ -274,5 +275,5 @@
 }
 .invite-input-group input {
   background: var(--input-bg); border: 1px solid var(--border-col);
-  padding: 12px; border-radius: 8px; color: var(--text-main); font-size: 12px; outline: none;
+  padding: 12px; border-radius: 8px; color: var(--text-main); font-size: 11px; outline: none;
 }
