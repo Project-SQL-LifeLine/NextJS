@@ -76,10 +76,10 @@ export default function BottomNav() {
   // লগইন থাকা অবস্থায় মেনু
   const loggedInMenu = [
     { name: t("My Profile", "আমার প্রোফাইল"), icon: <DrawerIcons.Profile />, path: "/user/profile" },
-    { name: t("VIP", "ভিআইপি"), icon: <DrawerIcons.VIP />, path: "/user/Vip-Level" }, // আপডেট করা হলো
+    { name: t("VIP", "ভিআইপি"), icon: <DrawerIcons.VIP />, path: "/user/Vip-Level" },
     { name: t("Deposit History", "ডিপোজিট হিস্ট্রি"), icon: <DrawerIcons.Transactions />, path: "/wallets/voucher-report" },
     { name: t("Withdrawal History", "উত্তোলন হিস্ট্রি"), icon: <DrawerIcons.Transactions />, path: "/wallets/withdrawal-report" },
-    { name: t("Notification", "নোটিফিকেশন"), icon: <DrawerIcons.Notification />, path: "/user/notification" }, // আপডেট করা হলো
+    { name: t("Notification", "নোটিফিকেশন"), icon: <DrawerIcons.Notification />, path: "/user/notification" },
     { name: t("Redeem Code", "রিডিম কোড"), icon: <DrawerIcons.Redeem />, path: "/user/freeRedeemCode" },
     { name: t("Invite Friends", "বন্ধুদের আমন্ত্রণ"), icon: <DrawerIcons.Affiliate />, path: "/user/invitedFriend" },
     { name: t("Tips", "টিপস"), icon: <DrawerIcons.Transactions />, path: "/user/tips" },
@@ -108,9 +108,9 @@ export default function BottomNav() {
         />
       )}
 
-      {/* Side Drawer (Full Screen & 11px Font) */}
+      {/* Side Drawer (Full Screen & 11px Font) - কালার আপডেট করা হলো */}
       <div 
-        className={`fixed top-0 right-0 h-full w-full bg-[#0d1e15] z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-full bg-[#184f35] z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
           isDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -126,7 +126,7 @@ export default function BottomNav() {
             <div 
               key={idx}
               onClick={() => { setIsDrawerOpen(false); router.push(item.path); }}
-              className="flex items-center gap-4 px-6 py-4 text-[#B1BAD3] hover:text-white hover:bg-[#1A2C38]/50 cursor-pointer transition-colors"
+              className="flex items-center gap-4 px-6 py-4 text-[#B1BAD3] hover:text-white hover:bg-black/20 cursor-pointer transition-colors"
             >
               {item.icon}
               <span className="font-medium text-[11px]">{item.name}</span>
@@ -136,8 +136,8 @@ export default function BottomNav() {
         {/* Logout বাটন সরিয়ে দেওয়া হয়েছে */}
       </div>
 
-      {/* Bottom Navigation (চিকন) - ব্যাকগ্রাউন্ড কালার ড্রয়ার এর সাথে ম্যাচ করা হলো */}
-      <nav className="bg-[#0d1e15] border-t border-[#1A2C38] fixed bottom-0 w-full flex justify-around items-center py-1 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+      {/* Bottom Navigation (চিকন) - কালার আপডেট করা হলো */}
+      <nav className="bg-[#184f35] border-t border-[#26352e] fixed bottom-0 w-full flex justify-around items-center py-1 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
         
         {/* 1. Casino */}
         <Link href="/" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
