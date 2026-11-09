@@ -76,7 +76,6 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
       {/* Header background: bg-[#184f35] */}
       <header className="bg-[#184f35] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#26352e]">
         
-        {/* ২. সাইট নামের কালার সাদা করা হয়েছে (text-white) */}
         <div className="text-2xl font-extrabold text-white tracking-wider">
           {siteName}
         </div>
@@ -95,10 +94,6 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
             <div className="flex items-center gap-2">
               {/* Profile Info */}
               <div className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full border border-[#26352e]">
-                {/* ১. game_id সরানো হয়েছে */}
-                {/* ৪. (৳) যোগ করা হয়েছে */}
-                {/* ৫. ফন্ট সাইজ 11px করা হয়েছে (text-[11px]) */}
-                {/* ৬. ব্যালেন্সের কালার সাদা করা হয়েছে (text-white) */}
                 <Icons.Wallet />
                 <span className="text-white text-[11px] font-bold">
                   ৳ {hideBalance ? "****" : (userProfile?.balance || "0.00")}
@@ -119,47 +114,49 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
       {/* Dropdown Menu Overlay */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setIsMenuOpen(false)}>
-          {/* ৩. মেনুর ব্যাকগ্রাউন্ড হেডারের মতো করা হয়েছে (bg-[#184f35]) */}
           <div 
             className="absolute top-[60px] right-3 w-60 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Game ID Copy Section */}
-            {isLoggedIn && userProfile && (
-              <div className="px-4 py-3 border-b border-[#26352e] flex flex-col gap-1 bg-black/20">
-                <span className="text-white/70 text-[10px] font-semibold uppercase tracking-wider">{t("Game ID", "গেম আইডি")}</span>
-                <div className="flex items-center justify-between">
-                  <span className="text-white text-[13px] font-bold font-mono">{userProfile.game_id || "N/A"}</span>
-                  <button onClick={copyGameId} className="p-1.5 bg-black/30 hover:bg-black/50 rounded-md transition">
-                    <Icons.Copy />
-                  </button>
-                </div>
-              </div>
+            {/* ইউজার লগইন থাকলে তবেই এই অপশনগুলো দেখাবে */}
+            {isLoggedIn && (
+              <>
+                {userProfile && (
+                  <div className="px-4 py-3 border-b border-[#26352e] flex flex-col gap-1 bg-black/20">
+                    <span className="text-white/70 text-[10px] font-semibold uppercase tracking-wider">{t("Game ID", "গেম আইডি")}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-white text-[13px] font-bold font-mono">{userProfile.game_id || "N/A"}</span>
+                      <button onClick={copyGameId} className="p-1.5 bg-black/30 hover:bg-black/50 rounded-md transition">
+                        <Icons.Copy />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <Link href="/wallets/voucher-center" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition">
+                  <Icons.Deposit /> <span className="text-[11px]">{t("Deposit", "ডিপোজিট")}</span>
+                </Link>
+                <Link href="/wallets/withdrawal" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition">
+                  <Icons.Withdraw /> <span className="text-[11px]">{t("Withdraw", "উত্তোলন")}</span>
+                </Link>
+                
+                <div className="h-px bg-white/10 my-1"></div>
+
+                <button className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition">
+                  <Icons.Refresh /> <span className="text-[11px]">{t("Refresh Balance", "ব্যালেন্স রিফ্রেশ")}</span>
+                </button>
+                <button 
+                  onClick={() => setHideBalance(!hideBalance)}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition"
+                >
+                  <Icons.EyeOff /> <span className="text-[11px]">{hideBalance ? t("Show Balance", "ব্যালেন্স দেখান") : t("Hide Balance", "ব্যালেন্স লুকান")}</span>
+                </button>
+
+                <div className="h-px bg-white/10 my-1"></div>
+              </>
             )}
 
-            {/* Deposit & Withdraw Links */}
-            <Link href="/wallets/voucher-center" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition">
-              <Icons.Deposit /> <span className="text-[11px]">{t("Deposit", "ডিপোজিট")}</span>
-            </Link>
-            <Link href="/wallets/withdrawal" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition">
-              <Icons.Withdraw /> <span className="text-[11px]">{t("Withdraw", "উত্তোলন")}</span>
-            </Link>
-            
-            <div className="h-px bg-white/10 my-1"></div>
-
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition">
-              <Icons.Refresh /> <span className="text-[11px]">{t("Refresh Balance", "ব্যালেন্স রিফ্রেশ")}</span>
-            </button>
-            <button 
-              onClick={() => setHideBalance(!hideBalance)}
-              className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition"
-            >
-              <Icons.EyeOff /> <span className="text-[11px]">{hideBalance ? t("Show Balance", "ব্যালেন্স দেখান") : t("Hide Balance", "ব্যালেন্স লুকান")}</span>
-            </button>
-
-            <div className="h-px bg-white/10 my-1"></div>
-
-            {/* Language Selector inside Menu */}
+            {/* Language Selector (লগইন থাকুক বা না থাকুক সবসময় দেখাবে) */}
             <div className="px-4 py-2 flex flex-col gap-2">
               <span className="text-[11px] text-white/70 font-semibold flex items-center gap-2">
                 <Icons.Globe /> {t("Language", "ভাষা")}
@@ -180,11 +177,15 @@ export default function Header({ isLoggedIn, userProfile }: { isLoggedIn: boolea
               </div>
             </div>
 
-            <div className="h-px bg-white/10 my-1"></div>
-
-            <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-[#ED4163] hover:bg-black/20 transition">
-              <Icons.Logout /> <span className="text-[11px]">{t("Logout", "লগআউট")}</span>
-            </button>
+            {/* Logout (শুধুমাত্র লগইন থাকলে দেখাবে) */}
+            {isLoggedIn && (
+              <>
+                <div className="h-px bg-white/10 my-1"></div>
+                <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-[#ED4163] hover:bg-black/20 transition">
+                  <Icons.Logout /> <span className="text-[11px]">{t("Logout", "লগআউট")}</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
