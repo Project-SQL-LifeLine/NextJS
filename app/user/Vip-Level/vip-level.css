@@ -154,46 +154,36 @@
 }
 
 /* =========================================
-   Settings CSS থেকে নেওয়া হুবহু বাটন ডিজাইন
+   Settings পেজের মতো বাটন ডিজাইন (Solid Green + White Border)
    ========================================= */
 .vip-btn-3d {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
-  border: 2px solid #117934;
-  border-radius: 50px;
-  color: #FFFFFF;
+  width: auto;
+  padding: 12px 24px;
+  font-size: 14px;
   font-weight: 800;
-  font-size: 13px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  color: #FFFFFF;
   cursor: pointer;
+  border: 2px solid #FFFFFF; /* সাদা বর্ডার */
+  border-radius: 50px;
+  background: #184f35; /* সলিড সবুজ ব্যাকগ্রাউন্ড */
   transition: all 0.1s ease;
-  box-shadow: 
-    inset 0 3px 5px rgba(255, 255, 255, 0.5),
-    inset 0 -4px 6px rgba(0, 0, 0, 0.2),
-    0 6px 12px rgba(0, 0, 0, 0.3);
-  padding: 12px 20px;
-  white-space: nowrap; 
+  white-space: nowrap;
 }
 
 .vip-btn-3d:hover:not(:disabled) {
-  filter: brightness(1.1);
+  background: #143d2a;
 }
 
 .vip-btn-3d:active:not(:disabled) {
   transform: translateY(2px);
-  box-shadow: 
-    inset 0 2px 4px rgba(255, 255, 255, 0.4),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
-    0 3px 6px rgba(0, 0, 0, 0.3);
 }
 
 .vip-btn-3d:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: translateY(2px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   background: var(--border-col);
   border-color: var(--border-col);
   color: var(--text-muted);
@@ -338,38 +328,30 @@
   margin-top: auto;
 }
 
-/* Claim Button (Settings Main Button Style) */
+/* Claim Button (Settings Page Style) */
 .vip-new-claim-btn {
   width: 100%;
-  background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
-  border: 2px solid #117934;
-  border-radius: 50px; /* পিল শেপ */
-  color: #FFFFFF;
-  font-weight: 800;
-  font-size: 12px;
   padding: 8px 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: #FFFFFF;
   cursor: pointer;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  box-shadow: 
-    inset 0 2px 4px rgba(255,255,255,0.5),
-    0 4px 6px rgba(0,0,0,0.3);
+  border: 2px solid #FFFFFF;
+  border-radius: 50px;
+  background: #184f35;
   transition: all 0.1s ease;
-  text-align: center;
 }
 
 .vip-new-claim-btn:hover:not(:disabled) {
-  filter: brightness(1.1);
+  background: #143d2a;
 }
 
 .vip-new-claim-btn:active:not(:disabled) {
   transform: translateY(2px);
-  box-shadow: 
-    inset 0 1px 2px rgba(255,255,255,0.5),
-    0 2px 4px rgba(0,0,0,0.2);
 }
 
 .vip-new-claim-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   background: var(--border-col);
   border-color: var(--border-col);
