@@ -164,3 +164,154 @@
   cursor: pointer;
   transition: all 0.1s ease;
   box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -3px 5px rgba(0, 0, 0, 0.2),
+    0 4px 0 #117934,
+    0 6px 10px rgba(0, 0, 0, 0.3);
+  padding: 10px 16px;
+  font-size: 11px;
+}
+
+.vip-btn-3d:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    0 1px 0 #117934,
+    0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.vip-btn-3d:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  background: #2B4236;
+  border-color: #2B4236;
+  color: #A0ADB0;
+}
+
+/* Accordion List */
+.vip-tier-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vip-tier-group {
+  background: var(--bg-card);
+  border: 1px solid var(--border-col);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.vip-tier-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: transparent;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+}
+
+.vip-tier-header:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+.vip-tier-content {
+  padding: 0 10px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vip-level-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-col);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vip-level-item.locked {
+  opacity: 0.7;
+}
+
+.vip-level-item.current {
+  border-color: var(--primary);
+  background: rgba(0, 231, 1, 0.05);
+}
+
+.vip-level-info h4 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: #FFF;
+}
+
+.vip-level-info p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* =========================================
+   নতুন ৪টি বোনাস কার্ডের গ্রিড (ছবির মতো ডিজাইন)
+   ========================================= */
+.vip-grid-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.vip-new-card {
+  background: #181B23; /* ছবির মতো ডার্ক ব্লু/গ্রে */
+  border: 1px solid #2B3040;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.vip-card-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.vip-card-top-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #E2E8F0;
+}
+
+.vip-top-icon {
+  width: 18px;
+  height: 18px;
+  color: #FFFFFF;
+}
+
+.vip-card-center-icon {
+  font-size: 32px; /* ইমোজি সাইজ */
+  margin-bottom: 8px;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+}
+
+.vip-new-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 16px;
+}
+
+.vip-card-value-box {
+  width: 100
