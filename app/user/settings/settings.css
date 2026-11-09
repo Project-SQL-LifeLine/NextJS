@@ -6,10 +6,6 @@
   --set-muted: #A0AAB2;
   --set-accent: #00E701;
   --set-input-bg: #111815;
-  
-  /* নতুন বাটন কালার */
-  --btn-bg: #2AAA8A;
-  --btn-border: #50C878;
 
   background-color: var(--set-bg);
   min-height: 100vh;
@@ -31,7 +27,7 @@
 }
 
 /* =========================================
-   নতুন ট্যাব ডিজাইন (Pill shape)
+   নতুন ট্যাব ডিজাইন (আপনার কালার অনুযায়ী)
    ========================================= */
 .settings-tabs {
   display: flex;
@@ -48,37 +44,35 @@
 .settings-tabs button {
   flex: 1;
   padding: 10px 12px;
-  background: var(--set-card); 
-  border: 1px solid var(--set-border);
-  color: var(--set-muted);
+  background: #184f35; /* আপনার দেওয়া মেইন ব্যাকগ্রাউন্ড */
+  border: 1px solid white; /* আপনার দেওয়া বর্ডার কালার */
+  color: #FFFFFF;
   font-weight: 700;
   font-size: 11px;
-  border-radius: 50px;
+  border-radius: 50px; 
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+  opacity: 0.7; /* ইনঅ্যাক্টিভ বাটন হালকা দেখা যাবে */
 }
 
-/* অ্যাক্টিভ ট্যাবের ডিজাইন (আপনার দেওয়া কালার) */
+/* অ্যাক্টিভ ট্যাবের ডিজাইন */
 .settings-tabs button.active {
-  background: var(--btn-bg); /* #2AAA8A */
-  border: 1px solid var(--btn-border); /* #50C878 */
-  color: #FFFFFF;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  box-shadow: 
-    inset 0 2px 3px rgba(255, 255, 255, 0.2),
-    0 4px 8px rgba(0, 0, 0, 0.3);
-  transform: translateY(-1px);
+  opacity: 1;
+  background: #184f35;
+  border: 1px solid white;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 4px 6px rgba(0,0,0,0.3); /* হোয়াইট গ্লো */
+  transform: translateY(-2px); 
 }
 
 .settings-tabs button:active {
   transform: translateY(1px);
+  box-shadow: none;
 }
+/* ========================================= */
 
-/* =========================================
-   Card Style
-   ========================================= */
+/* Card */
 .settings-card {
   background: var(--set-card);
   border: 1px solid var(--set-border);
@@ -129,40 +123,42 @@
   font-size: 11px;
   outline: none; 
 }
-.verify-form input:focus, .settings-form input:focus { border-color: var(--btn-border); }
+.verify-form input:focus, .settings-form input:focus { border-color: white; }
 
 /* =========================================
-   নতুন বাটন স্টাইল (আপনার দেওয়া কালার অনুযায়ী)
+   নতুন সাবমিট বাটন ডিজাইন (আপনার কালার অনুযায়ী)
    ========================================= */
 .verify-form button, .settings-form button {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 12px;
-  font-size: 13px;
-  font-weight: 700;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 800;
   color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   cursor: pointer;
-  border: 1px solid var(--btn-border); /* #50C878 */
   border-radius: 50px;
-  background: var(--btn-bg); /* #2AAA8A */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  background: #184f35; /* আপনার দেওয়া মেইন ব্যাকগ্রাউন্ড */
+  border: 1px solid white; /* আপনার দেওয়া বর্ডার কালার */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   transition: all 0.1s ease;
   margin-top: 10px;
 }
 
 .verify-form button:hover:not(:disabled), 
 .settings-form button:hover:not(:disabled) {
-  filter: brightness(1.1);
-  background: #2ebd99; /* হোভারে হালকা পরিবর্তন */
+  filter: brightness(1.2);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* হোভার করলে হোয়াইট গ্লো */
 }
 
 .verify-form button:active:not(:disabled), 
 .settings-form button:active:not(:disabled) {
   transform: translateY(2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
 }
+/* ========================================= */
 
 /* Security Form */
 .settings-form { display: flex; flex-direction: column; gap: 12px; }
