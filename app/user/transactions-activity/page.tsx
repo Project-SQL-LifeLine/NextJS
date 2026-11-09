@@ -21,7 +21,7 @@ export default function TransactionsActivityPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [totalDeposit, setTotalDeposit] = useState(0);
   const [totalWithdraw, setTotalWithdraw] = useState(0);
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([]); // পেমেন্ট মেথড লোগোর জন্য
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
   // ফিল্টার স্টেট
   const [filterType, setFilterType] = useState("all"); 
@@ -46,10 +46,10 @@ export default function TransactionsActivityPage() {
         .single();
       if (profileData) setProfile(profileData);
 
-      // ২. পেমেন্ট মেথড ডাটা (লোগোর জন্য)
+      // ২. পেমেন্ট মেথড ডাটা
       const { data: methodsData } = await supabase
         .from("control_payment_method")
-        .select("method_code, method_logo_url");
+        .select("method_code, method_name, method_logo_url");
       
       if (methodsData) setPaymentMethods(methodsData);
 
@@ -80,7 +80,7 @@ export default function TransactionsActivityPage() {
         const formatted = txData.map(d => ({
           id: d.id,
           type: d.transaction_type,
-          method_code: d.method_code, // লোগো ম্যাচ করার জন্য
+          method_code: d.method_code || "",
           amount: Number(d.amount),
           status: d.status,
           date: d.created_at,
@@ -190,8 +190,17 @@ export default function TransactionsActivityPage() {
             filteredTransactions.map((tx) => {
               const isWithdraw = tx.type === "withdrawal" || tx.type === "withdraw";
               
-              // লোগো খোঁজা
-              const matchedMethod = paymentMethods.find(m => m.method_code === tx.method_code);
+              // স্মার্ট লোগো ম্যাচিং
+              const matchedMethod = paymentMethods.find(m => {
+                const dbCode = (m.method_code || "").toLowerCase();
+                const dbName = (m.method_name || "").toLowerCase();
+                const txCode = (tx.method_code || "").toLowerCase();
+                
+                return dbCode === txCode || 
+                       dbName.includes(txCode) || 
+                       txCode.includes(dbCode);
+              });
+              
               const logoUrl = matchedMethod?.method_logo_url;
 
               return (
@@ -199,7 +208,14 @@ export default function TransactionsActivityPage() {
                   <div className="tx-item-left">
                     <div className={`tx-icon ${isWithdraw ? "withdraw" : "deposit"}`}>
                       {logoUrl ? (
-                        <img src={logoUrl} alt={tx.method_code} className="tx-logo-img" />
+                        <img 
+                          src={logoUrl} 
+                          alt={tx.method_code} 
+                          className="tx-logo-img" 
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
                       ) : (
                         !isWithdraw ? (
                           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
