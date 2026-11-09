@@ -201,7 +201,7 @@ export default function VipLevelPage() {
     // টাইম পার হয়েছে, এখন ওয়েজার চেক
     if (currentWager <= lastClaim.wager_at_claim) {
       // টাইম পার হয়েছে কিন্তু নতুন ওয়েজার নেই
-      return { canClaim: false, timeLeft: t("wager_more") || "Wager more" };
+      return { canClaim: false, timeLeft: t("Wager more", "আরও ওয়েজার করুন") };
     }
 
     // টাইম পার হয়েছে এবং নতুন ওয়েজারও আছে
@@ -275,7 +275,7 @@ export default function VipLevelPage() {
       <main className="vip-main">
         <h1 className="vip-title">
           <svg className="w-6 h-6 text-[#f58220]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-          {t("vip_program") || "VIP Program"}
+          {t("VIP Program", "ভিআইপি প্রোগ্রাম")}
         </h1>
 
         {message.text && (
@@ -308,21 +308,23 @@ export default function VipLevelPage() {
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
-                {Number(profile?.unclaimed_rakeback) > 0 ? (t("available") || "Available") : (t("no_rakeback") || "No Rakeback")}
+                {Number(profile?.unclaimed_rakeback) > 0 
+                  ? t("Available", "উপলব্ধ") 
+                  : t("No Rakeback", "কোনো রেকব্যাক নেই")}
               </span>
               <svg className="vip-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
               </svg>
             </div>
             <div className="vip-card-center-icon">🧹</div>
-            <span className="vip-new-card-title">{t("instant_rakeback") || "Instant Rakeback"}</span>
+            <span className="vip-new-card-title">{t("Instant Rakeback", "ইনস্ট্যান্ট রেকব্যাক")}</span>
             <div className="vip-card-value-box">
                {Number(profile?.unclaimed_rakeback) > 0 ? (
                 <button onClick={() => handleClaimTimeBonus("instant_rakeback")} className="vip-new-claim-btn" disabled={submitting}>
-                  {t("claim") || "Claim"}
+                  {t("Claim", "ক্লেইম")}
                 </button>
               ) : (
-                <span className="vip-new-timer">{t("no_rakeback") || "No Rakeback"}</span>
+                <span className="vip-new-timer">{t("No Rakeback", "কোনো রেকব্যাক নেই")}</span>
               )}
             </div>
           </div>
@@ -331,18 +333,20 @@ export default function VipLevelPage() {
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
-                {dailyStatus.canClaim ? (t("available") || "Available") : (t("claim_soon") || "Claim Soon!")}
+                {dailyStatus.canClaim 
+                  ? t("Available", "উপলব্ধ") 
+                  : t("Claim Soon!", "শীঘ্রই ক্লেইম করুন!")}
               </span>
               <svg className="vip-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
               </svg>
             </div>
             <div className="vip-card-center-icon">🎁</div>
-            <span className="vip-new-card-title">{t("daily_bonus") || "Daily Bonus"}</span>
+            <span className="vip-new-card-title">{t("Daily Bonus", "দৈনিক বোনাস")}</span>
             <div className="vip-card-value-box">
               {dailyStatus.canClaim ? (
                 <button onClick={() => handleClaimTimeBonus("daily")} className="vip-new-claim-btn" disabled={submitting}>
-                  {t("claim") || "Claim"}
+                  {t("Claim", "ক্লেইম")}
                 </button>
               ) : (
                 <span className="vip-new-timer">{dailyStatus.timeLeft}</span>
@@ -354,18 +358,20 @@ export default function VipLevelPage() {
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
-                {weeklyStatus.canClaim ? (t("available") || "Available") : (t("claim_soon") || "Claim Soon!")}
+                {weeklyStatus.canClaim 
+                  ? t("Available", "উপলব্ধ") 
+                  : t("Claim Soon!", "শীঘ্রই ক্লেইম করুন!")}
               </span>
               <svg className="vip-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
               </svg>
             </div>
             <div className="vip-card-center-icon">💵</div>
-            <span className="vip-new-card-title">{t("weekly_bonus") || "Weekly Bonus"}</span>
+            <span className="vip-new-card-title">{t("Weekly Bonus", "সাপ্তাহিক বোনাস")}</span>
             <div className="vip-card-value-box">
               {weeklyStatus.canClaim ? (
                 <button onClick={() => handleClaimTimeBonus("weekly")} className="vip-new-claim-btn" disabled={submitting}>
-                  {t("claim") || "Claim"}
+                  {t("Claim", "ক্লেইম")}
                 </button>
               ) : (
                 <span className="vip-new-timer">{weeklyStatus.timeLeft}</span>
@@ -377,18 +383,20 @@ export default function VipLevelPage() {
           <div className="vip-new-card">
             <div className="vip-card-header">
               <span className="vip-card-top-text">
-                {monthlyStatus.canClaim ? (t("available") || "Available") : (t("claim_soon") || "Claim Soon!")}
+                {monthlyStatus.canClaim 
+                  ? t("Available", "উপলব্ধ") 
+                  : t("Claim Soon!", "শীঘ্রই ক্লেইম করুন!")}
               </span>
               <svg className="vip-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
               </svg>
             </div>
             <div className="vip-card-center-icon">💎</div>
-            <span className="vip-new-card-title">{t("monthly_bonus") || "Monthly Bonus"}</span>
+            <span className="vip-new-card-title">{t("Monthly Bonus", "মাসিক বোনাস")}</span>
             <div className="vip-card-value-box">
               {monthlyStatus.canClaim ? (
                 <button onClick={() => handleClaimTimeBonus("monthly")} className="vip-new-claim-btn" disabled={submitting}>
-                  {t("claim") || "Claim"}
+                  {t("Claim", "ক্লেইম")}
                 </button>
               ) : (
                 <span className="vip-new-timer">{monthlyStatus.timeLeft}</span>
@@ -400,29 +408,29 @@ export default function VipLevelPage() {
 
         <div className="vip-bonus-card">
           <div className="vip-bonus-row">
-            <span>{t("vip_bonus_balance") || "VIP Bonus Balance"}</span>
+            <span>{t("VIP Bonus Balance", "ভিআইপি বোনাস ব্যালেন্স")}</span>
             <strong>৳ {Number(profile?.vip_bonus_balance || 0).toFixed(2)}</strong>
           </div>
           <p className="text-[10px] text-[#A0ADB0] mb-3">
-            {t("transfer_turnover_note") || "Transfer to main balance will require 1x turnover."}
+            {t("Transfer to main balance will require 1x turnover.", "মেইন ব্যালেন্সে ট্রান্সফার করতে ১x টার্নওভার প্রয়োজন হবে।")}
           </p>
           <form onSubmit={handleTransfer} className="vip-transfer-box">
             <input 
               type="number" 
-              placeholder={t("enter_amount") || "Enter amount"} 
+              placeholder={t("Enter amount", "পরিমাণ লিখুন")} 
               className="vip-transfer-input" 
               value={transferAmount}
               onChange={(e) => setTransferAmount(e.target.value)}
               max={profile?.vip_bonus_balance || 0}
             />
             <button type="submit" className="vip-btn-3d" disabled={submitting || Number(profile?.vip_bonus_balance) <= 0}>
-              {t("transfer_to_main") || "Transfer to Main"}
+              {t("Transfer to Main", "মেইনে ট্রান্সফার করুন")}
             </button>
           </form>
         </div>
 
         {/* Accordion VIP Level List */}
-        <h2 className="text-[14px] text-white font-bold mb-3 mt-6">{t("all_vip_levels") || "All VIP Levels"}</h2>
+        <h2 className="text-[14px] text-white font-bold mb-3 mt-6">{t("All VIP Levels", "সব ভিআইপি লেভেল")}</h2>
         <div className="vip-tier-list">
           {tiers.map((tier) => {
             const tierLevels = vipLevels.filter((level) => level.tier_name === tier);
@@ -451,14 +459,14 @@ export default function VipLevelPage() {
                         <div key={level.id} className={`vip-level-item ${isUnlocked ? "" : "locked"} ${isCurrent ? "current" : ""}`}>
                           <div className="vip-level-info">
                             <h4>{level.level_name}</h4>
-                            <p>{t("wager") || "Wager"}: ৳ {Number(level.required_wager).toLocaleString()}</p>
+                            <p>{t("Wager", "ওয়েজার")}: ৳ {Number(level.required_wager).toLocaleString()}</p>
                           </div>
                           <div>
                             {isClaimed ? (
-                              <span className="text-[11px] text-[#00E701] font-bold">{t("claimed") || "Claimed"}</span>
+                              <span className="text-[11px] text-[#00E701] font-bold">{t("Claimed", "ক্লেইমড")}</span>
                             ) : isUnlocked ? (
                               <button onClick={() => handleClaimLevelUp(level.id)} className="vip-btn-3d" disabled={submitting}>
-                                {t("claim") || "Claim"} ৳{level.bonus_amount}
+                                {t("Claim", "ক্লেইম")} ৳{level.bonus_amount}
                               </button>
                             ) : (
                               <span className="text-[12px] text-[#f58220] font-bold">
