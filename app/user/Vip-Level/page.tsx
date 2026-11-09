@@ -421,4 +421,64 @@ export default function VipLevelPage() {
           </form>
         </div>
 
-        {/* Accord
+        {/* Accordion VIP Level List */}
+        <h2 className="text-[14px] text-white font-bold mb-3 mt-6">All VIP Levels</h2>
+        <div className="vip-tier-list">
+          {tiers.map((tier) => {
+            const tierLevels = vipLevels.filter((level) => level.tier_name === tier);
+            if (tierLevels.length === 0) return null;
+
+            return (
+              <div key={tier} className="vip-tier-group">
+                <button 
+                  className="vip-tier-header"
+                  onClick={() => setExpandedTier(expandedTier === tier ? null : tier)}
+                >
+                  <span>{tier}</span>
+                  <svg className={`w-5 h-5 transition-transform ${expandedTier === tier ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {expandedTier === tier && (
+                  <div className="vip-tier-content">
+                    {tierLevels.map((level) => {
+                      const isClaimed = claimedLevels.includes(level.id);
+                      const isUnlocked = currentLevelId >= level.id;
+                      const isCurrent = currentLevelId === level.id;
+
+                      return (
+                        <div key={level.id} className={`vip-level-item ${isUnlocked ? "" : "locked"} ${isCurrent ? "current" : ""}`}>
+                          <div className="vip-level-info">
+                            <h4>{level.level_name}</h4>
+                            <p>Wager: ৳ {Number(level.required_wager).toLocaleString()}</p>
+                          </div>
+                          <div>
+                            {isClaimed ? (
+                              <span className="text-[11px] text-[#00E701] font-bold">Claimed</span>
+                            ) : isUnlocked ? (
+                              <button onClick={() => handleClaimLevelUp(level.id)} className="vip-btn-3d" disabled={submitting}>
+                                Claim ৳{level.bonus_amount}
+                              </button>
+                            ) : (
+                              <span className="text-[12px] text-[#f58220] font-bold">
+                                ৳ {Number(level.bonus_amount).toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+      </main>
+
+      <BottomNav />
+    </div>
+  );
+}
