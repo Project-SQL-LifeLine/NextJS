@@ -1,5 +1,4 @@
 .vip-page {
-  /* tips.css থেকে নেওয়া কালার ভেরিয়েবল */
   --bg-primary: #18221E;
   --bg-card: #1B2A23;
   --bg-input: #111815;
@@ -9,7 +8,6 @@
   --color-primary: #00E701;
   --color-danger: #ff4d4d;
 
-  /* আগের ভেরিয়েবলগুলো (কম্প্যাটিবিলিটির জন্য) */
   --bg-main: var(--bg-primary);
   --border-col: var(--border-color);
   --text-main: var(--text-primary);
@@ -154,7 +152,7 @@
 }
 
 /* =========================================
-   Settings পেজের মতো বাটন ডিজাইন (Solid Green + White Border)
+   Transfer & Level Claim বাটন (বর্ডার ১ পিক্সেল)
    ========================================= */
 .vip-btn-3d {
   display: flex;
@@ -166,9 +164,9 @@
   font-weight: 800;
   color: #FFFFFF;
   cursor: pointer;
-  border: 2px solid #FFFFFF; /* সাদা বর্ডার */
+  border: 1px solid #FFFFFF; /* বর্ডার ১ পিক্সেল করা হলো */
   border-radius: 50px;
-  background: #184f35; /* সলিড সবুজ ব্যাকগ্রাউন্ড */
+  background: #184f35;
   transition: all 0.1s ease;
   white-space: nowrap;
 }
@@ -328,7 +326,7 @@
   margin-top: auto;
 }
 
-/* Claim Button (Settings Page Style) */
+/* Claim Button (বর্ডার ১ পিক্সেল) */
 .vip-new-claim-btn {
   width: 100%;
   padding: 8px 0;
@@ -336,7 +334,7 @@
   font-weight: 800;
   color: #FFFFFF;
   cursor: pointer;
-  border: 2px solid #FFFFFF;
+  border: 1px solid #FFFFFF; /* বর্ডার ১ পিক্সেল করা হলো */
   border-radius: 50px;
   background: #184f35;
   transition: all 0.1s ease;
