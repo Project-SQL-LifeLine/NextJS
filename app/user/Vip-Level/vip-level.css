@@ -1,4 +1,5 @@
 .vip-page {
+  /* tips.css থেকে নেওয়া কালার ভেরিয়েবল */
   --bg-primary: #18221E;
   --bg-card: #1B2A23;
   --bg-input: #111815;
@@ -7,9 +8,18 @@
   --text-secondary: #A0AAB2;
   --color-primary: #00E701;
   --color-danger: #ff4d4d;
-  --orange: #f58220;
 
-  background-color: var(--bg-primary);
+  /* আগের ভেরিয়েবলগুলো (কম্প্যাটিবিলিটির জন্য) */
+  --bg-main: var(--bg-primary);
+  --border-col: var(--border-color);
+  --text-main: var(--text-primary);
+  --text-muted: var(--text-secondary);
+  --primary: var(--color-primary);
+  --primary-dark: #117934;
+  --orange: #f58220;
+  --danger: var(--color-danger);
+
+  background-color: var(--bg-main);
   min-height: 100vh;
   width: 100%;
   font-family: inherit;
@@ -24,7 +34,7 @@
 .vip-title {
   font-size: 16px;
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--text-main);
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
@@ -59,7 +69,7 @@
   z-index: 1;
   font-size: 24px;
   font-weight: 800;
-  color: var(--text-primary);
+  color: #FFFFFF;
   text-align: center;
   margin-bottom: 4px;
 }
@@ -68,7 +78,7 @@
   position: relative;
   z-index: 1;
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -86,7 +96,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin-bottom: 6px;
 }
 
@@ -96,7 +106,7 @@
   background: rgba(0,0,0,0.5);
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 .vip-progress-bar-fill {
@@ -109,9 +119,9 @@
 /* বোনাস কার্ড */
 .vip-bonus-card {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 20px;
+  border: 1px solid var(--border-col);
+  border-radius: 12px;
+  padding: 16px;
   margin-bottom: 20px;
 }
 
@@ -124,12 +134,12 @@
 
 .vip-bonus-row span {
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .vip-bonus-row strong {
   font-size: 18px;
-  color: var(--color-primary);
+  color: var(--primary);
   font-weight: 800;
 }
 
@@ -141,61 +151,52 @@
 
 .vip-transfer-input {
   flex: 1;
-  background: var(--bg-input);
-  border: 1px solid var(--border-color);
-  padding: 12px 14px;
-  border-radius: 10px;
-  color: var(--text-primary);
+  background: var(--bg-input); /* tips.css কালার */
+  border: 1px solid var(--border-col);
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #FFF;
   font-size: 11px;
   outline: none;
-  transition: border-color 0.2s;
 }
 
-.vip-transfer-input:focus {
-  border-color: var(--color-primary);
-}
-
-/* ৩ডি বাটন স্টাইল (Transfer & Claim - tips.css থেকে নেওয়া) */
+/* ৩ডি বাটন স্টাইল (Transfer & Claim) */
 .vip-btn-3d {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(90deg, #34f05f 0%, #1a9e4c 100%);
-  border: 2px solid #117934;
-  border-radius: 50px;
+  background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
+  border: 1px solid #117934;
+  border-radius: 8px;
   color: #FFFFFF;
   font-weight: 800;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   cursor: pointer;
   transition: all 0.1s ease;
   box-shadow: 
-    inset 0 3px 5px rgba(255, 255, 255, 0.5),
-    inset 0 -4px 6px rgba(0, 0, 0, 0.2),
-    0 6px 12px rgba(0, 0, 0, 0.3);
+    inset 0 2px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -3px 5px rgba(0, 0, 0, 0.2),
+    0 4px 0 #117934,
+    0 6px 10px rgba(0, 0, 0, 0.3);
   padding: 10px 16px;
   font-size: 11px;
 }
 
-.vip-btn-3d:hover:not(:disabled) {
-  filter: brightness(1.1);
-}
-
 .vip-btn-3d:active:not(:disabled) {
-  transform: translateY(2px);
+  transform: translateY(3px);
   box-shadow: 
-    inset 0 2px 4px rgba(255, 255, 255, 0.4),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
-    0 3px 6px rgba(0, 0, 0, 0.3);
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    0 1px 0 #117934,
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .vip-btn-3d:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: translateY(2px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  background: #2B4236;
-  border-color: #18221E;
-  color: #A0AAB2;
+  box-shadow: none;
+  background: var(--border-col); /* tips.css কালার */
+  border-color: var(--border-col);
+  color: var(--text-muted);
 }
 
 /* Accordion List */
@@ -207,8 +208,8 @@
 
 .vip-tier-group {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border: 1px solid var(--border-col);
+  border-radius: 12px;
   overflow: hidden;
 }
 
@@ -219,7 +220,7 @@
   align-items: center;
   padding: 14px 16px;
   background: transparent;
-  color: var(--text-primary);
+  color: #FFFFFF;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -238,9 +239,9 @@
 }
 
 .vip-level-item {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-col);
+  border-radius: 10px;
   padding: 12px 14px;
   display: flex;
   justify-content: space-between;
@@ -252,24 +253,24 @@
 }
 
 .vip-level-item.current {
-  border-color: var(--color-primary);
+  border-color: var(--primary);
   background: rgba(0, 231, 1, 0.05);
 }
 
 .vip-level-info h4 {
   margin: 0 0 4px;
   font-size: 12px;
-  color: var(--text-primary);
+  color: #FFF;
 }
 
 .vip-level-info p {
   margin: 0;
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 /* =========================================
-   নতুন ৪টি বোনাস কার্ডের গ্রিড (থিমের সাথে মিলিয়ে)
+   নতুন ৪টি বোনাস কার্ডের গ্রিড (tips.css কালার অনুযায়ী)
    ========================================= */
 .vip-grid-buttons {
   display: grid;
@@ -279,9 +280,9 @@
 }
 
 .vip-new-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
+  background: var(--bg-card); /* tips.css কালার ব্যবহার করা হলো */
+  border: 1px solid var(--border-color); /* tips.css কালার ব্যবহার করা হলো */
+  border-radius: 12px;
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -298,15 +299,15 @@
 }
 
 .vip-card-top-text {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: #E2E8F0;
 }
 
 .vip-top-icon {
   width: 18px;
   height: 18px;
-  color: #FFFFFF; /* আইকন সাদা করা হলো */
+  color: #FFFFFF;
 }
 
 .vip-card-center-icon {
@@ -316,9 +317,9 @@
 }
 
 .vip-new-card-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #FFFFFF;
   margin-bottom: 16px;
 }
 
@@ -332,49 +333,37 @@
 
 .vip-new-claim-btn {
   width: 100%;
-  background: linear-gradient(90deg, #34f05f 0%, #1a9e4c 100%);
-  border: 2px solid #117934;
-  border-radius: 50px;
+  background: linear-gradient(180deg, #34f05f 0%, #1a9e4c 100%);
+  border: 1px solid #117934;
+  border-radius: 8px;
   color: #FFFFFF;
-  font-weight: 800;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  font-size: 11px;
+  font-weight: 700;
+  font-size: 12px;
   padding: 10px 0;
   cursor: pointer;
-  box-shadow: 
-    inset 0 2px 4px rgba(255, 255, 255, 0.5),
-    inset 0 -3px 5px rgba(0, 0, 0, 0.2),
-    0 4px 0 #117934,
-    0 6px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 2px 0 #117934;
   transition: all 0.1s ease;
   text-align: center;
 }
 
 .vip-new-claim-btn:active {
-  transform: translateY(3px);
-  box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.4),
-    0 1px 0 #117934,
-    0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 0px 0 #117934;
 }
 
 .vip-new-claim-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
-  box-shadow: none;
-  background: #2B4236;
-  border-color: #18221E;
-  color: var(--text-secondary);
 }
 
 .vip-new-timer {
   width: 100%;
-  background: var(--bg-input);
+  background: var(--bg-input); /* tips.css কালার */
   border: 1px solid var(--border-color);
-  border-radius: 50px;
-  color: var(--orange);
-  font-weight: 700;
-  font-size: 12px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 13px;
   padding: 10px 0;
   text-align: center;
   font-family: monospace;
