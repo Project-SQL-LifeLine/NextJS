@@ -17,13 +17,11 @@ export default function TransactionsActivityPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // ডাটা স্টেট
   const [transactions, setTransactions] = useState<any[]>([]);
   const [totalDeposit, setTotalDeposit] = useState(0);
   const [totalWithdraw, setTotalWithdraw] = useState(0);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
-  // ফিল্টার স্টেট
   const [filterType, setFilterType] = useState("all"); 
   const [selectedDate, setSelectedDate] = useState("");
 
@@ -38,7 +36,6 @@ export default function TransactionsActivityPage() {
 
       setIsLoggedIn(true);
 
-      // ১. প্রোফাইল ডাটা
       const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
@@ -46,14 +43,12 @@ export default function TransactionsActivityPage() {
         .single();
       if (profileData) setProfile(profileData);
 
-      // ২. পেমেন্ট মেথড ডাটা
       const { data: methodsData } = await supabase
         .from("control_payment_method")
         .select("method_code, method_name, method_logo_url");
       
       if (methodsData) setPaymentMethods(methodsData);
 
-      // ৩. ট্রানজেকশন ডাটা
       const { data: txData, error } = await supabase
         .from("user_deposit_transaction")
         .select("*")
@@ -190,7 +185,6 @@ export default function TransactionsActivityPage() {
             filteredTransactions.map((tx) => {
               const isWithdraw = tx.type === "withdrawal" || tx.type === "withdraw";
               
-              // স্মার্ট লোগো ম্যাচিং
               const matchedMethod = paymentMethods.find(m => {
                 const dbCode = (m.method_code || "").toLowerCase();
                 const dbName = (m.method_name || "").toLowerCase();
