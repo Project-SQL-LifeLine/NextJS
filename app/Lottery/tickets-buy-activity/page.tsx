@@ -12,6 +12,9 @@ function TicketBuyContent() {
   const searchParams = useSearchParams();
   const { t } = useLanguage();
 
+  // গিটহাব পেজেসের জন্য Base Path
+  const basePath = process.env.NODE_ENV === "production" ? "/NextJS" : "";
+
   const ticketPrice = Number(searchParams.get("price")) || 50;
 
   const [profile, setProfile] = useState<any>(null);
@@ -105,8 +108,19 @@ function TicketBuyContent() {
 
       <main className="ticket-buy-main">
         
-        {/* টিকিট প্রিভিউ কার্ড (ব্যাকগ্রাউন্ড ইমেজ) */}
+        {/* টিকিট প্রিভিউ কার্ড */}
         <div className="ticket-preview-card">
+          {/* ব্যাকগ্রাউন্ড ইমেজ (basePath সহ) */}
+          <img 
+            src={`${basePath}/ticket-bg.png`} 
+            alt="Ticket Background" 
+            className="ticket-bg-img"
+            onError={(e) => {
+              // ইমেজ লোড না হলে যাতে এরর না দেখায়
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+
           {/* বাম দিক */}
           <div className="ticket-left">
             <h2>LUCKY<br/>TICKET</h2>
