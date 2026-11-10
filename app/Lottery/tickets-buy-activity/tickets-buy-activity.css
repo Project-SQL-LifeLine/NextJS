@@ -24,33 +24,64 @@
 }
 
 /* =========================================
-   1. Ticket Preview Card
+   1. Premium CSS-Based Ticket Design (No Image)
    ========================================= */
 .ticket-preview-card {
+  background: linear-gradient(135deg, #9b00d3 0%, #6a11cb 100%); /* পার্পল গ্রেডিয়েন্ট */
   border-radius: 12px;
+  display: flex;
   position: relative;
   overflow: hidden;
   aspect-ratio: 2 / 1; 
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 25px rgba(106, 17, 203, 0.4);
   min-height: 180px;
-  background-color: #9b00d3; 
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
-.ticket-bg-img {
+/* টিকিটের দুইপাশে পাঞ্চ হোল (ছেঁড়া ইফেক্ট) */
+.ticket-preview-card::before, 
+.ticket-preview-card::after {
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: fill; 
-  z-index: 0;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  background-color: var(--bg-main); /* পেজের ব্যাকগ্রাউন্ড কালার */
+  border-radius: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
 }
+.ticket-preview-card::before { left: -12px; }
+.ticket-preview-card::after { right: -12px; }
 
+/* বাম দিকের অংশ */
 .ticket-left {
-  position: absolute;
-  bottom: 15px;
-  left: 20px;
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
   z-index: 10;
+}
+
+.ticket-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.1;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.ticket-subtitle {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 700;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .ticket-price-tag {
@@ -61,29 +92,39 @@
   border-radius: 20px;
   font-size: 16px;
   font-weight: 900;
+  margin-top: 16px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* মাঝখানের ড্যাশ লাইন */
+.ticket-divider {
+  width: 1px;
+  border-left: 2px dashed rgba(255, 255, 255, 0.3);
+  margin: 15px 0;
+  z-index: 10;
 }
 
 /* ডান দিকের অংশ (শুধু বারকোড) */
 .ticket-right {
-  position: absolute;
-  right: 15px; 
-  top: 50%;
-  transform: translateY(-50%); 
+  flex: 0.8;
+  padding: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(0, 0, 0, 0.15); /* হালকা কালো শেড */
   z-index: 10;
 }
 
-/* সাদা বক্স ছাড়া ভার্টিকাল বারকোড */
+/* ট্রান্সপারেন্ট ভার্টিকাল বারকোড */
 .barcode-vertical-wrapper {
-  width: 40px; 
+  width: 38px; 
   height: 120px; 
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent; /* সাদা বক্স সরিয়ে ট্রান্সপারেন্ট করা হলো */
+  background: #FFFFFF; /* বারকোডের পেছনে সাদা বক্স */
+  border-radius: 4px;
+  padding: 2px;
 }
 
 .barcode-vertical-wrapper img {
@@ -169,53 +210,7 @@
 }
 
 /* =========================================
-   3. Payment Methods
-   ========================================= */
-.payment-section h3 {
-  font-size: 12px;
-  color: var(--text-main);
-  margin-bottom: 12px;
-  font-weight: 700;
-}
-
-.payment-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.payment-option {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.payment-option.active {
-  border-color: var(--gold);
-  background: rgba(245, 176, 65, 0.05);
-  box-shadow: 0 0 8px rgba(245, 176, 65, 0.15);
-}
-
-.payment-option img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-}
-
-.payment-option span {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-/* =========================================
-   4. Submit Button
+   3. Submit Button
    ========================================= */
 .submit-btn-wrapper {
   position: fixed;
@@ -250,8 +245,17 @@
   color: var(--text-muted);
 }
 
+/* Error & Success Messages */
 .error-msg {
   color: #ff4d4d;
+  font-size: 11px;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.success-msg {
+  color: #00E701;
   font-size: 11px;
   text-align: center;
   margin-top: 10px;
