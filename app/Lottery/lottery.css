@@ -345,3 +345,53 @@
 .payment-btn:hover {
   border-color: var(--gold);
 }
+
+
+/* =========================================
+   5. Lottery Banner Slider
+   ========================================= */
+.lottery-banner-slider {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none; /* Firefox */
+  padding-bottom: 4px;
+}
+
+.lottery-banner-slider::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.lottery-banner-card {
+  flex: 0 0 100%; /* একসাথে একটি করে ব্যানার দেখাবে */
+  scroll-snap-align: start;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.lottery-banner-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.banner-notice {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+  color: #FFFFFF;
+  padding: 20px 12px 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
