@@ -12,9 +12,7 @@ function TicketBuyContent() {
   const searchParams = useSearchParams();
   const { t } = useLanguage();
 
-  // গিটহাব পেজেসের জন্য Base Path
   const basePath = process.env.NODE_ENV === "production" ? "/NextJS" : "";
-
   const ticketPrice = Number(searchParams.get("price")) || 50;
 
   const [profile, setProfile] = useState<any>(null);
@@ -120,17 +118,17 @@ function TicketBuyContent() {
             }}
           />
 
-          {/* বাম দিক (শুধু প্রাইস ট্যাগ থাকবে) */}
+          {/* বাম দিক (প্রাইস ট্যাগ) */}
           <div className="ticket-left">
             <div className="ticket-price-tag">৳ {ticketPrice}</div>
           </div>
 
-          {/* ডান দিক (বারকোড ও নাম্বার) */}
+          {/* ডান দিক (নাম্বার ও ভার্টিকাল বারকোড) */}
           <div className="ticket-right">
             <div className="ticket-number-display">
-              {ticketNumber || "0000 0000 0000"}
+              {ticketNumber || "000000000000"}
             </div>
-            <div className="barcode-container">
+            <div className="barcode-vertical-wrapper">
               <img 
                 src={getBarcodeUrl(ticketNumber)} 
                 alt="Ticket Barcode" 
