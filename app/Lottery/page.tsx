@@ -14,7 +14,6 @@ export default function LotteryHomePage() {
   
   const [profile, setProfile] = useState<any>(null);
   const [banners, setBanners] = useState<any[]>([]);
-  const [selectedTicket, setSelectedTicket] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState({ hours: "00", minutes: "00", seconds: "00" });
 
   // ১. ডাটা লোড (প্রোফাইল এবং লটারি ব্যানার)
@@ -26,12 +25,12 @@ export default function LotteryHomePage() {
         if (data) setProfile(data);
       }
 
-      // লটারি ব্যানার ফেচ করা (এখানে serial = 10 ধরা হয়েছে, আপনি আপনার ইচ্ছেমতো নম্বর দিতে পারেন)
+      // লটারি ব্যানার ফেচ করা (serial = 10)
       const { data: bannerData } = await supabase
         .from("home_banners")
         .select("*")
         .eq("is_active", true)
-        .eq("serial", 10) // <--- লটারির জন্য নির্দিষ্ট সিরিয়াল নম্বর
+        .eq("serial", 10) 
         .order("created_at", { ascending: false });
 
       if (bannerData) setBanners(bannerData);
@@ -100,7 +99,7 @@ export default function LotteryHomePage() {
           </div>
         </div>
 
-        {/* ২. লটারি ব্যানার স্লাইডার (নতুন যোগ করা হয়েছে) */}
+        {/* ২. লটারি ব্যানার স্লাইডার */}
         {banners.length > 0 && (
           <div className="lottery-banner-slider">
             {banners.map((banner) => (
@@ -127,7 +126,12 @@ export default function LotteryHomePage() {
           <h2 className="section-title">{t("Buy Lottery Tickets", "লটারি টিকিট কিনুন")}</h2>
           <div className="ticket-grid">
             {ticketTiers.map((price) => (
-              <div key={price} className={`ticket-card tier-${price}`} onClick={() => setSelectedTicket(price)}>
+              <div 
+                key={price} 
+                className={`ticket-card tier-${price}`} 
+                // এখানে ক্লিক করলেই দামসহ টিকিট কেনার পেজে চলে যাবে
+                onClick={() => router.push(`/Lottery/tickets-buy-activity?price=${price}`)}
+              >
                 <div className="ticket-price">৳ {price}</div>
                 <div className="ticket-label">{t("Per Ticket", "প্রতি টিকিট")}</div>
                 <button className="buy-btn">{t("Play Now", "কিনুন")}</button>
@@ -162,33 +166,6 @@ export default function LotteryHomePage() {
       </main>
 
       <LotteryFooter />
-
-      {/* টিকিট কেনার পপ-আপ মডাল */}
-      {selectedTicket && (
-        <div className="modal-overlay" onClick={() => setSelectedTicket(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{t("Select Payment Method", "পেমেন্ট মেথড সিলেক্ট করুন")}</h3>
-              <button className="close-btn" onClick={() => setSelectedTicket(null)}>&times;</button>
-            </div>
-            
-            <p className="text-[11px] text-[#A0ADB0] mb-4 text-center">
-              {t(`Pay ৳${selectedTicket} to buy a ticket`, `টিকিট কিনতে ৳${selectedTicket} পেমেন্ট করুন`)}
-            </p>
-
-            <div className="payment-method-list">
-              <button className="payment-btn">
-                <img src="https://i.ibb.co/ynRH1K3z/file-00000000.png" alt="Bkash" className="w-8 h-8 object-contain" />
-                {t("Bkash (Manual)", "বিকাশ (ম্যানুয়াল)")}
-              </button>
-              <button className="payment-btn">
-                <img src="https://i.ibb.co/VcHQQJFT/file-00000000.png" alt="Nagad" className="w-8 h-8 object-contain" />
-                {t("Nagad (Manual)", "নগদ (ম্যানুয়াল)")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
