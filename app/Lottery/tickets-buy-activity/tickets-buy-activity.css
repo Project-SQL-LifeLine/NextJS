@@ -24,92 +24,89 @@
 }
 
 /* =========================================
-   1. Ticket Preview Card
+   1. Ticket Preview Card (Vertical Barcode Fix)
    ========================================= */
 .ticket-preview-card {
   border-radius: 12px;
-  display: flex;
-  position: relative;
+  position: relative; /* পজিশনিং ঠিক করার জন্য */
   overflow: hidden;
-  /* ইমেজের অনুপাত অনুযায়ী aspect-ratio সেট করুন (আপনার ছবি 2:1 হলে 2/1 দিবেন) */
   aspect-ratio: 2 / 1; 
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-  min-height: 170px;
-  background-color: #9b00d3; /* ছবি লোড না হলে ব্যাকগ্রাউন্ড কালার */
+  min-height: 180px;
+  background-color: #9b00d3; 
 }
 
-/* ব্যাকগ্রাউন্ড ইমেজ (যাতে পুরো কার্ডে ফিট হয়) */
 .ticket-bg-img {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: fill; /* ছবি কার্ডের সাইজে একদম পারফেক্টলি বসবে */
+  object-fit: fill; 
   z-index: 0;
 }
 
-/* বাম দিকের অংশ */
+/* বাম দিকের অংশ (শুধু প্রাইস ট্যাগ) */
 .ticket-left {
-  flex: 1;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end; /* নিচের দিকে অ্যালাইন করা হলো */
-  align-items: flex-start;
-  position: relative;
+  position: absolute;
+  bottom: 15px; /* নিচে বাম দিকে ফিক্সড */
+  left: 20px;
   z-index: 10;
 }
 
 .ticket-price-tag {
   display: inline-block;
-  background: #FFC107; /* হলুদ ব্যাকগ্রাউন্ড */
+  background: #FFC107;
   color: #000;
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 16px;
   font-weight: 900;
-  margin-bottom: 10px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* ডান দিকের অংশ (বারকোড) */
+/* ডান দিকের অংশ (নাম্বার এবং ভার্টিকাল বারকোড) */
 .ticket-right {
-  flex: 1.2;
-  padding: 16px;
+  position: absolute;
+  right: 15px; /* ডান দিক থেকে দূরত্ব */
+  top: 50%;
+  transform: translateY(-50%); /* মাঝখানে রাখার জন্য */
   display: flex;
   flex-direction: column;
-  justify-content: center; /* মাঝখানে অ্যালাইন করা হলো */
   align-items: center;
-  position: relative;
+  justify-content: center;
+  gap: 12px;
   z-index: 10;
 }
 
 .ticket-number-display {
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 800;
   color: #FFFFFF;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   font-family: monospace;
-  margin-bottom: 8px;
   text-align: center;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8); /* লেখা যাতে ছবির ওপর ফুটে ওঠে */
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
 
-.barcode-container {
-  width: 100%;
-  max-width: 160px; /* বারকোডের সাইজ */
-  background: #FFFFFF;
-  padding: 4px;
-  border-radius: 4px;
+/* ভার্টিকাল বারকোড কন্টেইনার */
+.barcode-vertical-wrapper {
+  width: 60px; /* কন্টেইনারের প্রস্থ */
+  height: 100px; /* কন্টেইনারের উচ্চতা */
   display: flex;
+  align-items: center;
   justify-content: center;
+  background: #FFFFFF;
+  border-radius: 6px;
+  padding: 4px;
 }
 
-.barcode-container img {
-  width: 100%;
-  height: 45px;
+.barcode-vertical-wrapper img {
+  /* বারকোডকে ৯০ ডিগ্রি ঘোরানো হলো */
+  width: 90px; /* ঘোরানোর পর যাতে ফিট হয় */
+  height: 40px;
   object-fit: contain;
+  transform: rotate(90deg); 
 }
 
 /* =========================================
