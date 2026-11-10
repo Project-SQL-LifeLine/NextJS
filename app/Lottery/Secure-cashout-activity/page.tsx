@@ -58,6 +58,19 @@ export default function SecureCashoutActivityPage() {
     }
   };
 
+  // ==========================================
+  // ফি ক্যালকুলেশন লজিক
+  // ==========================================
+  const baseFee = Number(settings?.withdrawal_fee_amount) || 200;
+  const mgmtPct = Number(settings?.management_fee_pct) || 0;
+  const srvcPct = Number(settings?.service_fee_pct) || 0;
+  const netPct = Number(settings?.network_fee_pct) || 0;
+  const vatPct = Number(settings?.vat_pct) || 0;
+  const gstPct = Number(settings?.gst_pct) || 0;
+
+  const totalPercentage = mgmtPct + srvcPct + netPct + vatPct + gstPct;
+  const totalFeeAmount = baseFee + (baseFee * totalPercentage) / 100;
+
   // ফি সাবমিট করার ফাংশন
   const handlePayFee = async () => {
     if (feeTrxId.length < 6) {
@@ -75,7 +88,7 @@ export default function SecureCashoutActivityPage() {
         user_id: profile.id,
         ticket_dp_track_id: trackId,
         transaction_type: "fee_payment",
-        amount: settings?.withdrawal_fee_amount || 200,
+        amount: totalFeeAmount, // এখানে মোট ফি সেভ হচ্ছে
         trx_id: feeTrxId.toUpperCase(),
         status: "pending",
       });
@@ -175,31 +188,47 @@ export default function SecureCashoutActivityPage() {
               </div>
               
               <div className="fee-amount-text">
-                {t("Activation Fee", "অ্যাক্টিভেশন ফি")}: <span>৳ {settings?.withdrawal_fee_amount || 200}</span>
+                {t("Base Fee", "বেস ফি")}: <span>৳ {baseFee}</span>
               </div>
 
-              {/* নতুন যোগ করা ফি ব্রেকডাউন */}
+              {/* ফি ব্রেকডাউন */}
               <div className="fee-breakdown">
-                <div className="fee-row">
-                  <span>{t("Management Fee", "ম্যানেজমেন্ট ফি")}:</span>
-                  <span>{settings?.management_fee_pct || 0}%</span>
-                </div>
-                <div className="fee-row">
-                  <span>{t("Service Fee", "সার্ভিস ফি")}:</span>
-                  <span>{settings?.service_fee_pct || 0}%</span>
-                </div>
-                <div className="fee-row">
-                  <span>{t("Network Fee", "নেটওয়ার্ক ফি")}:</span>
-                  <span>{settings?.network_fee_pct || 0}%</span>
-                </div>
-                <div className="fee-row">
-                  <span>{t("VAT", "ভ্যাট")}:</span>
-                  <span>{settings?.vat_pct || 0}%</span>
-                </div>
-                <div className="fee-row">
-                  <span>{t("GST", "জিএসটি")}:</span>
-                  <span>{settings?.gst_pct || 0}%</span>
-                </div>
+                {mgmtPct > 0 && (
+                  <div className="fee-row">
+                    <span>{t("Management Fee", "ম্যানেজমেন্ট ফি")} ({mgmtPct}%):</span>
+                    <span>৳ {((baseFee * mgmtPct) / 100).toFixed(2)}</span>
+                  </div>
+                )}
+                {srvcPct > 0 && (
+                  <div className="fee-row">
+                    <span>{t("Service Fee", "সার্ভিস ফি")} ({srvcPct}%):</span>
+                    <span>৳ {((baseFee * srvcPct) / 100).toFixed(2)}</span>
+                  </div>
+                )}
+                {netPct > 0 && (
+                  <div className="fee-row">
+                    <span>{t("Network Fee", "নেটওয়ার্ক ফি")} ({netPct}%):</span>
+                    <span>৳ {((baseFee * netPct) / 100).toFixed(2)}</span>
+                  </div>
+                )}
+                {vatPct > 0 && (
+                  <div className="fee-row">
+                    <span>{t("VAT", "ভ্যাট")} ({vatPct}%):</span>
+                    <span>৳ {((baseFee * vatPct) / 100).toFixed(2)}</span>
+                  </div>
+                )}
+                {gstPct > 0 && (
+                  <div className="fee-row">
+                    <span>{t("GST", "জিএসটি")} ({gstPct}%):</span>
+                    <span>৳ {((baseFee * gstPct) / 100).toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* মোট ফি (Total Fee) */}
+              <div className="total-fee-row">
+                <span>{t("Total Payable Fee", "মোট প্রদেয় ফি")}:</span>
+                <span className="total-fee-amount">৳ {totalFeeAmount.toFixed(2)}</span>
               </div>
 
               <p style={{fontSize: '11px', color: '#A0ADB0', marginTop: '12px', textAlign: 'center'}}>
@@ -296,7 +325,7 @@ export default function SecureCashoutActivityPage() {
             disabled={feeSubmitting || !feeTrxId}
             className="submit-btn"
           >
-            {feeSubmitting ? t("Processing...", "প্রসেসিং...") : t("Submit Fee Payment", "ফি পেমেন্ট সাবমিট করুন")}
+            {feeSubmitting ? t("Processing...", "প্রসেসিং...") : t(`Pay Fee (৳${totalFeeAmount.toFixed(0)})`, `ফি পরিশোধ করুন (৳${totalFeeAmount.toFixed(0)})`)}
           </button>
         ) : (
           <button 
