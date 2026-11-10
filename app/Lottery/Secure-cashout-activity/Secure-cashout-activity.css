@@ -243,3 +243,66 @@
 }
 .msg-box.error { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); }
 .msg-box.success { background: rgba(0, 231, 1, 0.1); color: #00E701; border: 1px solid rgba(0, 231, 1, 0.3); }
+
+
+/* লোডিং ও চেকলিস্টের জন্য নতুন স্টাইল */
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 16px;
+}
+.loader-shield {
+  width: 60px;
+  height: 60px;
+  color: #F5B041;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+.checklist-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 10px;
+}
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-main);
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.checklist-item.checked {
+  border-color: #00E701;
+  background: rgba(0, 231, 1, 0.05);
+}
+.checklist-box {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--text-muted);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00E701;
+  font-weight: bold;
+}
+.checklist-item.checked .checklist-box {
+  border-color: #00E701;
+}
+.checklist-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
