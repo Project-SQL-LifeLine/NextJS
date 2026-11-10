@@ -67,7 +67,7 @@
 /* ডান দিকের অংশ (শুধু বারকোড) */
 .ticket-right {
   position: absolute;
-  right: 12px; 
+  right: 15px; 
   top: 50%;
   transform: translateY(-50%); 
   display: flex;
@@ -76,24 +76,20 @@
   z-index: 10;
 }
 
-/* ভার্টিকাল বারকোড (সরু এবং লম্বা করা হয়েছে) */
+/* সাদা বক্স ছাড়া ভার্টিকাল বারকোড */
 .barcode-vertical-wrapper {
-  width: 45px; /* প্রস্থ কমিয়ে সরু করা হলো */
-  height: 130px; /* উচ্চতা বাড়িয়ে লম্বা করা হলো */
+  width: 40px; 
+  height: 120px; 
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #FFFFFF;
-  border-radius: 4px;
-  padding: 4px;
+  background: transparent; /* সাদা বক্স সরিয়ে ট্রান্সপারেন্ট করা হলো */
 }
 
 .barcode-vertical-wrapper img {
-  /* বারকোডকে ৯০ ডিগ্রি ঘোরানো হলো */
-  width: 120px; /* ঘোরানোর পর লম্বা হবে */
-  height: 30px; /* ঘোরানোর পর সরু হবে */
-  object-fit: contain;
-  transform: rotate(90deg); 
+  width: 100%;
+  height: 100%;
+  object-fit: fill; 
 }
 
 /* =========================================
@@ -120,10 +116,10 @@
   border-radius: 8px;
   padding: 14px 10px;
   color: var(--gold);
-  font-size: 18px; /* সাইজ কমিয়ে ফিট করা হয়েছে */
+  font-size: 18px; 
   font-weight: 800;
   text-align: center;
-  letter-spacing: 3px; /* স্পেসিং কমিয়ে ফিট করা হয়েছে */
+  letter-spacing: 3px; 
   outline: none;
   font-family: monospace;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -151,7 +147,6 @@
   align-items: center;
 }
 
-/* নতুন বাটন গ্রুপ (Random + Manual) */
 .button-group {
   display: flex;
   gap: 8px;
@@ -261,37 +256,4 @@
   text-align: center;
   margin-top: 10px;
   font-weight: bold;
-}
-
-
-/* ডান দিকের অংশ (শুধু বারকোড) */
-.ticket-right {
-  position: absolute;
-  right: 12px; 
-  top: 50%;
-  transform: translateY(-50%); 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
-/* ভার্টিকাল বারকোড (একদম সরু ও লম্বা করা হয়েছে) */
-.barcode-vertical-wrapper {
-  width: 22px; /* আগের ৪৫px থেকে কমিয়ে ২২px করা হলো */
-  height: 110px; /* উচ্চতা অপরিবর্তিত */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #FFFFFF;
-  border-radius: 2px;
-  padding: 1px; /* প্যাডিং কমিয়ে ১ পিক্সেল */
-  overflow: hidden;
-}
-
-.barcode-vertical-wrapper img {
-  width: 108px; /* ১১০ - ২ (প্যাডিং) */
-  height: 20px; /* ২২ - ২ (প্যাডিং) */
-  object-fit: fill; /* যাতে পুরো বক্স জুড়ে বারকোড থাকে */
-  transform: rotate(90deg); 
 }
