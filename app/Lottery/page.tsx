@@ -9,38 +9,33 @@ import "./lottery.css";
 
 export default function LotteryHomePage() {
   const { t } = useLanguage();
-  const [lotteryBalance, setLotteryBalance] = useState<number>(0);
+  const [profile, setProfile] = useState<any>(null);
   const [selectedTicket, setSelectedTicket] = useState<number | null>(null);
   
-  // কাউন্টডাউন টাইমার স্টেট
   const [timeLeft, setTimeLeft] = useState({ hours: "00", minutes: "00", seconds: "00" });
 
-  // ইউজারের লটারি ব্যালেন্স লোড করা
   useEffect(() => {
-    const fetchBalance = async () => {
+    const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await supabase.from("profiles").select("lottery_balance").eq("id", user.id).single();
-        if (data) setLotteryBalance(data.lottery_balance || 0);
+        const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+        if (data) setProfile(data);
       }
     };
-    fetchBalance();
+    fetchData();
   }, []);
 
-  // কাউন্টডাউন টাইমার লজিক (প্রতিদিন রাত ১২:৩০ মিনিট)
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
       const target = new Date();
-      target.setHours(0, 30, 0, 0); // রাত ১২:৩০
+      target.setHours(0, 30, 0, 0);
 
-      // যদি আজকের ১২:৩০ পার হয়ে যায়, তবে আগামীকালের ১২:৩০ সেট করবে
       if (now.getTime() > target.getTime()) {
         target.setDate(target.getDate() + 1);
       }
 
       const diff = target.getTime() - now.getTime();
-      
       const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
       const m = Math.floor((diff / 1000 / 60) % 60);
       const s = Math.floor((diff / 1000) % 60);
@@ -55,7 +50,6 @@ export default function LotteryHomePage() {
     return () => clearInterval(timer);
   }, []);
 
-  // ডেমো উইনার ডাটা (পরে ডাটাবেস থেকে আসবে)
   const mockWinners = [
     { id: "RA****99", amount: "৫০,০০০" },
     { id: "MD****11", amount: "১০,০০০" },
@@ -65,17 +59,14 @@ export default function LotteryHomePage() {
   const ticketTiers = [50, 100, 250, 500, 1000];
 
   return (
-    <div className="lottery-page">
-      <LotteryHeader />
+    <div className="lottery-page pb-20">
+      {/* হেডারে প্রোফাইল ডাটা পাঠানো হলো */}
+      <LotteryHeader userProfile={profile} />
 
       <main className="lottery-main">
-        
-        {/* ১. জ্যাকপট সেকশন */}
         <div className="jackpot-card">
           <div className="jackpot-title">{t("Today's Jackpot", "আজকের জ্যাকপট")}</div>
-          <div className="jackpot-amount">
-            ৳ ১,৫০,০০০
-          </div>
+          <div className="jackpot-amount">৳ ১,৫০,০০০</div>
           
           <div className="timer-container">
             <div className="timer-box">
@@ -93,18 +84,11 @@ export default function LotteryHomePage() {
           </div>
         </div>
 
-        {/* ২. ৫টি টিকিট */}
         <div>
-          <h2 className="section-title">
-            {t("Buy Lottery Tickets", "লটারি টিকিট কিনুন")}
-          </h2>
+          <h2 className="section-title">{t("Buy Lottery Tickets", "লটারি টিকিট কিনুন")}</h2>
           <div className="ticket-grid">
             {ticketTiers.map((price) => (
-              <div 
-                key={price} 
-                className={`ticket-card tier-${price}`}
-                onClick={() => setSelectedTicket(price)}
-              >
+              <div key={price} className={`ticket-card tier-${price}`} onClick={() => setSelectedTicket(price)}>
                 <div className="ticket-price">৳ {price}</div>
                 <div className="ticket-label">{t("Per Ticket", "প্রতি টিকিট")}</div>
                 <button className="buy-btn">{t("Play Now", "কিনুন")}</button>
@@ -113,18 +97,16 @@ export default function LotteryHomePage() {
           </div>
         </div>
 
-        {/* ৩. লটারি ওয়ালেট */}
         <div className="wallet-card">
           <div className="wallet-info">
             <h4>{t("Lottery Wallet Balance", "লটারি ওয়ালেট ব্যালেন্স")}</h4>
-            <div className="amount">৳ {lotteryBalance.toFixed(2)}</div>
+            <div className="amount">৳ {Number(profile?.lottery_balance || 0).toFixed(2)}</div>
           </div>
           <button className="withdraw-btn" onClick={() => window.location.href = '/Lottery/withdraw'}>
             {t("Withdraw", "উত্তোলন")}
           </button>
         </div>
 
-        {/* ৪. সাম্প্রতিক বিজয়ী */}
         <div>
           <h2 className="section-title">{t("Recent Winners", "সাম্প্রতিক বিজয়ী")}</h2>
           <div className="winners-list">
@@ -136,12 +118,10 @@ export default function LotteryHomePage() {
             ))}
           </div>
         </div>
-
       </main>
 
       <LotteryFooter />
 
-      {/* টিকেট কেনার পপ-আপ (মডাল) */}
       {selectedTicket && (
         <div className="modal-overlay" onClick={() => setSelectedTicket(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -155,7 +135,6 @@ export default function LotteryHomePage() {
             </p>
 
             <div className="payment-method-list">
-              {/* এখানে আপনার control_payment_method টেবিল থেকে ডাটা ম্যাপ হবে */}
               <button className="payment-btn">
                 <img src="https://i.ibb.co/ynRH1K3z/file-00000000.png" alt="Bkash" className="w-8 h-8 object-contain" />
                 {t("Bkash (Manual)", "বিকাশ (ম্যানুয়াল)")}
