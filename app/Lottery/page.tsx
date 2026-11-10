@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase/client";
 import { useLanguage } from "../../lib/LanguageContext";
 import LotteryHeader from "./Header/Header";
@@ -8,12 +9,15 @@ import LotteryFooter from "./Footer/Footer";
 import "./lottery.css";
 
 export default function LotteryHomePage() {
+  const router = useRouter();
   const { t } = useLanguage();
-  const [profile, setProfile] = useState<any>(null);
-  const [selectedTicket, setSelectedTicket] = useState<number | null>(null);
   
+  const [profile, setProfile] = useState<any>(null);
+  const [banners, setBanners] = useState<any[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState({ hours: "00", minutes: "00", seconds: "00" });
 
+  // ১. ডাটা লোড (প্রোফাইল এবং লটারি ব্যানার)
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -21,15 +25,26 @@ export default function LotteryHomePage() {
         const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
         if (data) setProfile(data);
       }
+
+      // লটারি ব্যানার ফেচ করা (এখানে serial = 10 ধরা হয়েছে, আপনি আপনার ইচ্ছেমতো নম্বর দিতে পারেন)
+      const { data: bannerData } = await supabase
+        .from("home_banners")
+        .select("*")
+        .eq("is_active", true)
+        .eq("serial", 10) // <--- লটারির জন্য নির্দিষ্ট সিরিয়াল নম্বর
+        .order("created_at", { ascending: false });
+
+      if (bannerData) setBanners(bannerData);
     };
     fetchData();
   }, []);
 
+  // ২. কাউন্টডাউন টাইমার লজিক
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
       const target = new Date();
-      target.setHours(0, 30, 0, 0);
+      target.setHours(0, 30, 0, 0); // রাত ১২:৩০
 
       if (now.getTime() > target.getTime()) {
         target.setDate(target.getDate() + 1);
@@ -60,10 +75,11 @@ export default function LotteryHomePage() {
 
   return (
     <div className="lottery-page pb-20">
-      {/* হেডারে প্রোফাইল ডাটা পাঠানো হলো */}
       <LotteryHeader userProfile={profile} />
 
       <main className="lottery-main">
+        
+        {/* ১. জ্যাকপট সেকশন */}
         <div className="jackpot-card">
           <div className="jackpot-title">{t("Today's Jackpot", "আজকের জ্যাকপট")}</div>
           <div className="jackpot-amount">৳ ১,৫০,০০০</div>
@@ -84,6 +100,29 @@ export default function LotteryHomePage() {
           </div>
         </div>
 
+        {/* ২. লটারি ব্যানার স্লাইডার (নতুন যোগ করা হয়েছে) */}
+        {banners.length > 0 && (
+          <div className="lottery-banner-slider">
+            {banners.map((banner) => (
+              <div 
+                key={banner.id} 
+                className="lottery-banner-card"
+                onClick={() => {
+                  if (banner.redirect_url) router.push(banner.redirect_url);
+                }}
+              >
+                <img src={banner.image_url} alt={banner.title || "Lottery Promo"} />
+                {banner.notice_text && (
+                  <div className="banner-notice">
+                    {banner.notice_text}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ৩. টিকিট সেকশন */}
         <div>
           <h2 className="section-title">{t("Buy Lottery Tickets", "লটারি টিকিট কিনুন")}</h2>
           <div className="ticket-grid">
@@ -97,16 +136,18 @@ export default function LotteryHomePage() {
           </div>
         </div>
 
+        {/* ৪. লটারি ওয়ালেট */}
         <div className="wallet-card">
           <div className="wallet-info">
             <h4>{t("Lottery Wallet Balance", "লটারি ওয়ালেট ব্যালেন্স")}</h4>
             <div className="amount">৳ {Number(profile?.lottery_balance || 0).toFixed(2)}</div>
           </div>
-          <button className="withdraw-btn" onClick={() => window.location.href = '/Lottery/withdraw'}>
+          <button className="withdraw-btn" onClick={() => router.push('/Lottery/withdraw')}>
             {t("Withdraw", "উত্তোলন")}
           </button>
         </div>
 
+        {/* ৫. সাম্প্রতিক বিজয়ী */}
         <div>
           <h2 className="section-title">{t("Recent Winners", "সাম্প্রতিক বিজয়ী")}</h2>
           <div className="winners-list">
@@ -122,6 +163,7 @@ export default function LotteryHomePage() {
 
       <LotteryFooter />
 
+      {/* টিকিট কেনার পপ-আপ মডাল */}
       {selectedTicket && (
         <div className="modal-overlay" onClick={() => setSelectedTicket(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
