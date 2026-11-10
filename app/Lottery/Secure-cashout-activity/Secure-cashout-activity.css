@@ -100,7 +100,7 @@
   color: var(--text-muted);
 }
 
-/* ফি পেমেন্ট বক্স (স্পেসিফিক নাম্বারের জন্য) */
+/* ফি পেমেন্ট বক্স */
 .fee-instruction-box {
   background: rgba(245, 176, 65, 0.1);
   border: 1px dashed var(--gold);
@@ -156,6 +156,29 @@
 
 .fee-amount-text span {
   color: #00E701;
+}
+
+/* ফি ব্রেকডাউন (নতুন স্টাইল) */
+.fee-breakdown {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fee-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.fee-row span:last-child {
+  color: #FFFFFF;
+  font-weight: 700;
 }
 
 /* সাবমিট বাটন */
