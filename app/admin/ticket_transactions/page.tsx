@@ -8,7 +8,7 @@ export default function AdminTicketTransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("pending"); // pending, approved, all
+  const [filterStatus, setFilterStatus] = useState("pending");
 
   useEffect(() => {
     fetchTransactions();
@@ -17,7 +17,6 @@ export default function AdminTicketTransactionsPage() {
   const fetchTransactions = async () => {
     setLoading(true);
     try {
-      // ticket_transactions টেবিল থেকে ডাটা আনা এবং profiles থেকে game_id জয়েন করা
       const { data, error } = await supabase
         .from("ticket_transactions")
         .select(`
@@ -35,22 +34,29 @@ export default function AdminTicketTransactionsPage() {
     }
   };
 
-  // অ্যাপ্রুভ করার ফাংশন (SQL RPC কল করবে)
-  const handleApprove = async (id: string) => {
+  // অ্যাপ্রুভ করার ফাংশন
+  const handleApprove = async (tx: any) => {
     if (!window.confirm("Are you sure you want to approve this transaction?")) return;
     
     try {
-      const { data, error } = await supabase.rpc("approve_lottery_transaction", {
-        p_tx_id: id,
-      });
-
-      if (error) throw error;
+      let response;
       
-      if (data.success) {
+      // ট্রানজেকশন টাইপ অনুযায়ী আলাদা ফাংশন কল হবে
+      if (tx.transaction_type === "fee_payment") {
+        // ফি পেমেন্টের জন্য approve_lottery_fee ফাংশন
+        response = await supabase.rpc("approve_lottery_fee", { p_tx_id: tx.id });
+      } else {
+        // অন্য সব (balance_reload) জন্য approve_lottery_transaction ফাংশন
+        response = await supabase.rpc("approve_lottery_transaction", { p_tx_id: tx.id });
+      }
+
+      if (response.error) throw response.error;
+      
+      if (response.data.success) {
         setMessage({ type: "success", text: "Transaction approved successfully!" });
         fetchTransactions(); // রিফ্রেশ
       } else {
-        setMessage({ type: "error", text: data.error });
+        setMessage({ type: "error", text: response.data.error });
       }
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
@@ -58,16 +64,23 @@ export default function AdminTicketTransactionsPage() {
   };
 
   // রিজেক্ট করার ফাংশন
-  const handleReject = async (id: string) => {
+  const handleReject = async (tx: any) => {
     if (!window.confirm("Are you sure you want to reject this transaction?")) return;
     
     try {
-      const { error } = await supabase
-        .from("ticket_transactions")
-        .update({ status: "rejected" })
-        .eq("id", id);
+      // যদি উইথড্র হয়, তবে reject_lottery_withdrawal কল করে টাকা ফেরত দিতে হবে
+      if (tx.transaction_type === "withdrawal") {
+        const response = await supabase.rpc("reject_lottery_withdrawal", { p_tx_id: tx.id });
+        if (response.error) throw response.error;
+      } else {
+        // সাধারণ রিজেক্ট
+        const { error } = await supabase
+          .from("ticket_transactions")
+          .update({ status: "rejected" })
+          .eq("id", tx.id);
+        if (error) throw error;
+      }
 
-      if (error) throw error;
       setMessage({ type: "success", text: "Transaction rejected." });
       fetchTransactions();
     } catch (err: any) {
@@ -87,6 +100,21 @@ export default function AdminTicketTransactionsPage() {
     return matchesSearch && matchesStatus;
   });
 
+  // ট্রানজেকশন টাইপের নাম ও কালার নির্ধারণের হেল্পার ফাংশন
+  const getTypeBadge = (type: string) => {
+    switch (type) {
+      case "balance_reload":
+        return <span className="px-2 py-1 rounded text-xs font-bold bg-blue-100 text-blue-700">Balance Reload</span>;
+      case "fee_payment":
+        return <span className="px-2 py-1 rounded text-xs font-bold bg-yellow-100 text-yellow-700">Fee Payment</span>;
+      case "withdrawal":
+        return <span className="px-2 py-1 rounded text-xs font-bold bg-red-100 text-red-700">Withdrawal</span>;
+      case "ticket_purchase":
+      default:
+        return <span className="px-2 py-1 rounded text-xs font-bold bg-purple-100 text-purple-700">Ticket Purchase</span>;
+    }
+  };
+
   if (loading) {
     return <div className="p-10 text-center text-gray-500">Loading Transactions...</div>;
   }
@@ -98,7 +126,7 @@ export default function AdminTicketTransactionsPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Ticket Transactions</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage reloads and ticket purchases.</p>
+          <p className="text-gray-500 text-sm mt-1">Manage reloads, fees, and ticket purchases.</p>
         </div>
         <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
           <input
@@ -144,7 +172,6 @@ export default function AdminTicketTransactionsPage() {
                 <th className="p-4 font-semibold">User (Game ID)</th>
                 <th className="p-4 font-semibold">Type</th>
                 <th className="p-4 font-semibold">Amount</th>
-                <th className="p-4 font-semibold">Method/Details</th>
                 <th className="p-4 font-semibold">TrxID / TrackID</th>
                 <th className="p-4 font-semibold">Status</th>
                 <th className="p-4 font-semibold text-right">Actions</th>
@@ -153,7 +180,7 @@ export default function AdminTicketTransactionsPage() {
             <tbody>
               {filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-gray-500">No transactions found.</td>
+                  <td colSpan={7} className="p-8 text-center text-gray-500">No transactions found.</td>
                 </tr>
               ) : (
                 filteredTransactions.map((tx) => (
@@ -165,17 +192,10 @@ export default function AdminTicketTransactionsPage() {
                       {tx.profiles?.game_id || "Unknown"}
                     </td>
                     <td className="p-4">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${
-                        tx.transaction_type === 'balance_reload' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-                      }`}>
-                        {tx.transaction_type === 'balance_reload' ? 'Balance Reload' : 'Ticket Purchase'}
-                      </span>
+                      {getTypeBadge(tx.transaction_type)}
                     </td>
                     <td className="p-4 font-bold text-green-600">
                       ৳{Number(tx.amount).toLocaleString()}
-                    </td>
-                    <td className="p-4 text-gray-700">
-                      {tx.bank_details?.method || "N/A"}
                     </td>
                     <td className="p-4 text-gray-500 font-mono text-xs">
                       {tx.trx_id ? `Trx: ${tx.trx_id}` : ""} <br/>
@@ -194,14 +214,14 @@ export default function AdminTicketTransactionsPage() {
                       {tx.status === "pending" && (
                         <>
                           <button 
-                            onClick={() => handleApprove(tx.id)}
+                            onClick={() => handleApprove(tx)}
                             className="px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md text-xs font-bold transition-colors"
                           >
                             Approve
                           </button>
                           <button 
-                            onClick={() => handleReject(tx.id)}
-                            className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-xs font-bold transition-colors"
+                            onClick={() => handleReject(tx)}
+                            className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md font-bold transition-colors text-xs"
                           >
                             Reject
                           </button>
