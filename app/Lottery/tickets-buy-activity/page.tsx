@@ -15,7 +15,7 @@ function TicketBuyContent() {
   const basePath = process.env.NODE_ENV === "production" ? "/NextJS" : "";
   const ticketPrice = Number(searchParams.get("price")) || 50;
 
-  const inputRef = useRef<HTMLInputElement>(null); // ম্যানুয়াল ফোকাসের জন্য
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState<any>(null);
   const [ticketNumber, setTicketNumber] = useState("");
@@ -62,12 +62,11 @@ function TicketBuyContent() {
     setError("");
   };
 
-  // ম্যানুয়ালি নাম্বার দেওয়ার ফাংশন
   const handleManualGenerate = () => {
     setTicketNumber("");
     setError("");
     if (inputRef.current) {
-      inputRef.current.focus(); // ইনপুট বক্সে কার্সর বসবে
+      inputRef.current.focus();
     }
   };
 
@@ -106,9 +105,10 @@ function TicketBuyContent() {
     }
   };
 
+  // নতুন API যা সরাসরি ট্রান্সপারেন্ট ব্যাকগ্রাউন্ডে ভার্টিকাল বারকোড তৈরি করে
   const getBarcodeUrl = (num: string) => {
     if (!num) num = "000000000000";
-    return `https://barcode.tec-it.com/barcode.ashx?data=${num}&code=Code128&translate-esc=on&dpi=96`;
+    return `https://bwipjs-api.metafloor.com/?bcid=code128&text=${num}&scale=2&rotate=L&includetext=false`;
   };
 
   return (
@@ -128,12 +128,11 @@ function TicketBuyContent() {
             }}
           />
 
-          {/* বাম দিক (প্রাইস ট্যাগ) */}
           <div className="ticket-left">
             <div className="ticket-price-tag">৳ {ticketPrice}</div>
           </div>
 
-          {/* ডান দিক (শুধু বারকোড) */}
+          {/* ডান দিক (শুধু ট্রান্সপারেন্ট ভার্টিকাল বারকোড) */}
           <div className="ticket-right">
             <div className="barcode-vertical-wrapper">
               <img 
@@ -163,7 +162,6 @@ function TicketBuyContent() {
           <div className="helper-text">
             <span>{ticketNumber.length}/12 {t("digits", "ডিজিট")}</span>
             
-            {/* নতুন বাটন গ্রুপ */}
             <div className="button-group">
               <button onClick={generateRandom} className="action-btn">
                 {t("Random", "র‍্যান্ডম")}
