@@ -11,9 +11,6 @@ export default function SecurePaymentPage() {
   const router = useRouter();
   const { t } = useLanguage();
 
-  // অ্যাডমিনের পেমেন্ট নাম্বার এখানে দিন
-  const ADMIN_PAYMENT_NUMBER = "01700000000"; 
-
   const [profile, setProfile] = useState<any>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
@@ -24,6 +21,7 @@ export default function SecurePaymentPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const presetAmounts = [100, 500, 1000, 2000, 5000];
 
@@ -35,6 +33,7 @@ export default function SecurePaymentPage() {
         if (profileData) setProfile(profileData);
       }
 
+      // এখানে * দিয়ে সব কলাম নেওয়া হচ্ছে, যাতে admin_payment_number ও চলে আসে
       const { data: methodsData } = await supabase
         .from("control_payment_method")
         .select("*")
@@ -47,6 +46,15 @@ export default function SecurePaymentPage() {
     };
     fetchData();
   }, []);
+
+  // নাম্বার কপি করার ফাংশন
+  const copyNumber = () => {
+    if (selectedMethod?.admin_payment_number) {
+      navigator.clipboard.writeText(selectedMethod.admin_payment_number);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const handleSubmit = async () => {
     const depositAmount = Number(amount);
@@ -76,11 +84,11 @@ export default function SecurePaymentPage() {
       const { error: insertError } = await supabase.from("ticket_transactions").insert({
         user_id: profile.id,
         ticket_dp_track_id: trackId,
-        transaction_type: "balance_reload", // নতুন টাইপ
+        transaction_type: "balance_reload", 
         amount: depositAmount,
         trx_id: trxId.toUpperCase(),
         status: "pending",
-        bank_details: { method: selectedMethod.method_name } // কোন মেথডে দিয়েছে তা সেভ হলো
+        bank_details: { method: selectedMethod.method_name }
       });
 
       if (insertError) throw insertError;
@@ -138,7 +146,7 @@ export default function SecurePaymentPage() {
             {paymentMethods.map((method) => (
               <div
                 key={method.id}
-                onClick={() => setSelectedMethod(method)}
+                onClick={() => { setSelectedMethod(method); setCopied(false); }}
                 className={`payment-option ${selectedMethod?.id === method.id ? "active" : ""}`}
               >
                 <img src={method.method_logo_url} alt={method.method_name} />
@@ -148,10 +156,21 @@ export default function SecurePaymentPage() {
           </div>
         </div>
 
-        {/* ইন্সট্রাকশন এবং অ্যাডমিন নাম্বার */}
+        {/* ইন্সট্রাকশন এবং ডাইনামিক অ্যাডমিন নাম্বার */}
         <div className="instruction-box">
-          <p>1. {t("Send money to the number below using", "নিচের নাম্বারে টাকা পাঠান")} {selectedMethod?.method_name || "Payment Method"}:</p>
-          <div className="admin-number">{ADMIN_PAYMENT_NUMBER}</div>
+          <p>1. {t("Send money to the number below using", "নিচের নাম্বারে টাকা পাঠান")} <b>{selectedMethod?.method_name || "Payment Method"}</b>:</p>
+          
+          <div className="admin-number-container">
+            <div className="admin-number">
+              {selectedMethod?.admin_payment_number || t("Number not set", "নাম্বার সেট করা নেই")}
+            </div>
+            {selectedMethod?.admin_payment_number && (
+              <button onClick={copyNumber} className="copy-btn">
+                {copied ? t("Copied!", "কপি হয়েছে!") : t("Copy", "কপি")}
+              </button>
+            )}
+          </div>
+
           <p style={{ marginTop: '10px' }}>2. {t("After sending money, enter the Transaction ID (TrxID) below.", "টাকা পাঠানোর পর নিচে ট্রানজেকশন আইডি (TrxID) দিন।")}</p>
         </div>
 
@@ -176,7 +195,7 @@ export default function SecurePaymentPage() {
       <div className="submit-btn-wrapper">
         <button 
           onClick={handleSubmit} 
-          disabled={submitting || !amount || !trxId}
+          disabled={submitting || !amount || !trxId || !selectedMethod?.admin_payment_number}
           className="submit-btn"
         >
           {submitting ? t("Submitting...", "জমা হচ্ছে...") : t("Submit Reload Request", "রিলোড রিকোয়েস্ট জমা দিন")}
