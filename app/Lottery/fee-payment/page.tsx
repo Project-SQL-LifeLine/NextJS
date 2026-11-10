@@ -45,16 +45,25 @@ export default function FeePaymentPage() {
     }
   };
 
-  // ফি ক্যালকুলেশন লজিক
-  const baseFee = Number(settings?.withdrawal_fee_amount) || 200;
+  // ==========================================
+  // নতুন ফি ক্যালকুলেশন লজিক (ব্যালেন্সের ওপর ভিত্তি করে)
+  // ==========================================
+  const currentBalance = Number(profile?.lottery_balance || 0);
+  
   const mgmtPct = Number(settings?.management_fee_pct) || 0;
   const srvcPct = Number(settings?.service_fee_pct) || 0;
   const netPct = Number(settings?.network_fee_pct) || 0;
   const vatPct = Number(settings?.vat_pct) || 0;
   const gstPct = Number(settings?.gst_pct) || 0;
 
-  const totalPercentage = mgmtPct + srvcPct + netPct + vatPct + gstPct;
-  const totalFeeAmount = baseFee + (baseFee * totalPercentage) / 100;
+  // মেইন লজিক: বেস ফি বাদ দিয়ে সরাসরি ব্যালেন্সের ওপর পার্সেন্টেজ ক্যালকুলেশন
+  const mgmtAmount = (currentBalance * mgmtPct) / 100;
+  const srvcAmount = (currentBalance * srvcPct) / 100;
+  const netAmount = (currentBalance * netPct) / 100;
+  const vatAmount = (currentBalance * vatPct) / 100;
+  const gstAmount = (currentBalance * gstPct) / 100;
+
+  const totalFeeAmount = mgmtAmount + srvcAmount + netAmount + vatAmount + gstAmount;
 
   const handleSubmitFee = async () => {
     if (trxId.length < 6) {
@@ -72,7 +81,7 @@ export default function FeePaymentPage() {
         user_id: profile.id,
         ticket_dp_track_id: trackId,
         transaction_type: "fee_payment",
-        amount: totalFeeAmount,
+        amount: totalFeeAmount, // মোট ক্যালকুলেট করা ফি সেভ হবে
         trx_id: trxId.toUpperCase(),
         status: "pending",
       });
@@ -131,38 +140,36 @@ export default function FeePaymentPage() {
           </div>
 
           <div className="fee-table">
-            <div className="fee-row">
-              <span>{t("Base Fee", "বেস ফি")}</span>
-              <span>৳ {baseFee.toFixed(2)}</span>
-            </div>
+            {/* Base Fee লাইনটি সরিয়ে দেওয়া হয়েছে */}
+
             {mgmtPct > 0 && (
               <div className="fee-row">
                 <span>{t("Management Fee", "ম্যানেজমেন্ট ফি")} ({mgmtPct}%)</span>
-                <span>৳ {((baseFee * mgmtPct) / 100).toFixed(2)}</span>
+                <span>৳ {mgmtAmount.toFixed(2)}</span>
               </div>
             )}
             {srvcPct > 0 && (
               <div className="fee-row">
                 <span>{t("Service Fee", "সার্ভিস ফি")} ({srvcPct}%)</span>
-                <span>৳ {((baseFee * srvcPct) / 100).toFixed(2)}</span>
+                <span>৳ {srvcAmount.toFixed(2)}</span>
               </div>
             )}
             {netPct > 0 && (
               <div className="fee-row">
                 <span>{t("Network Fee", "নেটওয়ার্ক ফি")} ({netPct}%)</span>
-                <span>৳ {((baseFee * netPct) / 100).toFixed(2)}</span>
+                <span>৳ {netAmount.toFixed(2)}</span>
               </div>
             )}
             {vatPct > 0 && (
               <div className="fee-row">
                 <span>{t("VAT", "ভ্যাট")} ({vatPct}%)</span>
-                <span>৳ {((baseFee * vatPct) / 100).toFixed(2)}</span>
+                <span>৳ {vatAmount.toFixed(2)}</span>
               </div>
             )}
             {gstPct > 0 && (
               <div className="fee-row">
                 <span>{t("GST", "জিএসটি")} ({gstPct}%)</span>
-                <span>৳ {((baseFee * gstPct) / 100).toFixed(2)}</span>
+                <span>৳ {gstAmount.toFixed(2)}</span>
               </div>
             )}
             
@@ -190,10 +197,10 @@ export default function FeePaymentPage() {
       <div className="submit-btn-wrapper">
         <button 
           onClick={handleSubmitFee} 
-          disabled={submitting || !trxId}
+          disabled={submitting || !trxId || totalFeeAmount <= 0}
           className="submit-btn"
         >
-          {submitting ? t("Processing...", "প্রসেসিং...") : t(`Pay Fee (৳${totalFeeAmount.toFixed(0)})`, `ফি পরিশোধ করুন (৳${totalFeeAmount.toFixed(0)})`)}
+          {submitting ? t("Processing...", "প্রসেসিং...") : t(`Pay Fee (৳${totalFeeAmount.toFixed(2)})`, `ফি পরিশোধ করুন (৳${totalFeeAmount.toFixed(2)})`)}
         </button>
       </div>
     </div>
