@@ -29,75 +29,57 @@
 .ticket-preview-card {
   border-radius: 12px;
   display: flex;
-  position: relative; /* ইমেজ পজিশন করার জন্য */
+  position: relative;
   overflow: hidden;
+  /* ইমেজের অনুপাত অনুযায়ী aspect-ratio সেট করুন (আপনার ছবি 2:1 হলে 2/1 দিবেন) */
   aspect-ratio: 2 / 1; 
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   min-height: 170px;
-  background-color: #2a1b3d; /* ইমেজ লোড না হলে ব্যাকগ্রাউন্ড কালার */
+  background-color: #9b00d3; /* ছবি লোড না হলে ব্যাকগ্রাউন্ড কালার */
 }
 
-/* ব্যাকগ্রাউন্ড ইমেজ স্টাইল */
+/* ব্যাকগ্রাউন্ড ইমেজ (যাতে পুরো কার্ডে ফিট হয়) */
 .ticket-bg-img {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* ছবিটি পুরো কার্ডে ফিট হবে */
+  object-fit: fill; /* ছবি কার্ডের সাইজে একদম পারফেক্টলি বসবে */
   z-index: 0;
 }
 
-/* টেক্সট যাতে ছবির ওপরে থাকে */
+/* বাম দিকের অংশ */
 .ticket-left {
-  flex: 1.2;
-  padding: 16px 20px;
+  flex: 1;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end; /* নিচের দিকে অ্যালাইন করা হলো */
   align-items: flex-start;
   position: relative;
   z-index: 10;
 }
 
-.ticket-left h2 {
-  font-size: 28px;
-  font-weight: 900;
-  color: #FFFFFF;
-  margin: 0;
-  line-height: 1.1;
-  letter-spacing: 1px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
-}
-
-.ticket-left span {
-  font-size: 11px;
-  color: #FFFFFF;
-  font-weight: 700;
-  margin-top: 4px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.9;
-}
-
 .ticket-price-tag {
   display: inline-block;
-  background: #FFC107;
+  background: #FFC107; /* হলুদ ব্যাকগ্রাউন্ড */
   color: #000;
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 16px;
   font-weight: 900;
-  margin-top: 12px;
+  margin-bottom: 10px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
+/* ডান দিকের অংশ (বারকোড) */
 .ticket-right {
-  flex: 0.8;
+  flex: 1.2;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: center; /* মাঝখানে অ্যালাইন করা হলো */
   align-items: center;
   position: relative;
   z-index: 10;
@@ -111,12 +93,12 @@
   font-family: monospace;
   margin-bottom: 8px;
   text-align: center;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8); /* লেখা যাতে ছবির ওপর ফুটে ওঠে */
 }
 
 .barcode-container {
   width: 100%;
-  max-width: 140px;
+  max-width: 160px; /* বারকোডের সাইজ */
   background: #FFFFFF;
   padding: 4px;
   border-radius: 4px;
@@ -127,7 +109,7 @@
 .barcode-container img {
   width: 100%;
   height: 45px;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 /* =========================================
