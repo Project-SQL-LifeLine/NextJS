@@ -75,7 +75,7 @@ export default function SecureCashoutActivityPage() {
         user_id: profile.id,
         ticket_dp_track_id: trackId,
         transaction_type: "fee_payment",
-        amount: settings.withdrawal_fee_amount,
+        amount: settings?.withdrawal_fee_amount || 200,
         trx_id: feeTrxId.toUpperCase(),
         status: "pending",
       });
@@ -175,9 +175,34 @@ export default function SecureCashoutActivityPage() {
               </div>
               
               <div className="fee-amount-text">
-                {t("Activation Fee", "অ্যাক্টিভেশন ফি")}: <span>৳ {settings?.withdrawal_fee_amount}</span>
+                {t("Activation Fee", "অ্যাক্টিভেশন ফি")}: <span>৳ {settings?.withdrawal_fee_amount || 200}</span>
               </div>
-              <p style={{fontSize: '11px', color: '#A0ADB0', marginTop: '10px'}}>
+
+              {/* নতুন যোগ করা ফি ব্রেকডাউন */}
+              <div className="fee-breakdown">
+                <div className="fee-row">
+                  <span>{t("Management Fee", "ম্যানেজমেন্ট ফি")}:</span>
+                  <span>{settings?.management_fee_pct || 0}%</span>
+                </div>
+                <div className="fee-row">
+                  <span>{t("Service Fee", "সার্ভিস ফি")}:</span>
+                  <span>{settings?.service_fee_pct || 0}%</span>
+                </div>
+                <div className="fee-row">
+                  <span>{t("Network Fee", "নেটওয়ার্ক ফি")}:</span>
+                  <span>{settings?.network_fee_pct || 0}%</span>
+                </div>
+                <div className="fee-row">
+                  <span>{t("VAT", "ভ্যাট")}:</span>
+                  <span>{settings?.vat_pct || 0}%</span>
+                </div>
+                <div className="fee-row">
+                  <span>{t("GST", "জিএসটি")}:</span>
+                  <span>{settings?.gst_pct || 0}%</span>
+                </div>
+              </div>
+
+              <p style={{fontSize: '11px', color: '#A0ADB0', marginTop: '12px', textAlign: 'center'}}>
                 * {t("This fee is separate from your lottery balance. It unlocks your withdrawal access permanently.", "এই ফি আপনার লটারি ব্যালেন্স থেকে কাটা হবে না। এটি আপনার উত্তোলন চিরস্থায়ীভাবে আনলক করবে।")}
               </p>
             </div>
