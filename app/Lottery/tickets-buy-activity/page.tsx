@@ -110,25 +110,22 @@ function TicketBuyContent() {
         
         {/* টিকিট প্রিভিউ কার্ড */}
         <div className="ticket-preview-card">
-          {/* ব্যাকগ্রাউন্ড ইমেজ (basePath সহ) */}
+          {/* ব্যাকগ্রাউন্ড ইমেজ */}
           <img 
             src={`${basePath}/ticket-bg.png`} 
             alt="Ticket Background" 
             className="ticket-bg-img"
             onError={(e) => {
-              // ইমেজ লোড না হলে যাতে এরর না দেখায়
               (e.target as HTMLImageElement).style.display = 'none';
             }}
           />
 
-          {/* বাম দিক */}
+          {/* বাম দিক (শুধু প্রাইস ট্যাগ থাকবে) */}
           <div className="ticket-left">
-            <h2>LUCKY<br/>TICKET</h2>
-            <span>{t("Official Draw", "অফিসিয়াল ড্র")}</span>
             <div className="ticket-price-tag">৳ {ticketPrice}</div>
           </div>
 
-          {/* ডান দিক (বারকোড) */}
+          {/* ডান দিক (বারকোড ও নাম্বার) */}
           <div className="ticket-right">
             <div className="ticket-number-display">
               {ticketNumber || "0000 0000 0000"}
