@@ -1,0 +1,173 @@
+.fee-payment-page {
+  background-color: #0d241e;
+  min-height: 100vh;
+  width: 100%;
+  font-family: inherit;
+  padding-bottom: 90px;
+}
+
+.fee-main {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ফি বক্স ডিজাইন */
+.fee-box {
+  background: var(--bg-card);
+  border: 1px dashed #F5B041;
+  border-radius: 12px;
+  padding: 20px;
+  background: rgba(245, 176, 65, 0.05);
+}
+
+.fee-box h3 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.fee-instruction {
+  font-size: 12px;
+  color: #A0ADB0;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* নাম্বার কপি বক্স */
+.number-copy-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(245, 176, 65, 0.3);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.number-copy-box span {
+  font-size: 18px;
+  font-family: monospace;
+  font-weight: 900;
+  color: #F5B041;
+  letter-spacing: 1px;
+}
+
+.copy-btn {
+  background: #F5B041;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* ফি ব্রেকডাউন টেবিল */
+.fee-table {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.fee-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #A0ADB0;
+  margin-bottom: 8px;
+}
+
+.fee-row:last-child {
+  margin-bottom: 0;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255,255,255,0.2);
+  font-size: 14px;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.fee-row .green-text {
+  color: #00E701;
+  font-size: 16px;
+}
+
+/* ইনপুট ফিল্ড */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.input-group label {
+  font-size: 12px;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.input-field {
+  width: 100%;
+  background: #0d241e;
+  border: 1px solid #2B4236;
+  border-radius: 8px;
+  padding: 14px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #F5B041;
+}
+
+/* সাবমিট বাটন */
+.submit-btn-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px;
+  background: #0d241e;
+  border-top: 1px solid #2B4236;
+  z-index: 50;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: #184f35;
+  border: 1px solid #FFFFFF;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* মেসেজ বক্স */
+.msg-box {
+  text-align: center;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+.msg-box.error { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); }
+.msg-box.success { background: rgba(0, 231, 1, 0.1); color: #00E701; border: 1px solid rgba(0, 231, 1, 0.3); }
