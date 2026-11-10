@@ -12,124 +12,129 @@ export default function SecureCashoutActivityPage() {
   const { t } = useLanguage();
 
   const [profile, setProfile] = useState<any>(null);
-  
-  // ফ্লো স্টেট
-  const [isPageLoading, setIsPageLoading] = useState(true);
-  const [check1, setCheck1] = useState(false);
-  const [check2, setCheck2] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [settings, setSettings] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const [amount, setAmount] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [routingNumber, setRoutingNumber] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   useEffect(() => {
-    // ১. ৩ সেকেন্ডের সিকিউরিটি লোডিং
-    const timer = setTimeout(() => {
-      setIsPageLoading(false);
-    }, 3000);
-
-    // ইউজার ডাটা লোড
-    const fetchUser = async () => {
+    const checkAccess = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-        if (data) setProfile(data);
+        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+        if (profileData) {
+          // সিকিউরিটি চেক: যদি ফি না দেওয়া থাকে তবে তাকে ফি পেজে পাঠিয়ে দাও
+          if (!profileData.is_lottery_fee_paid) {
+            router.replace("/Lottery/fee-payment");
+            return;
+          }
+          setProfile(profileData);
+        }
       }
+      const { data: settingsData } = await supabase.from("lottery_settings").select("*").eq("id", 1).single();
+      if (settingsData) setSettings(settingsData);
+      setLoading(false);
     };
-    fetchUser();
+    checkAccess();
+  }, [router]);
 
-    return () => clearTimeout(timer);
-  }, []);
+  const handleWithdraw = async () => {
+    const withdrawAmount = Number(amount);
+    if (!withdrawAmount || withdrawAmount < Number(settings?.min_withdrawal_limit || 50000)) {
+      setMessage({ type: "error", text: `${t("Minimum withdrawal is", "সর্বনিম্ন উত্তোলন")} ৳${settings?.min_withdrawal_limit}` });
+      return;
+    }
+    if (!bankName || !accountName || !accountNumber || !routingNumber) {
+      setMessage({ type: "error", text: t("Please fill all bank details.", "সব ব্যাংক তথ্য পূরণ করুন।") });
+      return;
+    }
 
-  const handleVerify = () => {
-    if (!check1 || !check2) return;
+    setSubmitting(true);
+    setMessage({ type: "", text: "" });
 
-    setIsVerifying(true);
-    
-    // ২. ২.৫ সেকেন্ডের ভেরিফিকেশন লোডিং
-    setTimeout(() => {
-      router.push("/Lottery/fee-payment"); // ফি পেজে রিডাইরেক্ট
-    }, 2500);
+    try {
+      const { data, error } = await supabase.rpc("request_lottery_withdrawal", {
+        p_amount: withdrawAmount,
+        p_bank_name: bankName,
+        p_account_name: accountName,
+        p_account_number: accountNumber,
+        p_routing_number: routingNumber,
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setMessage({ type: "success", text: data.message });
+        setAmount("");
+        setBankName("");
+        setAccountName("");
+        setAccountNumber("");
+        setRoutingNumber("");
+        // ব্যালেন্স আপডেট
+        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", profile.id).single();
+        if (profileData) setProfile(profileData);
+      } else {
+        setMessage({ type: "error", text: data.error });
+      }
+    } catch (err: any) {
+      setMessage({ type: "error", text: err.message });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // ৩ সেকেন্ডের লোডার
-  if (isPageLoading) {
-    return (
-      <div className="cashout-page">
-        <LotteryHeader userProfile={profile} />
-        <div className="loader-container">
-          <svg className="loader-shield" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-          <p className="text-[#F5B041] text-sm font-bold animate-pulse">
-            {t("Establishing Secure Connection...", "সুরক্ষিত সংযোগ তৈরি হচ্ছে...")}
-          </p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen bg-[#0d241e] flex items-center justify-center"><div className="w-8 h-8 border-4 border-[#F5B041] border-t-transparent rounded-full animate-spin"></div></div>;
 
-  // ২.৫ সেকেন্ডের ভেরিফাইং লোডার
-  if (isVerifying) {
-    return (
-      <div className="cashout-page">
-        <LotteryHeader userProfile={profile} />
-        <div className="loader-container">
-          <div className="w-10 h-10 border-4 border-[#F5B041] border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-[#F5B041] text-sm font-bold mt-4">
-            {t("Verifying Payment Method...", "পেমেন্ট মেথড যাচাই করা হচ্ছে...")}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // মেইন চেকলিস্ট ভিউ
   return (
     <div className="cashout-page pb-20">
       <LotteryHeader userProfile={profile} />
 
       <main className="cashout-main">
+        <div className="balance-card">
+          <span>{t("Withdrawable Lottery Balance", "উত্তোলনযোগ্য লটারি ব্যালেন্স")}</span>
+          <h2>৳ {Number(profile?.lottery_balance || 0).toFixed(2)}</h2>
+        </div>
+
         <div className="form-card">
           <h3 className="form-title">
-            <svg className="w-5 h-5 text-[#F5B041]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            {t("Security Verification Required", "নিরাপত্তা যাচাইকরণ প্রয়োজন")}
+            <svg className="w-5 h-5 text-[#00E701]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            {t("Bank Withdrawal Form", "ব্যাংক উইথড্র ফর্ম")}
           </h3>
 
-          <p className="text-[12px] text-[#A0ADB0] mb-4">
-            {t("Please confirm the following details to proceed with your withdrawal request.", "আপনার উত্তোলনের অনুরোধের সাথে এগিয়ে যেতে নিচের বিবরণগুলি নিশ্চিত করুন।")}
-          </p>
-
-          <div className="checklist-container">
-            {/* চেক ১ */}
-            <div 
-              className={`checklist-item ${check1 ? "checked" : ""}`}
-              onClick={() => setCheck1(!check1)}
-            >
-              <div className="checklist-box">
-                {check1 && <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-              </div>
-              <span className="checklist-text">{t("Check Your Verification Method", "আপনার ভেরিফিকেশন মেথড চেক করুন")}</span>
-            </div>
-
-            {/* চেক ২ */}
-            <div 
-              className={`checklist-item ${check2 ? "checked" : ""}`}
-              onClick={() => setCheck2(!check2)}
-            >
-              <div className="checklist-box">
-                {check2 && <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-              </div>
-              <span className="checklist-text">{t("Check Your Profile Info", "আপনার প্রোফাইল তথ্য চেক করুন")}</span>
-            </div>
+          <div className="input-group">
+            <label>{t("Amount (Min 50,000) *", "পরিমাণ (সর্বনিম্ন ৫০,০০০) *")}</label>
+            <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="input-field" />
           </div>
+          <div className="input-group">
+            <label>{t("Bank Name *", "ব্যাংকের নাম *")}</label>
+            <input type="text" value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="e.g. Sonali Bank" className="input-field" />
+          </div>
+          <div className="input-group">
+            <label>{t("Account Name *", "অ্যাকাউন্টের নাম *")}</label>
+            <input type="text" value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Your Name" className="input-field" />
+          </div>
+          <div className="input-group">
+            <label>{t("Account Number *", "অ্যাকাউন্ট নাম্বার *")}</label>
+            <input type="text" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} placeholder="Your Account Number" className="input-field" />
+          </div>
+          <div className="input-group">
+            <label>{t("Routing Number *", "রাউটিং নাম্বার *")}</label>
+            <input type="text" value={routingNumber} onChange={(e) => setRoutingNumber(e.target.value)} placeholder="Routing Number" className="input-field" />
+          </div>
+
+          {message.text && <div className={`msg-box ${message.type}`}>{message.text}</div>}
         </div>
       </main>
 
       <div className="submit-btn-wrapper">
-        <button 
-          onClick={handleVerify} 
-          disabled={!check1 || !check2 || isVerifying}
-          className="submit-btn"
-        >
-          {t("Verify Payment Method", "পেমেন্ট মেথড যাচাই করুন")}
+        <button onClick={handleWithdraw} disabled={submitting || !amount || !bankName || !accountName || !accountNumber || !routingNumber} className="submit-btn">
+          {submitting ? t("Processing...", "প্রসেসিং...") : t("Request Withdrawal", "উত্তোলনের আবেদন করুন")}
         </button>
       </div>
     </div>
