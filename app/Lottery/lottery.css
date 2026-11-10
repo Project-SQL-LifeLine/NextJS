@@ -1,0 +1,347 @@
+.lottery-page {
+  --bg-main: #0d241e;
+  --bg-card: #1B2A23;
+  --border-color: #2B4236;
+  --text-main: #FFFFFF;
+  --text-muted: #A0ADB0;
+  --gold: #F5B041;
+  --gold-glow: rgba(245, 176, 65, 0.3);
+  --btn-green: #184f35;
+
+  background-color: var(--bg-main);
+  min-height: 100vh;
+  width: 100%;
+  font-family: inherit;
+  padding-bottom: 70px; /* Footer এর জন্য */
+}
+
+.lottery-main {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* =========================================
+   1. Jackpot Hero Section
+   ========================================= */
+.jackpot-card {
+  background: linear-gradient(135deg, #1f1b33 0%, #121016 100%);
+  border: 2px solid var(--gold);
+  border-radius: 20px;
+  padding: 24px 16px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 25px var(--gold-glow), inset 0 0 15px rgba(245, 176, 65, 0.1);
+}
+
+/* গোল্ডেন শিমার ইফেক্ট */
+.jackpot-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(245, 176, 65, 0.15) 0%, transparent 60%);
+  animation: pulse-glow 3s infinite alternate;
+}
+
+@keyframes pulse-glow {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+
+.jackpot-title {
+  font-size: 11px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.jackpot-amount {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--text-main);
+  text-shadow: 0 0 15px var(--gold-glow);
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Countdown Timer */
+.timer-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.timer-box {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(245, 176, 65, 0.3);
+  border-radius: 8px;
+  padding: 6px 10px;
+  min-width: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timer-box span:first-child {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gold);
+  font-family: monospace;
+}
+
+.timer-box span:last-child {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* =========================================
+   2. Ticket Tiers Section
+   ========================================= */
+.section-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* 3D Paper Ticket Style */
+.ticket-card {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+}
+
+.ticket-card:hover {
+  transform: translateY(-4px);
+}
+
+/* টিকিটের দুইপাশের ছেঁড়া ইফেক্ট (Punch holes) */
+.ticket-card::before, .ticket-card::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  background-color: var(--bg-main);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+.ticket-card::before { left: -8px; }
+.ticket-card::after { right: -8px; }
+
+.ticket-price {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.ticket-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.buy-btn {
+  background: var(--btn-green);
+  color: #fff;
+  border: 1px solid #fff;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  width: 100%;
+  cursor: pointer;
+}
+
+/* টিকিটের টায়ার অনুযায়ী বর্ডার কালার */
+.ticket-card.tier-50 { border: 1px solid #A0AAB2; box-shadow: 0 4px 10px rgba(160, 170, 178, 0.1); }
+.ticket-card.tier-100 { border: 1px solid #4CAF50; box-shadow: 0 4px 10px rgba(76, 175, 80, 0.1); }
+.ticket-card.tier-250 { border: 1px solid #2196F3; box-shadow: 0 4px 10px rgba(33, 150, 243, 0.1); }
+.ticket-card.tier-500 { border: 1px solid #9C27B0; box-shadow: 0 4px 10px rgba(156, 39, 176, 0.1); }
+.ticket-card.tier-1000 { border: 2px solid var(--gold); box-shadow: 0 4px 15px var(--gold-glow); }
+
+/* =========================================
+   3. Lottery Wallet Section
+   ========================================= */
+.wallet-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wallet-info h4 {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.wallet-info .amount {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--gold);
+}
+
+.withdraw-btn {
+  background: var(--btn-green);
+  color: #fff;
+  border: 1px solid #fff;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+/* =========================================
+   4. Recent Winners Section
+   ========================================= */
+.winners-list {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.winner-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.winner-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.winner-id {
+  font-size: 12px;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.winner-prize {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 800;
+}
+
+/* =========================================
+   Modal (Popup)
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal-content {
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  box-shadow: 0 0 20px var(--gold-glow);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modal-header h3 {
+  font-size: 16px;
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.payment-method-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.payment-btn {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 700;
+}
+
+.payment-btn:hover {
+  border-color: var(--gold);
+}
