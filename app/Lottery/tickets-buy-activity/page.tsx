@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
@@ -14,6 +14,8 @@ function TicketBuyContent() {
 
   const basePath = process.env.NODE_ENV === "production" ? "/NextJS" : "";
   const ticketPrice = Number(searchParams.get("price")) || 50;
+
+  const inputRef = useRef<HTMLInputElement>(null); // ম্যানুয়াল ফোকাসের জন্য
 
   const [profile, setProfile] = useState<any>(null);
   const [ticketNumber, setTicketNumber] = useState("");
@@ -58,6 +60,15 @@ function TicketBuyContent() {
     }
     setTicketNumber(randomNum);
     setError("");
+  };
+
+  // ম্যানুয়ালি নাম্বার দেওয়ার ফাংশন
+  const handleManualGenerate = () => {
+    setTicketNumber("");
+    setError("");
+    if (inputRef.current) {
+      inputRef.current.focus(); // ইনপুট বক্সে কার্সর বসবে
+    }
   };
 
   const handleBuyTicket = async () => {
@@ -108,7 +119,6 @@ function TicketBuyContent() {
         
         {/* টিকিট প্রিভিউ কার্ড */}
         <div className="ticket-preview-card">
-          {/* ব্যাকগ্রাউন্ড ইমেজ */}
           <img 
             src={`${basePath}/ticket-bg.png`} 
             alt="Ticket Background" 
@@ -123,11 +133,8 @@ function TicketBuyContent() {
             <div className="ticket-price-tag">৳ {ticketPrice}</div>
           </div>
 
-          {/* ডান দিক (নাম্বার ও ভার্টিকাল বারকোড) */}
+          {/* ডান দিক (শুধু বারকোড) */}
           <div className="ticket-right">
-            <div className="ticket-number-display">
-              {ticketNumber || "000000000000"}
-            </div>
             <div className="barcode-vertical-wrapper">
               <img 
                 src={getBarcodeUrl(ticketNumber)} 
@@ -146,6 +153,7 @@ function TicketBuyContent() {
           <input
             type="tel"
             inputMode="numeric"
+            ref={inputRef}
             value={ticketNumber}
             onChange={handleNumberChange}
             placeholder={t("Enter 12 digit number", "১২ ডিজিটের নাম্বার লিখুন")}
@@ -154,9 +162,16 @@ function TicketBuyContent() {
           
           <div className="helper-text">
             <span>{ticketNumber.length}/12 {t("digits", "ডিজিট")}</span>
-            <button onClick={generateRandom} className="random-btn">
-              {t("Generate Random", "র‍্যান্ডম নাম্বার নিন")}
-            </button>
+            
+            {/* নতুন বাটন গ্রুপ */}
+            <div className="button-group">
+              <button onClick={generateRandom} className="action-btn">
+                {t("Random", "র‍্যান্ডম")}
+              </button>
+              <button onClick={handleManualGenerate} className="action-btn">
+                {t("Manual", "ম্যানুয়াল")}
+              </button>
+            </div>
           </div>
 
           {error && <div className="error-msg">{error}</div>}
