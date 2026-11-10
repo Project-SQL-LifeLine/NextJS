@@ -1,0 +1,217 @@
+.ticket-buy-page {
+  --bg-main: #0d241e;
+  --bg-card: #1B2A23;
+  --border-color: #2B4236;
+  --text-main: #FFFFFF;
+  --text-muted: #A0ADB0;
+  --gold: #F5B041;
+  --btn-green: #184f35;
+
+  background-color: var(--bg-main);
+  min-height: 100vh;
+  width: 100%;
+  font-family: inherit;
+  padding-bottom: 80px;
+}
+
+.ticket-buy-main {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* টিকিট প্রিভিউ (সুন্দর ড্যাশ বোর্ড) */
+.ticket-preview-card {
+  background: linear-gradient(135deg, #1f1b33 0%, #121016 100%);
+  border: 2px dashed var(--gold);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 0 20px rgba(245, 176, 65, 0.15);
+}
+
+.ticket-preview-title {
+  font-size: 11px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.ticket-number-display {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text-main);
+  letter-spacing: 4px;
+  font-family: monospace;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  margin-bottom: 12px;
+  word-break: break-all;
+}
+
+.ticket-price-tag {
+  display: inline-block;
+  background: var(--gold);
+  color: #000;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* ইনপুট সেকশন */
+.input-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.input-section h3 {
+  font-size: 12px;
+  color: var(--text-main);
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.ticket-number-input {
+  width: 100%;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  color: var(--text-main);
+  font-size: 20px;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 8px;
+  outline: none;
+  font-family: monospace;
+  transition: border-color 0.2s ease;
+}
+
+.ticket-number-input:focus {
+  border-color: var(--gold);
+}
+
+.ticket-number-input::placeholder {
+  letter-spacing: 2px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.helper-text {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.random-btn {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.random-btn:hover {
+  background: rgba(245, 176, 65, 0.1);
+}
+
+/* পেমেন্ট মেথড সিলেকশন */
+.payment-section h3 {
+  font-size: 12px;
+  color: var(--text-main);
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.payment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.payment-option {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payment-option.active {
+  border-color: var(--gold);
+  background: rgba(245, 176, 65, 0.05);
+}
+
+.payment-option img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.payment-option span {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* সাবমিট বাটন (সেটিংস পেজের ডিজাইন) */
+.submit-btn-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px;
+  background: var(--bg-main);
+  border-top: 1px solid var(--border-color);
+  z-index: 50;
+}
+
+.buy-ticket-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--btn-green);
+  border: 1px solid #FFFFFF;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: all 0.2s;
+}
+
+.buy-ticket-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--border-color);
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+/* এরর মেসেজ */
+.error-msg {
+  color: #ff4d4d;
+  font-size: 11px;
+  text-align: center;
+  margin-top: 8px;
+  font-weight: bold;
+}
