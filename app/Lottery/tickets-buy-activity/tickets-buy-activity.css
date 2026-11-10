@@ -24,11 +24,11 @@
 }
 
 /* =========================================
-   1. Ticket Preview Card (Vertical Barcode Fix)
+   1. Ticket Preview Card
    ========================================= */
 .ticket-preview-card {
   border-radius: 12px;
-  position: relative; /* পজিশনিং ঠিক করার জন্য */
+  position: relative;
   overflow: hidden;
   aspect-ratio: 2 / 1; 
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
@@ -46,10 +46,9 @@
   z-index: 0;
 }
 
-/* বাম দিকের অংশ (শুধু প্রাইস ট্যাগ) */
 .ticket-left {
   position: absolute;
-  bottom: 15px; /* নিচে বাম দিকে ফিক্সড */
+  bottom: 15px;
   left: 20px;
   z-index: 10;
 }
@@ -65,46 +64,34 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* ডান দিকের অংশ (নাম্বার এবং ভার্টিকাল বারকোড) */
+/* ডান দিকের অংশ (শুধু বারকোড) */
 .ticket-right {
   position: absolute;
-  right: 15px; /* ডান দিক থেকে দূরত্ব */
+  right: 12px; 
   top: 50%;
-  transform: translateY(-50%); /* মাঝখানে রাখার জন্য */
+  transform: translateY(-50%); 
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
   z-index: 10;
 }
 
-.ticket-number-display {
-  font-size: 11px;
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: 1px;
-  font-family: monospace;
-  text-align: center;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-}
-
-/* ভার্টিকাল বারকোড কন্টেইনার */
+/* ভার্টিকাল বারকোড (সরু এবং লম্বা করা হয়েছে) */
 .barcode-vertical-wrapper {
-  width: 60px; /* কন্টেইনারের প্রস্থ */
-  height: 100px; /* কন্টেইনারের উচ্চতা */
+  width: 45px; /* প্রস্থ কমিয়ে সরু করা হলো */
+  height: 130px; /* উচ্চতা বাড়িয়ে লম্বা করা হলো */
   display: flex;
   align-items: center;
   justify-content: center;
   background: #FFFFFF;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 4px;
 }
 
 .barcode-vertical-wrapper img {
   /* বারকোডকে ৯০ ডিগ্রি ঘোরানো হলো */
-  width: 90px; /* ঘোরানোর পর যাতে ফিট হয় */
-  height: 40px;
+  width: 120px; /* ঘোরানোর পর লম্বা হবে */
+  height: 30px; /* ঘোরানোর পর সরু হবে */
   object-fit: contain;
   transform: rotate(90deg); 
 }
@@ -131,12 +118,12 @@
   background: var(--bg-main);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 16px;
+  padding: 14px 10px;
   color: var(--gold);
-  font-size: 24px;
+  font-size: 18px; /* সাইজ কমিয়ে ফিট করা হয়েছে */
   font-weight: 800;
   text-align: center;
-  letter-spacing: 8px;
+  letter-spacing: 3px; /* স্পেসিং কমিয়ে ফিট করা হয়েছে */
   outline: none;
   font-family: monospace;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -148,8 +135,8 @@
 }
 
 .ticket-number-input::placeholder {
-  letter-spacing: 2px;
-  font-size: 14px;
+  letter-spacing: 1px;
+  font-size: 13px;
   font-family: inherit;
   font-weight: 500;
   color: var(--text-muted);
@@ -158,13 +145,19 @@
 .helper-text {
   font-size: 11px;
   color: var(--text-muted);
-  margin-top: 10px;
+  margin-top: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.random-btn {
+/* নতুন বাটন গ্রুপ (Random + Manual) */
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
   background: transparent;
   color: var(--gold);
   border: 1px solid var(--gold);
@@ -176,7 +169,7 @@
   transition: all 0.2s;
 }
 
-.random-btn:hover {
+.action-btn:hover {
   background: rgba(245, 176, 65, 0.1);
 }
 
