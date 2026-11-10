@@ -12,7 +12,6 @@ function TicketBuyContent() {
   const searchParams = useSearchParams();
   const { t } = useLanguage();
 
-  // URL থেকে টিকিটের দাম নেওয়া
   const ticketPrice = Number(searchParams.get("price")) || 50;
 
   const [profile, setProfile] = useState<any>(null);
@@ -22,7 +21,6 @@ function TicketBuyContent() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // ডাটা লোড
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -96,10 +94,8 @@ function TicketBuyContent() {
     }
   };
 
-  // বারকোড জেনারেট করার ফাংশন (API ব্যবহার করে, কোনো npm প্যাকেজ ছাড়া)
   const getBarcodeUrl = (num: string) => {
     if (!num) num = "000000000000";
-    // Code 128 ফরম্যাটে বারকোড তৈরি করবে
     return `https://barcode.tec-it.com/barcode.ashx?data=${num}&code=Code128&translate-esc=on&dpi=96`;
   };
 
@@ -109,7 +105,7 @@ function TicketBuyContent() {
 
       <main className="ticket-buy-main">
         
-        {/* হরাইজন্টাল টিকিট প্রিভিউ কার্ড */}
+        {/* টিকিট প্রিভিউ কার্ড (ব্যাকগ্রাউন্ড ইমেজ) */}
         <div className="ticket-preview-card">
           {/* বাম দিক */}
           <div className="ticket-left">
@@ -117,9 +113,6 @@ function TicketBuyContent() {
             <span>{t("Official Draw", "অফিসিয়াল ড্র")}</span>
             <div className="ticket-price-tag">৳ {ticketPrice}</div>
           </div>
-
-          {/* মাঝখানের ড্যাশ লাইন */}
-          <div className="ticket-dashed-divider"></div>
 
           {/* ডান দিক (বারকোড) */}
           <div className="ticket-right">
@@ -131,7 +124,6 @@ function TicketBuyContent() {
                 src={getBarcodeUrl(ticketNumber)} 
                 alt="Ticket Barcode" 
                 onError={(e) => {
-                  // ইমেজ লোড না হলে একটি ডিফল্ট বারকোড দেখাবে
                   (e.target as HTMLImageElement).src = getBarcodeUrl("000000000000");
                 }}
               />
@@ -194,7 +186,6 @@ function TicketBuyContent() {
   );
 }
 
-// Next.js App Router-এ useSearchParams ব্যবহারের জন্য Suspense বাউন্ডারি লাগে
 export default function TicketBuyPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#0d241e] flex items-center justify-center text-white">Loading...</div>}>
