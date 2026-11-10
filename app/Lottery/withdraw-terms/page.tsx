@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
@@ -11,24 +11,7 @@ export default function WithdrawTermsPage() {
   const { t } = useLanguage();
   
   const [isChecked, setIsChecked] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [proceeding, setProceeding] = useState(false);
-
-  // পেজ লোড হওয়ার সময় চেক করা হবে ইউজার আগে থেকেই ফি দিয়েছে কি না
-  useEffect(() => {
-    const checkFeeStatus = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase.from("profiles").select("is_lottery_fee_paid").eq("id", user.id).single();
-        // যদি ফি দেওয়া থাকে, তবে সরাসরি ফর্ম পেজে পাঠিয়ে দিব
-        if (data?.is_lottery_fee_paid) {
-          router.replace("/Lottery/Secure-cashout-activity");
-        }
-      }
-      setLoading(false);
-    };
-    checkFeeStatus();
-  }, [router]);
 
   const handleProceed = async () => {
     if (!isChecked) return;
@@ -37,15 +20,16 @@ export default function WithdrawTermsPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // ডাটাবেসে টার্মস অ্যাক্সেপ্ট true করে দেওয়া
+        // ১. ডাটাবেসে টার্মস অ্যাক্সেপ্ট true করে দেওয়া
         await supabase
           .from("profiles")
           .update({ lottery_is_terms_accepted: true })
           .eq("id", user.id);
         
-        // ফি চেক করা
+        // ২. ফি চেক করা
         const { data } = await supabase.from("profiles").select("is_lottery_fee_paid").eq("id", user.id).single();
         
+        // ৩. রিডাইরেক্ট লজিক
         if (data?.is_lottery_fee_paid) {
           router.push("/Lottery/Secure-cashout-activity"); // ফি দেওয়া থাকলে ফর্মে যাবে
         } else {
@@ -57,8 +41,6 @@ export default function WithdrawTermsPage() {
       setProceeding(false);
     }
   };
-
-  if (loading) return <div className="min-h-screen bg-[#0d241e] flex items-center justify-center text-white">Loading...</div>;
 
   return (
     <div className="terms-page">
