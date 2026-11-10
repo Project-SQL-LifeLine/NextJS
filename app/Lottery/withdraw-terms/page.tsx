@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
@@ -11,11 +11,28 @@ export default function WithdrawTermsPage() {
   const { t } = useLanguage();
   
   const [isChecked, setIsChecked] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [proceeding, setProceeding] = useState(false);
+
+  // পেজ লোড হওয়ার সময় চেক করা হবে ইউজার আগে থেকেই ফি দিয়েছে কি না
+  useEffect(() => {
+    const checkFeeStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase.from("profiles").select("is_lottery_fee_paid").eq("id", user.id).single();
+        // যদি ফি দেওয়া থাকে, তবে সরাসরি ফর্ম পেজে পাঠিয়ে দিব
+        if (data?.is_lottery_fee_paid) {
+          router.replace("/Lottery/Secure-cashout-activity");
+        }
+      }
+      setLoading(false);
+    };
+    checkFeeStatus();
+  }, [router]);
 
   const handleProceed = async () => {
     if (!isChecked) return;
-    setLoading(true);
+    setProceeding(true);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -26,14 +43,22 @@ export default function WithdrawTermsPage() {
           .update({ lottery_is_terms_accepted: true })
           .eq("id", user.id);
         
-        // এরপর সিকিউর ভেরিফিকেশন পেজে পাঠানো
-        router.push("/Lottery/Secure-cashout-activity");
+        // ফি চেক করা
+        const { data } = await supabase.from("profiles").select("is_lottery_fee_paid").eq("id", user.id).single();
+        
+        if (data?.is_lottery_fee_paid) {
+          router.push("/Lottery/Secure-cashout-activity"); // ফি দেওয়া থাকলে ফর্মে যাবে
+        } else {
+          router.push("/Lottery/fee-payment"); // ফি না দিলে ফি পেজে যাবে
+        }
       }
     } catch (error) {
       console.error(error);
-      setLoading(false);
+      setProceeding(false);
     }
   };
+
+  if (loading) return <div className="min-h-screen bg-[#0d241e] flex items-center justify-center text-white">Loading...</div>;
 
   return (
     <div className="terms-page">
@@ -61,10 +86,10 @@ export default function WithdrawTermsPage() {
 
         <button 
           onClick={handleProceed}
-          disabled={!isChecked || loading}
+          disabled={!isChecked || proceeding}
           className="terms-btn"
         >
-          {loading ? t("Processing...", "প্রসেসিং...") : t("Proceed to Verification", "ভেরিফিকেশনে এগিয়ে যান")}
+          {proceeding ? t("Processing...", "প্রসেসিং...") : t("Proceed", "এগিয়ে যান")}
         </button>
       </div>
     </div>
