@@ -1,0 +1,204 @@
+.cashout-page {
+  --bg-main: #0d241e;
+  --bg-card: #1B2A23;
+  --border-color: #2B4236;
+  --text-main: #FFFFFF;
+  --text-muted: #A0ADB0;
+  --gold: #F5B041;
+  --btn-green: #184f35;
+
+  background-color: var(--bg-main);
+  min-height: 100vh;
+  width: 100%;
+  font-family: inherit;
+  padding-bottom: 90px;
+}
+
+.cashout-main {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ব্যালেন্স কার্ড */
+.balance-card {
+  background: linear-gradient(135deg, #1f1b33 0%, #121016 100%);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(245, 176, 65, 0.15);
+}
+
+.balance-card span {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.balance-card h2 {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--gold);
+  margin-top: 8px;
+}
+
+/* ফর্ম সেকশন */
+.form-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.form-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.input-group label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.input-field {
+  width: 100%;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--gold);
+}
+
+.input-field::placeholder {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* ফি পেমেন্ট বক্স (স্পেসিফিক নাম্বারের জন্য) */
+.fee-instruction-box {
+  background: rgba(245, 176, 65, 0.1);
+  border: 1px dashed var(--gold);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.fee-instruction-box p {
+  font-size: 12px;
+  color: #E2E8F0;
+  margin: 0 0 10px 0;
+  line-height: 1.5;
+}
+
+.specific-number {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(245, 176, 65, 0.3);
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.specific-number span {
+  font-size: 18px;
+  font-family: monospace;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+.copy-btn-small {
+  background: var(--gold);
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.fee-amount-text {
+  font-size: 14px;
+  font-weight: 800;
+  color: #FFF;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.fee-amount-text span {
+  color: #00E701;
+}
+
+/* সাবমিট বাটন */
+.submit-btn-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px;
+  background: var(--bg-main);
+  border-top: 1px solid var(--border-color);
+  z-index: 50;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--btn-green);
+  border: 1px solid #FFFFFF;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: all 0.2s;
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--border-color);
+  border-color: var(--border-color);
+}
+
+/* মেসেজ */
+.msg-box {
+  text-align: center;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.msg-box.error { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); }
+.msg-box.success { background: rgba(0, 231, 1, 0.1); color: #00E701; border: 1px solid rgba(0, 231, 1, 0.3); }
