@@ -11,7 +11,7 @@
   min-height: 100vh;
   width: 100%;
   font-family: inherit;
-  padding-bottom: 90px;
+  padding-bottom: 90px; /* বাটন যাতে নিচে কন্টেন্ট ঢেকে না ফেলে */
 }
 
 .secure-main {
@@ -186,3 +186,76 @@
 .copy-btn:hover {
   background: #e5a435;
 }
+
+/* =========================================
+   ট্রানজেকশন আইডি ইনপুট (এটি আগে মিসিং ছিল)
+   ========================================= */
+.trx-input {
+  width: 100%;
+  background: var(--bg-main); /* কালো ব্যাকগ্রাউন্ড */
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  text-transform: uppercase;
+}
+
+.trx-input:focus {
+  border-color: var(--gold);
+}
+
+.trx-input::placeholder {
+  color: var(--text-muted);
+  font-weight: normal;
+  text-transform: none;
+}
+
+/* =========================================
+   সাবমিট বাটন (এটিও আগে মিসিং ছিল)
+   ========================================= */
+.submit-btn-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px;
+  background: var(--bg-main);
+  border-top: 1px solid var(--border-color);
+  z-index: 50;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--btn-green);
+  border: 1px solid #FFFFFF;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: all 0.2s;
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--border-color);
+  border-color: var(--border-color);
+}
+
+/* মেসেজ */
+.msg-box {
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+.msg-box.error { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); }
+.msg-box.success { background: rgba(0, 231, 1, 0.1); color: #00E701; border: 1px solid rgba(0, 231, 1, 0.3); }
