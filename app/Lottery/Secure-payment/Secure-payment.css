@@ -1,0 +1,225 @@
+.secure-payment-page {
+  --bg-main: #0d241e;
+  --bg-card: #1B2A23;
+  --border-color: #2B4236;
+  --text-main: #FFFFFF;
+  --text-muted: #A0ADB0;
+  --gold: #F5B041;
+  --btn-green: #184f35;
+
+  background-color: var(--bg-main);
+  min-height: 100vh;
+  width: 100%;
+  font-family: inherit;
+  padding-bottom: 90px;
+}
+
+.secure-main {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* টপ ব্যালেন্স কার্ড */
+.balance-info-card {
+  background: linear-gradient(135deg, #1f1b33 0%, #121016 100%);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(245, 176, 65, 0.15);
+}
+
+.balance-info-card span {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.balance-info-card h2 {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--gold);
+  margin-top: 8px;
+}
+
+/* সেকশন টাইটেল */
+.sec-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 12px;
+}
+
+/* অ্যামাউন্ট ইনপুট */
+.amount-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.amount-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 0;
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.amount-btn.active {
+  border-color: var(--gold);
+  background: rgba(245, 176, 65, 0.1);
+  color: var(--gold);
+}
+
+.custom-amount-input {
+  width: 100%;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  color: var(--gold);
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+  outline: none;
+  font-family: monospace;
+}
+
+.custom-amount-input:focus {
+  border-color: var(--gold);
+}
+
+/* পেমেন্ট মেথড */
+.payment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.payment-option {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payment-option.active {
+  border-color: var(--gold);
+  background: rgba(245, 176, 65, 0.05);
+}
+
+.payment-option img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.payment-option span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ইন্সট্রাকশন বক্স */
+.instruction-box {
+  background: rgba(245, 176, 65, 0.1);
+  border: 1px dashed var(--gold);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 10px;
+}
+
+.instruction-box p {
+  font-size: 11px;
+  color: #E2E8F0;
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.admin-number {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: 2px;
+  font-family: monospace;
+  margin-top: 10px;
+}
+
+/* ট্রানজেকশন আইডি ইনপুট */
+.trx-input {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  text-transform: uppercase;
+}
+
+.trx-input:focus {
+  border-color: var(--gold);
+}
+
+/* সাবমিট বাটন */
+.submit-btn-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px;
+  background: var(--bg-main);
+  border-top: 1px solid var(--border-color);
+  z-index: 50;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--btn-green);
+  border: 1px solid #FFFFFF;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: all 0.2s;
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--border-color);
+  border-color: var(--border-color);
+}
+
+/* মেসেজ */
+.msg-box {
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+.msg-box.error { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); }
+.msg-box.success { background: rgba(0, 231, 1, 0.1); color: #00E701; border: 1px solid rgba(0, 231, 1, 0.3); }
