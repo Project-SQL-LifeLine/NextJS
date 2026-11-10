@@ -262,3 +262,36 @@
   margin-top: 10px;
   font-weight: bold;
 }
+
+
+/* ডান দিকের অংশ (শুধু বারকোড) */
+.ticket-right {
+  position: absolute;
+  right: 12px; 
+  top: 50%;
+  transform: translateY(-50%); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* ভার্টিকাল বারকোড (একদম সরু ও লম্বা করা হয়েছে) */
+.barcode-vertical-wrapper {
+  width: 22px; /* আগের ৪৫px থেকে কমিয়ে ২২px করা হলো */
+  height: 110px; /* উচ্চতা অপরিবর্তিত */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  border-radius: 2px;
+  padding: 1px; /* প্যাডিং কমিয়ে ১ পিক্সেল */
+  overflow: hidden;
+}
+
+.barcode-vertical-wrapper img {
+  width: 108px; /* ১১০ - ২ (প্যাডিং) */
+  height: 20px; /* ২২ - ২ (প্যাডিং) */
+  object-fit: fill; /* যাতে পুরো বক্স জুড়ে বারকোড থাকে */
+  transform: rotate(90deg); 
+}
