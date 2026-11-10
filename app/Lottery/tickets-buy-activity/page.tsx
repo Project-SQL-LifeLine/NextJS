@@ -12,7 +12,7 @@ function TicketBuyContent() {
   const searchParams = useSearchParams();
   const { t } = useLanguage();
 
-  // URL থেকে টিকিটের দাম নেওয়া (যদি না থাকে তবে ডিফল্ট ৫০)
+  // URL থেকে টিকিটের দাম নেওয়া
   const ticketPrice = Number(searchParams.get("price")) || 50;
 
   const [profile, setProfile] = useState<any>(null);
@@ -22,7 +22,7 @@ function TicketBuyContent() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // ডাটা লোড (প্রোফাইল এবং পেমেন্ট মেথড)
+  // ডাটা লোড
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -31,7 +31,6 @@ function TicketBuyContent() {
         if (profileData) setProfile(profileData);
       }
 
-      // পেমেন্ট মেথড লোড (control_payment_method টেবিল থেকে)
       const { data: methodsData } = await supabase
         .from("control_payment_method")
         .select("*")
@@ -45,16 +44,14 @@ function TicketBuyContent() {
     fetchData();
   }, []);
 
-  // শুধুমাত্র নাম্বার ইনপুট এবং ম্যাক্সিমাম ১২ ডিজিট
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/\D/g, ""); // শুধু ডিজিট রাখবে
+    const val = e.target.value.replace(/\D/g, "");
     if (val.length <= 12) {
       setTicketNumber(val);
       setError("");
     }
   };
 
-  // র‍্যান্ডম ১২ ডিজিটের নাম্বার জেনারেট
   const generateRandom = () => {
     let randomNum = "";
     for (let i = 0; i < 12; i++) {
@@ -64,7 +61,6 @@ function TicketBuyContent() {
     setError("");
   };
 
-  // টিকিট কেনার সাবমিট বাটন
   const handleBuyTicket = async () => {
     if (ticketNumber.length !== 12) {
       setError(t("Ticket number must be exactly 12 digits.", "টিকিট নাম্বার অবশ্যই ১২ ডিজিটের হতে হবে।"));
@@ -79,7 +75,6 @@ function TicketBuyContent() {
     setError("");
 
     try {
-      // এখানে আমরা ডাটাবেসে ট্রানজেকশন তৈরি করব (পেমেন্ট গেটওয়ের জন্য)
       const trackId = `LOT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
       const { error: insertError } = await supabase.from("ticket_transactions").insert({
@@ -89,23 +84,23 @@ function TicketBuyContent() {
         amount: ticketPrice,
         ticket_tier: ticketPrice,
         status: "pending",
-        // এখানে চাইলে ডাটাবেসে টিকিট নাম্বারও সেভ করা যেতে পারে (আপনার টেবিলে কলাম থাকলে)
-        // ticket_number: ticketNumber 
       });
 
       if (insertError) throw insertError;
 
-      // পেমেন্ট পেজে রিডাইরেক্ট করা (আপনার পেমেন্ট মেথড অনুযায়ী)
-      alert(t(`Ticket Purchase Initiated! Track ID: ${trackId}`, `টিকিট কেনার রিকোয়েস্ট সফল! ট্র্যাক আইডি: ${trackId}`));
-      
-      // আপনার পেমেন্ট গেটওয়ে পেজে রিডাইরেক্ট করুন
-      // router.push(`/Lottery/payment?track_id=${trackId}&price=${ticketPrice}&method=${selectedMethod.method_name}`);
-
+      alert(t(`Ticket Purchase Initiated! Track ID: ${trackId}`, `টিকিট কেনার রিকোয়েস্ট সফল! ট্র্যাক আইডি: ${trackId}`));
     } catch (err: any) {
       setError(err.message || "Something went wrong.");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // বারকোড জেনারেট করার ফাংশন (API ব্যবহার করে, কোনো npm প্যাকেজ ছাড়া)
+  const getBarcodeUrl = (num: string) => {
+    if (!num) num = "000000000000";
+    // Code 128 ফরম্যাটে বারকোড তৈরি করবে
+    return `https://barcode.tec-it.com/barcode.ashx?data=${num}&code=Code128&translate-esc=on&dpi=96`;
   };
 
   return (
@@ -114,15 +109,33 @@ function TicketBuyContent() {
 
       <main className="ticket-buy-main">
         
-        {/* টিকিট প্রিভিউ কার্ড */}
+        {/* হরাইজন্টাল টিকিট প্রিভিউ কার্ড */}
         <div className="ticket-preview-card">
-          <div className="ticket-preview-dashed-line"></div>
-          <div className="ticket-preview-title">{t("Your Lucky Ticket", "আপনার লাকি টিকিট")}</div>
-          <div className="ticket-number-display">
-            {ticketNumber || "0000 0000 0000"}
+          {/* বাম দিক */}
+          <div className="ticket-left">
+            <h2>LUCKY<br/>TICKET</h2>
+            <span>{t("Official Draw", "অফিসিয়াল ড্র")}</span>
+            <div className="ticket-price-tag">৳ {ticketPrice}</div>
           </div>
-          <div className="ticket-price-tag">
-            ৳ {ticketPrice}
+
+          {/* মাঝখানের ড্যাশ লাইন */}
+          <div className="ticket-dashed-divider"></div>
+
+          {/* ডান দিক (বারকোড) */}
+          <div className="ticket-right">
+            <div className="ticket-number-display">
+              {ticketNumber || "0000 0000 0000"}
+            </div>
+            <div className="barcode-container">
+              <img 
+                src={getBarcodeUrl(ticketNumber)} 
+                alt="Ticket Barcode" 
+                onError={(e) => {
+                  // ইমেজ লোড না হলে একটি ডিফল্ট বারকোড দেখাবে
+                  (e.target as HTMLImageElement).src = getBarcodeUrl("000000000000");
+                }}
+              />
+            </div>
           </div>
         </div>
 
