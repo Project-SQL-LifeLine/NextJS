@@ -96,7 +96,6 @@ function TicketBuyContent() {
       if (insertError) throw insertError;
 
       // পেমেন্ট পেজে রিডাইরেক্ট করা (আপনার পেমেন্ট মেথড অনুযায়ী)
-      // এখানে আমরা একটি সাকসেস অ্যালার্ট দেখিয়ে ট্রানজেকশন আইডি পাস করব
       alert(t(`Ticket Purchase Initiated! Track ID: ${trackId}`, `টিকিট কেনার রিকোয়েস্ট সফল! ট্র্যাক আইডি: ${trackId}`));
       
       // আপনার পেমেন্ট গেটওয়ে পেজে রিডাইরেক্ট করুন
@@ -117,6 +116,7 @@ function TicketBuyContent() {
         
         {/* টিকিট প্রিভিউ কার্ড */}
         <div className="ticket-preview-card">
+          <div className="ticket-preview-dashed-line"></div>
           <div className="ticket-preview-title">{t("Your Lucky Ticket", "আপনার লাকি টিকিট")}</div>
           <div className="ticket-number-display">
             {ticketNumber || "0000 0000 0000"}
