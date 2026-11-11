@@ -157,7 +157,7 @@ export default function BottomNav() {
         {/* 3. Mega Lottery (নতুন গোল এবং স্পিনিং ডিজাইন) */}
         <Link href="/Lottery/my-lottery-tickets" className={`flex flex-col items-center cursor-pointer transition-colors -mt-4 ${isActive("/Lottery/my-lottery-tickets") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
           <div className={`w-11 h-11 flex items-center justify-center rounded-full border-2 transition-all duration-300 ${
-            isActive("/Lottery/my-lottery-tickets") 
+            isActive("/Lottery") 
               ? "border-[#00e701] bg-[#00e701]/20 shadow-[0_0_15px_rgba(0,231,1,0.5)]" 
               : "border-[#F5B041] bg-[#1B2A23] shadow-[0_0_10px_rgba(245,176,65,0.3)]"
           }`}>
