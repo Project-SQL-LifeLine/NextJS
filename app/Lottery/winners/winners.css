@@ -3,7 +3,7 @@
   min-height: 100vh;
   width: 100%;
   font-family: inherit;
-  padding-bottom: 80px; /* ফুটারের জন্য জায়গা */
+  padding-bottom: 80px;
 }
 
 .winners-main {
@@ -25,37 +25,24 @@
   gap: 8px;
 }
 
-/* বিজয়ীদের লিস্ট */
+/* বিজয়ীদের লিস্ট (বক্স ছাড়া) */
 .winners-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
 }
 
-/* মেইন কার্ড ডিজাইন */
-.winner-card {
-  background: #1B2A23;
-  border: 1px solid #2B4236;
-  border-radius: 12px;
-  padding: 16px;
+/* নতুন লিস্ট আইটেম ডিজাইন */
+.winner-list-item {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  position: relative;
-  overflow: hidden;
-  gap: 10px;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #2B4236; /* নিচে চিকন দাগ */
 }
 
-/* ১ম, ২য়, ৩য় বিজয়ীর জন্য বিশেষ বর্ডার কালার */
-.winner-card:nth-child(1) { 
-  border-color: #F5B041; 
-  box-shadow: 0 0 10px rgba(245, 176, 65, 0.2); 
-}
-.winner-card:nth-child(2) { 
-  border-color: #A0ADB0; 
-}
-.winner-card:nth-child(3) { 
-  border-color: #cd7f32; 
+/* শেষ আইটেমের নিচে দাগ থাকবে না */
+.winner-list-item:last-child {
+  border-bottom: none;
 }
 
 /* বাম দিকের অংশ */
@@ -64,6 +51,7 @@
   flex-direction: column;
   gap: 6px;
   flex: 1;
+  min-width: 0; /* টেক্সট ওভারফ্লো রোধ করতে */
 }
 
 .winner-id {
@@ -71,7 +59,6 @@
   font-weight: 800;
   color: #FFFFFF;
   font-family: monospace;
-  letter-spacing: 0.5px;
 }
 
 .winner-date {
@@ -111,56 +98,17 @@
 }
 
 .detail-value {
-  font-size: 11px;
+  font-size: 10px;
   color: #F5B041;
   font-family: monospace;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 120px; /* লম্বা UUID হলে কেটে যাবে */
+  max-width: 110px; /* লম্বা UUID হলে কেটে যাবে */
 }
 
-/* ডান দিকের অংশ */
-.winner-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  min-width: 90px;
-}
-
-.winner-prize {
-  font-size: 16px;
-  font-weight: 900;
-  color: #00E701;
-}
-
-.winner-tier {
-  font-size: 9px;
-  color: #A0ADB0;
-  font-weight: 700;
-}
-
-/* QR কোড বক্স */
-.qr-code-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #FFFFFF;
-  padding: 4px;
-  border-radius: 6px;
-  margin-top: 6px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-}
-
-.qr-code-box img {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-}
-
-/* কপি বাটন স্টাইল */
+/* কপি বাটন */
 .copy-btn {
   background: transparent;
   border: none;
@@ -168,7 +116,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2px;
+  padding: 0;
+  margin-left: 4px;
   color: #A0ADB0;
   transition: color 0.2s;
 }
@@ -177,7 +126,44 @@
   color: #F5B041;
 }
 
-/* এমপ্টি স্টেট (যখন কোনো বিজয়ী থাকে না) */
+/* ডান দিকের অংশ */
+.winner-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding-left: 10px;
+}
+
+.winner-prize {
+  font-size: 16px;
+  font-weight: 900;
+  color: #00E701;
+  white-space: nowrap;
+}
+
+.winner-tier {
+  font-size: 9px;
+  color: #A0ADB0;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* QR কোড বক্স (ছোট এবং ক্লিন) */
+.qr-code-box {
+  background: #FFFFFF;
+  padding: 3px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.qr-code-box img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
+/* এমপ্টি স্টেট */
 .empty-state {
   text-align: center;
   padding: 40px 16px;
