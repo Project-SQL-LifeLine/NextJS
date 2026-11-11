@@ -1,10 +1,18 @@
-.terms-page {
+.terms-page-wrapper {
   background-color: #0d241e;
   min-height: 100vh;
-  color: #fff;
-  padding: 20px;
-  font-family: inherit;
-  padding-bottom: 80px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.terms-page {
+  flex: 1;
+  padding: 16px;
+  padding-bottom: 90px; /* ফুটারের জন্য জায়গা */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .terms-card {
@@ -12,8 +20,8 @@
   border: 1px solid #F5B041;
   border-radius: 12px;
   padding: 20px;
+  width: 100%;
   max-width: 600px;
-  margin: 0 auto;
   box-shadow: 0 4px 15px rgba(245, 176, 65, 0.15);
 }
 
@@ -31,7 +39,7 @@
   border: 1px solid #2B4236;
   border-radius: 8px;
   padding: 16px;
-  height: 350px; /* বক্সের উচ্চতা */
+  height: 400px; /* বক্সের উচ্চতা */
   overflow-y: auto; /* ভেতরে স্ক্রল হবে */
   margin-bottom: 20px;
   font-size: 12px;
@@ -66,16 +74,6 @@
 .terms-scroll-box p {
   margin-bottom: 12px;
   text-align: justify;
-}
-
-.terms-scroll-box ul {
-  list-style-type: disc;
-  margin-left: 20px;
-  margin-bottom: 12px;
-}
-
-.terms-scroll-box li {
-  margin-bottom: 6px;
 }
 
 /* চেকবক্স স্টাইল */
