@@ -10,7 +10,7 @@ import "./lottery.css";
 
 export default function LotteryHomePage() {
   const router = useRouter();
-  const { t } = useLanguage(); // We'll stick to English as requested
+  const { t } = useLanguage(); // Keeping English based on previous request
   const basePath = process.env.NODE_ENV === "production" ? "/NextJS" : "";
   
   const [profile, setProfile] = useState<any>(null);
@@ -90,8 +90,13 @@ export default function LotteryHomePage() {
 
         <main className="lottery-main">
           
-          {/* 1. Jackpot Slider (Edge-to-Edge) */}
-          <div className="jackpot-slider-wrapper">
+          {/* 1. Jackpot Slider (Edge-to-Edge with Image Background) */}
+          <div 
+            className="jackpot-slider-wrapper"
+            style={{ backgroundImage: `url(${basePath}/banners-card.png)` }}
+          >
+            <div className="jackpot-overlay"></div> {/* Overlay for text readability */}
+            
             <div 
               className="jackpot-track"
               style={{ transform: `translateX(-${activeJackpot * 100}%)` }}
