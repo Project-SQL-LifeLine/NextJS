@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase/client";
 import { useLanguage } from "../../lib/LanguageContext";
 import LotteryHeader from "./Header/Header";
-import BottomNav from "../../components/BottomNav"; // মেইন অ্যাপের বটম নেভিগেশন
+import BottomNav from "../../components/BottomNav";
 import "./lottery.css";
 
 export default function LotteryHomePage() {
@@ -14,7 +14,6 @@ export default function LotteryHomePage() {
   const basePath = process.env.NODE_ENV === "production" ? "/NextJS" : "";
   
   const [profile, setProfile] = useState<any>(null);
-  const [banners, setBanners] = useState<any[]>([]);
   const [timeLeft, setTimeLeft] = useState({ hours: "00", minutes: "00", seconds: "00" });
 
   useEffect(() => {
@@ -24,15 +23,6 @@ export default function LotteryHomePage() {
         const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
         if (data) setProfile(data);
       }
-
-      const { data: bannerData } = await supabase
-        .from("home_banners")
-        .select("*")
-        .eq("is_active", true)
-        .eq("serial", 10) 
-        .order("created_at", { ascending: false });
-
-      if (bannerData) setBanners(bannerData);
     };
     fetchData();
   }, []);
@@ -88,7 +78,7 @@ export default function LotteryHomePage() {
 
         <main className="lottery-main">
           
-          {/* ১. প্রিমিয়াম জ্যাকপট কার্ড */}
+          {/* ১. প্রিমিয়াম জ্যাকপট কার্ড (চিকন ও ফুল-উইডথ) */}
           <div className="jackpot-card">
             <div className="jackpot-glow"></div>
             <div className="jackpot-title">{t("Today's Jackpot", "আজকের জ্যাকপট")}</div>
@@ -110,27 +100,7 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* ২. লটারি ব্যানার */}
-          {banners.length > 0 && (
-            <div className="lottery-banner-slider">
-              {banners.map((banner) => (
-                <div 
-                  key={banner.id} 
-                  className="lottery-banner-card"
-                  onClick={() => {
-                    if (banner.redirect_url) router.push(banner.redirect_url);
-                  }}
-                >
-                  <img src={banner.image_url} alt={banner.title || "Lottery Promo"} />
-                  {banner.notice_text && (
-                    <div className="banner-notice">{banner.notice_text}</div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* ৩. টিকিট সেকশন */}
+          {/* ২. টিকিট সেকশন */}
           <div>
             <div className="flex justify-between items-center mb-3">
               <h2 className="section-title">{t("Buy Tickets", "টিকিট কিনুন")}</h2>
@@ -152,7 +122,7 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* ৪. লটারি ওয়ালেট (স্মার্ট ডিজাইন) */}
+          {/* ৩. লটারি ওয়ালেট (স্মার্ট ডিজাইন) */}
           <div className="wallet-card">
             <div className="wallet-header">
               <div className="flex items-center gap-2">
@@ -171,7 +141,7 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* ৫. লাইভ উইনার্স (স্ক্রলিং এফেক্ট) */}
+          {/* ৪. লাইভ উইনার্স (স্ক্রলিং এফেক্ট) */}
           <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-2 rounded-full bg-[#00E701] animate-ping"></span>
@@ -192,7 +162,6 @@ export default function LotteryHomePage() {
 
         </main>
 
-        {/* মেইন অ্যাপের BottomNav যুক্ত করা হলো */}
         <BottomNav />
       </div>
     </div>
