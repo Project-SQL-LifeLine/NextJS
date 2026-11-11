@@ -13,7 +13,7 @@ export default function WinnersPage() {
   const [profile, setProfile] = useState<any>(null);
   const [winners, setWinners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [copiedId, setCopiedId] = useState<string | null>(null); // কপি স্টেট
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // গেম আইডি মাস্ক করার ফাংশন (যেমন: RA****99)
   const maskGameId = (gameId: string) => {
@@ -23,12 +23,17 @@ export default function WinnersPage() {
     return `${id.slice(0, 2)}****${id.slice(-2)}`;
   };
 
-  // কপি করার ফাংশন
+  // ওয়ান ক্লিক কপি করার ফাংশন
   const handleCopy = (text: string, id: string) => {
     if (!text || text === "N/A") return;
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+    
+    // ক্লিপবোর্ডে কপি
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000); // ২ সেকেন্ড পর "Copied!" মুছে যাবে
+    }).catch(err => {
+      console.error("Failed to copy:", err);
+    });
   };
 
   useEffect(() => {
@@ -101,11 +106,11 @@ export default function WinnersPage() {
               const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrData)}&color=0d241e&bgcolor=ffffff`;
 
               return (
-                <div key={winner.id} className="winner-card">
+                <div key={winner.id} className="winner-list-item">
                   
                   {/* বাম দিকের তথ্য */}
                   <div className="winner-left">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mb-1">
                       <span className="winner-id">ID: {maskGameId(winner.profiles?.game_id)}</span>
                       <span className="winner-badge">VERIFIED</span>
                     </div>
@@ -115,26 +120,26 @@ export default function WinnersPage() {
                     </span>
                     
                     <div className="winner-details-box">
-                      <span className="detail-label">Ticket ID:</span>
+                      <span className="detail-label">Ticket:</span>
                       <span className="detail-value">{winner.winning_ticket_number || "N/A"}</span>
                     </div>
                     
                     {/* Seed ID এবং কপি বাটন */}
-                    <div className="winner-details-box relative">
+                    <div className="winner-details-box">
                       <span className="detail-label">Seed ID:</span>
-                      <span className="detail-value text-xs truncate max-w-[100px]">
+                      <span className="detail-value">
                         {winner.profiles?.lottery_track_id || "N/A"}
                       </span>
                       {winner.profiles?.lottery_track_id && (
                         <button 
                           onClick={() => handleCopy(winner.profiles.lottery_track_id, winner.id)}
-                          className="ml-2 text-[#A0ADB0] hover:text-[#F5B041] transition-colors"
+                          className="copy-btn"
                           title="Copy Seed ID"
                         >
                           {copiedId === winner.id ? (
-                            <span className="text-[9px] text-[#00E701] font-bold">Copied!</span>
+                            <span className="text-[#00E701] text-[9px] font-bold">Copied!</span>
                           ) : (
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                             </svg>
                           )}
@@ -150,7 +155,6 @@ export default function WinnersPage() {
                     
                     <div className="qr-code-box">
                       <img src={qrUrl} alt="Verify QR" />
-                      <span className="text-[7px] text-[#A0ADB0] text-center mt-1">SCAN TO VERIFY</span>
                     </div>
                   </div>
 
