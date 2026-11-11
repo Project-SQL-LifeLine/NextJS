@@ -25,14 +25,13 @@ export default function WinnersPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ১. প্রোফাইল লোড
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
           if (profileData) setProfile(profileData);
         }
 
-        // ২. বিজয়ীদের তালিকা লোড (ticket_draws + profiles)
+        // ডাটাবেস থেকে বিজয়ীদের তথ্য আনা (winning_ticket_number এবং lottery_track_id সহ)
         const { data: drawsData, error } = await supabase
           .from("ticket_draws")
           .select(`
@@ -40,7 +39,8 @@ export default function WinnersPage() {
             draw_date,
             prize_amount,
             winning_ticket_price,
-            profiles:winner_user_id (game_id)
+            winning_ticket_number,
+            profiles:winner_user_id (game_id, lottery_track_id)
           `)
           .eq("status", "completed")
           .order("draw_date", { ascending: false });
@@ -87,23 +87,51 @@ export default function WinnersPage() {
           </div>
         ) : (
           <div className="winners-list">
-            {winners.map((winner) => (
-              <div key={winner.id} className="winner-card">
-                <div className="winner-left">
-                  <span className="winner-id">ID: {maskGameId(winner.profiles?.game_id)}</span>
-                  <span className="winner-date">
-                    {new Date(winner.draw_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                  </span>
-                  <span className="winner-tier">
-                    {t("Ticket Tier", "টিকিট টিয়ার")}: ৳ {winner.winning_ticket_price}
-                  </span>
+            {winners.map((winner) => {
+              // QR কোডের জন্য ডাটা (ভেরিফিকেশনের জন্য)
+              const qrData = `Verify Winner: Track ID: ${winner.profiles?.lottery_track_id || 'N/A'}, Ticket: ${winner.winning_ticket_number || 'N/A'}`;
+              const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrData)}&color=0d241e&bgcolor=ffffff`;
+
+              return (
+                <div key={winner.id} className="winner-card">
+                  
+                  {/* বাম দিকের তথ্য */}
+                  <div className="winner-left">
+                    <div className="flex items-center gap-2">
+                      <span className="winner-id">ID: {maskGameId(winner.profiles?.game_id)}</span>
+                      <span className="winner-badge">VERIFIED</span>
+                    </div>
+                    
+                    <span className="winner-date">
+                      {new Date(winner.draw_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </span>
+                    
+                    <div className="winner-details-box">
+                      <span className="detail-label">Ticket ID:</span>
+                      <span className="detail-value">{winner.winning_ticket_number || "N/A"}</span>
+                    </div>
+                    
+                    <div className="winner-details-box">
+                      <span className="detail-label">Seed ID:</span>
+                      <span className="detail-value text-xs truncate max-w-[120px]">{winner.profiles?.lottery_track_id || "N/A"}</span>
+                    </div>
+                  </div>
+
+                  {/* ডান দিকের প্রাইজ ও QR কোড */}
+                  <div className="winner-right">
+                    <span className="winner-prize">৳ {Number(winner.prize_amount).toLocaleString()}</span>
+                    <span className="winner-tier">Tier: ৳{winner.winning_ticket_price}</span>
+                    
+                    {/* QR Code */}
+                    <div className="qr-code-box">
+                      <img src={qrUrl} alt="Verify QR" />
+                      <span className="text-[7px] text-[#A0ADB0] text-center mt-1">SCAN TO VERIFY</span>
+                    </div>
+                  </div>
+
                 </div>
-                <div className="winner-right">
-                  <span className="winner-prize">৳ {Number(winner.prize_amount).toLocaleString()}</span>
-                  <span className="winner-badge">VERIFIED WINNER</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
