@@ -3,7 +3,7 @@
   width: 100%;
   font-family: inherit;
   position: relative;
-  background-color: #0d241e; /* ফলব্যাক কালার */
+  background-color: #0d241e; 
 }
 
 /* ফিক্সড ব্যাকগ্রাউন্ড ইমেজ */
@@ -16,18 +16,18 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  z-index: 0; /* z-index ঠিক করা হয়েছে */
-  background-color: #0d241e; /* ছবি লোড না হলে ব্যাকগ্রাউন্ড কালার */
+  z-index: 0; 
+  background-color: #0d241e; 
 }
 
-/* কন্টেন্ট ওভারলে */
+/* কন্টেন্ট ওভারলে (রিডেবিলিটি বাড়ানোর জন্য গাঢ় করা হলো) */
 .lottery-overlay {
   position: relative;
-  z-index: 1; /* কন্টেন্ট ব্যাকগ্রাউন্ডের ওপরে থাকবে */
+  z-index: 1; 
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(to bottom, rgba(13, 36, 30, 0.75), rgba(13, 36, 30, 0.95));
-  padding-bottom: 80px; /* ফুটারের জন্য জায়গা */
+  background: linear-gradient(to bottom, rgba(13, 36, 30, 0.85), rgba(13, 36, 30, 0.98));
+  padding-bottom: 80px; 
 }
 
 .lottery-main {
@@ -40,18 +40,18 @@
 }
 
 /* =========================================
-   1. Jackpot Hero Section (Premium)
+   1. Jackpot Hero Section
    ========================================= */
 .jackpot-card {
-  background: rgba(27, 42, 35, 0.85);
-  backdrop-filter: blur(10px);
+  background: rgba(27, 42, 35, 0.95); /* আরও সলিড করা হলো */
+  backdrop-filter: blur(5px);
   border: 2px solid #F5B041;
   border-radius: 20px;
   padding: 24px 16px;
   text-align: center;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 25px rgba(245, 176, 65, 0.3), inset 0 0 15px rgba(245, 176, 65, 0.1);
+  box-shadow: 0 0 25px rgba(245, 176, 65, 0.2), inset 0 0 15px rgba(245, 176, 65, 0.1);
 }
 
 .jackpot-glow {
@@ -60,7 +60,7 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(245, 176, 65, 0.2) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(245, 176, 65, 0.15) 0%, transparent 60%);
   animation: pulse-glow 3s infinite alternate;
 }
 
@@ -99,7 +99,7 @@
 }
 
 .timer-box {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(245, 176, 65, 0.4);
   border-radius: 8px;
   padding: 8px 12px;
@@ -188,7 +188,7 @@
 
 .ticket-card {
   position: relative;
-  background: rgba(27, 42, 35, 0.85);
+  background: rgba(27, 42, 35, 0.95); /* আরও সলিড */
   backdrop-filter: blur(5px);
   border-radius: 12px;
   padding: 20px 16px;
@@ -205,13 +205,14 @@
   transform: translateY(-4px);
 }
 
+/* পাঞ্চ হোল ইফেক্ট (ব্যাকগ্রাউন্ড কালারের সাথে ম্যাচ করা) */
 .ticket-card::before, .ticket-card::after {
   content: '';
   position: absolute;
   top: 50%;
   width: 16px;
   height: 16px;
-  background-color: #0d241e;
+  background-color: #0d241e; 
   border-radius: 50%;
   transform: translateY(-50%);
 }
@@ -255,8 +256,8 @@
    4. Smart Wallet Section
    ========================================= */
 .wallet-card {
-  background: rgba(27, 42, 35, 0.85);
-  backdrop-filter: blur(10px);
+  background: rgba(27, 42, 35, 0.95); /* আরও সলিড */
+  backdrop-filter: blur(5px);
   border: 1px solid #F5B041;
   border-radius: 12px;
   padding: 16px;
@@ -317,19 +318,21 @@
    ========================================= */
 .winners-ticker-wrapper {
   overflow: hidden;
-  background: rgba(27, 42, 35, 0.85);
+  background: rgba(27, 42, 35, 0.95); /* আরও সলিড */
   backdrop-filter: blur(5px);
   border: 1px solid #2B4236;
   border-radius: 8px;
-  padding: 12px 0;
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
+/* বাম এবং ডান দিকের শ্যাডো (ছোট করা হলো) */
 .winners-ticker-wrapper::before, .winners-ticker-wrapper::after {
   content: '';
   position: absolute;
   top: 0;
-  width: 40px;
+  width: 25px;
   height: 100%;
   z-index: 2;
 }
@@ -346,7 +349,8 @@
   display: flex;
   gap: 24px;
   width: max-content;
-  animation: scroll-ticker 15s linear infinite;
+  animation: scroll-ticker 20s linear infinite;
+  padding: 12px 0;
 }
 
 @keyframes scroll-ticker {
@@ -359,6 +363,7 @@
   align-items: center;
   gap: 10px;
   font-size: 12px;
+  white-space: nowrap; /* লেখা যাতে ভেঙে না যায় */
 }
 
 .winner-ticker-item .winner-id {
