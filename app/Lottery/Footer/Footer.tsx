@@ -11,7 +11,7 @@ export default function LotteryFooter() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="bg-[#183F35] border-t border-[#26352e] fixed bottom-0 w-full flex justify-around items-center py-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+    <nav className="bg-[#184f35] border-t border-[#26352e] fixed bottom-0 w-full flex justify-around items-center py-1 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
       
       {/* 1. Home / Play */}
       <Link href="/Lottery" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/Lottery") ? "text-[#F5B041]" : "text-white/70 hover:text-white"}`}>
@@ -43,7 +43,7 @@ export default function LotteryFooter() {
         <span className="text-[9px] font-bold mt-0.5">{t("Winners", "বিজয়ী")}</span>
       </Link>
 
-      {/* 4. Withdraw (লিংক withdraw-terms পেজে পাঠানো হলো) */}
+      {/* 4. Withdraw */}
       <Link href="/Lottery/withdraw-terms" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/Lottery/withdraw-terms") || isActive("/Lottery/Secure-cashout-activity") || isActive("/Lottery/fee-payment") ? "text-[#F5B041]" : "text-white/70 hover:text-white"}`}>
         <div className={`p-1 rounded-lg ${isActive("/Lottery/withdraw-terms") || isActive("/Lottery/Secure-cashout-activity") || isActive("/Lottery/fee-payment") ? "bg-[#F5B041]/10" : ""}`}>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
