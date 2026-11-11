@@ -6,7 +6,7 @@
   background-color: #0d241e; 
 }
 
-/* ফিক্সড ব্যাকগ্রাউন্ড ইমেজ */
+/* Fixed Background Image */
 .lottery-fixed-bg {
   position: fixed;
   top: 0;
@@ -20,7 +20,7 @@
   background-color: #0d241e; 
 }
 
-/* কন্টেন্ট ওভারলে */
+/* Content Overlay */
 .lottery-overlay {
   position: relative;
   z-index: 1; 
@@ -30,7 +30,6 @@
   padding-bottom: 80px; 
 }
 
-/* মেইন কন্টেন্ট প্যাডিং (ব্যানার সরানোর কারণে গ্যাপ অ্যাডজাস্ট করা হয়েছে) */
 .lottery-main {
   padding: 16px;
   max-width: 600px;
@@ -41,39 +40,34 @@
 }
 
 /* =========================================
-   1. Jackpot Hero Section (চিকন এবং ফুল-উইডথ)
+   1. Jackpot Slider (Edge-to-Edge)
    ========================================= */
-.jackpot-card {
+.jackpot-slider-wrapper {
+  /* Negative margin to stretch edge-to-edge */
+  margin: 0 -16px; 
   background: rgba(27, 42, 35, 0.95);
   backdrop-filter: blur(5px);
-  /* স্ক্রিনের ডান ও বাম পাশে আনার জন্য নেগেটিভ মার্জিন */
-  margin: 0 -16px; 
   border-top: 2px solid #F5B041;
   border-bottom: 2px solid #F5B041;
   border-left: none;
   border-right: none;
-  border-radius: 0;
-  /* প্যাডিং কমানো হয়েছে (৫০% চিকন করার জন্য) */
-  padding: 12px 16px; 
-  text-align: center;
-  position: relative;
   overflow: hidden;
+  position: relative;
+  padding-bottom: 16px; /* Space for dots */
   box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 0 15px rgba(245, 176, 65, 0.1);
 }
 
-.jackpot-glow {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(245, 176, 65, 0.15) 0%, transparent 60%);
-  animation: pulse-glow 3s infinite alternate;
+.jackpot-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  width: 100%;
 }
 
-@keyframes pulse-glow {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(1.2); opacity: 1; }
+.jackpot-slide {
+  flex: 0 0 100%;
+  padding: 12px 16px; 
+  text-align: center;
+  position: relative;
 }
 
 .jackpot-title {
@@ -82,34 +76,28 @@
   text-transform: uppercase;
   letter-spacing: 2px;
   font-weight: 800;
-  margin-bottom: 4px; /* গ্যাপ কমানো হয়েছে */
-  position: relative;
-  z-index: 1;
+  margin-bottom: 4px;
 }
 
 .jackpot-amount {
-  font-size: 26px; /* ফন্ট সাইজ ছোট করা হয়েছে */
+  font-size: 26px; 
   font-weight: 900;
   color: #FFFFFF;
   text-shadow: 0 0 15px rgba(245, 176, 65, 0.3);
-  margin-bottom: 10px; /* গ্যাপ কমানো হয়েছে */
-  position: relative;
-  z-index: 1;
+  margin-bottom: 10px; 
 }
 
 .timer-container {
   display: flex;
   justify-content: center;
   gap: 8px;
-  position: relative;
-  z-index: 1;
 }
 
 .timer-box {
   background: rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(245, 176, 65, 0.4);
   border-radius: 6px;
-  padding: 4px 8px; /* টাইমার বক্স চিকন করা হয়েছে */
+  padding: 4px 8px; 
   min-width: 50px;
   display: flex;
   flex-direction: column;
@@ -118,7 +106,7 @@
 }
 
 .timer-box span:first-child {
-  font-size: 14px; /* টাইমার ফন্ট ছোট */
+  font-size: 14px; 
   font-weight: 900;
   color: #F5B041;
   font-family: monospace;
@@ -129,6 +117,33 @@
   color: #A0ADB0;
   text-transform: uppercase;
   margin-top: 2px;
+}
+
+/* Slider Dots */
+.jackpot-dots {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 10;
+}
+
+.jackpot-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.jackpot-dot.active {
+  background: #F5B041;
+  width: 16px; /* Active dot is wider */
+  border-radius: 4px;
 }
 
 /* =========================================
