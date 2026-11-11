@@ -3,7 +3,7 @@
   min-height: 100vh;
   width: 100%;
   font-family: inherit;
-  padding-bottom: 80px; /* ফুটারের জন্য জায়গা */
+  padding-bottom: 80px;
 }
 
 .winners-main {
@@ -29,7 +29,7 @@
 .winners-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .winner-card {
@@ -39,9 +39,10 @@
   padding: 16px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   position: relative;
   overflow: hidden;
+  gap: 10px;
 }
 
 /* ১ম, ২য়, ৩য় এর জন্য বিশেষ বর্ডার */
@@ -52,7 +53,8 @@
 .winner-left {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  flex: 1;
 }
 
 .winner-id {
@@ -67,11 +69,28 @@
   color: #A0ADB0;
 }
 
-.winner-tier {
-  font-size: 10px;
+.winner-details-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #2B4236;
+  width: fit-content;
+}
+
+.detail-label {
+  font-size: 9px;
+  color: #A0ADB0;
+  font-weight: 600;
+}
+
+.detail-value {
+  font-size: 11px;
   color: #F5B041;
+  font-family: monospace;
   font-weight: 700;
-  margin-top: 4px;
 }
 
 .winner-right {
@@ -87,15 +106,38 @@
   color: #00E701;
 }
 
+.winner-tier {
+  font-size: 9px;
+  color: #A0ADB0;
+  font-weight: 700;
+}
+
 .winner-badge {
   background: rgba(0, 231, 1, 0.15);
   color: #00E701;
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 4px;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 800;
   letter-spacing: 0.5px;
   border: 1px solid rgba(0, 231, 1, 0.3);
+}
+
+/* QR কোড স্টাইল */
+.qr-code-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #FFFFFF;
+  padding: 4px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+.qr-code-box img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
 }
 
 /* এমপ্টি স্টেট */
