@@ -20,13 +20,14 @@
   background-color: #0d241e; 
 }
 
-/* কন্টেন্ট ওভারলে (রিডেবিলিটি বাড়ানোর জন্য গাঢ় করা হলো) */
+/* কন্টেন্ট ওভারলে (নিচের দিকে সম্পূর্ণ কালো/সবুজ করা হলো) */
 .lottery-overlay {
   position: relative;
   z-index: 1; 
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(to bottom, rgba(13, 36, 30, 0.85), rgba(13, 36, 30, 0.98));
+  /* নিচের দিকে #0d241e দিয়ে দেওয়া হয়েছে যাতে ফাঁকা জায়গায় ছবি না দেখায় */
+  background: linear-gradient(to bottom, rgba(13, 36, 30, 0.85) 0%, rgba(13, 36, 30, 0.95) 60%, #0d241e 100%);
   padding-bottom: 80px; 
 }
 
@@ -43,7 +44,7 @@
    1. Jackpot Hero Section
    ========================================= */
 .jackpot-card {
-  background: rgba(27, 42, 35, 0.95); /* আরও সলিড করা হলো */
+  background: rgba(27, 42, 35, 0.95);
   backdrop-filter: blur(5px);
   border: 2px solid #F5B041;
   border-radius: 20px;
@@ -188,7 +189,7 @@
 
 .ticket-card {
   position: relative;
-  background: rgba(27, 42, 35, 0.95); /* আরও সলিড */
+  background: rgba(27, 42, 35, 0.95);
   backdrop-filter: blur(5px);
   border-radius: 12px;
   padding: 20px 16px;
@@ -205,7 +206,6 @@
   transform: translateY(-4px);
 }
 
-/* পাঞ্চ হোল ইফেক্ট (ব্যাকগ্রাউন্ড কালারের সাথে ম্যাচ করা) */
 .ticket-card::before, .ticket-card::after {
   content: '';
   position: absolute;
@@ -256,7 +256,7 @@
    4. Smart Wallet Section
    ========================================= */
 .wallet-card {
-  background: rgba(27, 42, 35, 0.95); /* আরও সলিড */
+  background: rgba(27, 42, 35, 0.95);
   backdrop-filter: blur(5px);
   border: 1px solid #F5B041;
   border-radius: 12px;
@@ -318,7 +318,7 @@
    ========================================= */
 .winners-ticker-wrapper {
   overflow: hidden;
-  background: rgba(27, 42, 35, 0.95); /* আরও সলিড */
+  background: rgba(27, 42, 35, 0.95);
   backdrop-filter: blur(5px);
   border: 1px solid #2B4236;
   border-radius: 8px;
@@ -327,7 +327,6 @@
   align-items: center;
 }
 
-/* বাম এবং ডান দিকের শ্যাডো (ছোট করা হলো) */
 .winners-ticker-wrapper::before, .winners-ticker-wrapper::after {
   content: '';
   position: absolute;
@@ -363,7 +362,7 @@
   align-items: center;
   gap: 10px;
   font-size: 12px;
-  white-space: nowrap; /* লেখা যাতে ভেঙে না যায় */
+  white-space: nowrap;
 }
 
 .winner-ticker-item .winner-id {
