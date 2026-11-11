@@ -53,7 +53,7 @@ export default function DiceGamePage() {
     setWinStatus(null);
     setRollResult(null);
 
-    // অ্যানিমেশন (রোলিং ইফেক্ট)
+    // অ্যানিমেশন
     animationRef.current = setInterval(() => {
       setRollResult(Math.random() * 100);
     }, 50);
@@ -67,7 +67,6 @@ export default function DiceGamePage() {
 
       if (error) throw error;
 
-      // আসল রেজাল্ট দেখানোর জন্য ১ সেকেন্ড অপেক্ষা
       setTimeout(() => {
         if (animationRef.current) clearInterval(animationRef.current);
         
@@ -88,12 +87,12 @@ export default function DiceGamePage() {
     }
   };
 
-  // স্লাইডারের রঙিন ব্যাকগ্রাউন্ড
+  // স্লাইডারের ব্যাকগ্রাউন্ড কালার (Under হলে বাম দিকে লাল, Over হলে ডান দিকে লাল)
   const trackStyle = {
     background: `linear-gradient(to right, 
-      #ef4444 0%, #ef4444 ${isOver ? target : 0}%, 
-      #3b82f6 ${isOver ? target : 0}%, #3b82f6 ${isOver ? 100 : target}%, 
-      #ef4444 ${isOver ? 100 : target}%, #ef4444 100%)`
+      #ef4444 0%, #ef4444 ${!isOver ? 0 : target}%, 
+      #3b82f6 ${!isOver ? 0 : target}%, #3b82f6 ${!isOver ? target : 100}%, 
+      #ef4444 ${!isOver ? target : 100}%, #ef4444 100%)`
   };
 
   if (loading) return <div className="dice-fullscreen flex items-center justify-center text-white">Loading...</div>;
@@ -101,55 +100,51 @@ export default function DiceGamePage() {
   return (
     <div className="dice-fullscreen">
       
-      {/* টপ বার */}
-      <div className="dice-top-header">
-        <button className="dice-back-btn" onClick={() => router.back()}>
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
+      {/* টপ বার (হুবহু ছবির মতো) */}
+      <div className="dice-top-bar">
+        <button className="back-btn" onClick={() => router.back()}>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
         </button>
-        <div className="dice-tab-indicator">
-          <span>DICE</span>
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+        
+        <div className="center-tab">
+          DICE <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
         </div>
-        <div className="dice-top-right">
-          <button className="dice-icon-btn">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-          </button>
-        </div>
+
+        <button className="refresh-btn">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+        </button>
       </div>
 
-      {/* মেইন গেম এরিয়া */}
-      <div className="dice-content-area">
+      {/* মেইন কন্টেন্ট এরিয়া */}
+      <div className="game-main-area">
         
         {/* বড় রেজাল্ট ডিসপ্লে */}
-        <div className={`dice-big-number ${winStatus === "win" ? "text-green-400" : winStatus === "lose" ? "text-red-400" : ""}`}>
+        <div className={`big-number ${winStatus === "win" ? "text-green-400" : winStatus === "lose" ? "text-red-400" : ""}`}>
           {isRolling ? (rollResult !== null ? rollResult.toFixed(2) : "00.00") : (rollResult !== null ? rollResult.toFixed(2) : target.toFixed(2))}
         </div>
 
         {/* কাস্টম স্লাইডার */}
-        <div className="dice-slider-wrapper">
-          <div className="dice-slider-track-bg" style={trackStyle}></div>
-          
-          {/* টিক মার্কস */}
-          <div className="dice-slider-ticks">
-            <div className="tick"></div>
-            <div className="tick"></div>
-            <div className="tick"></div>
-            <div className="tick"></div>
-            <div className="tick"></div>
+        <div className="slider-container">
+          <div className="slider-marks">
+            <span>|</span><span>|</span><span>|</span><span>|</span><span>|</span>
           </div>
-          
-          <input 
-            type="range" 
-            min="2" 
-            max="98" 
-            step="0.01"
-            value={target}
-            onChange={(e) => { setTarget(Number(e.target.value)); setRollResult(null); setWinStatus(null); }}
-            className="dice-range-input"
-            disabled={isRolling}
-          />
-          
-          <div className="dice-slider-numbers">
+          <div className="slider-track-wrapper">
+            <div className="slider-track-bg" style={trackStyle}></div>
+            {/* নিচের সবুজ দাগ */}
+            <div className="slider-track-bottom-line"></div>
+            
+            <input 
+              type="range" 
+              min="2" 
+              max="98" 
+              step="0.01"
+              value={target}
+              onChange={(e) => { setTarget(Number(e.target.value)); setRollResult(null); setWinStatus(null); }}
+              className="slider-input"
+              disabled={isRolling}
+            />
+          </div>
+          <div className="slider-labels">
             <span>0</span>
             <span>25</span>
             <span>50</span>
@@ -159,24 +154,26 @@ export default function DiceGamePage() {
         </div>
 
         {/* পেআউট বক্স */}
-        <div className="dice-payout-container">
-          <div className="dice-payout-top">
-            <div className="payout-value-box">
-              <span className="label">Payout</span>
-              <span className="value">{multiplier.toFixed(2)} x</span>
+        <div className="payout-box">
+          <div className="payout-top-row">
+            <div className="payout-pill">
+              <span className="p-label">Payout</span>
+              <span className="p-value">{multiplier.toFixed(2)} x</span>
             </div>
-            <div className="payout-slider">
-              <div className="payout-slider-circle">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
+            <div className="payout-slider-track">
+              <div className="payout-slider-thumb">
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 3l4 4H6l4-4zm0 14l-4-4h8l-4 4z" /></svg>
               </div>
             </div>
           </div>
-          <div className="dice-payout-bottom">
-            <div className="potential-win">
-              Potential win: <br/> <strong>{potentialWin.toFixed(2)} BDT</strong>
+          <div className="payout-bottom-row">
+            <div className="p-bottom-item">
+              <span className="p-label">Potential win:</span>
+              <span className="p-val">{potentialWin.toFixed(2)} BDT</span>
             </div>
-            <div className="chance-win">
-              Chance: <br/> <strong>{winChance.toFixed(2)} %</strong>
+            <div className="p-bottom-item text-right">
+              <span className="p-label">Chance:</span>
+              <span className="p-val">{winChance.toFixed(2)} %</span>
             </div>
           </div>
         </div>
@@ -184,36 +181,36 @@ export default function DiceGamePage() {
       </div>
 
       {/* কন্ট্রোল প্যানেল */}
-      <div className="dice-control-panel">
+      <div className="control-panel">
         
         {/* Under / Over বাটন */}
-        <div className="dice-action-row">
-          <button className="dice-icon-blue-btn">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+        <div className="action-row">
+          <button className="btn-blue-icon">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
           </button>
           
           <button 
-            className={`dice-btn-under ${!isOver ? "active" : ""}`}
+            className={`btn-under ${!isOver ? "active" : ""}`}
             onClick={() => setIsOver(false)}
             disabled={isRolling}
           >
-            <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
-            <span className="btn-badge">{target.toFixed(2)}</span>
+            <svg className="w-7 h-7 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
+            <div className="inner-badge">{target.toFixed(2)}</div>
           </button>
           
           <button 
-            className={`dice-btn-over ${isOver ? "active" : ""}`}
+            className={`btn-over ${isOver ? "active" : ""}`}
             onClick={() => setIsOver(true)}
             disabled={isRolling}
           >
-            <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 15l7-7 7 7" /></svg>
-            <span className="btn-badge">{(100 - target).toFixed(2)}</span>
+            <svg className="w-7 h-7 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 15l7-7 7 7" /></svg>
+            <div className="inner-badge">{(100 - target).toFixed(2)}</div>
           </button>
         </div>
 
-        {/* বেট ইনপুট */}
-        <div className="dice-bet-row">
-          <div className="dice-bet-input-container">
+        {/* বেট ইনপুট এবং বাটন */}
+        <div className="bet-row">
+          <div className="bet-input-wrapper">
             <span className="bet-label">Bet BDT</span>
             <input 
               type="number" 
@@ -223,30 +220,22 @@ export default function DiceGamePage() {
               className="bet-input"
             />
           </div>
-          <div className="dice-bet-actions">
-            <button className="bet-action-btn" onClick={() => setBetAmount(Math.max(1, betAmount - 1))} disabled={isRolling}>−</button>
-            <button className="bet-action-btn" onClick={() => setBetAmount(profile?.balance || 1)} disabled={isRolling}>
-              <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-            </button>
-            <button className="bet-action-btn" onClick={() => setBetAmount(betAmount + 1)} disabled={isRolling}>+</button>
-          </div>
+          <button className="btn-square" onClick={() => setBetAmount(Math.max(1, betAmount - 1))} disabled={isRolling}>
+            −
+          </button>
+          <button className="btn-square" onClick={() => setBetAmount(profile?.balance || 1)} disabled={isRolling}>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+          </button>
+          <button className="btn-square" onClick={() => setBetAmount(betAmount + 1)} disabled={isRolling}>
+            +
+          </button>
         </div>
 
         {/* মেইন রোল বাটন */}
-        <button className="dice-main-roll-btn" onClick={handleRoll} disabled={isRolling}>
+        <button className="btn-roll" onClick={handleRoll} disabled={isRolling}>
           {isRolling ? "ROLLING..." : "ROLL"}
         </button>
 
-      </div>
-
-      {/* নিচের ফুটার বার */}
-      <div className="dice-footer-bar">
-        <button className="footer-dice-btn">DICE</button>
-        <div className="footer-help-icon">?</div>
-        <div className="footer-balance">{Number(profile?.balance || 0).toFixed(2)} BDT</div>
-        <button className="footer-menu-btn">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-        </button>
       </div>
     </div>
   );
