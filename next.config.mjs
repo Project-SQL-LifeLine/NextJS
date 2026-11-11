@@ -13,6 +13,9 @@ const nextConfig = {
   },
   basePath: "/NextJS",
   assetPrefix: "/NextJS/",
+  
+  // বিল্ড আরও দ্রুত এবং আউটপুট ফাইল সাইজ ছোট করার জন্য
+  swcMinify: true, 
 };
 
 export default nextConfig;
