@@ -6,11 +6,27 @@
   background-color: #0d241e;
 }
 
-/* ব্যাকগ্রাউন্ড ছবির ওপর ওভারলে (Opacity ও টেক্সট রিডেবিলিটি) */
+/* ফিক্সড ব্যাকগ্রাউন্ড ইমেজ */
+.lottery-fixed-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1; /* সবকিছুর পেছনে থাকবে */
+}
+
+/* কন্টেন্ট ওভারলে */
 .lottery-overlay {
+  position: relative;
+  z-index: 1; /* ব্যাকগ্রাউন্ডের ওপরে থাকবে */
   min-height: 100vh;
   width: 100%;
   background: linear-gradient(to bottom, rgba(13, 36, 30, 0.75), rgba(13, 36, 30, 0.95));
+  padding-bottom: 80px; /* ফুটারের জন্য জায়গা */
 }
 
 .lottery-main {
@@ -26,8 +42,8 @@
    1. Jackpot Hero Section (Premium)
    ========================================= */
 .jackpot-card {
-  background: rgba(27, 42, 35, 0.85); /* ট্রান্সপারেন্ট */
-  backdrop-filter: blur(10px); /* গ্লাস ইফেক্ট */
+  background: rgba(27, 42, 35, 0.85);
+  backdrop-filter: blur(10px);
   border: 2px solid #F5B041;
   border-radius: 20px;
   padding: 24px 16px;
@@ -171,7 +187,7 @@
 
 .ticket-card {
   position: relative;
-  background: rgba(27, 42, 35, 0.85); /* ট্রান্সপারেন্ট কার্ড */
+  background: rgba(27, 42, 35, 0.85);
   backdrop-filter: blur(5px);
   border-radius: 12px;
   padding: 20px 16px;
@@ -188,14 +204,13 @@
   transform: translateY(-4px);
 }
 
-/* পাঞ্চ হোল ইফেক্ট */
 .ticket-card::before, .ticket-card::after {
   content: '';
   position: absolute;
   top: 50%;
   width: 16px;
   height: 16px;
-  background-color: #0d241e; /* পেজের ব্যাকগ্রাউন্ড কালার */
+  background-color: #0d241e;
   border-radius: 50%;
   transform: translateY(-50%);
 }
@@ -229,7 +244,6 @@
   box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-/* টিকিটের টায়ার অনুযায়ী বর্ডার কালার */
 .ticket-card.tier-50 { border: 1px solid #A0AAB2; box-shadow: 0 4px 10px rgba(160, 170, 178, 0.1); }
 .ticket-card.tier-100 { border: 1px solid #4CAF50; box-shadow: 0 4px 10px rgba(76, 175, 80, 0.1); }
 .ticket-card.tier-250 { border: 1px solid #2196F3; box-shadow: 0 4px 10px rgba(33, 150, 243, 0.1); }
