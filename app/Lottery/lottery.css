@@ -14,23 +14,23 @@
   width: 100vw;
   height: 100vh;
   background-size: cover;
-  background-position: center top; /* ইমেজটি ওপরের দিক থেকে শুরু হবে */
+  background-position: center top;
   background-repeat: no-repeat;
   z-index: 0; 
   background-color: #0d241e; 
 }
 
-/* কন্টেন্ট ওভারলে (নিচের দিকে সম্পূর্ণ কালো/সবুজ করা হলো) */
+/* কন্টেন্ট ওভারলে */
 .lottery-overlay {
   position: relative;
   z-index: 1; 
   min-height: 100vh;
   width: 100%;
-  /* নিচের দিকে ১০০% সলিড #0d241e দেওয়া হলো যাতে ফাঁকা জায়গায় ছবি না দেখায় */
   background: linear-gradient(to bottom, rgba(13, 36, 30, 0.75) 0%, rgba(13, 36, 30, 0.95) 50%, #0d241e 100%);
   padding-bottom: 80px; 
 }
 
+/* মেইন কন্টেন্ট প্যাডিং (ব্যানার সরানোর কারণে গ্যাপ অ্যাডজাস্ট করা হয়েছে) */
 .lottery-main {
   padding: 16px;
   max-width: 600px;
@@ -41,18 +41,24 @@
 }
 
 /* =========================================
-   1. Jackpot Hero Section
+   1. Jackpot Hero Section (চিকন এবং ফুল-উইডথ)
    ========================================= */
 .jackpot-card {
   background: rgba(27, 42, 35, 0.95);
   backdrop-filter: blur(5px);
-  border: 2px solid #F5B041;
-  border-radius: 20px;
-  padding: 24px 16px;
+  /* স্ক্রিনের ডান ও বাম পাশে আনার জন্য নেগেটিভ মার্জিন */
+  margin: 0 -16px; 
+  border-top: 2px solid #F5B041;
+  border-bottom: 2px solid #F5B041;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  /* প্যাডিং কমানো হয়েছে (৫০% চিকন করার জন্য) */
+  padding: 12px 16px; 
   text-align: center;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 25px rgba(245, 176, 65, 0.2), inset 0 0 15px rgba(245, 176, 65, 0.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 0 15px rgba(245, 176, 65, 0.1);
 }
 
 .jackpot-glow {
@@ -71,22 +77,22 @@
 }
 
 .jackpot-title {
-  font-size: 11px;
+  font-size: 10px;
   color: #F5B041;
   text-transform: uppercase;
   letter-spacing: 2px;
   font-weight: 800;
-  margin-bottom: 8px;
+  margin-bottom: 4px; /* গ্যাপ কমানো হয়েছে */
   position: relative;
   z-index: 1;
 }
 
 .jackpot-amount {
-  font-size: 36px;
+  font-size: 26px; /* ফন্ট সাইজ ছোট করা হয়েছে */
   font-weight: 900;
   color: #FFFFFF;
-  text-shadow: 0 0 20px rgba(245, 176, 65, 0.3);
-  margin-bottom: 20px;
+  text-shadow: 0 0 15px rgba(245, 176, 65, 0.3);
+  margin-bottom: 10px; /* গ্যাপ কমানো হয়েছে */
   position: relative;
   z-index: 1;
 }
@@ -94,7 +100,7 @@
 .timer-container {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   position: relative;
   z-index: 1;
 }
@@ -102,9 +108,9 @@
 .timer-box {
   background: rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(245, 176, 65, 0.4);
-  border-radius: 8px;
-  padding: 8px 12px;
-  min-width: 60px;
+  border-radius: 6px;
+  padding: 4px 8px; /* টাইমার বক্স চিকন করা হয়েছে */
+  min-width: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -112,66 +118,21 @@
 }
 
 .timer-box span:first-child {
-  font-size: 18px;
+  font-size: 14px; /* টাইমার ফন্ট ছোট */
   font-weight: 900;
   color: #F5B041;
   font-family: monospace;
 }
 
 .timer-box span:last-child {
-  font-size: 9px;
+  font-size: 8px;
   color: #A0ADB0;
   text-transform: uppercase;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 /* =========================================
-   2. Lottery Banner Slider
-   ========================================= */
-.lottery-banner-slider {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-}
-.lottery-banner-slider::-webkit-scrollbar { display: none; }
-
-.lottery-banner-card {
-  flex: 0 0 100%;
-  scroll-snap-align: start;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  border: 1px solid #2B4236;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.lottery-banner-card img {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-}
-
-.banner-notice {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-  color: #FFFFFF;
-  padding: 20px 12px 10px 12px;
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* =========================================
-   3. Smart Ticket Tiers
+   2. Smart Ticket Tiers
    ========================================= */
 .section-title {
   font-size: 14px;
@@ -253,7 +214,7 @@
 .ticket-card.tier-1000 { border: 2px solid #F5B041; box-shadow: 0 4px 15px rgba(245, 176, 65, 0.3); }
 
 /* =========================================
-   4. Smart Wallet Section
+   3. Smart Wallet Section
    ========================================= */
 .wallet-card {
   background: rgba(27, 42, 35, 0.95);
@@ -314,7 +275,7 @@
 }
 
 /* =========================================
-   5. Live Winners Ticker (Auto Scroll)
+   4. Live Winners Ticker (Auto Scroll)
    ========================================= */
 .winners-ticker-wrapper {
   overflow: hidden;
