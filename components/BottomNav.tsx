@@ -154,8 +154,8 @@ export default function BottomNav() {
           <span className={`text-[9px] font-bold mt-0.5 ${isActive("/user/promotion/activity") ? "text-[#00e701]" : "text-white/70"}`}>{t("Promotion", "প্রমোশন")}</span>
         </Link>
         
-        {/* 3. Mega Lottery (নতুন গোল এবং স্পিনিং ডিজাইন) */}
-        <Link href="/Lottery/my-lottery-tickets" className={`flex flex-col items-center cursor-pointer transition-colors -mt-4 ${isActive("/Lottery/my-lottery-tickets") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
+        {/* 3. Mega Lottery (গোল এবং স্পিনিং ডিজাইন, লিংক /Lottery এ আপডেট করা হয়েছে) */}
+        <Link href="/Lottery" className={`flex flex-col items-center cursor-pointer transition-colors -mt-4 ${isActive("/Lottery") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
           <div className={`w-11 h-11 flex items-center justify-center rounded-full border-2 transition-all duration-300 ${
             isActive("/Lottery") 
               ? "border-[#00e701] bg-[#00e701]/20 shadow-[0_0_15px_rgba(0,231,1,0.5)]" 
@@ -165,7 +165,7 @@ export default function BottomNav() {
               <NavIcons.Lottery />
             </div>
           </div>
-          <span className={`text-[8px] font-bold mt-1 text-center leading-tight ${isActive("/Lottery/my-lottery-tickets") ? "text-[#00e701]" : "text-[#F5B041]"}`}>{t("Mega Lottery", "মেগা লটারি")}</span>
+          <span className={`text-[8px] font-bold mt-1 text-center leading-tight ${isActive("/Lottery") ? "text-[#00e701]" : "text-[#F5B041]"}`}>{t("Mega Lottery", "মেগা লটারি")}</span>
         </Link>
 
         {/* 4. Sports */}
