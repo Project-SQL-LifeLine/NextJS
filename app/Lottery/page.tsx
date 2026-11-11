@@ -16,7 +16,6 @@ export default function LotteryHomePage() {
   const [banners, setBanners] = useState<any[]>([]);
   const [timeLeft, setTimeLeft] = useState({ hours: "00", minutes: "00", seconds: "00" });
 
-  // ১. ডাটা লোড (প্রোফাইল এবং লটারি ব্যানার)
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -25,7 +24,6 @@ export default function LotteryHomePage() {
         if (data) setProfile(data);
       }
 
-      // লটারি ব্যানার ফেচ করা (serial = 10)
       const { data: bannerData } = await supabase
         .from("home_banners")
         .select("*")
@@ -38,12 +36,11 @@ export default function LotteryHomePage() {
     fetchData();
   }, []);
 
-  // ২. কাউন্টডাউন টাইমার লজিক
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
       const target = new Date();
-      target.setHours(0, 30, 0, 0); // রাত ১২:৩০
+      target.setHours(0, 30, 0, 0);
 
       if (now.getTime() > target.getTime()) {
         target.setDate(target.getDate() + 1);
@@ -129,7 +126,6 @@ export default function LotteryHomePage() {
               <div 
                 key={price} 
                 className={`ticket-card tier-${price}`} 
-                // এখানে ক্লিক করলেই দামসহ টিকিট কেনার পেজে চলে যাবে
                 onClick={() => router.push(`/Lottery/tickets-buy-activity?price=${price}`)}
               >
                 <div className="ticket-price">৳ {price}</div>
@@ -146,7 +142,8 @@ export default function LotteryHomePage() {
             <h4>{t("Lottery Wallet Balance", "লটারি ওয়ালেট ব্যালেন্স")}</h4>
             <div className="amount">৳ {Number(profile?.lottery_balance || 0).toFixed(2)}</div>
           </div>
-          <button className="withdraw-btn" onClick={() => router.push('/Lottery/withdraw')}>
+          {/* লিংক withdraw-terms পেজে পাঠানো হলো */}
+          <button className="withdraw-btn" onClick={() => router.push('/Lottery/withdraw-terms')}>
             {t("Withdraw", "উত্তোলন")}
           </button>
         </div>
