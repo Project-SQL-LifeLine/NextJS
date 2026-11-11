@@ -1,13 +1,13 @@
 /* =========================================
-   গ্লোবাল ফুল স্ক্রিন লেআউট
+   গ্লোবাল ফুল স্ক্রিন লেআউট (No Scroll)
    ========================================= */
 .dice-fullscreen {
-  height: 100dvh; /* মোবাইলের জন্য ডাইনামিক ভিউপোর্ট হাইট */
+  height: 100dvh; /* মোবাইলের ব্রাউজার বার বাদ দিয়ে ডাইনামিক হাইট */
   width: 100vw;
-  background-color: #421b7a; /* মূল ডার্ক পার্পল */
+  background-color: #421b7a;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* স্ক্রল বন্ধ */
+  overflow: hidden; /* স্ক্রল সম্পূর্ণ বন্ধ */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   user-select: none;
 }
@@ -17,15 +17,16 @@
    ========================================= */
 .dice-top-section {
   background-color: #2d0f56;
-  padding-bottom: 4px;
+  padding-bottom: 2px;
+  flex-shrink: 0; /* যাতে উপরের অংশ চেপে না যায় */
 }
 
 .dice-nav-bar {
-  height: 48px;
+  height: 40px; /* হাইট কমানো হয়েছে */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
+  padding: 0 10px;
   position: relative;
 }
 
@@ -35,6 +36,7 @@
   border: none;
   cursor: pointer;
   z-index: 10;
+  padding: 4px;
 }
 
 /* ট্র্যাপিজয়েড ট্যাব */
@@ -45,8 +47,8 @@
   transform: translateX(-50%);
   background: #18072d;
   color: #fff;
-  padding: 8px 36px 10px;
-  font-size: 13px;
+  padding: 6px 30px 8px;
+  font-size: 12px;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -59,57 +61,58 @@
   border: 2px solid #7b31db;
   color: #fff;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 
-/* হিস্ট্রি বার (উপরের নাম্বারগুলো) */
+/* হিস্ট্রি বার */
 .history-bar {
   display: flex;
   gap: 6px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
-.history-bar::-webkit-scrollbar { display: none; } /* Chrome */
+.history-bar::-webkit-scrollbar { display: none; }
 
 .history-item {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 20px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
 }
 .hist-green { color: #22c55e; }
 .hist-red { color: #ef4444; }
 
 /* =========================================
-   মেইন গেম এরিয়া (বড় নাম্বার, স্লাইডার, পেআউট)
+   মেইন গেম এরিয়া (flex: 1 দেওয়া হয়েছে)
    ========================================= */
 .game-main-area {
-  flex: 1;
+  flex: 1; /* স্ক্রিনের বাকি জায়গা দখল করবে */
+  min-height: 0; /* ফ্লেক্সবাগ এড়ানোর জন্য */
   background-color: #5c1ca8;
-  margin: 8px 12px 12px;
+  margin: 6px 10px;
   border-radius: 16px;
   border: 1px solid #7b31db;
-  padding: 16px;
+  padding: 10px 16px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-evenly; /* সবকিছু সমান দূরত্বে থাকবে */
 }
 
 .big-number {
-  font-size: 56px;
+  font-size: 46px; /* ফন্ট সাইজ ছোট করা হয়েছে */
   font-weight: 900;
   color: #fff;
   text-align: center;
   font-family: monospace;
-  letter-spacing: -2px;
-  margin-bottom: 24px;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
   text-shadow: 0 4px 10px rgba(0,0,0,0.4);
   transition: color 0.1s;
 }
@@ -118,29 +121,28 @@
    কাস্টম স্লাইডার (স্ট্রাইপ ডিজাইন)
    ========================================= */
 .slider-container {
-  margin-bottom: 24px;
+  margin-bottom: 4px;
 }
 
 .slider-marks {
   display: flex;
   justify-content: space-between;
   color: #9c6ade;
-  font-size: 12px;
-  padding-bottom: 8px;
+  font-size: 11px;
+  padding-bottom: 4px;
 }
 
 .slider-track-wrapper {
   position: relative;
-  height: 32px;
+  height: 26px; /* হাইট কমানো হয়েছে */
   border-radius: 4px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
 .slider-track-stripes {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 6px;
+  top: 0; left: 0; right: 0; bottom: 5px;
   z-index: 1;
-  /* স্ট্রাইপ ইফেক্ট নিচে CSS থেকে ডাইনামিকালি আসছে */
 }
 
 .slider-track-bottom-line {
@@ -148,8 +150,8 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 6px;
-  background-color: #2dd4bf; /* সায়ান কালার */
+  height: 5px;
+  background-color: #2dd4bf;
   z-index: 2;
   border-radius: 0 0 4px 4px;
 }
@@ -164,14 +166,13 @@
   cursor: pointer;
 }
 
-/* হলুদ থাম্ব (গোল বাটন) */
 .slider-input::-webkit-slider-thumb {
   appearance: none;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: #fbbf24;
-  border: 5px solid #b45309;
+  border: 4px solid #b45309;
   box-shadow: 0 0 0 2px #000, 0 4px 8px rgba(0,0,0,0.5);
   cursor: grab;
   margin-top: -1px;
@@ -181,9 +182,9 @@
   display: flex;
   justify-content: space-between;
   color: #9c6ade;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 /* =========================================
@@ -192,20 +193,20 @@
 .payout-box {
   background: #3d0b73;
   border-radius: 12px;
-  padding: 12px 16px;
+  padding: 10px 14px;
 }
 
 .payout-top-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .payout-pill {
   background: #280b4f;
   border-radius: 30px;
-  padding: 8px 16px;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -213,8 +214,8 @@
   border: 1px solid #55219e;
 }
 
-.p-label { color: #9c6ade; font-size: 12px; font-weight: 600; }
-.p-value { color: #fff; font-size: 16px; font-weight: 800; }
+.p-label { color: #9c6ade; font-size: 11px; font-weight: 600; }
+.p-value { color: #fff; font-size: 15px; font-weight: 800; }
 
 .payout-slider-track {
   flex: 1;
@@ -229,8 +230,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   background: #a855f7;
   border-radius: 50%;
   display: flex;
@@ -243,50 +244,51 @@
   display: flex;
   justify-content: space-between;
   border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 10px;
+  padding-top: 8px;
 }
 
 .p-bottom-item { display: flex; flex-direction: column; gap: 2px; }
 .text-right { text-align: right; }
-.p-val { color: #fff; font-weight: 800; font-size: 15px; }
+.p-val { color: #fff; font-weight: 800; font-size: 14px; }
 
 /* =========================================
    কন্ট্রোল প্যানেল (নিচের অংশ)
    ========================================= */
 .control-panel {
   background: #280b4f;
-  padding: 12px 16px 16px;
+  padding: 10px 12px;
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px; /* গ্যাপ কমানো হয়েছে */
+  flex-shrink: 0; /* যাতে নিচের অংশ চেপে না যায় */
 }
 
 /* Under / Over বাটন */
 .action-row {
   display: flex;
   gap: 8px;
-  height: 56px;
+  height: 46px; /* হাইট কমানো হয়েছে */
 }
 
 .btn-blue-icon {
-  width: 56px;
+  width: 46px;
   background: #2563eb;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
   cursor: pointer;
 }
 
 .btn-under, .btn-over {
   flex: 1;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -294,7 +296,7 @@
   color: #fff;
   cursor: pointer;
   position: relative;
-  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
   transition: all 0.1s;
 }
 
@@ -302,44 +304,44 @@
 .btn-over { background: #3b82f6; }
 
 .btn-under.active, .btn-over.active {
-  box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.3);
   transform: translateY(2px);
 }
 
 /* ভেতরের কালো পিল */
 .inner-badge {
   background: rgba(0,0,0,0.6);
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 13px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
   font-weight: 800;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 /* বেট ইনপুট */
 .bet-row {
   display: flex;
   gap: 8px;
-  height: 56px;
+  height: 46px; /* হাইট কমানো হয়েছে */
 }
 
 .bet-input-wrapper {
   flex: 1;
   background: #18072d;
   border: 2px solid #421b7a;
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
-.bet-label { color: #9c6ade; font-size: 10px; margin-bottom: -2px; }
+.bet-label { color: #9c6ade; font-size: 9px; margin-bottom: -2px; }
 .bet-input {
   background: transparent;
   border: none;
   color: #fff;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   text-align: center;
   width: 100%;
@@ -347,33 +349,32 @@
 }
 
 .btn-square {
-  width: 56px;
+  width: 46px;
   background: #4b1b83;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   color: #fff;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
-  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.1s;
 }
 .btn-square:active { transform: translateY(2px); box-shadow: none; }
 
 /* রোল বাটন */
 .btn-roll {
   width: 100%;
-  height: 56px;
+  height: 46px; /* হাইট কমানো হয়েছে */
   background: #10b981;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   color: #fff;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 900;
-  box-shadow: inset 0 -5px 0 rgba(0,0,0,0.3);
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
   cursor: pointer;
   letter-spacing: 1px;
 }
@@ -383,27 +384,28 @@
    ফুটার বার
    ========================================= */
 .dice-footer {
-  height: 48px;
+  height: 40px; /* হাইট কমানো হয়েছে */
   background: #18072d;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 12px;
+  flex-shrink: 0;
 }
 
 .btn-dice {
   background: #5e23ab;
   color: #fff;
   border: none;
-  padding: 6px 16px;
+  padding: 4px 14px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
 }
 
 .help-icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: 2px solid #fbbf24;
   color: #fbbf24;
@@ -411,12 +413,12 @@
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .footer-balance {
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -424,8 +426,8 @@
   background: #5e23ab;
   color: #fff;
   border: none;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: flex;
   align-items: center;
