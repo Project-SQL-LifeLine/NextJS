@@ -13,6 +13,7 @@ export default function WinnersPage() {
   const [profile, setProfile] = useState<any>(null);
   const [winners, setWinners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [copiedId, setCopiedId] = useState<string | null>(null); // কপি স্টেট
 
   // গেম আইডি মাস্ক করার ফাংশন (যেমন: RA****99)
   const maskGameId = (gameId: string) => {
@@ -20,6 +21,14 @@ export default function WinnersPage() {
     const id = gameId.toUpperCase();
     if (id.length <= 4) return id;
     return `${id.slice(0, 2)}****${id.slice(-2)}`;
+  };
+
+  // কপি করার ফাংশন
+  const handleCopy = (text: string, id: string) => {
+    if (!text || text === "N/A") return;
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   useEffect(() => {
@@ -31,7 +40,6 @@ export default function WinnersPage() {
           if (profileData) setProfile(profileData);
         }
 
-        // ডাটাবেস থেকে বিজয়ীদের তথ্য আনা (winning_ticket_number এবং lottery_track_id সহ)
         const { data: drawsData, error } = await supabase
           .from("ticket_draws")
           .select(`
@@ -88,7 +96,7 @@ export default function WinnersPage() {
         ) : (
           <div className="winners-list">
             {winners.map((winner) => {
-              // QR কোডের জন্য ডাটা (ভেরিফিকেশনের জন্য)
+              // QR কোডের জন্য ডাটা
               const qrData = `Verify Winner: Track ID: ${winner.profiles?.lottery_track_id || 'N/A'}, Ticket: ${winner.winning_ticket_number || 'N/A'}`;
               const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrData)}&color=0d241e&bgcolor=ffffff`;
 
@@ -111,9 +119,27 @@ export default function WinnersPage() {
                       <span className="detail-value">{winner.winning_ticket_number || "N/A"}</span>
                     </div>
                     
-                    <div className="winner-details-box">
+                    {/* Seed ID এবং কপি বাটন */}
+                    <div className="winner-details-box relative">
                       <span className="detail-label">Seed ID:</span>
-                      <span className="detail-value text-xs truncate max-w-[120px]">{winner.profiles?.lottery_track_id || "N/A"}</span>
+                      <span className="detail-value text-xs truncate max-w-[100px]">
+                        {winner.profiles?.lottery_track_id || "N/A"}
+                      </span>
+                      {winner.profiles?.lottery_track_id && (
+                        <button 
+                          onClick={() => handleCopy(winner.profiles.lottery_track_id, winner.id)}
+                          className="ml-2 text-[#A0ADB0] hover:text-[#F5B041] transition-colors"
+                          title="Copy Seed ID"
+                        >
+                          {copiedId === winner.id ? (
+                            <span className="text-[9px] text-[#00E701] font-bold">Copied!</span>
+                          ) : (
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -122,7 +148,6 @@ export default function WinnersPage() {
                     <span className="winner-prize">৳ {Number(winner.prize_amount).toLocaleString()}</span>
                     <span className="winner-tier">Tier: ৳{winner.winning_ticket_price}</span>
                     
-                    {/* QR Code */}
                     <div className="qr-code-box">
                       <img src={qrUrl} alt="Verify QR" />
                       <span className="text-[7px] text-[#A0ADB0] text-center mt-1">SCAN TO VERIFY</span>
