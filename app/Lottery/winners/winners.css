@@ -1,0 +1,116 @@
+.winners-page {
+  background-color: #0d241e;
+  min-height: 100vh;
+  width: 100%;
+  font-family: inherit;
+  padding-bottom: 80px; /* ফুটারের জন্য জায়গা */
+}
+
+.winners-main {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.winners-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* টেবিল বা লিস্ট ডিজাইন */
+.winners-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.winner-card {
+  background: #1B2A23;
+  border: 1px solid #2B4236;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ১ম, ২য়, ৩য় এর জন্য বিশেষ বর্ডার */
+.winner-card:nth-child(1) { border-color: #F5B041; box-shadow: 0 0 10px rgba(245, 176, 65, 0.2); }
+.winner-card:nth-child(2) { border-color: #A0ADB0; }
+.winner-card:nth-child(3) { border-color: #cd7f32; }
+
+.winner-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.winner-id {
+  font-size: 14px;
+  font-weight: 800;
+  color: #FFFFFF;
+  font-family: monospace;
+}
+
+.winner-date {
+  font-size: 10px;
+  color: #A0ADB0;
+}
+
+.winner-tier {
+  font-size: 10px;
+  color: #F5B041;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.winner-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.winner-prize {
+  font-size: 16px;
+  font-weight: 900;
+  color: #00E701;
+}
+
+.winner-badge {
+  background: rgba(0, 231, 1, 0.15);
+  color: #00E701;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(0, 231, 1, 0.3);
+}
+
+/* এমপ্টি স্টেট */
+.empty-state {
+  text-align: center;
+  padding: 40px 16px;
+  background: #1B2A23;
+  border: 1px dashed #2B4236;
+  border-radius: 12px;
+  color: #A0ADB0;
+}
+
+.empty-state svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
