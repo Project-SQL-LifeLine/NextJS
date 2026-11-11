@@ -2,7 +2,7 @@ name: Deploy Next.js to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main"] # আপনার ব্রাঞ্চের নাম
   workflow_dispatch:
 
 permissions:
@@ -10,7 +10,6 @@ permissions:
   pages: write
   id-token: write
 
-# একই সময়ে একাধিক বিল্ড চললে পুরনো বিল্ড বাতিল করে নতুনটিকে দ্রুত রান করাবে
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -18,9 +17,8 @@ concurrency:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    # টেলিমেট্রি বন্ধ করা হলো (বিল্ড ফাস্ট হবে)
     env:
-      NEXT_TELEMETRY_DISABLED: 1
+      NEXT_TELEMETRY_DISABLED: 1 # বিল্ড ফাস্ট করার জন্য
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,22 +27,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: 'npm'
+          # cache: 'npm' এটি সরিয়ে দেওয়া হয়েছে যাতে এরর না আসে
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # Next.js এর বিল্ড ক্যাশ (সবচেয়ে গুরুত্বপূর্ণ ধাপ)
+      # Next.js এর বিল্ড ক্যাশ (এটি বিল্ড ফাস্ট করবে)
       - name: Cache Next.js build
         uses: actions/cache@v4
         with:
           path: .next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-nextjs-
 
       - name: Install dependencies
-        # --no-audit --no-fund যোগ করায় ইনস্টলেশন ফাস্ট হবে
         run: npm ci --no-audit --no-fund
 
       - name: Build with Next.js
@@ -53,10 +50,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out # আপনার আউটপুট ডিরেক্টরি
+          path: ./out 
 
-      # ডিপ্লয়মেন্ট একই জবের ভেতরে করা হলো, যা রানার স্টার্টআপ টাইম বাঁচাবে
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        # (যদিও অফিসিয়াল অ্যাকশনটি আলাদা জব পছন্দ করে, তবে এটি রানার স্পিন-আপ টাইম বাঁচায়)
