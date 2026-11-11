@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
@@ -8,24 +8,9 @@ import { useLanguage } from "../../../lib/LanguageContext";
 import { useSiteSettings } from "../../../lib/SiteSettingsContext";
 
 const Icons = {
-  Deposit: () => (
-    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-    </svg>
-  ),
-  Withdraw: () => (
-    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-    </svg>
-  ),
   Wallet: () => (
     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-    </svg>
-  ),
-  Refresh: () => (
-    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
     </svg>
   ),
   EyeOff: () => (
@@ -43,14 +28,29 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
     </svg>
   ),
-  Copy: () => (
-    <svg className="w-4 h-4 text-white hover:text-gray-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-    </svg>
-  ),
   Back: () => (
     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    </svg>
+  ),
+  Ticket: () => (
+    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z" />
+    </svg>
+  ),
+  Money: () => (
+    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  Trophy: () => (
+    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+    </svg>
+  ),
+  Document: () => (
+    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
   ),
 };
@@ -62,16 +62,29 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hideBalance, setHideBalance] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsLoggedIn(!!user);
+    };
+    checkUser();
+  }, [userProfile]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setIsMenuOpen(false);
     router.push("/user/login");
   };
 
-  const copyLotteryId = () => {
-    if (userProfile?.lottery_track_id) {
-      navigator.clipboard.writeText(userProfile.lottery_track_id);
-      alert(t("Lottery ID Copied!", "লটারি আইডি কপি হয়েছে!"));
+  // Buy Tickets এ ক্লিক করার ফাংশন
+  const handleBuyTicketsClick = () => {
+    setIsMenuOpen(false);
+    if (!isLoggedIn) {
+      router.push("/user/login"); // লগইন না থাকলে লগইন পেজে যাবে
+    } else {
+      router.push("/Lottery"); // লগইন থাকলে টিকিট পেজে যাবে
     }
   };
 
@@ -94,13 +107,15 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
         </div>
         
         <div className="flex items-center gap-3">
-          {/* Lottery Balance */}
-          <div className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full border border-[#26352e]">
-            <Icons.Wallet />
-            <span className="text-white text-[11px] font-bold">
-              ৳ {hideBalance ? "****" : (Number(userProfile?.lottery_balance) || 0).toFixed(2)}
-            </span>
-          </div>
+          {/* Lottery Balance (শুধুমাত্র লগইন থাকলে দেখাবে) */}
+          {isLoggedIn && (
+            <div className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full border border-[#26352e]">
+              <Icons.Wallet />
+              <span className="text-white text-[11px] font-bold">
+                ৳ {hideBalance ? "****" : (Number(userProfile?.lottery_balance) || 0).toFixed(2)}
+              </span>
+            </div>
+          )}
 
           {/* Hamburger Menu Button */}
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white ml-1">
@@ -115,48 +130,58 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setIsMenuOpen(false)}>
           <div 
-            className="absolute top-[60px] right-3 w-60 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
+            className="absolute top-[60px] right-3 w-64 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Lottery ID Copy Section */}
-            {userProfile && (
-              <div className="px-4 py-3 border-b border-[#26352e] flex flex-col gap-1 bg-black/20">
-                <span className="text-white/70 text-[10px] font-semibold uppercase tracking-wider">{t("Lottery ID", "লটারি আইডি")}</span>
-                <div className="flex items-center justify-between">
-                  <span className="text-white text-[13px] font-bold font-mono">
-                    {userProfile?.lottery_track_id || "N/A"}
-                  </span>
-                  <button onClick={copyLotteryId} className="p-1.5 bg-black/30 hover:bg-black/50 rounded-md transition">
-                    <Icons.Copy />
-                  </button>
-                </div>
-              </div>
+            {/* ১. Buy Tickets */}
+            <button 
+              onClick={handleBuyTicketsClick}
+              className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
+            >
+              <Icons.Ticket /> <span className="text-[11px] font-semibold">{t("Buy Tickets", "টিকিট কিনুন")}</span>
+            </button>
+
+            {/* লগইন থাকলে বাকি অপশনগুলো দেখাবে */}
+            {isLoggedIn && (
+              <>
+                {/* ২. Withdraw Fund */}
+                <button 
+                  onClick={() => { setIsMenuOpen(false); router.push("/Lottery/withdraw-terms"); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
+                >
+                  <Icons.Money /> <span className="text-[11px] font-semibold">{t("Withdraw Fund", "ফান্ড উত্তোলন")}</span>
+                </button>
+
+                {/* ৩. Winner */}
+                <button 
+                  onClick={() => { setIsMenuOpen(false); router.push("/Lottery/winners"); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
+                >
+                  <Icons.Trophy /> <span className="text-[11px] font-semibold">{t("Winner", "বিজয়ী")}</span>
+                </button>
+              </>
             )}
 
-            {/* Deposit & Withdraw Links (পয়েন্ট করতে পারেন আপনার মেইন ওয়ালেট পেজে) */}
-            <Link href="/wallets/voucher-center" className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition">
-              <Icons.Deposit /> <span className="text-[11px]">{t("Buy Tickets", "টিকিট কিনুন")}</span>
-            </Link>
-            <Link href="/Lottery/withdraw" className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition">
-              <Icons.Withdraw /> <span className="text-[11px]">{t("Withdraw", "উত্তোলন")}</span>
-            </Link>
-            
-            <div className="h-px bg-white/10 my-1"></div>
-
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition">
-              <Icons.Refresh /> <span className="text-[11px]">{t("Refresh Balance", "ব্যালেন্স রিফ্রেশ")}</span>
-            </button>
+            {/* ৪. Terms Condition (সবসময় দেখাবে) */}
             <button 
-              onClick={() => setHideBalance(!hideBalance)}
-              className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition"
+              onClick={() => { setIsMenuOpen(false); router.push("/Lottery/withdraw-terms"); }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
             >
-              <Icons.EyeOff /> <span className="text-[11px]">{hideBalance ? t("Show Balance", "ব্যালেন্স দেখান") : t("Hide Balance", "ব্যালেন্স লুকান")}</span>
+              <Icons.Document /> <span className="text-[11px] font-semibold">{t("Terms Condition", "শর্তাবলী")}</span>
             </button>
 
-            <div className="h-px bg-white/10 my-1"></div>
+            {/* Hide/Show Balance (শুধুমাত্র লগইন থাকলে) */}
+            {isLoggedIn && (
+              <button 
+                onClick={() => setHideBalance(!hideBalance)}
+                className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
+              >
+                <Icons.EyeOff /> <span className="text-[11px] font-semibold">{hideBalance ? t("Show Balance", "ব্যালেন্স দেখান") : t("Hide Balance", "ব্যালেন্স লুকান")}</span>
+              </button>
+            )}
 
-            {/* Language Selector */}
-            <div className="px-4 py-2 flex flex-col gap-2">
+            {/* Language Selector (সবসময় দেখাবে) */}
+            <div className="px-4 py-2 flex flex-col gap-2 border-b border-[#26352e]">
               <span className="text-[11px] text-white/70 font-semibold flex items-center gap-2">
                 <Icons.Globe /> {t("Language", "ভাষা")}
               </span>
@@ -176,11 +201,12 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               </div>
             </div>
 
-            <div className="h-px bg-white/10 my-1"></div>
-
-            <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-[#ED4163] hover:bg-black/20 transition">
-              <Icons.Logout /> <span className="text-[11px]">{t("Logout", "লগআউট")}</span>
-            </button>
+            {/* Logout (শুধুমাত্র লগইন থাকলে) */}
+            {isLoggedIn && (
+              <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-[#ED4163] hover:bg-black/20 transition">
+                <Icons.Logout /> <span className="text-[11px] font-semibold">{t("Logout", "লগআউট")}</span>
+              </button>
+            )}
           </div>
         </div>
       )}
