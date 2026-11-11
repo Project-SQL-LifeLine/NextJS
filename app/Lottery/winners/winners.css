@@ -1,8 +1,16 @@
 .winners-page {
-  background-color: #0d241e;
   min-height: 100vh;
   width: 100%;
   font-family: inherit;
+  position: relative;
+  background-color: #0d241e;
+}
+
+/* ব্যাকগ্রাউন্ড ছবির ওপর কালো ও সবুজের মিশ্রণ (যাতে টেক্সট পড়া যায়) */
+.winners-overlay {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(to bottom, rgba(13, 36, 30, 0.7), rgba(13, 36, 30, 0.95));
   padding-bottom: 80px;
 }
 
@@ -23,35 +31,35 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-/* বিজয়ীদের লিস্ট (বক্স ছাড়া) */
+/* বিজয়ীদের লিস্ট */
 .winners-list {
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
 
-/* নতুন লিস্ট আইটেম ডিজাইন */
+/* নতুন গ্লাস ইফেক্ট (Glassmorphism) লিস্ট আইটেম */
 .winner-list-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid #2B4236; /* নিচে চিকন দাগ */
+  padding: 16px;
+  background: rgba(27, 42, 35, 0.85); /* হালকা ট্রান্সপারেন্ট ব্যাকগ্রাউন্ড */
+  backdrop-filter: blur(10px); /* গ্লাস ইফেক্ট */
+  border: 1px solid rgba(43, 66, 54, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
-/* শেষ আইটেমের নিচে দাগ থাকবে না */
-.winner-list-item:last-child {
-  border-bottom: none;
-}
-
-/* বাম দিকের অংশ */
 .winner-left {
   display: flex;
   flex-direction: column;
   gap: 6px;
   flex: 1;
-  min-width: 0; /* টেক্সট ওভারফ্লো রোধ করতে */
+  min-width: 0;
 }
 
 .winner-id {
@@ -73,7 +81,6 @@
   border-radius: 4px;
   font-size: 8px;
   font-weight: 800;
-  letter-spacing: 0.5px;
   border: 1px solid rgba(0, 231, 1, 0.3);
 }
 
@@ -82,7 +89,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.4);
   padding: 4px 8px;
   border-radius: 4px;
   border: 1px solid #2B4236;
@@ -105,7 +112,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 110px; /* লম্বা UUID হলে কেটে যাবে */
+  max-width: 110px; 
 }
 
 /* কপি বাটন */
@@ -140,6 +147,7 @@
   font-weight: 900;
   color: #00E701;
   white-space: nowrap;
+  text-shadow: 0 0 10px rgba(0, 231, 1, 0.3);
 }
 
 .winner-tier {
@@ -149,12 +157,13 @@
   white-space: nowrap;
 }
 
-/* QR কোড বক্স (ছোট এবং ক্লিন) */
+/* QR কোড বক্স */
 .qr-code-box {
   background: #FFFFFF;
   padding: 3px;
   border-radius: 4px;
   margin-top: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
 .qr-code-box img {
@@ -167,10 +176,11 @@
 .empty-state {
   text-align: center;
   padding: 40px 16px;
-  background: #1B2A23;
+  background: rgba(27, 42, 35, 0.85);
   border: 1px dashed #2B4236;
   border-radius: 12px;
   color: #A0ADB0;
+  backdrop-filter: blur(10px);
 }
 
 .empty-state svg {
