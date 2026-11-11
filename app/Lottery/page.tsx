@@ -74,16 +74,16 @@ export default function LotteryHomePage() {
   const ticketTiers = [50, 100, 250, 500, 1000];
 
   return (
-    <div 
-      className="lottery-page-wrapper"
-      style={{ 
-        backgroundImage: `url(${basePath}/home-way.png)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      <div className="lottery-overlay pb-20">
+    <div className="lottery-page-wrapper pb-20">
+      
+      {/* ফিক্সড ব্যাকগ্রাউন্ড ইমেজ (যা স্ক্রল হবে না) */}
+      <div 
+        className="lottery-fixed-bg"
+        style={{ backgroundImage: `url(${basePath}/home-way.png)` }}
+      ></div>
+
+      {/* ওভারলে এবং মেইন কন্টেন্ট */}
+      <div className="lottery-overlay">
         <LotteryHeader userProfile={profile} />
 
         <main className="lottery-main">
