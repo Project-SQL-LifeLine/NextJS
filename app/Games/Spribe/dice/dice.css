@@ -1,450 +1,369 @@
-/* গ্লোবাল ফুল স্ক্রিন */
 .dice-fullscreen {
-  height: 100vh;
+  height: 100dvh; /* মোবাইলের জন্য 100dvh বেশি ভালো কাজ করে */
   width: 100vw;
-  background-color: #4b1b83; /* মূল ডার্ক পার্পল */
+  background-color: #421b7a; /* মূল ডার্ক পার্পল */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   user-select: none;
 }
 
-/* টপ বার */
-.dice-top-header {
-  height: 50px;
-  background-color: #35115e;
+/* =========================================
+   টপ বার
+   ========================================= */
+.dice-top-bar {
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  border-bottom: 1px solid #5a2499;
+  position: relative;
 }
 
-.dice-back-btn {
+.back-btn {
   color: #fff;
   background: transparent;
   border: none;
-  padding: 8px;
   cursor: pointer;
 }
 
-.dice-tab-indicator {
-  background: #240b41;
-  padding: 6px 20px;
-  border-radius: 8px 8px 0 0;
+/* ছবির মতো ট্র্যাপিজয়েড ট্যাব */
+.center-tab {
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
+  background: #280b4f;
+  color: #fff;
+  padding: 10px 30px 12px;
+  font-size: 13px;
+  font-weight: 800;
   display: flex;
   align-items: center;
-  gap: 4px;
-  color: #fff;
-  font-weight: 800;
-  font-size: 12px;
+  justify-content: center;
   clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%);
+  border-bottom: 2px solid #55219e;
 }
 
-.dice-top-right {
-  display: flex;
-  gap: 8px;
-}
-
-.dice-icon-btn {
-  background: #5a2499;
-  border: 1px solid #7c39c9;
+.refresh-btn {
+  background: #5e23ab;
+  border: 2px solid #7b31db;
   color: #fff;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
 
-/* মেইন গেম এরিয়া */
-.dice-content-area {
+/* =========================================
+   মেইন কন্টেন্ট
+   ========================================= */
+.game-main-area {
   flex: 1;
+  background-color: #5c1ca8;
+  margin: 10px;
+  border-radius: 16px;
+  border: 1px solid #7b31db;
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 16px;
-  background: #5a1ea6; /* হালকা পার্পল */
-  margin: 12px;
-  border-radius: 16px;
-  border: 1px solid #7630cd;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
 }
 
-.dice-big-number {
-  font-size: 56px;
+.big-number {
+  font-size: 60px;
   font-weight: 900;
   color: #fff;
   text-align: center;
   font-family: monospace;
-  letter-spacing: -1px;
-  margin-bottom: 24px;
-  text-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  transition: color 0.2s;
+  letter-spacing: -2px;
+  margin-bottom: 30px;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.4);
 }
 
-/* কাস্টম স্লাইডার */
-.dice-slider-wrapper {
-  position: relative;
-  margin-bottom: 24px;
+/* =========================================
+   স্লাইডার
+   ========================================= */
+.slider-container {
+  margin-bottom: 30px;
   padding: 0 10px;
 }
 
-.dice-slider-track-bg {
-  height: 28px;
-  border-radius: 6px;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  /* রঙিন বার (নিচের দিকের হাইলাইট) */
-  border-bottom: 6px solid #2dd4bf; 
-}
-
-/* স্লাইডারের টিক মার্ক */
-.dice-slider-ticks {
-  position: absolute;
-  top: -10px;
-  left: 10px;
-  right: 10px;
+.slider-marks {
   display: flex;
   justify-content: space-between;
-  pointer-events: none;
+  color: #9c6ade;
+  font-size: 10px;
+  padding-bottom: 4px;
 }
 
-.dice-slider-ticks .tick {
-  width: 2px;
-  height: 8px;
-  background: #a78bfa;
+.slider-track-wrapper {
+  position: relative;
+  height: 36px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 4px 6px rgba(0,0,0,0.4);
 }
 
-/* ইনপুট রেঞ্জ */
-.dice-range-input {
+.slider-track-bg {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 28px;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 10;
+  height: 100%;
+  z-index: 1;
 }
 
-/* কাস্টম থাম্ব (স্লাইডার বাটন) */
-.dice-range-input::-webkit-slider-thumb {
+/* নিচের সবুজ দাগ (ছবির মতো) */
+.slider-track-bottom-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background-color: #2dd4bf;
+  z-index: 2;
+}
+
+.slider-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 10;
+  cursor: pointer;
+}
+
+/* হলুদ গোল বাটন */
+.slider-input::-webkit-slider-thumb {
   appearance: none;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #fbbf24;
-  border: 6px solid #b45309;
-  box-shadow: 0 0 15px rgba(251, 191, 36, 0.5), inset 0 0 5px rgba(0,0,0,0.5);
+  border: 4px solid #b45309;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
   cursor: grab;
-  margin-top: -4px;
-  position: relative;
-  z-index: 11;
 }
 
-.dice-slider-numbers {
+.slider-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
-  color: #c4b5fd;
-  margin-top: 8px;
+  color: #9c6ade;
+  font-size: 13px;
   font-weight: 700;
+  margin-top: 8px;
 }
 
-/* পেআউট বক্স */
-.dice-payout-container {
-  background: #3b0b6b;
+/* =========================================
+   পেআউট বক্স
+   ========================================= */
+.payout-box {
+  background: #3d0b73;
   border-radius: 12px;
   padding: 16px;
-  border: 1px solid #5a2499;
 }
 
-.dice-payout-top {
+.payout-top-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 16px;
 }
 
-.payout-value-box {
-  background: #240b41;
-  border: 1px solid #4b1b83;
-  border-radius: 24px;
-  padding: 8px 20px;
-  flex: 1;
+.payout-pill {
+  background: #280b4f;
+  border-radius: 30px;
+  padding: 8px 16px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  flex: 1;
+  border: 1px solid #55219e;
 }
 
-.payout-value-box .label {
-  color: #a78bfa;
-  font-size: 12px;
+.p-label {
+  color: #9c6ade;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.payout-value-box .value {
+.p-value {
   color: #fff;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
 }
 
-.payout-slider {
+.payout-slider-track {
   flex: 1;
-  height: 12px;
-  background: #240b41;
-  border-radius: 6px;
+  height: 10px;
+  background: #280b4f;
+  border-radius: 5px;
   position: relative;
-  border: 1px solid #4b1b83;
 }
 
-.payout-slider-circle {
-  width: 32px;
-  height: 32px;
-  background: #8b5cf6;
-  border-radius: 50%;
+.payout-slider-thumb {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+  background: #a855f7;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid #a78bfa;
+  border: 2px solid #d8b4fe;
 }
 
-.dice-payout-bottom {
+.payout-bottom-row {
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid #4b1b83;
+  border-top: 1px solid #55219e;
   padding-top: 12px;
 }
 
-.potential-win, .chance-win {
-  font-size: 13px;
-  color: #a78bfa;
-  line-height: 1.4;
+.p-bottom-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.potential-win strong, .chance-win strong {
-  color: #fff;
-  font-size: 15px;
-}
+.text-right { text-align: right; }
+.p-val { color: #fff; font-weight: 800; font-size: 16px; }
 
-/* কন্ট্রোল প্যানেল */
-.dice-control-panel {
-  background: #35115e;
+/* =========================================
+   কন্ট্রোল প্যানেল (নিচের অংশ)
+   ========================================= */
+.control-panel {
+  background: #280b4f;
   padding: 16px;
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding-bottom: 24px;
 }
 
-/* Under / Over বাটন */
-.dice-action-row {
+/* Under / Over */
+.action-row {
   display: flex;
-  gap: 8px;
-  height: 60px;
+  gap: 10px;
+  height: 64px;
 }
 
-.dice-icon-blue-btn {
-  width: 60px;
+.btn-blue-icon {
+  width: 64px;
   background: #2563eb;
   border: none;
-  border-radius: 16px;
-  border-bottom: 4px solid #1e3a8a;
+  border-radius: 12px;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 0 #1e3a8a;
   cursor: pointer;
 }
+.btn-blue-icon:active { transform: translateY(4px); box-shadow: none; }
 
-.dice-btn-under, .dice-btn-over {
+.btn-under, .btn-over {
   flex: 1;
   border: none;
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  position: relative;
+  justify-content: center;
+  color: #fff;
   cursor: pointer;
-  transition: all 0.1s;
+  position: relative;
 }
 
-.dice-btn-under {
-  background: #10b981;
-  border-bottom: 4px solid #047857;
-  color: #fff;
-}
-.dice-btn-under.active {
-  background: #059669;
-  box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
-  border-bottom: none;
+.btn-under { background: #10b981; box-shadow: 0 4px 0 #047857; }
+.btn-over { background: #3b82f6; box-shadow: 0 4px 0 #1e3a8a; }
+
+.btn-under.active, .btn-over.active {
   transform: translateY(4px);
+  box-shadow: none;
+  filter: brightness(0.9);
 }
 
-.dice-btn-over {
-  background: #3b82f6;
-  border-bottom: 4px solid #1d4ed8;
-  color: #fff;
-}
-.dice-btn-over.active {
-  background: #2563eb;
-  box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
-  border-bottom: none;
-  transform: translateY(4px);
-}
-
-.btn-badge {
-  position: absolute;
-  bottom: 4px;
-  background: rgba(0,0,0,0.4);
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 700;
+/* ভেতরের কালো পিল (সংখ্যা দেখানোর জন্য) */
+.inner-badge {
+  background: rgba(0,0,0,0.5);
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 /* বেট ইনপুট */
-.dice-bet-row {
+.bet-row {
   display: flex;
   gap: 8px;
   height: 60px;
 }
 
-.dice-bet-input-container {
+.bet-input-wrapper {
   flex: 1;
-  background: #240b41;
-  border: 1px solid #4b1b83;
-  border-radius: 30px;
+  background: #18072d;
+  border: 2px solid #421b7a;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 4px;
 }
 
-.bet-label {
-  font-size: 10px;
-  color: #a78bfa;
-  margin-bottom: -2px;
-}
-
+.bet-label { color: #9c6ade; font-size: 11px; margin-bottom: -2px; }
 .bet-input {
   background: transparent;
   border: none;
   color: #fff;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
   text-align: center;
   width: 100%;
   outline: none;
 }
 
-.dice-bet-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.bet-action-btn {
+.btn-square {
   width: 60px;
   background: #4b1b83;
   border: none;
-  border-radius: 16px;
-  border-bottom: 4px solid #240b41;
+  border-radius: 12px;
   color: #fff;
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 800;
+  box-shadow: 0 4px 0 #240b41;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
-.bet-action-btn:active {
-  transform: translateY(2px);
-  border-bottom: none;
-}
+.btn-square:active { transform: translateY(4px); box-shadow: none; }
 
-/* মেইন রোল বাটন */
-.dice-main-roll-btn {
+/* রোল বাটন */
+.btn-roll {
   width: 100%;
-  height: 60px;
+  height: 64px;
   background: #10b981;
   border: none;
-  border-radius: 16px;
-  border-bottom: 4px solid #047857;
+  border-radius: 12px;
   color: #fff;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
-  letter-spacing: 1px;
+  box-shadow: 0 5px 0 #047857;
   cursor: pointer;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: 1px;
 }
-
-.dice-main-roll-btn:active:not(:disabled) {
-  transform: translateY(4px);
-  border-bottom: none;
-}
-
-/* ফুটার বার */
-.dice-footer-bar {
-  height: 50px;
-  background: #240b41;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  border-top: 1px solid #4b1b83;
-}
-
-.footer-dice-btn {
-  background: #5a2499;
-  color: #fff;
-  border: 1px solid #7c39c9;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.footer-help-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid #fbbf24;
-  color: #fbbf24;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 14px;
-}
-
-.footer-balance {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.footer-menu-btn {
-  background: #5a2499;
-  color: #fff;
-  border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.btn-roll:active:not(:disabled) { transform: translateY(5px); box-shadow: none; }
