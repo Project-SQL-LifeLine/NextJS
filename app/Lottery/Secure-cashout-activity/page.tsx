@@ -26,21 +26,27 @@ export default function SecureCashoutActivityPage() {
 
   useEffect(() => {
     const checkAccess = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-        if (profileData) {
-          // সিকিউরিটি চেক: যদি ফি না দেওয়া থাকে তবে তাকে ফি পেজে পাঠিয়ে দাও
-          if (!profileData.is_lottery_fee_paid) {
-            router.replace("/Lottery/fee-payment");
-            return;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+          if (profileData) {
+            // সিকিউরিটি চেক: যদি ফি না দেওয়া থাকে তবে তাকে ফি পেজে পাঠিয়ে দাও
+            if (!profileData.is_lottery_fee_paid) {
+              router.replace("/Lottery/fee-payment");
+              return;
+            }
+            setProfile(profileData);
           }
-          setProfile(profileData);
         }
+        const { data: settingsData } = await supabase.from("lottery_settings").select("*").eq("id", 1).single();
+        if (settingsData) setSettings(settingsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        // সব ডাটা লোড শেষ হলে লোডিং বন্ধ হবে
+        setLoading(false); 
       }
-      const { data: settingsData } = await supabase.from("lottery_settings").select("*").eq("id", 1).single();
-      if (settingsData) setSettings(settingsData);
-      setLoading(false);
     };
     checkAccess();
   }, [router]);
@@ -90,7 +96,32 @@ export default function SecureCashoutActivityPage() {
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-[#0d241e] flex items-center justify-center"><div className="w-8 h-8 border-4 border-[#F5B041] border-t-transparent rounded-full animate-spin"></div></div>;
+  // ==========================================
+  // লোডিং স্ক্রিন (যখন ডাটা লোড হবে)
+  // ==========================================
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
+        {/* সিকিউরিটি / শিল্ড SVG আইকন */}
+        <svg 
+          className="w-12 h-12 text-white animate-spin" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={1.5} 
+            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" 
+          />
+        </svg>
+        <p className="text-white mt-4 font-bold tracking-widest animate-pulse text-[11px]">
+          SECURING...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div 
