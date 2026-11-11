@@ -136,7 +136,7 @@ export default function BottomNav() {
       </div>
 
       {/* Bottom Navigation (চিকন) */}
-      <nav className="bg-[#184f35] border-t border-[#26352e] fixed bottom-0 w-full flex justify-around items-center py-1 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+      <nav className="bg-[#184f35] border-t border-[#26352e] fixed bottom-0 w-full flex justify-around items-end pb-1 pt-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
         
         {/* 1. Casino */}
         <Link href="/" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
@@ -146,7 +146,7 @@ export default function BottomNav() {
           <span className={`text-[9px] font-bold mt-0.5 ${isActive("/") ? "text-[#00e701]" : "text-white/70"}`}>{t("Casino", "ক্যাসিনো")}</span>
         </Link>
 
-        {/* 2. Promotion (আপডেট করা পাথ) */}
+        {/* 2. Promotion */}
         <Link href="/user/promotion/activity" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/user/promotion/activity") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
           <div className={`p-1 rounded-lg ${isActive("/user/promotion/activity") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
             <NavIcons.Promotion />
@@ -154,15 +154,21 @@ export default function BottomNav() {
           <span className={`text-[9px] font-bold mt-0.5 ${isActive("/user/promotion/activity") ? "text-[#00e701]" : "text-white/70"}`}>{t("Promotion", "প্রমোশন")}</span>
         </Link>
         
-        {/* 3. Mega Lottery (আপডেট করা পাথ) */}
-        <Link href="/Lottery/my-lottery-tickets" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/Lottery/my-lottery-tickets") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
-          <div className={`p-1 rounded-lg ${isActive("/Lottery/my-lottery-tickets") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
-            <NavIcons.Lottery />
+        {/* 3. Mega Lottery (নতুন গোল এবং স্পিনিং ডিজাইন) */}
+        <Link href="/Lottery/my-lottery-tickets" className={`flex flex-col items-center cursor-pointer transition-colors -mt-4 ${isActive("/Lottery/my-lottery-tickets") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
+          <div className={`w-11 h-11 flex items-center justify-center rounded-full border-2 transition-all duration-300 ${
+            isActive("/Lottery/my-lottery-tickets") 
+              ? "border-[#00e701] bg-[#00e701]/20 shadow-[0_0_15px_rgba(0,231,1,0.5)]" 
+              : "border-[#F5B041] bg-[#1B2A23] shadow-[0_0_10px_rgba(245,176,65,0.3)]"
+          }`}>
+            <div className="animate-[spin_4s_linear_infinite]">
+              <NavIcons.Lottery />
+            </div>
           </div>
-          <span className={`text-[8px] font-bold mt-0.5 text-center leading-tight ${isActive("/Lottery/my-lottery-tickets") ? "text-[#00e701]" : "text-white/70"}`}>{t("Mega Lottery", "মেগা লটারি")}</span>
+          <span className={`text-[8px] font-bold mt-1 text-center leading-tight ${isActive("/Lottery/my-lottery-tickets") ? "text-[#00e701]" : "text-[#F5B041]"}`}>{t("Mega Lottery", "মেগা লটারি")}</span>
         </Link>
 
-        {/* 4. Sports (আপডেট করা পাথ) */}
+        {/* 4. Sports */}
         <Link href="/Sports/sport" className={`flex flex-col items-center cursor-pointer transition-colors ${isActive("/Sports/sport") ? "text-[#00e701]" : "text-white/70 hover:text-white"}`}>
           <div className={`p-1 rounded-lg ${isActive("/Sports/sport") ? "border-2 border-[#00e701] bg-[#00e701]/10" : ""}`}>
             <NavIcons.Sports />
