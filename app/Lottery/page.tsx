@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase/client";
 import { useLanguage } from "../../lib/LanguageContext";
 import LotteryHeader from "./Header/Header";
-import LotteryFooter from "./Footer/Footer";
+import BottomNav from "../../components/BottomNav"; // মেইন অ্যাপের বটম নেভিগেশন
 import "./lottery.css";
 
 export default function LotteryHomePage() {
@@ -76,13 +76,13 @@ export default function LotteryHomePage() {
   return (
     <div className="lottery-page-wrapper pb-20">
       
-      {/* ফিক্সড ব্যাকগ্রাউন্ড ইমেজ (যা স্ক্রল হবে না) */}
+      {/* ফিক্সড ব্যাকগ্রাউন্ড ইমেজ */}
       <div 
         className="lottery-fixed-bg"
         style={{ backgroundImage: `url(${basePath}/home-way.png)` }}
       ></div>
 
-      {/* ওভারলে এবং মেইন কন্টেন্ট */}
+      {/* কন্টেন্ট ওভারলে */}
       <div className="lottery-overlay">
         <LotteryHeader userProfile={profile} />
 
@@ -192,7 +192,8 @@ export default function LotteryHomePage() {
 
         </main>
 
-        <LotteryFooter />
+        {/* মেইন অ্যাপের BottomNav যুক্ত করা হলো */}
+        <BottomNav />
       </div>
     </div>
   );
