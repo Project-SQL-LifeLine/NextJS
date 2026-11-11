@@ -2,7 +2,7 @@ name: Deploy Next.js to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # আপনার ব্রাঞ্চের নাম
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +17,10 @@ concurrency:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    # গিটহাব পেজের জন্য environment ডিক্লেয়ার করা বাধ্যতামূলক
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     env:
       NEXT_TELEMETRY_DISABLED: 1
     steps:
@@ -40,7 +44,7 @@ jobs:
             ${{ runner.os }}-nextjs-
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund # npm ci এর বদলে npm install
+        run: npm install --no-audit --no-fund
 
       - name: Build with Next.js
         run: npm run build
