@@ -16,7 +16,8 @@
 }
 
 .terms-card {
-  background: #1B2A23;
+  background: rgba(27, 42, 35, 0.95);
+  backdrop-filter: blur(10px);
   border: 1px solid #F5B041;
   border-radius: 12px;
   padding: 20px;
@@ -39,8 +40,8 @@
   border: 1px solid #2B4236;
   border-radius: 8px;
   padding: 16px;
-  height: 400px; /* বক্সের উচ্চতা */
-  overflow-y: auto; /* ভেতরে স্ক্রল হবে */
+  height: 400px; 
+  overflow-y: auto; 
   margin-bottom: 20px;
   font-size: 12px;
   color: #A0ADB0;
