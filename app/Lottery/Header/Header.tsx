@@ -78,13 +78,12 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
     router.push("/user/login");
   };
 
-  // Buy Tickets এ ক্লিক করার ফাংশন
   const handleBuyTicketsClick = () => {
     setIsMenuOpen(false);
     if (!isLoggedIn) {
-      router.push("/user/login"); // লগইন না থাকলে লগইন পেজে যাবে
+      router.push("/user/login");
     } else {
-      router.push("/Lottery"); // লগইন থাকলে টিকিট পেজে যাবে
+      router.push("/Lottery");
     }
   };
 
@@ -98,16 +97,16 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
             <Icons.Back />
           </button>
           
+          {/* Lotto Logo/Text */}
           <div className="flex flex-col">
-            <div className="text-lg font-extrabold text-white tracking-wider leading-tight">
-              {siteName} <span className="text-[#F5B041] text-sm">Lottery</span>
+            <div className="text-xl font-black text-[#F5B041] tracking-widest uppercase leading-tight drop-shadow-md">
+              Lotto
             </div>
-            <span className="text-[9px] text-[#A0ADB0]">Lucky Draw</span>
           </div>
         </div>
         
         <div className="flex items-center gap-3">
-          {/* Lottery Balance (শুধুমাত্র লগইন থাকলে দেখাবে) */}
+          {/* Lottery Balance */}
           {isLoggedIn && (
             <div className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full border border-[#26352e]">
               <Icons.Wallet />
@@ -129,8 +128,9 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
       {/* Dropdown Menu Overlay */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setIsMenuOpen(false)}>
+          {/* মেনুটি যাতে হেডারের নিচে ঠিকমতো বসে, সেজন্য top-[64px] এবং mt-2 ব্যবহার করা হয়েছে */}
           <div 
-            className="absolute top-[60px] right-3 w-64 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
+            className="absolute top-[60px] right-3 mt-1 w-64 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
             onClick={(e) => e.stopPropagation()}
           >
             {/* ১. Buy Tickets */}
@@ -162,7 +162,7 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               </>
             )}
 
-            {/* ৪. Terms Condition (সবসময় দেখাবে) */}
+            {/* ৪. Terms Condition */}
             <button 
               onClick={() => { setIsMenuOpen(false); router.push("/Lottery/withdraw-terms"); }}
               className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
@@ -170,7 +170,7 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               <Icons.Document /> <span className="text-[11px] font-semibold">{t("Terms Condition", "শর্তাবলী")}</span>
             </button>
 
-            {/* Hide/Show Balance (শুধুমাত্র লগইন থাকলে) */}
+            {/* Hide/Show Balance */}
             {isLoggedIn && (
               <button 
                 onClick={() => setHideBalance(!hideBalance)}
@@ -180,7 +180,7 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               </button>
             )}
 
-            {/* Language Selector (সবসময় দেখাবে) */}
+            {/* Language Selector */}
             <div className="px-4 py-2 flex flex-col gap-2 border-b border-[#26352e]">
               <span className="text-[11px] text-white/70 font-semibold flex items-center gap-2">
                 <Icons.Globe /> {t("Language", "ভাষা")}
@@ -201,7 +201,7 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               </div>
             </div>
 
-            {/* Logout (শুধুমাত্র লগইন থাকলে) */}
+            {/* Logout */}
             {isLoggedIn && (
               <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-[#ED4163] hover:bg-black/20 transition">
                 <Icons.Logout /> <span className="text-[11px] font-semibold">{t("Logout", "লগআউট")}</span>
