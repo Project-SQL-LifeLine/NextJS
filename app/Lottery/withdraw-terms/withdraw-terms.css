@@ -4,6 +4,7 @@
   color: #fff;
   padding: 20px;
   font-family: inherit;
+  padding-bottom: 80px;
 }
 
 .terms-card {
@@ -11,57 +12,98 @@
   border: 1px solid #F5B041;
   border-radius: 12px;
   padding: 20px;
-  max-width: 500px;
+  max-width: 600px;
   margin: 0 auto;
   box-shadow: 0 4px 15px rgba(245, 176, 65, 0.15);
 }
 
 .terms-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
   color: #F5B041;
   text-align: center;
   margin-bottom: 20px;
 }
 
-.terms-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+/* স্ক্রলেবল টার্মস বক্স */
+.terms-scroll-box {
+  background: #0d241e;
+  border: 1px solid #2B4236;
+  border-radius: 8px;
+  padding: 16px;
+  height: 350px; /* বক্সের উচ্চতা */
+  overflow-y: auto; /* ভেতরে স্ক্রল হবে */
+  margin-bottom: 20px;
   font-size: 12px;
   color: #A0ADB0;
   line-height: 1.6;
-  margin-bottom: 20px;
 }
 
-.terms-list li {
+/* কাস্টম স্ক্রলবার ডিজাইন */
+.terms-scroll-box::-webkit-scrollbar {
+  width: 6px;
+}
+.terms-scroll-box::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+.terms-scroll-box::-webkit-scrollbar-thumb {
+  background: #F5B041;
+  border-radius: 10px;
+}
+
+.terms-scroll-box h3 {
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+.terms-scroll-box h3:first-child {
+  margin-top: 0;
+}
+
+.terms-scroll-box p {
+  margin-bottom: 12px;
+  text-align: justify;
+}
+
+.terms-scroll-box ul {
   list-style-type: disc;
-  margin-left: 16px;
+  margin-left: 20px;
+  margin-bottom: 12px;
 }
 
+.terms-scroll-box li {
+  margin-bottom: 6px;
+}
+
+/* চেকবক্স স্টাইল */
 .terms-checkbox-label {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   background: rgba(245, 176, 65, 0.1);
-  padding: 12px;
+  padding: 14px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
   color: #fff;
   margin-bottom: 20px;
+  border: 1px solid rgba(245, 176, 65, 0.3);
 }
 
 .terms-checkbox {
   margin-top: 2px;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   accent-color: #F5B041;
+  cursor: pointer;
 }
 
 .terms-btn {
   width: 100%;
-  padding: 14px;
+  padding: 16px;
   background: #184f35;
   border: 1px solid #FFFFFF;
   border-radius: 8px;
@@ -69,9 +111,12 @@
   font-weight: 800;
   font-size: 14px;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .terms-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: #2B4236;
+  border-color: #2B4236;
 }
