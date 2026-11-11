@@ -2,7 +2,7 @@ name: Deploy Next.js to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # আপনার ব্রাঞ্চের নাম (main/master)
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -16,8 +16,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
+    # টেলিমেট্রি বন্ধ করা হলো (বিল্ড ফাস্ট হবে)
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,23 +29,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: 'npm' # এটি npm ডিপেন্ডেন্সি অটোমেটিক ক্যাশ করবে
+          cache: 'npm'
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # Next.js এর বিল্ড ক্যাশ (এটি বিল্ডের গতি বহুগুণ বাড়িয়ে দেয়)
+      # Next.js এর বিল্ড ক্যাশ (সবচেয়ে গুরুত্বপূর্ণ ধাপ)
       - name: Cache Next.js build
         uses: actions/cache@v4
         with:
-          path: |
-            .next/cache
+          path: .next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
       - name: Install dependencies
-        run: npm ci # npm install এর চেয়ে npm ci অনেক ফাস্ট কাজ করে
+        # --no-audit --no-fund যোগ করায় ইনস্টলেশন ফাস্ট হবে
+        run: npm ci --no-audit --no-fund
 
       - name: Build with Next.js
         run: npm run build
@@ -50,15 +53,10 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out # আপনার Next.js এর আউটপুট ফোল্ডার (output: 'export' দিলে এটি out হয়)
+          path: ./out # আপনার আউটপুট ডিরেক্টরি
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
+      # ডিপ্লয়মেন্ট একই জবের ভেতরে করা হলো, যা রানার স্টার্টআপ টাইম বাঁচাবে
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        # (যদিও অফিসিয়াল অ্যাকশনটি আলাদা জব পছন্দ করে, তবে এটি রানার স্পিন-আপ টাইম বাঁচায়)
