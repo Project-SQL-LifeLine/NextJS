@@ -48,10 +48,13 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  border-top: 2px solid #F5B041;
-  border-bottom: 2px solid #F5B041;
+  
+  /* উপরের হলুদ বর্ডার সরানো হলো এবং নিচের বর্ডার #0d241e করা হলো */
+  border-top: none; 
+  border-bottom: 2px solid #0d241e;
   border-left: none;
   border-right: none;
+  
   overflow: hidden;
   position: relative;
   padding-bottom: 16px; /* Space for dots */
@@ -110,8 +113,9 @@
 }
 
 .timer-box {
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(245, 176, 65, 0.5);
+  /* টাইমার বক্সের বর্ডার #0d241e করা হলো */
+  background: rgba(13, 36, 30, 0.6); 
+  border: 1px solid #0d241e;
   border-radius: 6px;
   padding: 4px 8px; 
   min-width: 50px;
@@ -124,7 +128,7 @@
 .timer-box span:first-child {
   font-size: 14px; 
   font-weight: 900;
-  color: #F5B041;
+  color: #FFFFFF; /* টাইমার কালার সাদা করা হলো */
   font-family: monospace;
 }
 
