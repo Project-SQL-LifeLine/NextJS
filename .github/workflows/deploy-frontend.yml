@@ -1,15 +1,16 @@
-name: Deploy Frontend to GitHub Pages
+name: Deploy Next.js to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"] # আপনার ব্রাঞ্চের নাম (main/master)
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
+# একই সময়ে একাধিক বিল্ড চললে পুরনো বিল্ড বাতিল করে নতুনটিকে দ্রুত রান করাবে
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -24,24 +25,32 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          node-version: "20"
+          cache: 'npm' # এটি npm ডিপেন্ডেন্সি অটোমেটিক ক্যাশ করবে
 
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
+
+      # Next.js এর বিল্ড ক্যাশ (এটি বিল্ডের গতি বহুগুণ বাড়িয়ে দেয়)
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Install dependencies
+        run: npm ci # npm install এর চেয়ে npm ci অনেক ফাস্ট কাজ করে
+
+      - name: Build with Next.js
+        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          path: ./out # আপনার Next.js এর আউটপুট ফোল্ডার (output: 'export' দিলে এটি out হয়)
 
   deploy:
     environment:
