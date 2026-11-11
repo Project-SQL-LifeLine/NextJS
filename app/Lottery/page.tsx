@@ -10,10 +10,12 @@ import "./lottery.css";
 
 export default function LotteryHomePage() {
   const router = useRouter();
-  const { t } = useLanguage(); // Keeping English based on previous request
+  const { t } = useLanguage(); 
   const basePath = process.env.NODE_ENV === "production" ? "/NextJS" : "";
   
   const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true); // নতুন লোডিং স্টেট
+  
   const [timeLeft, setTimeLeft] = useState({ hours: "00", minutes: "00", seconds: "00" });
   
   // Jackpot Slider State
@@ -22,10 +24,17 @@ export default function LotteryHomePage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-        if (data) setProfile(data);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+          if (data) setProfile(data);
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        // ডাটা লোড শেষ হলে লোডার বন্ধ হবে
+        setLoading(false); 
       }
     };
     fetchData();
@@ -35,7 +44,7 @@ export default function LotteryHomePage() {
   useEffect(() => {
     const sliderInterval = setInterval(() => {
       setActiveJackpot((prev) => (prev + 1) % jackpotAmounts.length);
-    }, 3000); // Changes every 3 seconds
+    }, 3000);
     return () => clearInterval(sliderInterval);
   }, [jackpotAmounts.length]);
 
@@ -44,7 +53,7 @@ export default function LotteryHomePage() {
     const timer = setInterval(() => {
       const now = new Date();
       const target = new Date();
-      target.setHours(0, 30, 0, 0); // 12:30 AM
+      target.setHours(0, 30, 0, 0);
 
       if (now.getTime() > target.getTime()) {
         target.setDate(target.getDate() + 1);
@@ -75,6 +84,33 @@ export default function LotteryHomePage() {
 
   const ticketTiers = [50, 100, 250, 500, 1000];
 
+  // ==========================================
+  // লোডিং স্ক্রিন (যখন ডাটা লোড হবে)
+  // ==========================================
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
+        {/* লটারি টিকিট SVG আইকন */}
+        <svg 
+          className="w-12 h-12 text-white animate-spin" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={1.5} 
+            d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z" 
+          />
+        </svg>
+        <p className="text-white mt-4 font-bold tracking-widest animate-pulse text-[11px]">
+          LOADING...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="lottery-page-wrapper pb-20">
       
@@ -95,7 +131,7 @@ export default function LotteryHomePage() {
             className="jackpot-slider-wrapper"
             style={{ backgroundImage: `url(${basePath}/banners-card.png)` }}
           >
-            <div className="jackpot-overlay"></div> {/* Overlay for text readability */}
+            <div className="jackpot-overlay"></div>
             
             <div 
               className="jackpot-track"
@@ -126,7 +162,6 @@ export default function LotteryHomePage() {
               ))}
             </div>
             
-            {/* Slider Dots */}
             <div className="jackpot-dots">
               {jackpotAmounts.map((_, index) => (
                 <div 
