@@ -32,7 +32,7 @@
   border-radius: 18px;
   display: flex;
   flex-direction: column;
-  gap: 6px; /* গ্যাপ কমানো হয়েছে */
+  gap: 6px;
   box-shadow: inset 0 0 0 2px rgba(28, 0, 68, .35);
   position: relative;
 }
@@ -105,7 +105,7 @@
   border-top: 10px solid #a6a3b5;
 }
 
-/* RESULT PANEL (ফাঁকা জায়গা সরিয়ে ছোট করা হয়েছে) */
+/* RESULT PANEL */
 .result-panel {
   flex: 1;
   min-height: 0;
@@ -181,13 +181,11 @@
 .bar .cyan { background-color: #10a6d9; }
 .bar .mint { background-color: #36d7b2; }
 
-/* গ্রিড লাইন ওভারলে (সবসময় ৭০টি দাগ থাকবে) */
 .bar::after {
   content: "";
   position: absolute;
   inset: 0;
   background-image: linear-gradient(90deg, rgba(10, 0, 30, 0.4) 1px, transparent 1px);
-  /* ১০০% ভাগ ৭০ = ১.৪২৮% প্রতি ঘরে একটি দাগ */
   background-size: calc(100% / 70) 100%;
   z-index: 5;
   pointer-events: none;
@@ -323,9 +321,9 @@ input[type=range]::-webkit-slider-thumb {
   margin-top: 2px;
 }
 
-/* BET AREA (উচ্চতা কমানো হয়েছে) */
+/* BET AREA */
 .bet-area {
-  height: 180px; /* আগে ২২৯ ছিল */
+  height: 180px;
   flex: none;
   border-radius: 16px;
   background: #35116e;
@@ -333,7 +331,7 @@ input[type=range]::-webkit-slider-thumb {
   padding: 16px 5% 12px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* স্পেস ঠিক করার জন্য */
+  justify-content: space-between;
 }
 
 .action-row {
@@ -343,14 +341,19 @@ input[type=range]::-webkit-slider-thumb {
   align-items: center;
 }
 
+/* =========================================
+   অ্যারো এবং নাম্বারের পজিশন ফিক্স করা হলো
+   ========================================= */
 .action-btn {
   height: 64px;
   border-radius: 25px;
   border: 3px solid #160d32;
   box-shadow: 0 3px 4px #1a0731, inset 0 2px 3px rgba(255, 255, 255, .35);
   display: flex;
+  flex-direction: column; /* অ্যারো উপরে, নাম্বার নিচে */
   align-items: center;
   justify-content: center;
+  gap: 2px; /* অ্যারো এবং নাম্বারের মাঝে সামান্য জায়গা */
   position: relative;
   cursor: pointer;
 }
@@ -374,26 +377,27 @@ input[type=range]::-webkit-slider-thumb {
 .arrow-svg {
   width: 34px;
   height: 34px;
-  margin-bottom: 8px;
+  margin-top: -4px; /* অ্যারোটি কিছুটা উপরে তোলা হলো */
   filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
 }
 
 .prob {
-  position: absolute;
-  bottom: 5px;
+  position: relative; /* absolute সরিয়ে দেওয়া হলো */
+  bottom: 0; /* bottom সরিয়ে দেওয়া হলো */
   background: #12635b;
   border-radius: 6px;
   padding: 1px 12px;
   font-size: 14px;
+  line-height: 1.2;
 }
 
 .high .prob {
   background: #07517a;
 }
 
-/* BET CONTROLS (আরও ছোট করা হয়েছে) */
+/* BET CONTROLS */
 .bet-row {
-  height: 56px; /* আগে ৭৭ ছিল */
+  height: 56px;
   border-radius: 38px;
   background: #7225c5;
   border: 2px solid #32105c;
@@ -536,10 +540,10 @@ input[type=range]::-webkit-slider-thumb {
   
   .bet-area { height: 125px; padding: 10px 4% 8px; gap: 6px; border-radius: 14px; }
   .action-row { grid-template-columns: 45px 1fr 1fr; gap: 5px; }
-  .action-btn { height: 45px; border-width: 2px; border-radius: 18px; }
+  .action-btn { height: 45px; border-width: 2px; border-radius: 18px; gap: 1px; }
   .roll { height: 45px; width: 45px; }
-  .arrow-svg { width: 24px; height: 24px; margin-bottom: 4px; }
-  .prob { bottom: 2px; padding: 1px 8px; font-size: 11px; border-radius: 4px; }
+  .arrow-svg { width: 24px; height: 24px; margin-top: -2px; }
+  .prob { padding: 1px 8px; font-size: 10px; border-radius: 4px; }
   
   .bet-row { height: 40px; grid-template-columns: 1fr 32px 32px 32px; padding: 3px 7px; gap: 4px; }
   .bet-label { font-size: 10px; }
