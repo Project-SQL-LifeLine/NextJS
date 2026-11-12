@@ -42,13 +42,62 @@ export default function DiceGamePage() {
   const highChance = 100 - chance;
   const potentialWin = bet * payout;
 
+  // 🎵 Web Audio API সাউন্ড ইফেক্ট (কোনো এক্সটার্নাল ফাইল ছাড়াই)
+  const playSound = (type: 'roll' | 'win' | 'lose') => {
+    if (!soundEnabled) return;
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      
+      if (type === 'win') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, ctx.currentTime); // A
+        osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.1); // C#
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2); // E
+        gain.gain.setValueAtTime(0.5, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+      } else if (type === 'lose') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } else if (type === 'roll') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(150, ctx.currentTime);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.1);
+      }
+    } catch (e) {
+      console.log("Audio error", e);
+    }
+  };
+
   // ডাটা লোড (Provably Fair সিড সহ)
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          // প্রোফাইল থেকে ব্যালেন্স এবং সিড ডাটা আনা
           const { data } = await supabase
             .from("profiles")
             .select("balance, pf_client_seed, pf_server_seed_hash")
@@ -61,7 +110,6 @@ export default function DiceGamePage() {
             setServerSeedHash(data.pf_server_seed_hash || "");
           }
 
-          // আগের ড্র-এর হিস্ট্রি আনা
           const { data: history } = await supabase
             .from("original_bets_history")
             .select("roll_value, is_win")
@@ -86,7 +134,6 @@ export default function DiceGamePage() {
     fetchData();
   }, []);
 
-  // মোডাল ওপেন করলে বিস্তারিত হিস্ট্রি লোড করা
   const openModal = async (type: string) => {
     setActiveModal(type);
     if (type === 'history') {
@@ -108,12 +155,10 @@ export default function DiceGamePage() {
     }
   };
 
-  // নতুন র্যান্ডম ক্লায়েন্ট সিড জেনারেট করা
   const handleRandomizeClientSeed = async () => {
     if (isSeedUpdating) return;
     setIsSeedUpdating(true);
     try {
-      // র্যান্ডম ৩২ অক্ষরের হেক্স স্ট্রিং জেনারেট
       const newSeed = Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -136,7 +181,6 @@ export default function DiceGamePage() {
     }
   };
 
-  // টেক্সট কপি ফাংশন
   const handleCopyText = (text: string) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
@@ -153,6 +197,7 @@ export default function DiceGamePage() {
     setIsRolling(true);
     setIsWin(null);
     setResult(null);
+    playSound('roll'); // 🎵 রোলিং সাউন্ড
 
     // অ্যানিমেশন শুরু (১ সেকেন্ড)
     let rollCount = 0;
@@ -162,7 +207,6 @@ export default function DiceGamePage() {
     }, 50);
 
     try {
-      // আসল RPC কল
       const { data, error } = await supabase.rpc("play_dice", {
         p_bet_amount: bet,
         p_target: chance,
@@ -179,7 +223,13 @@ export default function DiceGamePage() {
           setIsWin(data.is_win);
           setProfile({ ...profile, balance: data.balance_after });
           
-          // হিস্ট্রি আপডেট
+          // 🎵 জয় বা পরাজয়ের সাউন্ড
+          if (data.is_win) {
+            playSound('win');
+          } else {
+            playSound('lose');
+          }
+
           setHistoryData(prev => [
             { val: Number(data.roll).toFixed(2), isGreen: data.is_win },
             ...prev
@@ -189,7 +239,7 @@ export default function DiceGamePage() {
           setResult(null);
         }
         setIsRolling(false);
-      }, 1000); // ১ সেকেন্ড পর আসল রেজাল্ট দেখাবে
+      }, 1000);
 
     } catch (err: any) {
       if (animationRef.current) clearInterval(animationRef.current);
@@ -242,7 +292,6 @@ export default function DiceGamePage() {
             </div>
           )) : <div className="text-xs text-gray-400 w-full text-center">{t("No History", "কোন হিস্ট্রি নেই")}</div>}
           
-          {/* Updated History Menu Button with Aligned SVGs */}
           <button className="history-menu" onClick={() => openModal('history')}>
             <svg className="hm-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -258,7 +307,6 @@ export default function DiceGamePage() {
         {/* RESULT & GRAPH PANEL */}
         <section className="result-panel">
           
-          {/* Menu Arrow (Notch) */}
           <div className="notch" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? "▲" : "▼"}
           </div>
@@ -351,7 +399,6 @@ export default function DiceGamePage() {
         <section className="bet-area">
           <div className="action-row">
             
-            {/* Rebet / Roll Button */}
             <button className="action-btn roll" id="roll" onClick={() => handleRoll(false)} disabled={isRolling}>
               <svg style={{ width: '28px', height: '28px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
@@ -359,7 +406,6 @@ export default function DiceGamePage() {
               </svg>
             </button>
 
-            {/* Low (Under) Button */}
             <button className="action-btn low" id="low" onClick={() => handleRoll(false)} disabled={isRolling}>
               <svg className="arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 9l6 6 6-6" />
@@ -367,7 +413,6 @@ export default function DiceGamePage() {
               <span className="prob" id="lowChance">{chance.toFixed(2)}</span>
             </button>
 
-            {/* High (Over) Button */}
             <button className="action-btn high" id="high" onClick={() => handleRoll(true)} disabled={isRolling}>
               <svg className="arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 15l-6-6-6 6" />
