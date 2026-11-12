@@ -15,55 +15,55 @@
   overflow: hidden;
   display: flex;
   justify-content: center;
-  align-items: center; /* গেমটিকে মাঝখানে রাখার জন্য */
 }
 
 .dice-page-wrapper * {
   box-sizing: border-box;
 }
 
+/* =========================================
+   মেইন শেল (সবকিছু ২০% ছোট করা হয়েছে)
+   ========================================= */
 .game-shell {
   width: min(100vw, 709px);
   height: 100dvh;
   min-height: 0;
-  padding: 10px;
+  padding: 8px; /* আগে 10px */
   background: linear-gradient(135deg, #712bb7, #5520a9 52%, #4b19a1);
-  border: 3px solid #8b48d0;
-  border-radius: 23px;
+  border: 2px solid #8b48d0; /* আগে 3px */
+  border-radius: 18px; /* আগে 23px */
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 7px; /* আগে 9px */
   box-shadow: inset 0 0 0 2px rgba(28, 0, 68, .35);
   position: relative;
-  /* স্ক্রিনে ফিট করার জন্য জুম কমানো হলো */
-  zoom: 0.85; 
 }
 
 /* HISTORY */
 .history {
-  height: 51px;
+  height: 41px; /* 51 -> 41 */
   flex: none;
-  border-radius: 24px;
+  border-radius: 20px;
   background: #40147d;
   border: 2px solid #32105e;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 7px;
+  gap: 6px;
+  padding: 4px 6px;
   overflow: hidden;
   position: relative;
 }
 
 .history-item {
-  height: 36px;
+  height: 29px; /* 36 -> 29 */
   min-width: 0;
   flex: 1;
-  border-radius: 24px;
+  border-radius: 20px;
   background: #241039;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(12px, 3.5vw, 24px);
+  font-size: clamp(10px, 2.8vw, 19px); /* ছোট করা হয়েছে */
   white-space: nowrap;
 }
 
@@ -71,15 +71,15 @@
 .history-item.white { color: #fff; }
 
 .history-menu {
-  height: 47px;
-  width: 70px;
+  height: 38px; /* 47 -> 38 */
+  width: 56px; /* 70 -> 56 */
   flex: none;
-  border-radius: 30px;
+  border-radius: 25px;
   background: #7421c5;
   border: 2px solid #210b3b;
   display: grid;
   place-items: center;
-  font-size: 27px;
+  font-size: 22px;
   color: white;
   cursor: pointer;
 }
@@ -88,8 +88,8 @@
   position: absolute;
   top: -1px;
   left: 43%;
-  width: 92px;
-  height: 29px;
+  width: 74px;
+  height: 23px;
   background: #0e0924;
   border: 1px solid #261344;
   border-top: 0;
@@ -102,9 +102,9 @@
   content: "";
   width: 0;
   height: 0;
-  border-left: 9px solid transparent;
-  border-right: 9px solid transparent;
-  border-top: 16px solid #a6a3b5;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 13px solid #a6a3b5;
 }
 
 /* RESULT PANEL */
@@ -112,7 +112,7 @@
   flex: 1;
   min-height: 0;
   border: 2px solid #24103f;
-  border-radius: 17px;
+  border-radius: 14px;
   background: linear-gradient(145deg, #4c1b79, #39146f 58%, #42157f);
   display: flex;
   flex-direction: column;
@@ -122,10 +122,10 @@
 
 .result-number {
   height: 22%;
-  min-height: 100px;
+  min-height: 80px;
   display: grid;
   place-items: center;
-  font-size: clamp(58px, 14vw, 105px);
+  font-size: clamp(46px, 11vw, 84px); /* ছোট করা হয়েছে */
   font-weight: 700;
   letter-spacing: 2px;
   color: #36bd00;
@@ -133,50 +133,54 @@
 
 .chart-area {
   height: 47%;
-  min-height: 180px;
+  min-height: 144px;
   position: relative;
-  padding: 0 0 35px;
+  padding: 0 0 28px;
 }
 
 .scale {
-  height: 23px;
+  height: 18px;
   display: flex;
   justify-content: space-between;
   color: #9b87ae;
-  font-size: 17px;
+  font-size: 14px;
 }
 
 .scale i {
-  height: 17px;
+  height: 14px;
   width: 2px;
   background: #b0a0bf;
 }
 
 .bars {
-  height: calc(100% - 57px);
+  height: calc(100% - 46px);
   display: flex;
   flex-direction: column;
-  gap: 17px;
+  gap: 14px;
 }
 
 .bar {
-  height: 49px;
+  height: 39px; /* 49 -> 39 */
   display: flex;
   overflow: hidden;
   position: relative;
   background: #80103e;
 }
 
+/* =========================================
+   এখানে গ্রিড লাইন ৭০টি করা হয়েছে
+   ========================================= */
 .bar .red,
 .bar .cyan,
 .bar .mint {
   height: 100%;
-  background-size: 10px 100%;
+  /* ১০০% কে ৭০ ভাগে ভাগ করা হয়েছে */
+  background-size: calc(100% / 70) 100%;
   background-image: linear-gradient(
     90deg,
     rgba(10, 0, 30, .6) 1.5px,
     transparent 1.5px,
-    transparent 9px
+    transparent 100%
   );
 }
 
@@ -192,11 +196,11 @@
 
 .ball {
   position: absolute;
-  right: 7px;
+  right: 6px;
   top: 50%;
   transform: translateY(-50%);
-  width: 56px;
-  height: 56px;
+  width: 45px; /* 56 -> 45 */
+  height: 45px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #ffd72c, #ffad00 65%, #ed8c00);
   box-shadow: 0 3px 9px #18082b;
@@ -207,8 +211,8 @@
 
 .ball:after {
   content: "";
-  width: 13px;
-  height: 13px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #111038;
 }
@@ -217,20 +221,20 @@
   display: flex;
   justify-content: space-between;
   color: #9380a9;
-  font-size: 17px;
+  font-size: 14px;
   padding: 0 2px;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
 /* PAYOUT */
 .payout {
-  height: 198px;
+  height: 158px; /* 198 -> 158 */
   flex: none;
   border: 2px solid #1c0c32;
-  border-radius: 17px;
+  border-radius: 14px;
   background: linear-gradient(140deg, #4a1b7c, #32115d);
   position: relative;
-  padding: 18px 6% 0;
+  padding: 14px 5% 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -240,37 +244,37 @@
   display: grid;
   grid-template-columns: 40% 1fr;
   align-items: center;
-  gap: 10%;
-  height: 94px;
+  gap: 8%;
+  height: 75px;
 }
 
 .payout-label {
   text-align: center;
   color: #9c88ad;
-  font-size: 23px;
-  margin-bottom: 6px;
+  font-size: 18px;
+  margin-bottom: 5px;
 }
 
 .multiplier {
-  height: 55px;
-  border-radius: 30px;
+  height: 44px;
+  border-radius: 24px;
   background: #260e47;
   border: 2px solid #70518c;
   display: grid;
   place-items: center;
-  font-size: 36px;
+  font-size: 29px;
 }
 
 .slider-wrap {
   position: relative;
-  padding-top: 19px;
+  padding-top: 15px;
 }
 
 input[type=range] {
   appearance: none;
   width: 100%;
-  height: 27px;
-  border-radius: 18px;
+  height: 22px;
+  border-radius: 14px;
   background: #200c3c;
   border: 2px solid #765296;
   outline: none;
@@ -278,8 +282,8 @@ input[type=range] {
 
 input[type=range]::-webkit-slider-thumb {
   appearance: none;
-  width: 57px;
-  height: 57px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   background: #7c27ca;
   border: 3px solid #4a167d;
@@ -291,20 +295,20 @@ input[type=range]::-webkit-slider-thumb {
 }
 
 .ticks {
-  height: 17px;
-  margin: 0 10px;
+  height: 14px;
+  margin: 0 8px;
   display: flex;
   justify-content: space-between;
 }
 
 .ticks i {
-  height: 12px;
+  height: 10px;
   width: 1px;
   background: #8972a0;
 }
 
 .payout-bottom {
-  height: 70px;
+  height: 56px;
   border-top: 1px solid rgba(20, 4, 38, .35);
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -314,39 +318,39 @@ input[type=range]::-webkit-slider-thumb {
 
 .small-label {
   color: #9b87ae;
-  font-size: 22px;
+  font-size: 18px;
 }
 
 .small-value {
-  font-size: 27px;
+  font-size: 22px;
   margin-top: 2px;
 }
 
 /* BET AREA */
 .bet-area {
-  height: 286px;
+  height: 229px; /* 286 -> 229 */
   flex: none;
-  border-radius: 24px;
+  border-radius: 19px;
   background: #35116e;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
-  padding: 30px 6% 19px;
+  padding: 24px 5% 15px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: 16px;
+  gap: 13px;
 }
 
 .action-row {
   display: grid;
-  grid-template-columns: 92px 1fr 1fr;
-  gap: 9px;
+  grid-template-columns: 74px 1fr 1fr;
+  gap: 7px;
   align-items: center;
 }
 
 .action-btn {
-  height: 99px;
-  border-radius: 37px;
-  border: 4px solid #160d32;
+  height: 79px; /* 99 -> 79 */
+  border-radius: 30px;
+  border: 3px solid #160d32;
   box-shadow: 0 3px 4px #1a0731, inset 0 2px 3px rgba(255, 255, 255, .35);
   display: flex;
   align-items: center;
@@ -356,8 +360,8 @@ input[type=range]::-webkit-slider-thumb {
 }
 
 .roll {
-  height: 96px;
-  width: 96px;
+  height: 77px; /* 96 -> 77 */
+  width: 77px;
   border-radius: 50%;
   background: linear-gradient(145deg, #0785ff, #0050bb);
   color: white;
@@ -373,13 +377,13 @@ input[type=range]::-webkit-slider-thumb {
 
 /* SVG অ্যারো বাটন স্টাইল */
 .arrow-svg {
-  width: 50px;
-  height: 50px;
-  margin-bottom: 12px;
+  width: 40px; /* 50 -> 40 */
+  height: 40px;
+  margin-bottom: 10px;
   filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
 }
 
-/* স্পিনিং অ্যানিমেশন (Refresh Icon) */
+/* স্পিনিং অ্যানিমেশন */
 .animate-spin {
   animation: spin 1s linear infinite;
 }
@@ -391,11 +395,11 @@ input[type=range]::-webkit-slider-thumb {
 
 .prob {
   position: absolute;
-  bottom: 8px;
+  bottom: 6px;
   background: #12635b;
-  border-radius: 8px;
-  padding: 2px 17px;
-  font-size: 21px;
+  border-radius: 6px;
+  padding: 2px 14px;
+  font-size: 17px;
 }
 
 .high .prob {
@@ -404,177 +408,171 @@ input[type=range]::-webkit-slider-thumb {
 
 /* BET CONTROLS */
 .bet-row {
-  height: 96px;
-  border-radius: 60px;
+  height: 77px; /* 96 -> 77 */
+  border-radius: 48px;
   background: #7225c5;
   border: 2px solid #32105c;
   display: grid;
-  grid-template-columns: 1fr 70px 70px 70px;
-  gap: 8px;
+  grid-template-columns: 1fr 56px 56px 56px;
+  gap: 6px;
   align-items: center;
-  padding: 7px 17px;
+  padding: 6px 14px;
 }
 
 .bet-label {
   text-align: center;
-  font-size: 25px;
-  margin-bottom: 4px;
+  font-size: 20px;
+  margin-bottom: 3px;
 }
 
 .bet-input {
-  height: 43px;
-  border-radius: 28px;
+  height: 34px;
+  border-radius: 22px;
   background: #4b197f;
   border: 2px solid #1d0b3a;
   text-align: center;
-  font-size: 27px;
+  font-size: 22px;
   font-weight: 700;
   display: grid;
   place-items: center;
 }
 
 .round-control {
-  height: 69px;
-  width: 69px;
+  height: 55px; /* 69 -> 55 */
+  width: 55px;
   border-radius: 50%;
   border: 2px solid #32105c;
   background: #7123bf;
   display: grid;
   place-items: center;
-  font-size: 34px;
+  font-size: 27px;
   box-shadow: inset 0 1px 2px #b05ae9;
   cursor: pointer;
 }
 
-.coins { font-size: 28px; }
+.coins { font-size: 22px; }
 
 /* FOOTER */
 .footer {
-  height: 48px;
+  height: 38px; /* 48 -> 38 */
   flex: none;
   display: grid;
-  grid-template-columns: 1fr 48px 1fr 48px;
-  gap: 8px;
+  grid-template-columns: 1fr 38px 1fr 38px;
+  gap: 6px;
   align-items: center;
 }
 
 .dice-tab {
-  height: 45px;
-  border-radius: 30px;
+  height: 36px;
+  border-radius: 24px;
   background: #7022bd;
   border: 2px solid #2a104b;
   display: grid;
   place-items: center;
-  font-size: 23px;
+  font-size: 18px;
 }
 
 .help {
-  width: 43px;
-  height: 43px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: #ffad13;
   color: #40105f;
-  border: 3px solid #32104e;
+  border: 2px solid #32104e;
   display: grid;
   place-items: center;
   font-weight: bold;
-  font-size: 28px;
+  font-size: 22px;
 }
 
 .balance {
   text-align: right;
-  font-size: 27px;
+  font-size: 22px;
   white-space: nowrap;
-  padding-right: 10px;
+  padding-right: 8px;
 }
 
 .balance span { color: #a88ec3; }
 
 .menu {
-  width: 48px;
-  height: 48px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: #7524c5;
   border: 2px solid #2b104c;
   display: grid;
   place-items: center;
-  font-size: 27px;
+  font-size: 22px;
   color: white;
   cursor: pointer;
 }
 
 /* COMPACT MOBILE DESIGN */
 @media(max-width: 500px) {
-  .game-shell { 
-    padding: 6px; 
-    gap: 6px; 
-    border-radius: 16px; 
-    /* মোবাইলে আরও জুম কমানো হলো যাতে সব ফিট হয় */
-    zoom: 0.80; 
-  }
-  .history { height: 34px; gap: 4px; padding: 3px; }
-  .history-item { height: 25px; font-size: clamp(11px, 3.1vw, 14px); }
-  .history-menu { height: 32px; width: 43px; font-size: 18px; }
-  .pointer { width: 54px; height: 19px; }
-  .pointer:after { border-left-width: 6px; border-right-width: 6px; border-top-width: 10px; }
-  .result-number { min-height: 0; font-size: clamp(48px, 14vw, 60px); height: 22%; }
-  .chart-area { min-height: 115px; padding-bottom: 24px; }
-  .scale { height: 15px; font-size: 11px; }
-  .scale i { height: 10px; width: 1px; }
-  .bars { height: calc(100% - 39px); gap: 10px; }
-  .bar { height: 27px; }
-  .ball { width: 32px; height: 32px; right: 5px; }
-  .ball:after { width: 8px; height: 8px; }
-  .axis { font-size: 11px; margin-top: 2px; }
-  .payout { height: 110px; padding: 8px 5% 0; border-radius: 12px; }
-  .payout-top { height: 53px; grid-template-columns: 40% 1fr; gap: 6%; }
-  .payout-label { font-size: 13px; margin-bottom: 3px; }
-  .multiplier { height: 31px; font-size: 21px; }
-  .slider-wrap { padding-top: 10px; }
-  input[type=range] { height: 16px; }
-  input[type=range]::-webkit-slider-thumb { width: 33px; height: 33px; }
-  .ticks { height: 9px; margin: 0 5px; }
-  .ticks i { height: 7px; }
-  .payout-bottom { height: 39px; }
-  .small-label { font-size: 12px; }
-  .small-value { font-size: 15px; margin-top: 1px; }
-  .bet-area { height: 160px; padding: 12px 5% 10px; gap: 9px; border-radius: 17px; }
-  .action-row { grid-template-columns: 52px 1fr 1fr; gap: 6px; }
-  .action-btn { height: 55px; border-width: 2px; border-radius: 22px; }
-  .roll { height: 53px; width: 53px; font-size: 29px; }
+  .game-shell { padding: 5px; gap: 5px; border-radius: 12px; }
+  .history { height: 27px; gap: 3px; padding: 2px; }
+  .history-item { height: 20px; font-size: clamp(9px, 2.5vw, 11px); }
+  .history-menu { height: 25px; width: 34px; font-size: 14px; }
+  .pointer { width: 43px; height: 15px; }
+  .pointer:after { border-left-width: 5px; border-right-width: 5px; border-top-width: 8px; }
+  .result-number { min-height: 0; font-size: clamp(38px, 11vw, 48px); height: 22%; }
+  .chart-area { min-height: 92px; padding-bottom: 19px; }
+  .scale { height: 12px; font-size: 9px; }
+  .scale i { height: 8px; width: 1px; }
+  .bars { height: calc(100% - 31px); gap: 8px; }
+  .bar { height: 21px; }
+  .ball { width: 26px; height: 26px; right: 4px; }
+  .ball:after { width: 6px; height: 6px; }
+  .axis { font-size: 9px; margin-top: 2px; }
+  .payout { height: 88px; padding: 6px 4% 0; border-radius: 10px; }
+  .payout-top { height: 42px; grid-template-columns: 40% 1fr; gap: 5%; }
+  .payout-label { font-size: 10px; margin-bottom: 2px; }
+  .multiplier { height: 25px; font-size: 17px; }
+  .slider-wrap { padding-top: 8px; }
+  input[type=range] { height: 13px; }
+  input[type=range]::-webkit-slider-thumb { width: 26px; height: 26px; }
+  .ticks { height: 7px; margin: 0 4px; }
+  .ticks i { height: 5px; }
+  .payout-bottom { height: 31px; }
+  .small-label { font-size: 10px; }
+  .small-value { font-size: 12px; margin-top: 1px; }
+  .bet-area { height: 128px; padding: 10px 4% 8px; gap: 7px; border-radius: 14px; }
+  .action-row { grid-template-columns: 42px 1fr 1fr; gap: 5px; }
+  .action-btn { height: 44px; border-width: 2px; border-radius: 18px; }
+  .roll { height: 42px; width: 42px; font-size: 23px; }
   
-  /* মোবাইলে SVG অ্যারো সাইজ ছোট করা হলো */
-  .arrow-svg { width: 30px; height: 30px; margin-bottom: 8px; }
+  /* মোবাইলে SVG অ্যারো সাইজ আরও ছোট */
+  .arrow-svg { width: 24px; height: 24px; margin-bottom: 5px; }
   
-  .prob { bottom: 3px; padding: 1px 9px; font-size: 12px; border-radius: 5px; }
-  .bet-row { height: 55px; grid-template-columns: 1fr 40px 40px 40px; padding: 4px 9px; gap: 5px; }
-  .bet-label { font-size: 14px; margin-bottom: 2px; }
-  .bet-input { height: 25px; font-size: 16px; border-width: 1px; }
-  .round-control { width: 39px; height: 39px; font-size: 21px; border-width: 1px; }
-  .coins { font-size: 17px; }
-  .footer { height: 28px; grid-template-columns: 1fr 28px 1fr 30px; gap: 5px; }
-  .dice-tab { height: 27px; font-size: 13px; border-width: 1px; }
-  .help { width: 26px; height: 26px; font-size: 17px; border-width: 2px; }
-  .balance { font-size: 15px; padding-right: 4px; }
-  .menu { width: 28px; height: 28px; font-size: 16px; border-width: 1px; }
+  .prob { bottom: 2px; padding: 1px 7px; font-size: 10px; border-radius: 4px; }
+  .bet-row { height: 44px; grid-template-columns: 1fr 32px 32px 32px; padding: 3px 7px; gap: 4px; }
+  .bet-label { font-size: 11px; margin-bottom: 1px; }
+  .bet-input { height: 20px; font-size: 13px; border-width: 1px; }
+  .round-control { width: 31px; height: 31px; font-size: 17px; border-width: 1px; }
+  .coins { font-size: 14px; }
+  .footer { height: 22px; grid-template-columns: 1fr 22px 1fr 24px; gap: 4px; }
+  .dice-tab { height: 21px; font-size: 10px; border-width: 1px; }
+  .help { width: 21px; height: 21px; font-size: 14px; border-width: 1px; }
+  .balance { font-size: 12px; padding-right: 3px; }
+  .menu { width: 22px; height: 22px; font-size: 13px; border-width: 1px; }
 }
 
 @media(max-height: 760px) and (min-width: 501px) {
-  .game-shell { gap: 6px; padding: 7px; }
-  .history { height: 42px; }
-  .history-item { height: 29px; }
-  .payout { height: 165px; padding-top: 10px; }
-  .payout-top { height: 78px; }
-  .multiplier { height: 45px; font-size: 30px; }
-  .payout-bottom { height: 59px; }
-  .small-label { font-size: 17px; }
-  .small-value { font-size: 22px; }
-  .bet-area { height: 235px; padding-top: 15px; gap: 10px; }
-  .action-btn { height: 78px; }
-  .roll { height: 76px; width: 76px; }
-  .bet-row { height: 82px; grid-template-columns: 1fr 58px 58px 58px; }
-  .round-control { width: 57px; height: 57px; }
-  .footer { height: 42px; }
-  .dice-tab { height: 40px; }
-  .help, .menu { width: 40px; height: 40px; }
+  .game-shell { gap: 5px; padding: 6px; }
+  .history { height: 34px; }
+  .history-item { height: 23px; }
+  .payout { height: 132px; padding-top: 8px; }
+  .payout-top { height: 62px; }
+  .multiplier { height: 36px; font-size: 24px; }
+  .payout-bottom { height: 47px; }
+  .small-label { font-size: 14px; }
+  .small-value { font-size: 18px; }
+  .bet-area { height: 188px; padding-top: 12px; gap: 8px; }
+  .action-btn { height: 62px; }
+  .roll { height: 61px; width: 61px; }
+  .bet-row { height: 66px; grid-template-columns: 1fr 46px 46px 46px; }
+  .round-control { width: 46px; height: 46px; }
+  .footer { height: 34px; }
+  .dice-tab { height: 32px; }
+  .help, .menu { width: 32px; height: 32px; }
 }
