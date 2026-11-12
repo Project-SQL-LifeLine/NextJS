@@ -1,526 +1,445 @@
-/* Wrapper to center the app and prevent scroll */
-.dice-game-wrapper {
+/* ফুল স্ক্রিন র‍্যাপার */
+.dice-page {
+  background-color: #1a0b2e;
+  height: 100dvh;
+  width: 100vw;
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100dvh;
-  background-color: #101016; /* Background for the wrapper */
   overflow: hidden;
 }
 
-/* আপনার দেওয়া মূল CSS */
-.app {
-  --purple:#6426b5; --purple2:#7527c6; --panel:#401b70; --panel-dark:#2d1054;
-  --outline:#211039; --muted:#a99ab4; --green:#16b80b; --mint:#49d8b8;
-  --red:#a00045; --blue:#08a8e8;
-
-  width: min(100vw, 839px);
-  height: 100dvh;
-  min-height: 540px;
-  display: grid;
-  grid-template-rows: 7% 88% 5%;
+/* মূল গেম অ্যাপ */
+.dice-app {
+  width: 100%;
+  max-width: 600px;
+  height: 100%;
+  background: #501caf; /* মেইন ব্যাকগ্রাউন্ড */
+  display: flex;
+  flex-direction: column;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(118deg, #6928b6 0%, #6326b4 48%, #501caf 100%);
-  border: 3px solid #8e46d1;
-  border-radius: clamp(18px, 4vw, 34px);
-  box-shadow: inset 0 0 0 3px rgba(190, 105, 255, .14), inset 0 0 22px rgba(0, 0, 0, .18);
-  font-family: Arial, Helvetica, sans-serif;
-  color: #fff;
+  border-left: 1px solid #6a2ac5;
+  border-right: 1px solid #6a2ac5;
 }
 
-.app * {
-  box-sizing: border-box;
-}
-
-.app button, .app input {
-  font: inherit;
-}
-
-.historybar {
-  min-height: 0;
-  margin: 0 1%;
-  border-radius: 0 0 25px 25px;
-  background: rgba(57, 17, 105, .72);
+/* =========================================
+   ১. টপ হেডার ও হিস্ট্রি
+   ========================================= */
+.dice-header {
+  height: 50px;
+  background: #35106b;
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 1.2%;
-  padding: 0 1.1%;
-  overflow: hidden;
-  white-space: nowrap;
-  position: relative;
-}
-
-.history-item {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 60%;
-  border-radius: 30px;
-  display: grid;
-  place-items: center;
-  background: #251044;
-  font-size: clamp(13px, 3.1vw, 29px);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, .28);
-}
-
-.history-item.win {
-  color: #28bb20;
-}
-
-.history-action {
-  flex: 0 0 10%;
-  height: 76%;
-  border-radius: 40px;
-  background: #7022bd;
-  border: 2px solid #2b104b;
-  color: white;
-  font-size: clamp(17px, 3vw, 27px);
-  cursor: pointer;
 }
 
 .notch {
   position: absolute;
-  z-index: 4;
   top: 0;
-  left: 43%;
-  width: 14%;
-  height: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 24px;
   background: #110b29;
-  border: 2px solid #24103f;
-  border-top: 0;
   border-radius: 0 0 12px 12px;
+  color: #666;
   text-align: center;
-  color: #aaa;
-  font-size: 24px;
-  pointer-events: none;
+  font-size: 14px;
+  line-height: 24px;
+  z-index: 10;
 }
 
-main {
-  position: relative;
-  min-height: 0;
+.history-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.history-bar::-webkit-scrollbar { display: none; }
 
-.result-panel {
-  position: absolute;
-  left: 1%;
-  right: 1%;
-  top: 17.8%;
-  height: 31.8%;
-  border: 2px solid #24103b;
-  border-radius: 19px;
-  background: rgba(54, 20, 95, .73);
-  overflow: hidden;
+.history-item {
+  background: #281044;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  flex-shrink: 0;
 }
+.history-item.win { color: #10b981; }
 
-.result-number {
-  height: 31%;
+.refresh-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #5e23ab;
+  border: 2px solid #7b31db;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(65px, 14vw, 122px);
-  font-weight: 500;
-  letter-spacing: 1px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.refresh-icon-btn svg { width: 16px; height: 16px; }
+
+/* =========================================
+   ২. মেইন গেম সেকশন
+   ========================================= */
+.game-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 16px;
 }
 
-.graph {
-  height: 69%;
-  position: relative;
-  padding-bottom: 8px;
+.result-number {
+  font-size: 64px;
+  font-weight: 900;
+  color: #fff;
+  text-align: center;
+  font-family: monospace;
+  letter-spacing: -2px;
+  margin-top: 10px;
+}
+.result-number.text-green { color: #10b981; }
+.result-number.text-red { color: #ef4444; }
+
+/* --- স্লাইডার --- */
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.tickrow {
-  height: 14%;
+.slider-ticks-top {
   display: flex;
   justify-content: space-between;
-  padding: 0 1px;
+  color: #9c6ade;
+  font-size: 12px;
+  padding: 0 4px;
 }
 
-.tickrow i {
-  height: 100%;
-  border-left: 2px solid #aaa;
-  opacity: .8;
-}
-
-.bars {
-  height: 25%;
-  display: flex;
+.slider-track-wrapper {
+  position: relative;
+  height: 40px;
+  border-radius: 4px;
   overflow: hidden;
-  position: relative;
+  box-shadow: inset 0 4px 6px rgba(0,0,0,0.3);
 }
 
-.bars.first {
-  margin-bottom: 2.8%;
+.slider-bars {
+  display: flex;
+  width: 100%;
+  height: 30px; /* নিচে সবুজ লাইনের জন্য ১০ পিক্সেল বাদ */
 }
 
-.segment {
+.bar-red {
+  background: #ef4444;
   height: 100%;
-  position: relative;
+  transition: width 0.1s;
+  /* ভেতরের স্ট্রাইপ ডিজাইন */
+  background-image: repeating-linear-gradient(90deg, transparent, transparent 6px, rgba(0,0,0,0.15) 6px, rgba(0,0,0,0.15) 8px);
 }
 
-.red { background-color: var(--red); }
-.blue { background-color: var(--blue); }
-.green { background-color: var(--mint); }
-
-.segment:after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(90deg, transparent 0 9px, rgba(20, 0, 35, .62) 9px 11px);
+.bar-blue {
+  background: #3b82f6;
+  height: 100%;
+  transition: width 0.1s;
+  background-image: repeating-linear-gradient(90deg, transparent, transparent 6px, rgba(0,0,0,0.15) 6px, rgba(0,0,0,0.15) 8px);
 }
 
-.indicator {
+.slider-bottom-green {
   position: absolute;
-  z-index: 2;
-  top: 35%;
-  transform: translate(-50%, -50%);
-  width: clamp(52px, 8vw, 68px);
-  aspect-ratio: 1;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  background: #2dd4bf;
+}
+
+.slider-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 10;
+  cursor: pointer;
+}
+
+/* স্লাইডারের হলুদ বাটন */
+.slider-input::-webkit-slider-thumb {
+  appearance: none;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: #ffb900;
-  border: 3px solid #e99b00;
-  box-shadow: 0 3px 12px #21083d;
+  background: #fbbf24;
+  border: 4px solid #b45309;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  cursor: grab;
+  margin-top: -2px;
 }
 
-.indicator:after {
-  content: "";
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #17102b;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.scale-labels {
-  height: 25%;
+.slider-numbers {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  padding: 0 1.5%;
-  color: #a99ab2;
-  font-size: clamp(14px, 2.8vw, 22px);
+  color: #9c6ade;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0 4px;
 }
 
-.scale-labels span {
-  position: relative;
-}
-
-.scale-labels span:before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: -27px;
-  height: 17px;
-  border-left: 2px solid #aaa;
-}
-
-.payout-panel {
-  position: absolute;
-  left: 1%;
-  right: 1%;
-  top: 50.8%;
-  height: 18.4%;
-  border: 2px solid #24103b;
-  border-radius: 19px;
-  background: rgba(53, 19, 92, .82);
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: 56% 44%;
+/* --- পেআউট সেকশন --- */
+.payout-section {
+  background: #3d0b73;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: auto; /* নিচে চলে যাবে */
 }
 
 .payout-top {
-  min-height: 0;
-  display: grid;
-  grid-template-columns: 39% 1fr;
-  align-items: center;
-  gap: 5%;
-  padding: 2.5% 5% 0;
-}
-
-.payout-left {
-  text-align: center;
-  min-width: 0;
-}
-
-.muted {
-  color: var(--muted);
-  font-size: clamp(16px, 3.1vw, 26px);
-  line-height: 1.15;
-}
-
-.multiplier {
-  margin-top: 5px;
-  border: 2px solid #6c4888;
-  border-radius: 40px;
-  background: #281044;
-  padding: 4px 7px;
-  font-size: clamp(27px, 5.5vw, 45px);
-  line-height: 1.12;
-  white-space: nowrap;
-}
-
-.slider-wrap {
-  min-width: 0;
-  position: relative;
-  padding: 0 0 16px;
-}
-
-.slider-wrap input {
-  width: 100%;
-  height: 34px;
-  appearance: none;
-  background: #1f0b39;
-  border: 2px solid #68418b;
-  border-radius: 20px;
-  outline: none;
-  display: block;
-}
-
-.slider-wrap input::-webkit-slider-thumb {
-  appearance: none;
-  width: clamp(48px, 8vw, 65px);
-  height: clamp(48px, 8vw, 65px);
-  border-radius: 50%;
-  background: #7624c5;
-  border: 3px solid #40106e;
-  box-shadow: 0 2px 5px #170529;
-  cursor: pointer;
-}
-
-.slider-wrap input::-moz-range-thumb {
-  width: clamp(42px, 7vw, 59px);
-  height: clamp(42px, 7vw, 59px);
-  border-radius: 50%;
-  background: #7624c5;
-  border: 3px solid #40106e;
-  cursor: pointer;
-}
-
-.slider-symbol {
-  position: absolute;
-  left: 50%;
-  top: 16px;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  font-size: clamp(24px, 4vw, 34px);
-  font-weight: bold;
-  line-height: 1;
-}
-
-.slider-ticks {
   display: flex;
-  justify-content: space-between;
-  margin: 2px 4% 0;
-  height: 12px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-.slider-ticks i {
-  border-left: 2px solid #77638e;
-  height: 100%;
+.payout-pill {
+  background: #280b4f;
+  border: 1px solid #55219e;
+  border-radius: 24px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
 }
+
+.payout-pill .label { color: #9c6ade; font-size: 13px; }
+.payout-pill .value { color: #fff; font-size: 18px; font-weight: 800; }
+
+.payout-slider {
+  flex: 1;
+  height: 12px;
+  background: #280b4f;
+  border-radius: 6px;
+  position: relative;
+}
+
+.payout-thumb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+  background: #a855f7;
+  border-radius: 50%;
+  border: 2px solid #d8b4fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.payout-thumb svg { width: 14px; height: 14px; color: #fff; }
 
 .payout-bottom {
-  min-height: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  background: rgba(25, 7, 47, .2);
-  padding: 0 5%;
-  gap: 2%;
-  font-size: clamp(17px, 3.5vw, 28px);
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 10px;
 }
 
-.payout-bottom .muted {
-  display: block;
-  margin-bottom: 3px;
+.p-info { display: flex; flex-direction: column; gap: 2px; }
+.p-info .label { color: #9c6ade; font-size: 12px; }
+.p-info .val { color: #fff; font-weight: 800; font-size: 15px; }
+.text-right { text-align: right; }
+
+/* =========================================
+   ৩. কন্ট্রোল প্যানেল (নিচের বাটনগুলো)
+   ========================================= */
+.control-section {
+  background: #280b4f;
+  padding: 12px 16px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.controls {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 26%;
-  border-radius: 29px 29px 0 0;
-  background: rgba(49, 15, 91, .84);
-  padding: 3.5% 6.2% 3%;
-  display: grid;
-  grid-template-rows: 48% 43%;
-  row-gap: 4%;
+/* Under / Over বাটন */
+.btn-row {
+  display: flex;
+  gap: 8px;
+  height: 56px;
 }
 
-.play-row {
-  min-height: 0;
+.btn-refresh-blue {
+  width: 56px;
+  background: #2563eb;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
   display: flex;
   align-items: center;
-  gap: 2.3%;
+  justify-content: center;
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
 }
+.btn-refresh-blue svg { width: 24px; height: 24px; }
 
-.circle {
-  flex: 0 0 17%;
-  height: auto;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 4px solid #100b2b;
-  background: linear-gradient(#087de0, #0753bd);
-  color: white;
-  font-size: clamp(30px, 6vw, 52px);
-  box-shadow: 0 3px 7px #17062d;
-  cursor: pointer;
-}
-
-.bet-button {
+.btn-under, .btn-over {
   flex: 1;
-  min-width: 0;
-  height: 88%;
-  border-radius: 42px;
-  border: 4px solid #100b2b;
-  color: #fff;
-  font-size: clamp(36px, 7vw, 60px);
-  font-weight: bold;
-  position: relative;
-  box-shadow: 0 3px 8px #18062b;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.low { background: linear-gradient(120deg, #009e80, #00b58a); }
-.high { background: linear-gradient(120deg, #0788ca, #0075b8); }
-
-.bet-button small {
-  position: absolute;
-  bottom: 5%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 50, 62, .55);
-  border-radius: 8px;
-  padding: 2px 16px;
-  font-size: clamp(17px, 3.2vw, 27px);
-  font-weight: normal;
-  white-space: nowrap;
-}
-
-.bet-area {
-  min-height: 0;
-  border: 2px solid #a04adf;
-  border-radius: 55px;
-  background: #7624c2;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 12% 12% 12%;
+  border: none;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1.5%;
-  padding: 1.5% 2.3%;
-}
-
-.bet-input {
-  min-width: 0;
-  text-align: center;
-}
-
-.bet-input label {
-  display: block;
-  font-size: clamp(18px, 3.5vw, 29px);
-  line-height: 1.05;
-  margin-bottom: 3px;
-}
-
-.bet-input input {
-  width: 100%;
-  height: clamp(34px, 6vw, 49px);
-  border-radius: 28px;
-  border: 2px solid #210b3d;
-  background: #4b1881;
+  justify-content: center;
   color: #fff;
+  font-weight: 800;
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
+  transition: all 0.1s;
+}
+
+.btn-under { background: #10b981; }
+.btn-over { background: #3b82f6; }
+
+.btn-under.active, .btn-over.active {
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
+  transform: translateY(2px);
+  filter: brightness(0.9);
+}
+
+.btn-under .arrow, .btn-over .arrow { font-size: 20px; margin-bottom: -4px; }
+.btn-under .badge, .btn-over .badge {
+  background: rgba(0,0,0,0.6);
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* বেট ইনপুট */
+.bet-input-row {
+  display: flex;
+  gap: 8px;
+  height: 56px;
+}
+
+.bet-pill {
+  flex: 1;
+  background: #18072d;
+  border: 2px solid #421b7a;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.bet-label { color: #9c6ade; font-size: 11px; margin-bottom: -2px; }
+.bet-field {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
   text-align: center;
-  font-size: clamp(22px, 4.3vw, 34px);
-  font-weight: bold;
+  width: 100%;
   outline: none;
 }
 
-.small-btn {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 2px solid #35105e;
-  background: #7624bd;
+.btn-small-round {
+  width: 56px;
+  background: #4b1b83;
+  border: none;
+  border-radius: 12px;
   color: #fff;
-  font-size: clamp(23px, 4vw, 34px);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-
-.footer {
-  min-height: 0;
+  font-size: 22px;
+  font-weight: 800;
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
   display: flex;
   align-items: center;
-  gap: 1.5%;
-  padding: 0 2%;
+  justify-content: center;
 }
+.btn-small-round svg { width: 20px; height: 20px; }
+.btn-small-round:active { transform: translateY(2px); box-shadow: none; }
 
-.dice-label {
-  height: 75%;
-  flex: 0 0 36%;
-  border: 2px solid #39105f;
-  border-radius: 35px;
-  background: #7624c3;
-  display: grid;
-  place-items: center;
-  font-size: clamp(17px, 3.3vw, 27px);
-}
-
-.help {
-  height: 80%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #ff9d00;
-  border: 3px solid #52216e;
-  color: #28103e;
-  font-size: clamp(22px, 4vw, 29px);
+/* মেইন রোল বাটন */
+.btn-main-roll {
+  width: 100%;
+  height: 56px;
+  background: #10b981;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  box-shadow: inset 0 -5px 0 rgba(0,0,0,0.3);
   cursor: pointer;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+.btn-main-roll:active:not(:disabled) { transform: translateY(3px); box-shadow: none; }
+
+/* =========================================
+   ৪. ফুটার
+   ========================================= */
+.footer-bar {
+  height: 48px;
+  background: #18072d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
 }
 
-.balance {
-  margin-left: auto;
-  font-size: clamp(19px, 3.8vw, 31px);
-  white-space: nowrap;
+.btn-dice-label {
+  background: #5e23ab;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 800;
 }
 
-.balance span {
-  color: #aaa;
-}
-
-.menu {
-  height: 85%;
-  aspect-ratio: 1;
+.btn-help {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: #7624c3;
-  border: 2px solid #35105c;
-  color: white;
-  font-size: clamp(21px, 3.5vw, 28px);
-  cursor: pointer;
+  border: 2px solid #fbbf24;
+  color: #fbbf24;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 12px;
 }
 
-@media(max-width: 520px) {
-  .app { border-radius: 22px; }
-  .history-item { font-size: clamp(12px, 3vw, 18px); }
-  .notch { height: 34px; }
-  .result-panel { top: 17.5%; height: 32%; }
-  .payout-panel { top: 50.7%; height: 18.7%; }
-  .controls { height: 26.5%; padding: 3% 5.5% 2.5%; grid-template-rows: 48% 43%; row-gap: 4%; }
-  .circle { border-width: 3px; }
-  .bet-button { border-width: 3px; }
-  .bet-area { grid-template-columns: minmax(0,1fr) 12% 12% 12%; gap: 1.2%; }
-  .footer { gap: 1.2%; }
-  .dice-label { flex-basis: 36%; }
+.balance-text {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
 }
 
-@media(max-height: 700px) {
-  .app { min-height: 0; }
-  .result-panel { top: 15%; height: 34%; }
-  .payout-panel { top: 50%; height: 19%; }
-  .controls { height: 27%; }
+.btn-menu {
+  background: #5e23ab;
+  color: #fff;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
