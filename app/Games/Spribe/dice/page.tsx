@@ -28,6 +28,11 @@ export default function DiceGamePage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [modalHistory, setModalHistory] = useState<any[]>([]);
 
+  // Provably Fair স্টেট (নতুন)
+  const [clientSeed, setClientSeed] = useState("");
+  const [serverSeedHash, setServerSeedHash] = useState("");
+  const [isSeedUpdating, setIsSeedUpdating] = useState(false);
+
   // হিস্ট্রি স্টেট
   const [historyData, setHistoryData] = useState<any[]>([]);
 
@@ -37,14 +42,24 @@ export default function DiceGamePage() {
   const highChance = 100 - chance;
   const potentialWin = bet * payout;
 
-  // ডাটা লোড
+  // ডাটা লোড (Provably Fair সিড সহ)
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { data } = await supabase.from("profiles").select("balance").eq("id", user.id).single();
-          if (data) setProfile(data);
+          // প্রোফাইল থেকে ব্যালেন্স এবং সিড ডাটা আনা
+          const { data } = await supabase
+            .from("profiles")
+            .select("balance, pf_client_seed, pf_server_seed_hash")
+            .eq("id", user.id)
+            .single();
+            
+          if (data) {
+            setProfile(data);
+            setClientSeed(data.pf_client_seed || "");
+            setServerSeedHash(data.pf_server_seed_hash || "");
+          }
 
           // আগের ড্র-এর হিস্ট্রি আনা
           const { data: history } = await supabase
@@ -91,6 +106,42 @@ export default function DiceGamePage() {
         console.error("History fetch error", err);
       }
     }
+  };
+
+  // নতুন র্যান্ডম ক্লায়েন্ট সিড জেনারেট করা
+  const handleRandomizeClientSeed = async () => {
+    if (isSeedUpdating) return;
+    setIsSeedUpdating(true);
+    try {
+      // র্যান্ডম ৩২ অক্ষরের হেক্স স্ট্রিং জেনারেট
+      const newSeed = Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ pf_client_seed: newSeed })
+          .eq("id", user.id);
+          
+        if (!error) {
+          setClientSeed(newSeed);
+        } else {
+          console.error("Error updating seed:", error);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSeedUpdating(false);
+    }
+  };
+
+  // টেক্সট কপি ফাংশন
+  const handleCopyText = (text: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    // চাইলে এখানে একটি ছোট টোস্ট মেসেজ দিতে পারেন, আপাতত alert দেওয়া হলো
+    alert(t("Copied to clipboard!", "কপি করা হয়েছে!"));
   };
 
   const handleRoll = async (isHigh: boolean) => {
@@ -513,7 +564,7 @@ export default function DiceGamePage() {
                 </div>
               )}
 
-              {/* ---- PROVABLY FAIR MODAL ---- */}
+              {/* ---- PROVABLY FAIR MODAL (Real Data Connected) ---- */}
               {activeModal === 'provably' && (
                 <div className="modal-inner">
                   <div className="modal-header">
@@ -538,9 +589,13 @@ export default function DiceGamePage() {
                       <label><input type="radio" name="seed" /> {t("Add nonce", "নন্স যোগ করুন")}</label>
                     </div>
                     <div className="pf-input-group">
-                      <input type="text" readOnly value="f831c2f76974550948" />
-                      <button className="pf-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></button>
-                      <button className="pf-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
+                      <input type="text" readOnly value={clientSeed || "Loading..."} />
+                      <button className="pf-icon-btn" onClick={() => handleCopyText(clientSeed)}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                      </button>
+                      <button className="pf-icon-btn" onClick={handleRandomizeClientSeed} disabled={isSeedUpdating}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={isSeedUpdating ? "animate-spin" : ""}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                      </button>
                     </div>
                   </div>
 
@@ -553,9 +608,10 @@ export default function DiceGamePage() {
                       </div>
                     </div>
                     <div className="pf-input-group">
-                      <input type="text" readOnly value="3e45f23aff42567280" />
-                      <button className="pf-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></button>
-                      <button className="pf-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
+                      <input type="text" readOnly value={serverSeedHash || "Loading..."} />
+                      <button className="pf-icon-btn" onClick={() => handleCopyText(serverSeedHash)}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                      </button>
                     </div>
                   </div>
                 </div>
