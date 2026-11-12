@@ -1,0 +1,485 @@
+:root {
+  --bg-dark: #091e36;
+  --bg-blue: #0056b3;
+  --panel-bg: rgba(13, 42, 77, 0.85);
+  --tile-bg: #0e3866;
+  --tile-border: #0a2540;
+  --tile-inner: #1d5e99;
+  --gold: #ffca05;
+  --green-light: #5cb85c;
+  --green-dark: #2e7d32;
+  --blue-light: #007bff;
+}
+
+/* Wrapper */
+.mines-wrapper {
+  margin: 0;
+  width: 100%;
+  height: 100dvh;
+  background: linear-gradient(180deg, #00a8ff 0%, #0066cc 50%, #003d80 100%);
+  font-family: Arial, Helvetica, sans-serif;
+  color: #fff;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+.mines-wrapper * {
+  box-sizing: border-box;
+}
+
+/* Main Shell */
+.game-shell {
+  width: min(100vw, 709px);
+  height: 100dvh;
+  min-height: 0;
+  padding: 8px;
+  background: linear-gradient(180deg, #0066cc, #004080);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+/* TOP MENU POPUP */
+.top-menu-popup {
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 650px;
+  background: #092b4d;
+  border: 2px solid #125c9c;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 10px;
+  z-index: 100;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.menu-item svg { width: 24px; height: 24px; color: #7eb3e6; }
+.menu-item:hover svg { color: #fff; }
+.menu-item span { font-size: 10px; color: #7eb3e6; text-align: center; }
+
+/* Pointer (Notch) */
+.notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 24px;
+  background: #0a1c33;
+  border: 1px solid #1d4775;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  display: grid;
+  place-items: center;
+  z-index: 20;
+  color: #7eb3e6;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* TOP CONTROLS */
+.top-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 38px;
+  flex: none;
+  margin-top: 15px; /* Space for notch */
+}
+
+.mines-selector {
+  background: #0e457f;
+  border: 2px solid #1b68b5;
+  border-radius: 20px;
+  padding: 0 16px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.next-multiplier {
+  background: var(--gold);
+  color: #333;
+  border-radius: 20px;
+  padding: 0 16px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* GAME GRID */
+.game-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.mines-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 1;
+}
+
+.mines-tile {
+  background: var(--tile-bg);
+  border-radius: 8px;
+  border: 2px solid var(--tile-border);
+  box-shadow: 0 4px 0 var(--tile-border), inset 0 2px 5px rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+  position: relative;
+}
+
+.mines-tile:active:not(.revealed) {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--tile-border);
+}
+
+.inner-circle {
+  width: 30%;
+  height: 30%;
+  background: var(--tile-inner);
+  border-radius: 50%;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+  transition: opacity 0.2s;
+}
+
+.mines-tile.revealed {
+  background: #1b5e99;
+  border-color: #0a2540;
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+  cursor: default;
+}
+
+.mines-tile.revealed .inner-circle {
+  opacity: 0;
+}
+
+.mines-tile.mine {
+  background: #d32f2f; /* Red */
+  border-color: #8b0000;
+}
+
+.mines-tile.star {
+  background: #2e7d32; /* Green */
+  border-color: #1b5e20;
+}
+
+.mines-tile .icon {
+  font-size: 24px;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+/* MIDDLE CONTROLS */
+.middle-controls {
+  display: flex;
+  gap: 10px;
+  height: 40px;
+  flex: none;
+}
+
+.random-btn {
+  flex: 1;
+  background: #1160a5;
+  border: 2px solid #2480d1;
+  border-radius: 20px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.random-btn:disabled { opacity: 0.5; }
+
+.auto-game-toggle {
+  flex: 1;
+  background: #08335e;
+  border: 2px solid #1160a5;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 0 10px;
+}
+
+.toggle-switch {
+  width: 34px;
+  height: 18px;
+  background: #555;
+  border-radius: 20px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.toggle-switch.active { background: var(--green-light); }
+.toggle-knob {
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s;
+}
+.toggle-switch.active .toggle-knob { transform: translateX(16px); }
+
+/* BET PANEL */
+.bet-panel {
+  background: #0b3969;
+  border: 2px solid #155794;
+  border-radius: 16px;
+  padding: 10px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bet-action-row {
+  display: flex;
+  gap: 10px;
+  height: 55px;
+}
+
+.refresh-btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: #155794;
+  border: 2px solid #2480d1;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.refresh-btn svg { width: 24px; height: 24px; }
+.refresh-btn:disabled { opacity: 0.5; }
+
+.main-action-btn {
+  flex: 1;
+  border: none;
+  border-radius: 28px;
+  color: #fff;
+  font-weight: 900;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.bet-btn {
+  background: linear-gradient(180deg, #6fcf4a, #388e3c);
+  border: 2px solid #1b5e20;
+  box-shadow: 0 4px 0 #1b5e20, inset 0 2px 2px rgba(255,255,255,0.3);
+}
+.bet-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #1b5e20;
+}
+
+.cashout-btn {
+  background: linear-gradient(180deg, #ffca05, #e5b300);
+  border: 2px solid #a37a00;
+  box-shadow: 0 4px 0 #a37a00, inset 0 2px 2px rgba(255,255,255,0.3);
+  color: #000;
+  text-shadow: none;
+}
+.cashout-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #a37a00;
+}
+
+.bet-input-row {
+  height: 50px;
+  background: #08335e;
+  border: 2px solid #1160a5;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 8px;
+}
+
+.bet-input-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.bet-label {
+  font-size: 10px;
+  color: #7eb3e6;
+  line-height: 1;
+}
+
+.bet-input {
+  font-size: 16px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.round-ctrl {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #155794;
+  border: 2px solid #2480d1;
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.round-ctrl:disabled { opacity: 0.5; }
+.round-ctrl.stack { font-size: 16px; }
+
+/* FOOTER */
+.footer {
+  height: 36px;
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr 36px 1fr 36px;
+  gap: 8px;
+  align-items: center;
+}
+
+.mines-tab {
+  height: 100%;
+  border-radius: 20px;
+  background: #0e457f;
+  border: 2px solid #1b68b5;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.help {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #333;
+  display: grid;
+  place-items: center;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.balance {
+  text-align: right;
+  font-size: 16px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.balance span { font-size: 12px; color: #7eb3e6; }
+
+.menu {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #155794;
+  border: 2px solid #2480d1;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* COMPACT MOBILE DESIGN */
+@media(max-width: 500px) {
+  .game-shell { padding: 5px; gap: 4px; }
+  
+  .mines-grid { gap: 5px; border-radius: 4px; }
+  .mines-tile { border-radius: 4px; border-width: 1px; box-shadow: 0 2px 0 var(--tile-border); }
+  .mines-tile .icon { font-size: 18px; }
+  
+  .top-controls { height: 32px; margin-top: 12px; }
+  .mines-selector, .next-multiplier { font-size: 12px; padding: 0 10px; border-width: 1px; }
+  .notch { width: 60px; height: 18px; font-size: 10px; border-radius: 0 0 8px 8px; }
+  
+  .middle-controls { height: 34px; gap: 6px; }
+  .random-btn, .auto-game-toggle { font-size: 11px; border-width: 1px; }
+  .toggle-switch { width: 28px; height: 16px; }
+  .toggle-knob { width: 12px; height: 12px; }
+  .toggle-switch.active .toggle-knob { transform: translateX(12px); }
+  
+  .bet-panel { padding: 6px; gap: 6px; border-radius: 12px; }
+  .bet-action-row { height: 45px; gap: 6px; }
+  .refresh-btn { width: 45px; height: 45px; border-width: 1px; }
+  .refresh-btn svg { width: 18px; height: 18px; }
+  .main-action-btn { font-size: 14px; border-width: 1px; }
+  
+  .bet-input-row { height: 40px; padding: 0 6px; gap: 4px; border-width: 1px; }
+  .bet-input { font-size: 14px; }
+  .round-ctrl { width: 30px; height: 30px; font-size: 16px; border-width: 1px; }
+  
+  .footer { height: 28px; grid-template-columns: 1fr 28px 1fr 28px; gap: 4px; }
+  .mines-tab { font-size: 11px; border-width: 1px; }
+  .help { width: 24px; height: 24px; font-size: 14px; }
+  .balance { font-size: 13px; }
+  .menu { width: 28px; height: 28px; font-size: 14px; border-width: 1px; }
+  
+  .top-menu-popup { padding: 8px 5px; gap: 5px; border-width: 1px; }
+  .menu-item svg { width: 20px; height: 20px; }
+  .menu-item span { font-size: 8px; }
+}
