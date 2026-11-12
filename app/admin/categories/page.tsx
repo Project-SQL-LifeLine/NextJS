@@ -13,17 +13,17 @@ export default function AdminCategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
-  // ফর্ম স্টেট (নতুন ফিল্ডগুলো যোগ করা হয়েছে)
+  // ফর্ম স্টেট
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
     icon_name: "gamepad",
-    link_url: "https://www.yourlink.com",
+    link_url: "",
     serial: 0,
-    image_path: "", // নতুন: ছবির পাথ
-    is_game: false, // নতুন: এটি কি গেম?
-    display_home: true, // নতুন: হোমে দেখাবে?
-    display_game_hub: false, // নতুন: গেম পেজে দেখাবে?
+    image_path: "",
+    is_game: false,
+    display_home: true,
+    display_game_hub: false,
   });
 
   useEffect(() => {
@@ -117,13 +117,13 @@ export default function AdminCategoriesPage() {
           .update(payload)
           .eq("id", editingCategory.id);
         if (error) throw error;
-        setMessage({ type: "success", text: "Category updated successfully!" });
+        setMessage({ type: "success", text: "Updated successfully!" });
       } else {
         const { error } = await supabase
           .from("home_categories_create")
           .insert([payload]);
         if (error) throw error;
-        setMessage({ type: "success", text: "New Category added successfully!" });
+        setMessage({ type: "success", text: "Added successfully!" });
       }
 
       setIsModalOpen(false);
@@ -166,7 +166,7 @@ export default function AdminCategoriesPage() {
   };
 
   if (loading) {
-    return <div className="p-10 text-center text-gray-500">Loading Categories...</div>;
+    return <div className="p-10 text-center text-gray-500">Loading...</div>;
   }
 
   return (
@@ -176,7 +176,7 @@ export default function AdminCategoriesPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Game & Category Manager</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage games and categories for Home and Game Hub.</p>
+          <p className="text-gray-500 text-sm mt-1">Manage where games and categories appear.</p>
         </div>
         <button 
           onClick={() => openModal()} 
@@ -204,7 +204,7 @@ export default function AdminCategoriesPage() {
                 <th className="p-4 font-semibold">Title</th>
                 <th className="p-4 font-semibold">Type</th>
                 <th className="p-4 font-semibold">Locations</th>
-                <th className="p-4 font-semibold">Image Path</th>
+                <th className="p-4 font-semibold">Route URL</th>
                 <th className="p-4 font-semibold">Status</th>
                 <th className="p-4 font-semibold text-right">Actions</th>
               </tr>
@@ -235,8 +235,8 @@ export default function AdminCategoriesPage() {
                         ))}
                       </div>
                     </td>
-                    <td className="p-4 text-gray-500 font-mono text-xs max-w-[150px] truncate">
-                      {cat.image_path || "N/A"}
+                    <td className="p-4 text-blue-600 font-mono text-xs max-w-[200px] truncate">
+                      {cat.link_url}
                     </td>
                     <td className="p-4">
                       <button 
@@ -277,7 +277,7 @@ export default function AdminCategoriesPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editingCategory ? `Edit: ${editingCategory.title}` : "Add New"}
+              {editingCategory ? `Edit: ${editingCategory.title}` : "Add New Game / Category"}
             </h2>
             
             <form onSubmit={handleSave} className="flex flex-col gap-4">
@@ -340,21 +340,21 @@ export default function AdminCategoriesPage() {
               </div>
 
               <div>
-                <label className="text-sm text-gray-600 font-semibold mb-1 block">Link URL (Route)</label>
+                <label className="text-sm text-gray-600 font-semibold mb-1 block">Route URL (From app folder)</label>
                 <input
                   type="text"
                   name="link_url"
                   value={formData.link_url}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500 font-mono text-sm"
                   placeholder="e.g. /Games/Spribe/dice"
                   required
                 />
+                <p className="text-xs text-gray-400 mt-1">Your route starts from app/Games/. So URL will be /Games/...</p>
               </div>
 
-              {/* নতুন: Image Path */}
               <div>
-                <label className="text-sm text-gray-600 font-semibold mb-1 block">Image Path (from public folder)</label>
+                <label className="text-sm text-gray-600 font-semibold mb-1 block">Image Path (From public folder)</label>
                 <input
                   type="text"
                   name="image_path"
@@ -363,10 +363,9 @@ export default function AdminCategoriesPage() {
                   className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500 font-mono text-sm"
                   placeholder="e.g. /images/games/dice.png"
                 />
-                <p className="text-xs text-gray-400 mt-1">Put your image in public folder and paste the path here.</p>
+                <p className="text-xs text-gray-400 mt-1">Put your image in public/images/ and paste the path here.</p>
               </div>
 
-              {/* নতুন: Is Game? */}
               <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <input
                   type="checkbox"
@@ -381,7 +380,6 @@ export default function AdminCategoriesPage() {
                 </label>
               </div>
 
-              {/* নতুন: Display Locations */}
               <div>
                 <label className="text-sm text-gray-600 font-semibold mb-2 block">Where to display?</label>
                 <div className="flex gap-4">
