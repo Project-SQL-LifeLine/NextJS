@@ -5,7 +5,7 @@ import { supabase } from "../../../../lib/supabase/client"; // পাথ চে�
 import "./ludu.css";
 
 // ==========================================
-// 1. BOARD CONSTANTS (Accurate 52-cell mapping)
+// 1. BOARD CONSTANTS
 // ==========================================
 const TRACK = [
   [6,1], [6,2], [6,3], [6,4], [6,5], [5,6], [4,6], [3,6], [2,6], [1,6], [0,6],
@@ -24,15 +24,15 @@ const HOME_LANES = {
 };
 
 const START_INDEX = { red: 39, yellow: 13 };
-const SAFE_INDICES = [13, 21, 39, 46]; // Adjusted for 1v1 (start cells + some stars)
+const SAFE_INDICES = [13, 21, 39, 46];
 
-// Yard positions for 2 tokens each
+// Exact grid positions to place the 2 tokens inside the yard circles
 const YARD_COORDS = {
-  red: [[10,1], [13,4]], // Bottom-left corner
-  yellow: [[1,10], [4,13]], // Top-right corner
+  red: [[10, 1], [13, 4]],   // Bottom-left yard tokens
+  yellow: [[1, 10], [4, 13]], // Top-right yard tokens
 };
 
-const AI_NAMES = ["Sabbir_99", "Rakib_Hasan", "Mehedi_07", "Tanjim_Khan", "Arif_BD"];
+const AI_BASE_NAMES = ["SABBIR", "RAKIB", "MEHEDI", "TANJIM", "ARIF", "SHAKIB", "NAYEM", "FARHAN"];
 
 type Color = 'red' | 'yellow';
 type TokenStatus = 'yard' | 'track' | 'home_lane' | 'finished';
@@ -70,9 +70,13 @@ export default function LudoMasterPage() {
   const [timeLeft, setTimeLeft] = useState(15);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize
+  // Initialize Game
   useEffect(() => {
-    setAiName(AI_NAMES[Math.floor(Math.random() * AI_NAMES.length)]);
+    // Generate Random AI Name (Base Name + 1 to 5 digit random number)
+    const randomBase = AI_BASE_NAMES[Math.floor(Math.random() * AI_BASE_NAMES.length)];
+    const randomDigits = Math.floor(Math.random() * 99999) + 1; // 1 to 99999
+    setAiName(`${randomBase}${randomDigits}`);
+
     const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -85,7 +89,6 @@ export default function LudoMasterPage() {
   }, []);
 
   const initTokens = () => {
-    // 2 tokens per player
     const newTokens: Token[] = [
       { id: `red-0`, color: 'red', status: 'yard', trackIndex: -1, homeLaneIndex: -1 },
       { id: `red-1`, color: 'red', status: 'yard', trackIndex: -1, homeLaneIndex: -1 },
@@ -184,83 +187,84 @@ export default function LudoMasterPage() {
     return valid;
   };
 
-  const executeMove = (tokenId: string) => {
-    if (!validMoves.includes(tokenId)) return;
+  // ==========================================
+  // STEP-BY-STEP MOVEMENT LOGIC
+  // ==========================================
+  const executeMove = async (tokenId: string) => {
+    if (!validMoves.includes(tokenId) || animatingToken) return;
+    
     setValidMoves([]);
     setAnimatingToken(tokenId);
 
     const token = tokens.find(t => t.id === tokenId)!;
     const player = token.color;
-    const dice = diceValue;
+    const steps = diceValue;
 
-    let newStatus = token.status;
-    let newTrackIndex = token.trackIndex;
-    let newHomeLaneIndex = token.homeLaneIndex;
+    let currToken = { ...token };
     let isCapture = false;
 
-    if (token.status === 'yard') {
-      newStatus = 'track';
-      newTrackIndex = START_INDEX[player];
-    } else if (token.status === 'track') {
-      const dist = (token.trackIndex - START_INDEX[player] + 52) % 52;
-      const nextDist = dist + dice;
+    // Loop through each step to move token cell by cell
+    for (let i = 0; i < steps; i++) {
+      if (currToken.status === 'yard') {
+        currToken.status = 'track';
+        currToken.trackIndex = START_INDEX[player];
+      } else if (currToken.status === 'track') {
+        const dist = (currToken.trackIndex - START_INDEX[player] + 52) % 52;
+        if (dist + 1 <= 51) {
+          currToken.trackIndex = (currToken.trackIndex + 1) % 52;
+        } else {
+          currToken.status = 'home_lane';
+          currToken.homeLaneIndex = 0;
+          currToken.trackIndex = -1;
+        }
+      } else if (currToken.status === 'home_lane') {
+        currToken.homeLaneIndex += 1;
+        if (currToken.homeLaneIndex >= 6) {
+          currToken.status = 'finished';
+          currToken.homeLaneIndex = -1;
+        }
+      }
+
+      // Update state to visually move one step
+      setTokens(prev => prev.map(t => t.id === tokenId ? { ...currToken } : t));
       
-      if (nextDist <= 51) {
-        newTrackIndex = (token.trackIndex + dice) % 52;
-      } else {
-        newStatus = 'home_lane';
-        newHomeLaneIndex = nextDist - 52;
-        newTrackIndex = -1;
-      }
-    } else if (token.status === 'home_lane') {
-      newHomeLaneIndex += dice;
-      if (newHomeLaneIndex >= 6) {
-        newStatus = 'finished';
-        newHomeLaneIndex = -1;
-      }
+      // Wait 300ms for the CSS transition before next step
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
 
-    // Capture logic
-    let capturedTokenIds: string[] = [];
-    if (newStatus === 'track') {
-      const isSafe = SAFE_INDICES.includes(newTrackIndex);
+    // --- End of Movement: Check Capture ---
+    let updatedTokens = tokens.map(t => t.id === tokenId ? currToken : t);
+
+    if (currToken.status === 'track') {
+      const isSafe = SAFE_INDICES.includes(currToken.trackIndex);
       if (!isSafe) {
-        tokens.forEach(t => {
-          if (t.color !== player && t.status === 'track' && t.trackIndex === newTrackIndex) {
-            capturedTokenIds.push(t.id);
+        updatedTokens = updatedTokens.map(t => {
+          if (t.color !== player && t.status === 'track' && t.trackIndex === currToken.trackIndex) {
+            isCapture = true;
+            return { ...t, status: 'yard', trackIndex: -1, homeLaneIndex: -1 };
           }
+          return t;
         });
       }
     }
 
-    let updatedTokens = tokens.map(t => {
-      if (t.id === tokenId) return { ...t, status: newStatus, trackIndex: newTrackIndex, homeLaneIndex: newHomeLaneIndex };
-      if (capturedTokenIds.includes(t.id)) {
-        isCapture = true;
-        return { ...t, status: 'yard', trackIndex: -1, homeLaneIndex: -1 };
-      }
-      return t;
-    });
+    setTokens(updatedTokens);
+    setAnimatingToken(null);
 
-    setTokens(updatedTokens as Token[]);
+    // Check Win Condition
+    const playerTokens = updatedTokens.filter(t => t.color === player);
+    if (playerTokens.every(t => t.status === 'finished')) {
+      handleWin(player);
+      return;
+    }
 
-    setTimeout(() => {
-      setAnimatingToken(null);
-      
-      // 2 Tokens win condition
-      const playerTokens = updatedTokens.filter(t => t.color === player);
-      if (playerTokens.every(t => t.status === 'finished')) {
-        handleWin(player);
-        return;
-      }
-
-      if (dice === 6 || isCapture) {
-        setTimeLeft(15);
-        setSixesCount(dice === 6 ? sixesCount : 0); 
-      } else {
-        nextTurn();
-      }
-    }, 300); // 300ms for animation
+    // Turn Management
+    if (diceValue === 6 || isCapture) {
+      setTimeLeft(15);
+      setSixesCount(diceValue === 6 ? sixesCount : 0); 
+    } else {
+      nextTurn();
+    }
   };
 
   const nextTurn = () => {
@@ -332,7 +336,8 @@ export default function LudoMasterPage() {
       top: `${(r + 0.5) * cellSize}%`,
       left: `${(c + 0.5) * cellSize}%`,
       transform: 'translate(-50%, -50%)',
-      transition: animatingToken === token.id ? 'all 0.3s ease-in-out' : 'none',
+      // CSS Transition for smooth cell-by-cell animation
+      transition: animatingToken === token.id ? 'all 0.25s ease-in-out' : 'none',
       zIndex: token.status === 'track' ? 10 : 5,
       cursor: validMoves.includes(token.id) ? 'pointer' : 'default'
     } as React.CSSProperties;
@@ -342,9 +347,7 @@ export default function LudoMasterPage() {
     const cells = [];
     for (let r = 0; r < 15; r++) {
       for (let c = 0; c < 15; c++) {
-        // Skip yards
         if ((r < 6 && c < 6) || (r < 6 && c > 8) || (r > 8 && c < 6) || (r > 8 && c > 8)) continue;
-        // Center block
         if (r >= 6 && r <= 8 && c >= 6 && c <= 8) continue;
 
         const trackIdx = TRACK.findIndex(p => p[0] === r && p[1] === c);
@@ -412,11 +415,39 @@ export default function LudoMasterPage() {
                {renderBoardCells}
             </div>
             
-            {/* YARDS - only red and yellow have tokens now */}
-            <div className="yard-wrapper top-left"><div className="yard yard-green"><div className="yard-inner"></div></div></div>
-            <div className="yard-wrapper top-right"><div className="yard yard-yellow"><div className="yard-inner"></div></div></div>
-            <div className="yard-wrapper bottom-left"><div className="yard yard-red"><div className="yard-inner"></div></div></div>
-            <div className="yard-wrapper bottom-right"><div className="yard yard-blue"><div className="yard-inner"></div></div></div>
+            {/* YARDS with 2x2 Circle Spots */}
+            <div className="yard-wrapper top-left">
+              <div className="yard yard-green">
+                <div className="yard-inner">
+                  <div className="yard-spot"></div><div className="yard-spot"></div>
+                  <div className="yard-spot"></div><div className="yard-spot"></div>
+                </div>
+              </div>
+            </div>
+            <div className="yard-wrapper top-right">
+              <div className="yard yard-yellow">
+                <div className="yard-inner">
+                  <div className="yard-spot"></div><div className="yard-spot"></div>
+                  <div className="yard-spot"></div><div className="yard-spot"></div>
+                </div>
+              </div>
+            </div>
+            <div className="yard-wrapper bottom-left">
+              <div className="yard yard-red">
+                <div className="yard-inner">
+                  <div className="yard-spot"></div><div className="yard-spot"></div>
+                  <div className="yard-spot"></div><div className="yard-spot"></div>
+                </div>
+              </div>
+            </div>
+            <div className="yard-wrapper bottom-right">
+              <div className="yard yard-blue">
+                <div className="yard-inner">
+                  <div className="yard-spot"></div><div className="yard-spot"></div>
+                  <div className="yard-spot"></div><div className="yard-spot"></div>
+                </div>
+              </div>
+            </div>
 
             {/* CENTER HOME */}
             <div className="center-home">
