@@ -40,6 +40,9 @@ export default function MinesGamePage() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [modalHistory, setModalHistory] = useState<any[]>([]);
+  
+  // 🆕 Mines Selector Dropdown State
+  const [isMinesMenuOpen, setIsMinesMenuOpen] = useState(false);
 
   // 🎵 Web Audio API Sound Effects
   const playSound = (type: 'click' | 'win' | 'lose' | 'explosion') => {
@@ -150,6 +153,15 @@ export default function MinesGamePage() {
     });
   };
 
+  // 🆕 Handle Mines Count Change
+  const handleMinesSelect = (count: number) => {
+    if (isPlaying) return;
+    setMinesCount(count);
+    setIsMinesMenuOpen(false);
+    setSelectedTiles([]); // রিসেট সিলেকশন
+    playSound('click');
+  };
+
   // 🚀 গেম শুরু
   const startGame = async () => {
     if (isProcessing) return;
@@ -175,7 +187,7 @@ export default function MinesGamePage() {
         if (isAutoMode && selectedTiles.length > 0) {
           autoPlaySelectedTiles(data.game_id, selectedTiles, data.balance_after);
         } else {
-          setIsProcessing(false); // ✅ FIX: ম্যানুয়াল খেলায় গেম শুরু হলেই isProcessing false হবে
+          setIsProcessing(false);
         }
       } else { 
         alert(data.error); 
@@ -391,6 +403,51 @@ export default function MinesGamePage() {
                 </div>
               )}
 
+              {/* ---- HOW TO PLAY MODAL (New Design) ---- */}
+              {(activeModal === 'howto' || activeModal === 'rules') && (
+                <div className="modal-inner howto-modal">
+                  <div className="modal-header">
+                    <h2>{t("HOW TO PLAY", "কিভাবে খেলবেন")}</h2>
+                    <button className="close-btn" onClick={() => setActiveModal(null)}>✕</button>
+                  </div>
+                  
+                  <div className="howto-content">
+                    <div className="howto-icon-title">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#4facfe" strokeWidth="2" className="star-icon">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                      <h3>MINES</h3>
+                    </div>
+
+                    {/* Mini Grid for Example */}
+                    <div className="howto-example-grid">
+                      {[...Array(25)].map((_, i) => {
+                        let cellClass = "howto-cell";
+                        if (i === 6 || i === 12 || i === 18) cellClass += " star-cell"; // Yellow with star
+                        if (i === 8) cellClass += " mine-cell"; // Red with mine
+                        
+                        return (
+                          <div key={i} className={cellClass}>
+                            {i === 6 || i === 12 || i === 18 ? (
+                              <span className="howto-icon-star">★</span>
+                            ) : i === 8 ? (
+                              <span className="howto-icon-mine">💥</span>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <p className="howto-text">
+                      {t("Each tile hides either a star or a mine.", "প্রতিটি ঘরে একটি তারা অথবা একটি মাইন লুকিয়ে থাকে।")}
+                    </p>
+                    <p className="howto-text">
+                      {t("Increase the total number of stars for bigger odds and higher rewards. You can cash out after each turn, or try for increased winnings.", "বড় অডস এবং উচ্চতর পুরস্কারের জন্য তারা সংখ্যা বাড়ান। আপনি প্রতিটি টার্নের পরে ক্যাশ আউট করতে পারেন, অথবা বর্ধিত জয়ের চেষ্টা করতে পারেন।")}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* ---- OTHER MODALS (Placeholders) ---- */}
               {activeModal === 'history' && (
                 <div className="modal-inner">
@@ -411,7 +468,7 @@ export default function MinesGamePage() {
                 </div>
               )}
 
-              {activeModal !== 'main' && activeModal !== 'history' && (
+              {activeModal !== 'main' && activeModal !== 'history' && activeModal !== 'howto' && activeModal !== 'rules' && (
                 <div className="modal-inner">
                   <div className="modal-header">
                     <h2>{activeModal.toUpperCase()}</h2>
@@ -429,10 +486,31 @@ export default function MinesGamePage() {
 
         {/* TOP CONTROLS */}
         <section className="top-controls">
-          <div className="mines-selector" style={{ opacity: isPlaying ? 0.5 : 1, pointerEvents: isPlaying ? 'none' : 'auto' }}>
+          {/* 🆕 Mines Dropdown Selector */}
+          <div 
+            className="mines-selector" 
+            onClick={() => !isPlaying && setIsMinesMenuOpen(!isMinesMenuOpen)}
+            style={{ opacity: isPlaying ? 0.5 : 1, pointerEvents: isPlaying ? 'none' : 'auto' }}
+          >
             <span>{t("Mines", "মাইনস")}: {minesCount}</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '16px', height: '16px' }}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '16px', height: '16px', transform: isMinesMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.2s' }}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            
+            {/* Dropdown Menu */}
+            {isMinesMenuOpen && (
+              <div className="mines-dropdown" onClick={(e) => e.stopPropagation()}>
+                {Array.from({ length: 24 }, (_, i) => i + 1).map(num => (
+                  <div 
+                    key={num} 
+                    className={`mines-dropdown-item ${minesCount === num ? 'active' : ''}`}
+                    onClick={() => handleMinesSelect(num)}
+                  >
+                    {num}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
           <div className="next-multiplier">
             {t("Next", "পরবর্তী")}: {nextMultiplier.toFixed(2)}x
           </div>
