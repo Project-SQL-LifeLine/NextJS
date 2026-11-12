@@ -1,9 +1,3 @@
-/* 
-  আপনার দেওয়া CSS-এ body এবং * সিলেক্টর ছিল। 
-  Next.js-এ গ্লোবাল স্টাইল নষ্ট না করার জন্য 
-  এগুলোকে .ludo-wrapper এর ভেতর স্কোপ করা হয়েছে।
-*/
-
 .ludo-wrapper * {
   box-sizing: border-box;
   margin: 0;
@@ -30,20 +24,81 @@
   width: 100%;
   max-width: 650px;
   min-height: 100vh;
-  padding: 18px 10px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
+/* ======================================= */
+/* 💰 WALLET HEADER (NEW) */
+/* ======================================= */
+.wallet-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+}
+
+.wallet-box {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wallet-label {
+  font-size: 10px;
+  color: #aaa;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.wallet-amount {
+  font-size: 14px;
+  color: #00e701; /* Neon Green for money */
+  font-weight: bold;
+}
+
+.ai-wallet .wallet-amount {
+  color: #ff4d4d; /* Red for AI */
+}
+
+.match-status {
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.status-live { color: #ff4d4d; animation: blink 1.5s infinite; }
+.status-idle { color: #ffca05; }
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* ======================================= */
 /* PLAYER CONTROL */
+/* ======================================= */
 .control {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
+  min-height: 80px;
 }
 
 .control.bottom {
@@ -86,6 +141,12 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.dice-button.disabled-dice {
+  filter: grayscale(0.8) brightness(0.7);
+  cursor: not-allowed;
 }
 
 .dice-face {
@@ -100,18 +161,6 @@
   transition: background 0.2s;
 }
 
-/* 
-  .dice-dot ক্লাসটি React-এ ব্যবহার করা হয়নি কারণ 
-  আমরা সরাসরি background প্যাটার্ন সেট করেছি। 
-  তবে ভবিষ্যতে ব্যবহারের জন্য রেখে দেওয়া হলো।
-*/
-.dice-dot {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: #000;
-}
-
 .arrow {
   color: #ffae00;
   font-size: 55px;
@@ -119,7 +168,9 @@
   text-shadow: 2px 3px 3px #633;
 }
 
+/* ======================================= */
 /* BOARD */
+/* ======================================= */
 .board {
   width: min(96vw, 610px);
   aspect-ratio: 1;
@@ -150,14 +201,8 @@
 .red-lane { background: var(--red); }
 .blue-lane { background: var(--blue); }
 
-.safe {
-  color: #999;
-  font-size: clamp(12px, 3vw, 23px);
-}
-
-.start {
-  font-size: clamp(16px, 4vw, 26px);
-}
+.safe { color: #999; font-size: clamp(12px, 3vw, 23px); }
+.start { font-size: clamp(16px, 4vw, 26px); }
 
 /* HOMES */
 .home {
@@ -208,9 +253,7 @@
   text-shadow: 1px 2px 3px #333;
 }
 
-.yellow .player-name {
-  transform: rotate(180deg);
-}
+.yellow .player-name { transform: rotate(180deg); }
 
 /* CENTER */
 .center {
@@ -222,11 +265,7 @@
   z-index: 4;
 }
 
-.triangle {
-  position: absolute;
-  inset: 0;
-}
-
+.triangle { position: absolute; inset: 0; }
 .triangle.yellow { background: var(--yellow); clip-path: polygon(0 0, 100% 0, 50% 50%); }
 .triangle.blue { background: var(--blue); clip-path: polygon(100% 0, 100% 100%, 50% 50%); }
 .triangle.red { background: var(--red); clip-path: polygon(0 100%, 100% 100%, 50% 50%); }
@@ -242,24 +281,143 @@
   overflow: visible;
 }
 
-.token svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-  overflow: visible;
-}
+.token svg { width: 100%; height: 100%; display: block; overflow: visible; }
 
-/* TOKEN POSITION */
 .token-yellow-1 { top: 19%; left: 45%; }
 .token-yellow-2 { top: 29%; left: 45%; }
 .token-yellow-3 { top: 48%; right: 1%; }
-
 .token-blue-1 { top: 54%; left: 63%; }
-
 .token-red-1 { top: 69%; left: 45%; }
 .token-red-2 { top: 76%; left: 45%; }
 .token-red-3 { top: 83%; left: 45%; }
 .token-red-4 { top: 90%; left: 45%; }
+
+/* ======================================= */
+/* 💰 BETTING PANEL (NEW) */
+/* ======================================= */
+.betting-panel {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.bet-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+.bet-controls {
+  display: flex;
+  align-items: center;
+  background: #111;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+
+.bet-controls button {
+  background: #333;
+  color: #fff;
+  border: none;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.bet-controls button:hover { background: #555; }
+
+.bet-controls input {
+  width: 60px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  color: #ffca05;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  outline: none;
+}
+
+.quick-chips {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.quick-chips button {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 8px 0;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-chips button.active {
+  background: #ffca05;
+  color: #000;
+  border-color: #ffca05;
+  box-shadow: 0 0 10px rgba(255, 202, 5, 0.5);
+}
+
+.potential-win {
+  display: flex;
+  justify-content: space-between;
+  color: #aaa;
+  font-size: 12px;
+  padding-top: 5px;
+  border-top: 1px dashed #333;
+}
+
+.potential-win strong { color: #00e701; font-size: 14px; }
+
+.start-btn {
+  width: 100%;
+  background: linear-gradient(180deg, #ffdf8a, #ffca05, #e5b300);
+  color: #000;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 900;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #a37a00, 0 5px 15px rgba(255, 202, 5, 0.4);
+  transition: all 0.1s;
+}
+
+.start-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #a37a00;
+}
+
+/* Demo Finish Button */
+.finish-demo-btn {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-left: auto;
+  margin-right: 3%;
+  font-weight: bold;
+  cursor: pointer;
+}
 
 @media(max-width: 380px) {
   .game { padding: 8px 4px; }
