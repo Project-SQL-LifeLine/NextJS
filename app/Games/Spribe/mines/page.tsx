@@ -53,7 +53,6 @@ export default function MinesGamePage() {
       osc.connect(gain); gain.connect(ctx.destination);
 
       if (type === 'win') {
-        // হীরা পাওয়ার সাউন্ড
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(440, ctx.currentTime);
         osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.1);
@@ -62,7 +61,6 @@ export default function MinesGamePage() {
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
         osc.start(); osc.stop(ctx.currentTime + 0.4);
       } else if (type === 'explosion') {
-        // বোমা ফাটার সাউন্ড
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(100, ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + 0.5);
@@ -70,7 +68,6 @@ export default function MinesGamePage() {
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
         osc.start(); osc.stop(ctx.currentTime + 0.5);
       } else if (type === 'click') {
-        // বাটন ক্লিক সাউন্ড
         osc.type = 'square';
         osc.frequency.setValueAtTime(600, ctx.currentTime);
         gain.gain.setValueAtTime(0.1, ctx.currentTime);
@@ -82,12 +79,10 @@ export default function MinesGamePage() {
 
   // ⏳ Loading Sequence & Data Fetching
   useEffect(() => {
-    // ১.৫ সেকেন্ড পর Connecting to server
     const timer1 = setTimeout(() => {
       setLoadingText("Connecting to server...");
     }, 1500);
 
-    // ২.৫ সেকেন্ড পর (মোট ৪ সেকেন্ড) গেম লোড হবে
     const timer2 = setTimeout(async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -98,7 +93,7 @@ export default function MinesGamePage() {
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setIsAppReady(true); // গেম রেডি
+        setIsAppReady(true);
       }
     }, 4000);
 
@@ -178,10 +173,20 @@ export default function MinesGamePage() {
         setTiles(Array(25).fill({ isMine: false, isRevealed: false }).map((_, i) => ({ id: i, isMine: false, isRevealed: false })));
 
         if (isAutoMode && selectedTiles.length > 0) {
+          // Auto Play শুরু হবে (এটি শেষ হলে নিজেই isProcessing false করবে)
           autoPlaySelectedTiles(data.game_id, selectedTiles, data.balance_after);
+        } else {
+          // ✅ FIX: ম্যানুয়াল খেলার জন্য isProcessing রিসেট করা হলো
+          setIsProcessing(false); 
         }
-      } else { alert(data.error); setIsProcessing(false); }
-    } catch (err: any) { alert(err.message); setIsProcessing(false); }
+      } else { 
+        alert(data.error); 
+        setIsProcessing(false); 
+      }
+    } catch (err: any) { 
+      alert(err.message); 
+      setIsProcessing(false); 
+    }
   };
 
   // 🤖 Auto Play Sequence
@@ -244,7 +249,7 @@ export default function MinesGamePage() {
 
         if (data.is_mine) {
           playSound('explosion');
-          setIsPlaying(false); setIsProcessing(false);
+          setIsPlaying(false); 
           const minePositions = data.mines_positions || [];
           setTiles(prev => prev.map((t, i) => ({ ...t, isRevealed: true, isMine: minePositions.includes(i) })));
         } else {
@@ -263,7 +268,8 @@ export default function MinesGamePage() {
           }
         }
       }
-    } catch (err: any) { console.error(err); } finally { setIsProcessing(false); }
+    } catch (err: any) { console.error(err); } 
+    finally { setIsProcessing(false); } // ✅ FIX: ম্যানুয়াল প্লেতে কাজ শেষে রিসেট হবে
   };
 
   // 💰 ক্যাশআউট
@@ -281,7 +287,8 @@ export default function MinesGamePage() {
         alert(t(`Cashed out ${data.payout.toFixed(2)} BDT!`, `সফলভাবে টাকা তুলেছেন!`));
         setTiles(prev => prev.map(t => ({ ...t, isRevealed: true })));
       } else { alert(data.error); }
-    } catch (err: any) { alert(err.message); } finally { setIsProcessing(false); }
+    } catch (err: any) { alert(err.message); } 
+    finally { setIsProcessing(false); }
   };
 
   const toggleAutoMode = () => {
