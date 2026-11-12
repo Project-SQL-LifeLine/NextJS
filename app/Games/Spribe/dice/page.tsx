@@ -2,181 +2,225 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "../../../../lib/supabase/client";
 import "./dice.css";
 
 export default function DiceGamePage() {
   const router = useRouter();
+  
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // ডামি স্টেট (পরে Supabase এর সাথে কানেক্ট করবেন)
-  const [balance, setBalance] = useState(4.75);
   const [betAmount, setBetAmount] = useState<number>(1.00);
-  const [payout, setPayout] = useState<number>(2.00);
-  const [result, setResult] = useState<number | null>(95.01);
-  const [resultColor, setResultColor] = useState<string>("#19bd10");
-  const [history, setHistory] = useState<{ val: number; win: boolean }[]>([
-    { val: 95.01, win: true },
-    { val: 44.33, win: false },
-    { val: 55.33, win: false },
-    { val: 85.45, win: true },
-    { val: 19.17, win: true },
-    { val: 49.00, win: false },
-  ]);
+  const [target, setTarget] = useState<number>(50.00);
+  const [isOver, setIsOver] = useState<boolean>(false);
+  
+  const [isRolling, setIsRolling] = useState(false);
+  const [rollResult, setRollResult] = useState<number | null>(null);
+  const [winStatus, setWinStatus] = useState<"win" | "lose" | null>(null);
+  
+  // ডামি হিস্ট্রি (পরে ডাটাবেস থেকে আসবে)
+  const [history, setHistory] = useState([95.01, 44.33, 55.33, 85.45, 19.17, 49.00]);
 
-  // লাইভ ম্যাথ ক্যালকুলেশন
-  const chance = Math.min(97, 97 / payout);
-  const otherChance = 100 - chance;
-  const potentialWin = Math.max(0, betAmount) * payout;
+  // লাইভ ম্যাথ
+  const winChance = isOver ? 100 - target : target;
+  const multiplier = winChance > 0 ? (99 / winChance) : 0;
+  const potentialWin = betAmount * multiplier;
 
-  // বেট অ্যাডজাস্ট
-  const adjustBet = (mode: "half" | "double" | "add") => {
-    let newAmount = betAmount || 1;
-    if (mode === "half") newAmount /= 2;
-    if (mode === "double") newAmount *= 2;
-    if (mode === "add") newAmount += 1;
-    setBetAmount(Math.max(0.01, newAmount));
-  };
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase.from("profiles").select("balance").eq("id", user.id).single();
+        if (data) setProfile(data);
+      }
+      setLoading(false);
+    };
+    fetchProfile();
+  }, []);
 
-  // ডাইস রোল লজিক (এখানে আপনার RPC ফাংশন কল হবে)
-  const roll = (direction: "low" | "high") => {
-    if (!betAmount || betAmount < 0.01) {
-      alert("Enter a valid bet amount");
-      return;
-    }
-    if (betAmount > balance) {
-      alert("Insufficient demo balance");
+  const handleRoll = async () => {
+    if (!profile || betAmount <= 0) return;
+    if (betAmount > profile.balance) {
+      alert("Insufficient balance!");
       return;
     }
 
-    const newBalance = balance - betAmount;
-    const randomRoll = Math.random() * 100;
-    const isWin = direction === "low" ? randomRoll < chance : randomRoll >= chance;
+    setIsRolling(true);
+    setWinStatus(null);
+    setRollResult(null);
 
-    setResult(randomRoll);
-    setResultColor(isWin ? "#19bd10" : "#fff");
+    // রোলিং অ্যানিমেশন (আপনি চাইলে ডাটাবেস কলের আগে এটি রাখতে পারেন)
+    const animInterval = setInterval(() => {
+      setRollResult(Math.random() * 100);
+    }, 50);
 
-    if (isWin) {
-      setBalance(newBalance + (betAmount * payout));
-    } else {
-      setBalance(newBalance);
+    try {
+      // আসল RPC কল
+      const { data, error } = await supabase.rpc("play_dice", {
+        p_bet_amount: betAmount,
+        p_target: target,
+        p_is_over: isOver
+      });
+
+      if (error) throw error;
+
+      setTimeout(() => {
+        clearInterval(animInterval);
+        
+        if (data.success) {
+          setRollResult(data.roll);
+          setWinStatus(data.is_win ? "win" : "lose");
+          setProfile({ ...profile, balance: data.balance_after });
+          setHistory(prev => [data.roll, ...prev].slice(0, 6));
+        } else {
+          alert(data.error);
+        }
+        setIsRolling(false);
+      }, 800);
+
+    } catch (err: any) {
+      clearInterval(animInterval);
+      alert(err.message);
+      setIsRolling(false);
     }
-
-    // হিস্ট্রি আপডেট
-    setHistory(prev => [{ val: randomRoll, win: isWin }, ...prev].slice(0, 6));
   };
 
-  const resetDisplay = () => {
-    setResult(50.00);
-    setResultColor("#19bd10");
-  };
+  if (loading) return <div className="dice-page bg-[#421b7a] flex items-center justify-center text-white">Loading...</div>;
 
   return (
-    <div className="dice-game-wrapper">
-      <div className="app">
-        <div className="notch">▼</div>
+    <div className="dice-page">
+      <div className="dice-app">
         
-        {/* টপ হিস্ট্রি বার */}
-        <div className="historybar">
-          {history.map((item, idx) => (
-            <div key={idx} className={`history-item ${item.win ? "win" : ""}`}>
-              {item.val.toFixed(2)}
-            </div>
-          ))}
-          <button className="history-action" onClick={resetDisplay}>◴⌄</button>
+        {/* ================= টপ হেডার ================= */}
+        <div className="dice-header">
+          <div className="notch">▼</div>
+          <div className="history-bar">
+            {history.map((val, idx) => (
+              <div key={idx} className={`history-item ${val > 50 ? "win" : ""}`}>
+                {val.toFixed(2)}
+              </div>
+            ))}
+            <button className="refresh-icon-btn" onClick={() => window.location.reload()}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            </button>
+          </div>
         </div>
 
-        <main>
-          {/* রেজাল্ট ও গ্রাফ প্যানেল */}
-          <section className="result-panel">
-            <div className="result-number" style={{ color: resultColor }}>
-              {result !== null ? result.toFixed(2) : "50.00"}
+        {/* ================= মেইন গেম সেকশন ================= */}
+        <div className="game-section">
+          
+          {/* রেজাল্ট নাম্বার */}
+          <div className={`result-number ${winStatus === "win" ? "text-green" : winStatus === "lose" ? "text-red" : ""}`}>
+            {isRolling ? (rollResult !== null ? rollResult.toFixed(2) : "00.00") : (rollResult !== null ? rollResult.toFixed(2) : target.toFixed(2))}
+          </div>
+
+          {/* কাস্টম স্লাইডার */}
+          <div className="slider-container">
+            <div className="slider-ticks-top">
+              <span>|</span><span>|</span><span>|</span><span>|</span><span>|</span>
             </div>
-            <div className="graph">
-              <div className="tickrow"><i></i><i></i><i></i><i></i><i></i></div>
-              <div className="bars first">
-                <div className="segment red" style={{ width: `${chance}%` }}></div>
-                <div className="segment blue" style={{ width: `${otherChance}%` }}></div>
+            <div className="slider-track-wrapper">
+              <div className="slider-bars">
+                <div className="bar-red" style={{ width: isOver ? `${target}%` : `${target}%` }}></div>
+                <div className="bar-blue" style={{ width: isOver ? `${100-target}%` : `${100-target}%` }}></div>
               </div>
-              <div className="bars">
-                <div className="segment green" style={{ width: `${chance}%` }}></div>
-                <div className="segment red" style={{ width: `${otherChance}%` }}></div>
-              </div>
-              <div className="indicator" style={{ left: `${chance}%` }}></div>
-              <div className="scale-labels">
-                <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
-              </div>
+              <div className="slider-bottom-green"></div>
+              
+              <input 
+                type="range" min="2" max="98" step="0.01" 
+                value={target}
+                onChange={(e) => { setTarget(Number(e.target.value)); setRollResult(null); setWinStatus(null); }}
+                className="slider-input" disabled={isRolling}
+              />
             </div>
-          </section>
+            <div className="slider-numbers">
+              <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+            </div>
+          </div>
 
           {/* পেআউট সেকশন */}
-          <section className="payout-panel">
+          <div className="payout-section">
             <div className="payout-top">
-              <div className="payout-left">
-                <div className="muted">Payout</div>
-                <div className="multiplier">{payout.toFixed(2)} x</div>
+              <div className="payout-pill">
+                <span className="label">Payout</span>
+                <span className="value">{multiplier.toFixed(2)} x</span>
               </div>
-              <div className="slider-wrap">
-                <input 
-                  type="range" 
-                  min="1.01" 
-                  max="50" 
-                  step=".01" 
-                  value={payout} 
-                  onChange={(e) => setPayout(Number(e.target.value))}
-                />
-                <span className="slider-symbol">‹›</span>
-                <div className="slider-ticks">
-                  {Array.from({ length: 30 }).map((_, i) => <i key={i}></i>)}
+              <div className="payout-slider">
+                <div className="payout-thumb">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
                 </div>
               </div>
             </div>
             <div className="payout-bottom">
-              <div>
-                <span className="muted">Potential win:</span>
-                <div>{potentialWin.toFixed(2)} BDT</div>
+              <div className="p-info">
+                <span className="label">Potential win:</span>
+                <span className="val">{potentialWin.toFixed(2)} BDT</span>
               </div>
-              <div>
-                <span className="muted">Chance:</span>
-                <span>{chance.toFixed(2)} %</span>
+              <div className="p-info text-right">
+                <span className="label">Chance:</span>
+                <span className="val">{winChance.toFixed(2)} %</span>
               </div>
             </div>
-          </section>
+          </div>
+        </div>
 
-          {/* কন্ট্রোল সেকশন */}
-          <section className="controls">
-            <div className="play-row">
-              <button className="circle" onClick={resetDisplay}>⟳</button>
-              <button className="bet-button low" onClick={() => roll("low")}>
-                ⌄<small>{chance.toFixed(2)}</small>
-              </button>
-              <button className="bet-button high" onClick={() => roll("high")}>
-                ⌃<small>{otherChance.toFixed(2)}</small>
-              </button>
-            </div>
-            <div className="bet-area">
-              <div className="bet-input">
-                <label>Bet BDT</label>
-                <input 
-                  type="number" 
-                  value={betAmount} 
-                  onChange={(e) => setBetAmount(Number(e.target.value))}
-                  min=".01" 
-                  step=".01" 
-                />
-              </div>
-              <button className="small-btn" onClick={() => adjustBet("half")}>−</button>
-              <button className="small-btn" onClick={() => adjustBet("double")}>▤</button>
-              <button className="small-btn" onClick={() => adjustBet("add")}>+</button>
-            </div>
-          </section>
-        </main>
+        {/* ================= কন্ট্রোল প্যানেল ================= */}
+        <div className="control-section">
+          
+          <div className="btn-row">
+            <button className="btn-refresh-blue" onClick={() => window.location.reload()}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            </button>
+            
+            <button 
+              className={`btn-under ${!isOver ? "active" : ""}`}
+              onClick={() => setIsOver(false)} disabled={isRolling}
+            >
+              <span className="arrow">⌄</span>
+              <span className="badge">{target.toFixed(2)}</span>
+            </button>
+            
+            <button 
+              className={`btn-over ${isOver ? "active" : ""}`}
+              onClick={() => setIsOver(true)} disabled={isRolling}
+            >
+              <span className="arrow">⌃</span>
+              <span className="badge">{(100 - target).toFixed(2)}</span>
+            </button>
+          </div>
 
-        {/* ফুটার */}
-        <footer className="footer">
-          <div className="dice-label">DICE</div>
-          <button className="help" onClick={() => alert("Dice demo UI")}>?</button>
-          <div className="balance">{balance.toFixed(2)} <span>BDT</span></div>
-          <button className="menu" onClick={() => router.push('/')}>☰</button>
-        </footer>
+          <div className="bet-input-row">
+            <div className="bet-pill">
+              <span className="bet-label">Bet BDT</span>
+              <input 
+                type="number" value={betAmount} 
+                onChange={(e) => setBetAmount(Number(e.target.value))}
+                disabled={isRolling} className="bet-field"
+              />
+            </div>
+            <button className="btn-small-round" onClick={() => setBetAmount(Math.max(1, betAmount - 1))}>−</button>
+            <button className="btn-small-round" onClick={() => setBetAmount(profile?.balance || 1)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+            </button>
+            <button className="btn-small-round" onClick={() => setBetAmount(betAmount + 1)}>+</button>
+          </div>
+
+          <button className="btn-main-roll" onClick={handleRoll} disabled={isRolling}>
+            {isRolling ? "ROLLING..." : "ROLL"}
+          </button>
+        </div>
+
+        {/* ================= ফুটার ================= */}
+        <div className="footer-bar">
+          <button className="btn-dice-label">DICE</button>
+          <button className="btn-help">?</button>
+          <div className="balance-text">{Number(profile?.balance || 0).toFixed(2)} BDT</div>
+          <button className="btn-menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+        </div>
+
       </div>
     </div>
   );
