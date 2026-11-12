@@ -123,8 +123,8 @@
 
 /* Updated History Menu Button */
 .history-menu {
-  height: 36px; /* Increased 5% */
-  width: 54px;  /* Increased 5% */
+  height: 36px;
+  width: 54px;
   flex: none;
   border-radius: 25px;
   background: #7421c5;
@@ -851,7 +851,6 @@ input[type=range]::-webkit-slider-thumb {
   .history { height: 27px; gap: 3px; padding: 2px; }
   .history-item { height: 20px; font-size: clamp(9px, 2.5vw, 11px); }
   
-  /* Responsive History Menu Button */
   .history-menu { height: 27px; width: 37px; gap: 2px; border-width: 1px; }
   .hm-clock { width: 14px; height: 14px; }
   .hm-arrow { width: 12px; height: 12px; }
