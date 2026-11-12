@@ -6,7 +6,7 @@ import { supabase } from "../../../../lib/supabase/client";
 import "./ludu.css";
 
 // ==========================================
-// 1. BOARD CONSTANTS
+// 1. CORRECTED 52 CELL TRACK
 // ==========================================
 
 const TRACK = [
@@ -20,8 +20,8 @@ const TRACK = [
   [9,8], [10,8], [11,8], [12,8], [13,8], [14,8],
   [14,7],
   [14,6], [13,6], [12,6], [11,6], [10,6], [9,6],
-  [8,6], [8,5], [8,4], [8,3], [8,2], [8,1], [8,0],
-  [7,0]
+  [8,5], [8,4], [8,3], [8,2], [8,1], [8,0],
+  [7,0], [6,0]
 ];
 
 const HOME_LANES = {
@@ -32,7 +32,7 @@ const HOME_LANES = {
   yellow: [
     [1,7], [2,7], [3,7],
     [4,7], [5,7], [6,7]
-  ],
+  ]
 };
 
 const START_INDEX = {
@@ -42,16 +42,9 @@ const START_INDEX = {
 
 const SAFE_INDICES = [13, 21, 39, 46];
 
-// Two round token slots per player
 const YARD_COORDS = {
-  red: [
-    [10.5, 1.5],
-    [12.5, 3.5]
-  ],
-  yellow: [
-    [1.5, 10.5],
-    [3.5, 12.5]
-  ],
+  red: [[10,1], [13,4]],
+  yellow: [[1,10], [4,13]]
 };
 
 type Color = "red" | "yellow";
@@ -70,23 +63,16 @@ interface Token {
   homeLaneIndex: number;
 }
 
-// ==========================================
-// 2. HELPER
-// ==========================================
-
 const wait = (ms: number) =>
-  new Promise(resolve => setTimeout(resolve, ms));
+  new Promise<void>(resolve => setTimeout(resolve, ms));
 
 export default function LudoMasterPage() {
-
-  const t = (en: string, bn: string) => en;
 
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(0);
   const [betAmount, setBetAmount] = useState(100);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Game State
   const [gamePhase, setGamePhase] =
     useState<"betting" | "playing" | "finished">("betting");
 
@@ -97,33 +83,26 @@ export default function LudoMasterPage() {
 
   const [diceValue, setDiceValue] = useState(6);
   const [isRolling, setIsRolling] = useState(false);
-
   const [validMoves, setValidMoves] = useState<string[]>([]);
-
   const [sixesCount, setSixesCount] = useState(0);
-
   const [winner, setWinner] = useState<Color | null>(null);
 
   const [animatingToken, setAnimatingToken] =
     useState<string | null>(null);
 
-  // AI Name
   const [aiName, setAiName] = useState("");
-
-  // Timer
   const [timeLeft, setTimeLeft] = useState(15);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const moveLockRef = useRef(false);
 
   // ==========================================
-  // 3. INITIALIZE
+  // 2. INITIALIZE
   // ==========================================
 
   useEffect(() => {
 
-    // Random username: SABBIR99
     const randomNumber = Math.floor(Math.random() * 90) + 10;
-
     setAiName(`SABBIR${randomNumber}`);
 
     const fetchProfile = async () => {
@@ -140,9 +119,7 @@ export default function LudoMasterPage() {
           .eq("id", user.id)
           .single();
 
-        if (data) {
-          setBalance(data.balance);
-        }
+        if (data) setBalance(data.balance);
       }
 
       setLoading(false);
@@ -150,10 +127,14 @@ export default function LudoMasterPage() {
 
     fetchProfile();
 
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+
   }, []);
 
   // ==========================================
-  // 4. INITIALIZE TOKENS
+  // 3. INITIALIZE TOKENS
   // ==========================================
 
   const initTokens = () => {
@@ -167,7 +148,6 @@ export default function LudoMasterPage() {
         trackIndex: -1,
         homeLaneIndex: -1
       },
-
       {
         id: "red-1",
         color: "red",
@@ -175,7 +155,6 @@ export default function LudoMasterPage() {
         trackIndex: -1,
         homeLaneIndex: -1
       },
-
       {
         id: "yellow-0",
         color: "yellow",
@@ -183,14 +162,13 @@ export default function LudoMasterPage() {
         trackIndex: -1,
         homeLaneIndex: -1
       },
-
       {
         id: "yellow-1",
         color: "yellow",
         status: "yard",
         trackIndex: -1,
         homeLaneIndex: -1
-      },
+      }
 
     ];
 
@@ -198,7 +176,7 @@ export default function LudoMasterPage() {
   };
 
   // ==========================================
-  // 5. TURN TIMER
+  // 4. TURN TIMER
   // ==========================================
 
   useEffect(() => {
@@ -210,20 +188,17 @@ export default function LudoMasterPage() {
       winner
     ) return;
 
-    if (timeLeft === 0) {
+    if (timeLeft <= 0) {
       nextTurn();
       return;
     }
 
-    timerRef.current = setTimeout(
-      () => setTimeLeft(prev => prev - 1),
-      1000
-    );
+    timerRef.current = setTimeout(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
 
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
 
   }, [
@@ -235,7 +210,7 @@ export default function LudoMasterPage() {
   ]);
 
   // ==========================================
-  // 6. AI LOGIC
+  // 5. AI LOGIC
   // ==========================================
 
   useEffect(() => {
@@ -293,16 +268,18 @@ export default function LudoMasterPage() {
   ]);
 
   // ==========================================
-  // 7. ROLL DICE
+  // 6. DICE
   // ==========================================
 
   const rollDice = () => {
 
     if (
       isRolling ||
+      moveLockRef.current ||
       animatingToken ||
       gamePhase !== "playing" ||
-      winner
+      winner ||
+      validMoves.length > 0
     ) return;
 
     setIsRolling(true);
@@ -322,7 +299,6 @@ export default function LudoMasterPage() {
         const finalDice = Math.floor(Math.random() * 6) + 1;
 
         setDiceValue(finalDice);
-
         setIsRolling(false);
 
         handleDiceResult(finalDice);
@@ -331,10 +307,6 @@ export default function LudoMasterPage() {
     }, 50);
   };
 
-  // ==========================================
-  // 8. DICE RESULT
-  // ==========================================
-
   const handleDiceResult = (dice: number) => {
 
     if (dice === 6) {
@@ -342,9 +314,7 @@ export default function LudoMasterPage() {
       setSixesCount(prev => prev + 1);
 
       if (sixesCount >= 2) {
-
         setTimeout(() => nextTurn(), 1000);
-
         return;
       }
 
@@ -358,13 +328,12 @@ export default function LudoMasterPage() {
     setValidMoves(moves);
 
     if (moves.length === 0) {
-
       setTimeout(() => nextTurn(), 1200);
     }
   };
 
   // ==========================================
-  // 9. VALID MOVES
+  // 7. VALID MOVES
   // ==========================================
 
   const getValidMoves = (
@@ -382,9 +351,7 @@ export default function LudoMasterPage() {
 
       if (token.status === "yard") {
 
-        if (dice === 6) {
-          valid.push(token.id);
-        }
+        if (dice === 6) valid.push(token.id);
 
       } else if (token.status === "track") {
 
@@ -413,25 +380,25 @@ export default function LudoMasterPage() {
   };
 
   // ==========================================
-  // 10. STEP BY STEP TOKEN MOVEMENT
+  // 8. STEP-BY-STEP MOVEMENT
   // ==========================================
 
   const executeMove = async (tokenId: string) => {
 
     if (
       !validMoves.includes(tokenId) ||
-      animatingToken
+      moveLockRef.current
     ) return;
 
-    setValidMoves([]);
+    moveLockRef.current = true;
 
+    setValidMoves([]);
     setAnimatingToken(tokenId);
 
-    const token = tokens.find(
-      t => t.id === tokenId
-    );
+    const token = tokens.find(t => t.id === tokenId);
 
     if (!token) {
+      moveLockRef.current = false;
       setAnimatingToken(null);
       return;
     }
@@ -439,22 +406,18 @@ export default function LudoMasterPage() {
     const player = token.color;
     const dice = diceValue;
 
-    let currentStatus = token.status;
-
+    let currentStatus: TokenStatus = token.status;
     let currentTrackIndex = token.trackIndex;
-
     let currentHomeLaneIndex = token.homeLaneIndex;
 
     // ------------------------------------------
-    // YARD TO START CELL
+    // YARD -> START CELL
     // ------------------------------------------
 
     if (token.status === "yard") {
 
       currentStatus = "track";
-
       currentTrackIndex = START_INDEX[player];
-
       currentHomeLaneIndex = -1;
 
       setTokens(prev =>
@@ -470,11 +433,12 @@ export default function LudoMasterPage() {
         )
       );
 
-      await wait(180);
+      // Starting cell pause
+      await wait(220);
     }
 
     // ------------------------------------------
-    // TRACK STEP BY STEP
+    // TRACK -> EACH CELL
     // ------------------------------------------
 
     else if (token.status === "track") {
@@ -482,7 +446,6 @@ export default function LudoMasterPage() {
       const dist =
         (token.trackIndex - START_INDEX[player] + 52) % 52;
 
-      // Every cell gets its own animation
       for (let step = 1; step <= dice; step++) {
 
         const nextDist = dist + step;
@@ -505,7 +468,6 @@ export default function LudoMasterPage() {
           currentTrackIndex = -1;
         }
 
-        // Move token to this individual cell
         setTokens(prev =>
           prev.map(t =>
             t.id === tokenId
@@ -519,13 +481,12 @@ export default function LudoMasterPage() {
           )
         );
 
-        // Wait before moving to next cell
         await wait(180);
       }
     }
 
     // ------------------------------------------
-    // HOME LANE STEP BY STEP
+    // HOME LANE -> EACH CELL
     // ------------------------------------------
 
     else if (token.status === "home_lane") {
@@ -538,17 +499,13 @@ export default function LudoMasterPage() {
         if (nextHomeIndex >= 6) {
 
           currentStatus = "finished";
-
           currentHomeLaneIndex = -1;
-
           currentTrackIndex = -1;
 
         } else {
 
           currentStatus = "home_lane";
-
           currentHomeLaneIndex = nextHomeIndex;
-
           currentTrackIndex = -1;
         }
 
@@ -569,9 +526,9 @@ export default function LudoMasterPage() {
       }
     }
 
-    // ------------------------------------------
-    // CAPTURE LOGIC
-    // ------------------------------------------
+    // ==========================================
+    // 9. CAPTURE
+    // ==========================================
 
     let isCapture = false;
 
@@ -591,7 +548,6 @@ export default function LudoMasterPage() {
             t.status === "track" &&
             t.trackIndex === currentTrackIndex
           ) {
-
             capturedTokenIds.push(t.id);
           }
 
@@ -599,9 +555,9 @@ export default function LudoMasterPage() {
       }
     }
 
-    // ------------------------------------------
-    // UPDATE FINAL TOKEN POSITIONS
-    // ------------------------------------------
+    // ==========================================
+    // 10. FINAL TOKEN UPDATE
+    // ==========================================
 
     const updatedTokens = tokens.map(t => {
 
@@ -632,27 +588,29 @@ export default function LudoMasterPage() {
 
     setTokens(updatedTokens);
 
-    // ------------------------------------------
-    // MOVEMENT COMPLETE
-    // ------------------------------------------
+    await wait(100);
 
     setAnimatingToken(null);
+    moveLockRef.current = false;
 
-    // Win condition
+    // ==========================================
+    // 11. WIN CHECK
+    // ==========================================
+
     const playerTokens = updatedTokens.filter(
       t => t.color === player
     );
 
-    if (
-      playerTokens.every(t => t.status === "finished")
-    ) {
+    if (playerTokens.every(t => t.status === "finished")) {
 
       handleWin(player);
-
       return;
     }
 
-    // Extra turn
+    // ==========================================
+    // 12. EXTRA TURN
+    // ==========================================
+
     if (dice === 6 || isCapture) {
 
       setTimeLeft(15);
@@ -665,19 +623,18 @@ export default function LudoMasterPage() {
 
       nextTurn();
     }
-
   };
 
   // ==========================================
-  // 11. NEXT TURN
+  // 13. NEXT TURN
   // ==========================================
 
   const nextTurn = () => {
 
+    moveLockRef.current = false;
+
     setSixesCount(0);
-
     setValidMoves([]);
-
     setTimeLeft(15);
 
     setCurrentTurn(prev =>
@@ -686,13 +643,12 @@ export default function LudoMasterPage() {
   };
 
   // ==========================================
-  // 12. WIN SYSTEM
+  // 14. WIN SYSTEM
   // ==========================================
 
   const handleWin = async (winningPlayer: Color) => {
 
     setGamePhase("finished");
-
     setWinner(winningPlayer);
 
     if (winningPlayer === "red") {
@@ -717,9 +673,7 @@ export default function LudoMasterPage() {
         console.error(err);
       }
 
-      alert(
-        `🎉 You Won ${winAmount.toFixed(2)} BDT!`
-      );
+      alert(`🎉 You Won ${winAmount.toFixed(2)} BDT!`);
 
     } else {
 
@@ -737,14 +691,12 @@ export default function LudoMasterPage() {
         console.error(err);
       }
 
-      alert(
-        `😢 ${aiName} Won the match! You lost.`
-      );
+      alert(`😢 ${aiName} Won the match! You lost.`);
     }
   };
 
   // ==========================================
-  // 13. START GAME
+  // 15. START GAME
   // ==========================================
 
   const startGame = async () => {
@@ -773,16 +725,17 @@ export default function LudoMasterPage() {
         initTokens();
 
         setGamePhase("playing");
-
         setCurrentTurn("red");
-
         setWinner(null);
 
         setTimeLeft(15);
-
         setSixesCount(0);
-
         setDiceValue(6);
+
+        setValidMoves([]);
+        setAnimatingToken(null);
+
+        moveLockRef.current = false;
 
       } else {
 
@@ -800,21 +753,18 @@ export default function LudoMasterPage() {
   };
 
   // ==========================================
-  // 14. TOKEN POSITION
+  // 16. TOKEN POSITION
   // ==========================================
 
   const getTokenStyle = (token: Token) => {
 
     let r = 0;
     let c = 0;
-
     let tokenSize = 6.5;
 
     if (token.status === "yard") {
 
-      const idx = parseInt(
-        token.id.split("-")[1]
-      );
+      const idx = Number(token.id.split("-")[1]);
 
       [r, c] = YARD_COORDS[token.color][idx];
 
@@ -829,7 +779,7 @@ export default function LudoMasterPage() {
       [r, c] =
         HOME_LANES[token.color][token.homeLaneIndex];
 
-    } else if (token.status === "finished") {
+    } else {
 
       r = 7;
       c = 7;
@@ -839,37 +789,28 @@ export default function LudoMasterPage() {
 
     return {
       position: "absolute" as const,
-
       width: `${tokenSize}%`,
-
       height: `${tokenSize}%`,
-
       top: `${(r + 0.5) * cellSize}%`,
-
       left: `${(c + 0.5) * cellSize}%`,
-
       transform: "translate(-50%, -50%)",
-
       transition:
         animatingToken === token.id
           ? "top 0.18s linear, left 0.18s linear"
           : "none",
-
       zIndex:
         token.status === "track" ||
         token.status === "home_lane"
           ? 10
           : 5,
-
-      cursor:
-        validMoves.includes(token.id)
-          ? "pointer"
-          : "default"
+      cursor: validMoves.includes(token.id)
+        ? "pointer"
+        : "default"
     } as React.CSSProperties;
   };
 
   // ==========================================
-  // 15. BOARD CELLS
+  // 17. BOARD CELLS
   // ==========================================
 
   const renderBoardCells = useMemo(() => {
@@ -880,7 +821,6 @@ export default function LudoMasterPage() {
 
       for (let c = 0; c < 15; c++) {
 
-        // Skip yards
         if (
           (r < 6 && c < 6) ||
           (r < 6 && c > 8) ||
@@ -888,7 +828,6 @@ export default function LudoMasterPage() {
           (r > 8 && c > 8)
         ) continue;
 
-        // Skip center
         if (
           r >= 6 && r <= 8 &&
           c >= 6 && c <= 8
@@ -898,8 +837,7 @@ export default function LudoMasterPage() {
           p => p[0] === r && p[1] === c
         );
 
-        const isSafe =
-          SAFE_INDICES.includes(trackIdx);
+        const isSafe = SAFE_INDICES.includes(trackIdx);
 
         let className = "cell ";
 
@@ -907,9 +845,7 @@ export default function LudoMasterPage() {
 
           className += "track ";
 
-          if (isSafe) {
-            className += "safe ";
-          }
+          if (isSafe) className += "safe ";
 
           if (trackIdx === START_INDEX.red) {
             className += "bg-red ";
@@ -954,14 +890,10 @@ export default function LudoMasterPage() {
   }, []);
 
   // ==========================================
-  // 16. TOKEN SVG
+  // 18. TOKEN SVG
   // ==========================================
 
-  const TokenSVG = ({
-    color
-  }: {
-    color: Color
-  }) => {
+  const TokenSVG = ({ color }: { color: Color }) => {
 
     const colors: Record<Color, string> = {
       red: "var(--red)",
@@ -969,7 +901,6 @@ export default function LudoMasterPage() {
     };
 
     return (
-
       <svg
         viewBox="0 0 64 70"
         style={{
@@ -1000,7 +931,7 @@ export default function LudoMasterPage() {
   };
 
   // ==========================================
-  // 17. LOADING
+  // 19. LOADING
   // ==========================================
 
   if (loading) {
@@ -1021,7 +952,7 @@ export default function LudoMasterPage() {
   }
 
   // ==========================================
-  // 18. MAIN RENDER
+  // 20. MAIN UI
   // ==========================================
 
   return (
@@ -1057,16 +988,12 @@ export default function LudoMasterPage() {
                     : "text-yellow"
                 }`}
               >
-
                 ●{" "}
-
                 {currentTurn === "red"
                   ? "YOUR TURN"
                   : `${aiName}'S TURN`
                 }
-
                 {" "}({timeLeft}s)
-
               </span>
             )}
 
@@ -1093,95 +1020,60 @@ export default function LudoMasterPage() {
           <div className="board">
 
             <div className="board-grid">
-
               {renderBoardCells}
-
             </div>
 
             {/* GREEN YARD */}
 
             <div className="yard-wrapper top-left">
-
               <div className="yard yard-green">
-
                 <div className="yard-inner">
-
                   <div className="yard-slot yard-slot-one" />
-
                   <div className="yard-slot yard-slot-two" />
-
                 </div>
-
               </div>
-
             </div>
 
             {/* YELLOW YARD */}
 
             <div className="yard-wrapper top-right">
-
               <div className="yard yard-yellow">
-
                 <div className="yard-inner">
-
                   <div className="yard-slot yard-slot-one" />
-
                   <div className="yard-slot yard-slot-two" />
-
                 </div>
-
               </div>
-
             </div>
 
             {/* RED YARD */}
 
             <div className="yard-wrapper bottom-left">
-
               <div className="yard yard-red">
-
                 <div className="yard-inner">
-
                   <div className="yard-slot yard-slot-one" />
-
                   <div className="yard-slot yard-slot-two" />
-
                 </div>
-
               </div>
-
             </div>
 
             {/* BLUE YARD */}
 
             <div className="yard-wrapper bottom-right">
-
               <div className="yard yard-blue">
-
                 <div className="yard-inner">
-
                   <div className="yard-slot yard-slot-one" />
-
                   <div className="yard-slot yard-slot-two" />
-
                 </div>
-
               </div>
-
             </div>
 
             {/* CENTER HOME */}
 
             <div className="center-home">
-
               <div className="tri top" />
-
               <div className="tri right" />
-
               <div className="tri bottom" />
-
               <div className="tri left" />
-
             </div>
 
             {/* TOKENS */}
@@ -1192,10 +1084,7 @@ export default function LudoMasterPage() {
                 return null;
               }
 
-              const style = getTokenStyle(token);
-
               return (
-
                 <div
                   key={token.id}
                   className={`token ${
@@ -1203,21 +1092,19 @@ export default function LudoMasterPage() {
                       ? "glow-move"
                       : ""
                   }`}
-                  style={style}
-                  onClick={() =>
-                    validMoves.includes(token.id) &&
-                    executeMove(token.id)
-                  }
+                  style={getTokenStyle(token)}
+                  onClick={() => {
+                    if (validMoves.includes(token.id)) {
+                      executeMove(token.id);
+                    }
+                  }}
                 >
-
                   <TokenSVG color={token.color} />
-
                 </div>
               );
             })}
 
           </div>
-
         </div>
 
         {/* CONTROLS */}
@@ -1228,17 +1115,13 @@ export default function LudoMasterPage() {
 
             <div className="bet-info">
 
-              <span>
-                Bet Amount (1v1 Match)
-              </span>
+              <span>Bet Amount (1v1 Match)</span>
 
               <div className="bet-controls">
 
                 <button
                   onClick={() =>
-                    setBetAmount(
-                      Math.max(10, betAmount - 10)
-                    )
+                    setBetAmount(Math.max(10, betAmount - 10))
                   }
                 >
                   -
@@ -1267,12 +1150,7 @@ export default function LudoMasterPage() {
               onClick={startGame}
               disabled={isProcessing}
             >
-
-              {isProcessing
-                ? "STARTING..."
-                : "START MATCH"
-              }
-
+              {isProcessing ? "STARTING..." : "START MATCH"}
             </button>
 
           </div>
@@ -1294,9 +1172,7 @@ export default function LudoMasterPage() {
                     ? "disabled-dice"
                     : ""
                 }`}
-
                 onClick={rollDice}
-
                 disabled={
                   currentTurn !== "red" ||
                   isRolling ||
@@ -1311,23 +1187,15 @@ export default function LudoMasterPage() {
                   {[...Array(9)].map((_, i) => {
 
                     const patterns: Record<number, number[]> = {
-
                       1: [4],
-
                       2: [0, 8],
-
                       3: [0, 4, 8],
-
                       4: [0, 2, 6, 8],
-
                       5: [0, 2, 4, 6, 8],
-
                       6: [0, 2, 3, 5, 6, 8]
-
                     };
 
                     return (
-
                       <div
                         key={i}
                         className={`dot ${
@@ -1336,9 +1204,7 @@ export default function LudoMasterPage() {
                             : ""
                         }`}
                       />
-
                     );
-
                   })}
 
                 </div>
@@ -1355,14 +1221,12 @@ export default function LudoMasterPage() {
                 marginLeft: "15px"
               }}
             >
-
               {winner
                 ? "GAME OVER"
                 : currentTurn === "red"
                   ? "YOUR TURN"
                   : `${aiName} TURN...`
               }
-
             </div>
 
           </div>
@@ -1370,7 +1234,6 @@ export default function LudoMasterPage() {
         )}
 
       </div>
-
     </div>
   );
 }
