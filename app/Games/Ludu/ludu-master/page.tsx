@@ -6,10 +6,10 @@ import { supabase } from "../../../../lib/supabase/client";
 import "./ludu.css";
 
 // ==========================================
-// 1. CORRECTED 52 CELL TRACK
+// 1. BOARD CONSTANTS
 // ==========================================
 
-const TRACK = [
+const TRACK: [number, number][] = [
   [6,1], [6,2], [6,3], [6,4], [6,5],
   [5,6], [4,6], [3,6], [2,6], [1,6], [0,6],
   [0,7],
@@ -20,11 +20,11 @@ const TRACK = [
   [9,8], [10,8], [11,8], [12,8], [13,8], [14,8],
   [14,7],
   [14,6], [13,6], [12,6], [11,6], [10,6], [9,6],
-  [8,5], [8,4], [8,3], [8,2], [8,1], [8,0],
-  [7,0], [6,0]
+  [8,6], [8,5], [8,4], [8,3], [8,2], [8,1], [8,0],
+  [7,0]
 ];
 
-const HOME_LANES = {
+const HOME_LANES: Record<Color, [number, number][]> = {
   red: [
     [13,7], [12,7], [11,7],
     [10,7], [9,7], [8,7]
@@ -35,17 +35,65 @@ const HOME_LANES = {
   ]
 };
 
-const START_INDEX = {
+const START_INDEX: Record<Color, number> = {
   red: 39,
   yellow: 13
 };
 
 const SAFE_INDICES = [13, 21, 39, 46];
 
-const YARD_COORDS = {
-  red: [[10,1], [13,4]],
-  yellow: [[1,10], [4,13]]
+// Two perfectly aligned yard positions for each playing color
+const YARD_COORDS: Record<Color, [number, number][]> = {
+  red: [
+    [10,2],
+    [11,3]
+  ],
+  yellow: [
+    [2,11],
+    [3,12]
+  ]
 };
+
+// ==========================================
+// 2. OPPONENT NAME GENERATOR
+// ==========================================
+
+const AI_NAMES = [
+  "SABBIR",
+  "RAKIB",
+  "TANVIR",
+  "MEHEDI",
+  "TANJIM",
+  "ARIF",
+  "SAKIB",
+  "IMRAN",
+  "NAYEM",
+  "HASAN",
+  "SHUVO",
+  "RIYAD"
+];
+
+function generateOpponentName(seed: string): string {
+  let hash = 0;
+
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash |= 0;
+  }
+
+  const positiveHash = Math.abs(hash);
+
+  const name = AI_NAMES[positiveHash % AI_NAMES.length];
+
+  // Stable number between 1 and 99999
+  const number = (positiveHash % 99999) + 1;
+
+  return `${name}${number}`;
+}
+
+// ==========================================
+// 3. TYPES
+// ==========================================
 
 type Color = "red" | "yellow";
 
@@ -63,8 +111,18 @@ interface Token {
   homeLaneIndex: number;
 }
 
-const wait = (ms: number) =>
-  new Promise<void>(resolve => setTimeout(resolve, ms));
+type MoveStep = {
+  status: TokenStatus;
+  trackIndex: number;
+  homeLaneIndex: number;
+};
+
+const delay = (ms: number) =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
+// ==========================================
+// 4. MAIN GAME
+// ==========================================
 
 export default function LudoMasterPage() {
 
@@ -73,6 +131,7 @@ export default function LudoMasterPage() {
   const [betAmount, setBetAmount] = useState(100);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Game state
   const [gamePhase, setGamePhase] =
     useState<"betting" | "playing" | "finished">("betting");
 
@@ -82,59 +141,84 @@ export default function LudoMasterPage() {
     useState<Color>("red");
 
   const [diceValue, setDiceValue] = useState(6);
+
   const [isRolling, setIsRolling] = useState(false);
+
   const [validMoves, setValidMoves] = useState<string[]>([]);
+
   const [sixesCount, setSixesCount] = useState(0);
+
   const [winner, setWinner] = useState<Color | null>(null);
 
   const [animatingToken, setAnimatingToken] =
     useState<string | null>(null);
 
+  // Opponent
   const [aiName, setAiName] = useState("");
+
+  // Timer
   const [timeLeft, setTimeLeft] = useState(15);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const moveLockRef = useRef(false);
 
   // ==========================================
-  // 2. INITIALIZE
+  // 5. INITIALIZE USER
   // ==========================================
 
   useEffect(() => {
 
-    const randomNumber = Math.floor(Math.random() * 90) + 10;
-    setAiName(`SABBIR${randomNumber}`);
+    let mounted = true;
 
     const fetchProfile = async () => {
 
-      const {
-        data: { user }
-      } = await supabase.auth.getUser();
+      try {
 
-      if (user) {
+        const {
+          data: { user }
+        } = await supabase.auth.getUser();
 
-        const { data } = await supabase
-          .from("profiles")
-          .select("balance")
-          .eq("id", user.id)
-          .single();
+        if (!mounted) return;
 
-        if (data) setBalance(data.balance);
+        // Same account receives the same generated opponent name.
+        const seed = user?.id ??
+          `guest-${Date.now()}-${Math.random()}`;
+
+        setAiName(generateOpponentName(seed));
+
+        if (user) {
+
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("balance")
+            .eq("id", user.id)
+            .single();
+
+          if (!error && data && mounted) {
+            setBalance(Number(data.balance) || 0);
+          }
+        }
+
+      } catch (error) {
+
+        console.error("Profile loading error:", error);
+
+      } finally {
+
+        if (mounted) setLoading(false);
+
       }
-
-      setLoading(false);
     };
 
     fetchProfile();
 
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      mounted = false;
     };
 
   }, []);
 
   // ==========================================
-  // 3. INITIALIZE TOKENS
+  // 6. INITIALIZE TOKENS
   // ==========================================
 
   const initTokens = () => {
@@ -148,6 +232,7 @@ export default function LudoMasterPage() {
         trackIndex: -1,
         homeLaneIndex: -1
       },
+
       {
         id: "red-1",
         color: "red",
@@ -155,6 +240,7 @@ export default function LudoMasterPage() {
         trackIndex: -1,
         homeLaneIndex: -1
       },
+
       {
         id: "yellow-0",
         color: "yellow",
@@ -162,6 +248,7 @@ export default function LudoMasterPage() {
         trackIndex: -1,
         homeLaneIndex: -1
       },
+
       {
         id: "yellow-1",
         color: "yellow",
@@ -176,7 +263,7 @@ export default function LudoMasterPage() {
   };
 
   // ==========================================
-  // 4. TURN TIMER
+  // 7. TURN TIMER
   // ==========================================
 
   useEffect(() => {
@@ -198,7 +285,9 @@ export default function LudoMasterPage() {
     }, 1000);
 
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     };
 
   }, [
@@ -210,130 +299,7 @@ export default function LudoMasterPage() {
   ]);
 
   // ==========================================
-  // 5. AI LOGIC
-  // ==========================================
-
-  useEffect(() => {
-
-    if (
-      gamePhase === "playing" &&
-      currentTurn === "yellow" &&
-      !winner &&
-      validMoves.length === 0 &&
-      !isRolling &&
-      !animatingToken
-    ) {
-
-      const aiTimer = setTimeout(() => {
-        rollDice();
-      }, 1200);
-
-      return () => clearTimeout(aiTimer);
-    }
-
-    if (
-      gamePhase === "playing" &&
-      currentTurn === "yellow" &&
-      validMoves.length > 0 &&
-      !animatingToken
-    ) {
-
-      const aiMoveTimer = setTimeout(() => {
-
-        let bestMoveId = validMoves[0];
-
-        const yardMoves = validMoves.filter(
-          id => tokens.find(t => t.id === id)?.status === "yard"
-        );
-
-        if (yardMoves.length > 0) {
-          bestMoveId = yardMoves[0];
-        }
-
-        executeMove(bestMoveId);
-
-      }, 1200);
-
-      return () => clearTimeout(aiMoveTimer);
-    }
-
-  }, [
-    currentTurn,
-    gamePhase,
-    validMoves,
-    isRolling,
-    animatingToken,
-    winner,
-    tokens
-  ]);
-
-  // ==========================================
-  // 6. DICE
-  // ==========================================
-
-  const rollDice = () => {
-
-    if (
-      isRolling ||
-      moveLockRef.current ||
-      animatingToken ||
-      gamePhase !== "playing" ||
-      winner ||
-      validMoves.length > 0
-    ) return;
-
-    setIsRolling(true);
-
-    let rolls = 0;
-
-    const interval = setInterval(() => {
-
-      setDiceValue(Math.floor(Math.random() * 6) + 1);
-
-      rolls++;
-
-      if (rolls > 10) {
-
-        clearInterval(interval);
-
-        const finalDice = Math.floor(Math.random() * 6) + 1;
-
-        setDiceValue(finalDice);
-        setIsRolling(false);
-
-        handleDiceResult(finalDice);
-      }
-
-    }, 50);
-  };
-
-  const handleDiceResult = (dice: number) => {
-
-    if (dice === 6) {
-
-      setSixesCount(prev => prev + 1);
-
-      if (sixesCount >= 2) {
-        setTimeout(() => nextTurn(), 1000);
-        return;
-      }
-
-    } else {
-
-      setSixesCount(0);
-    }
-
-    const moves = getValidMoves(currentTurn, dice);
-
-    setValidMoves(moves);
-
-    if (moves.length === 0) {
-      setTimeout(() => nextTurn(), 1200);
-    }
-  };
-
-  // ==========================================
-  // 7. VALID MOVES
+  // 8. VALID MOVE CALCULATOR
   // ==========================================
 
   const getValidMoves = (
@@ -344,14 +310,16 @@ export default function LudoMasterPage() {
     const valid: string[] = [];
 
     const playerTokens = tokens.filter(
-      t => t.color === player
+      token => token.color === player
     );
 
     playerTokens.forEach(token => {
 
       if (token.status === "yard") {
 
-        if (dice === 6) valid.push(token.id);
+        if (dice === 6) {
+          valid.push(token.id);
+        }
 
       } else if (token.status === "track") {
 
@@ -380,65 +348,113 @@ export default function LudoMasterPage() {
   };
 
   // ==========================================
-  // 8. STEP-BY-STEP MOVEMENT
+  // 9. DICE RESULT
+  // ==========================================
+
+  const handleDiceResult = (dice: number) => {
+
+    if (dice === 6) {
+
+      setSixesCount(prev => prev + 1);
+
+      if (sixesCount >= 2) {
+
+        setTimeout(() => nextTurn(), 1000);
+
+        return;
+      }
+
+    } else {
+
+      setSixesCount(0);
+
+    }
+
+    const moves = getValidMoves(currentTurn, dice);
+
+    setValidMoves(moves);
+
+    if (moves.length === 0) {
+
+      setTimeout(() => nextTurn(), 1200);
+
+    }
+
+  };
+
+  // ==========================================
+  // 10. DICE ROLLING ANIMATION
+  // ==========================================
+
+  const rollDice = () => {
+
+    if (
+      isRolling ||
+      animatingToken ||
+      gamePhase !== "playing" ||
+      winner
+    ) return;
+
+    setIsRolling(true);
+
+    // The existing dice number remains unchanged
+    // while the dice animation is running.
+
+    setTimeout(() => {
+
+      const finalDice =
+        Math.floor(Math.random() * 6) + 1;
+
+      setDiceValue(finalDice);
+
+      setIsRolling(false);
+
+      handleDiceResult(finalDice);
+
+    }, 750);
+
+  };
+
+  // ==========================================
+  // 11. STEP-BY-STEP TOKEN MOVEMENT
   // ==========================================
 
   const executeMove = async (tokenId: string) => {
 
-    if (
-      !validMoves.includes(tokenId) ||
-      moveLockRef.current
-    ) return;
-
-    moveLockRef.current = true;
-
-    setValidMoves([]);
-    setAnimatingToken(tokenId);
+    if (!validMoves.includes(tokenId)) return;
 
     const token = tokens.find(t => t.id === tokenId);
 
-    if (!token) {
-      moveLockRef.current = false;
-      setAnimatingToken(null);
-      return;
-    }
+    if (!token) return;
+
+    if (animatingToken || isRolling) return;
+
+    setValidMoves([]);
+
+    setAnimatingToken(tokenId);
 
     const player = token.color;
+
     const dice = diceValue;
 
-    let currentStatus: TokenStatus = token.status;
-    let currentTrackIndex = token.trackIndex;
-    let currentHomeLaneIndex = token.homeLaneIndex;
+    const steps: MoveStep[] = [];
 
     // ------------------------------------------
-    // YARD -> START CELL
+    // YARD TO RED/YELLOW START CELL
     // ------------------------------------------
 
     if (token.status === "yard") {
 
-      currentStatus = "track";
-      currentTrackIndex = START_INDEX[player];
-      currentHomeLaneIndex = -1;
+      steps.push({
+        status: "track",
+        trackIndex: START_INDEX[player],
+        homeLaneIndex: -1
+      });
 
-      setTokens(prev =>
-        prev.map(t =>
-          t.id === tokenId
-            ? {
-                ...t,
-                status: "track",
-                trackIndex: START_INDEX[player],
-                homeLaneIndex: -1
-              }
-            : t
-        )
-      );
-
-      // Starting cell pause
-      await wait(220);
     }
 
     // ------------------------------------------
-    // TRACK -> EACH CELL
+    // MAIN TRACK MOVEMENT
     // ------------------------------------------
 
     else if (token.status === "track") {
@@ -446,209 +462,293 @@ export default function LudoMasterPage() {
       const dist =
         (token.trackIndex - START_INDEX[player] + 52) % 52;
 
-      for (let step = 1; step <= dice; step++) {
+      for (let i = 1; i <= dice; i++) {
 
-        const nextDist = dist + step;
+        const nextDist = dist + i;
 
         if (nextDist <= 51) {
 
-          currentStatus = "track";
-
-          currentTrackIndex =
-            (START_INDEX[player] + nextDist) % 52;
-
-          currentHomeLaneIndex = -1;
+          steps.push({
+            status: "track",
+            trackIndex:
+              (START_INDEX[player] + nextDist) % 52,
+            homeLaneIndex: -1
+          });
 
         } else {
 
-          currentStatus = "home_lane";
+          const homeIndex = nextDist - 52;
 
-          currentHomeLaneIndex = nextDist - 52;
+          if (homeIndex >= 0 && homeIndex <= 5) {
 
-          currentTrackIndex = -1;
+            steps.push({
+              status: "home_lane",
+              trackIndex: -1,
+              homeLaneIndex: homeIndex
+            });
+
+          }
+
         }
 
-        setTokens(prev =>
-          prev.map(t =>
-            t.id === tokenId
-              ? {
-                  ...t,
-                  status: currentStatus,
-                  trackIndex: currentTrackIndex,
-                  homeLaneIndex: currentHomeLaneIndex
-                }
-              : t
-          )
-        );
-
-        await wait(180);
       }
+
     }
 
     // ------------------------------------------
-    // HOME LANE -> EACH CELL
+    // HOME LANE MOVEMENT
     // ------------------------------------------
 
     else if (token.status === "home_lane") {
 
-      for (let step = 1; step <= dice; step++) {
+      for (let i = 1; i <= dice; i++) {
 
-        const nextHomeIndex =
-          token.homeLaneIndex + step;
+        const nextIndex = token.homeLaneIndex + i;
 
-        if (nextHomeIndex >= 6) {
+        if (nextIndex >= 6) {
 
-          currentStatus = "finished";
-          currentHomeLaneIndex = -1;
-          currentTrackIndex = -1;
+          steps.push({
+            status: "finished",
+            trackIndex: -1,
+            homeLaneIndex: -1
+          });
 
-        } else {
+          break;
 
-          currentStatus = "home_lane";
-          currentHomeLaneIndex = nextHomeIndex;
-          currentTrackIndex = -1;
         }
 
-        setTokens(prev =>
-          prev.map(t =>
-            t.id === tokenId
-              ? {
-                  ...t,
-                  status: currentStatus,
-                  trackIndex: currentTrackIndex,
-                  homeLaneIndex: currentHomeLaneIndex
-                }
-              : t
-          )
-        );
+        steps.push({
+          status: "home_lane",
+          trackIndex: -1,
+          homeLaneIndex: nextIndex
+        });
 
-        await wait(180);
       }
+
     }
 
-    // ==========================================
-    // 9. CAPTURE
-    // ==========================================
+    if (steps.length === 0) {
+
+      setAnimatingToken(null);
+
+      return;
+    }
+
+    // ------------------------------------------
+    // ANIMATE EACH CELL ONE BY ONE
+    // ------------------------------------------
+
+    let workingTokens = [...tokens];
+
+    for (const step of steps) {
+
+      await delay(160);
+
+      workingTokens = workingTokens.map(t => {
+
+        if (t.id === tokenId) {
+
+          return {
+            ...t,
+            status: step.status,
+            trackIndex: step.trackIndex,
+            homeLaneIndex: step.homeLaneIndex
+          };
+
+        }
+
+        return t;
+
+      });
+
+      setTokens([...workingTokens]);
+
+    }
+
+    // ------------------------------------------
+    // CAPTURE LOGIC
+    // ------------------------------------------
+
+    const finalToken = workingTokens.find(
+      t => t.id === tokenId
+    );
 
     let isCapture = false;
 
-    const capturedTokenIds: string[] = [];
+    let capturedTokenIds: string[] = [];
 
-    if (currentStatus === "track") {
+    if (finalToken?.status === "track") {
 
-      const isSafe =
-        SAFE_INDICES.includes(currentTrackIndex);
+      const isSafe = SAFE_INDICES.includes(
+        finalToken.trackIndex
+      );
 
       if (!isSafe) {
 
-        tokens.forEach(t => {
+        workingTokens.forEach(t => {
 
           if (
             t.color !== player &&
             t.status === "track" &&
-            t.trackIndex === currentTrackIndex
+            t.trackIndex === finalToken.trackIndex
           ) {
+
             capturedTokenIds.push(t.id);
+
           }
 
         });
+
       }
+
     }
 
-    // ==========================================
-    // 10. FINAL TOKEN UPDATE
-    // ==========================================
+    if (capturedTokenIds.length > 0) {
 
-    const updatedTokens = tokens.map(t => {
+      isCapture = true;
 
-      if (t.id === tokenId) {
+      workingTokens = workingTokens.map(t => {
 
-        return {
-          ...t,
-          status: currentStatus,
-          trackIndex: currentTrackIndex,
-          homeLaneIndex: currentHomeLaneIndex
-        };
-      }
+        if (capturedTokenIds.includes(t.id)) {
 
-      if (capturedTokenIds.includes(t.id)) {
+          return {
+            ...t,
+            status: "yard",
+            trackIndex: -1,
+            homeLaneIndex: -1
+          };
 
-        isCapture = true;
+        }
 
-        return {
-          ...t,
-          status: "yard" as TokenStatus,
-          trackIndex: -1,
-          homeLaneIndex: -1
-        };
-      }
+        return t;
 
-      return t;
-    });
+      });
 
-    setTokens(updatedTokens);
+    }
 
-    await wait(100);
+    setTokens(workingTokens);
 
     setAnimatingToken(null);
-    moveLockRef.current = false;
 
-    // ==========================================
-    // 11. WIN CHECK
-    // ==========================================
+    // ------------------------------------------
+    // WIN CONDITION
+    // ------------------------------------------
 
-    const playerTokens = updatedTokens.filter(
+    const playerTokens = workingTokens.filter(
       t => t.color === player
     );
 
     if (playerTokens.every(t => t.status === "finished")) {
 
       handleWin(player);
+
       return;
     }
 
-    // ==========================================
-    // 12. EXTRA TURN
-    // ==========================================
+    // ------------------------------------------
+    // EXTRA TURN
+    // ------------------------------------------
 
     if (dice === 6 || isCapture) {
 
       setTimeLeft(15);
 
-      setSixesCount(
-        dice === 6 ? sixesCount : 0
-      );
+      setSixesCount(dice === 6 ? sixesCount : 0);
 
     } else {
 
       nextTurn();
+
     }
+
   };
 
   // ==========================================
-  // 13. NEXT TURN
+  // 12. NEXT TURN
   // ==========================================
 
   const nextTurn = () => {
 
-    moveLockRef.current = false;
-
     setSixesCount(0);
+
     setValidMoves([]);
+
     setTimeLeft(15);
 
     setCurrentTurn(prev =>
       prev === "red" ? "yellow" : "red"
     );
+
   };
 
   // ==========================================
-  // 14. WIN SYSTEM
+  // 13. AI PLAYER
+  // ==========================================
+
+  useEffect(() => {
+
+    if (
+      gamePhase === "playing" &&
+      currentTurn === "yellow" &&
+      !winner &&
+      validMoves.length === 0 &&
+      !isRolling &&
+      !animatingToken
+    ) {
+
+      const aiTimer = setTimeout(() => {
+        rollDice();
+      }, 1200);
+
+      return () => clearTimeout(aiTimer);
+
+    }
+
+    if (
+      gamePhase === "playing" &&
+      currentTurn === "yellow" &&
+      validMoves.length > 0 &&
+      !animatingToken
+    ) {
+
+      const aiMoveTimer = setTimeout(() => {
+
+        let bestMoveId = validMoves[0];
+
+        const yardMoves = validMoves.filter(id =>
+          tokens.find(t => t.id === id)?.status === "yard"
+        );
+
+        if (yardMoves.length > 0) {
+          bestMoveId = yardMoves[0];
+        }
+
+        executeMove(bestMoveId);
+
+      }, 1200);
+
+      return () => clearTimeout(aiMoveTimer);
+
+    }
+
+  }, [
+    currentTurn,
+    gamePhase,
+    validMoves,
+    isRolling,
+    animatingToken,
+    winner,
+    tokens
+  ]);
+
+  // ==========================================
+  // 14. WIN HANDLER
   // ==========================================
 
   const handleWin = async (winningPlayer: Color) => {
 
     setGamePhase("finished");
+
     setWinner(winningPlayer);
 
     if (winningPlayer === "red") {
@@ -665,15 +765,21 @@ export default function LudoMasterPage() {
           }
         );
 
-        if (!error && data.success) {
+        if (!error && data?.success) {
+
           setBalance(data.balance_after);
+
         }
 
       } catch (err) {
+
         console.error(err);
+
       }
 
-      alert(`🎉 You Won ${winAmount.toFixed(2)} BDT!`);
+      alert(
+        `🎉 You Won ${winAmount.toFixed(2)} BDT!`
+      );
 
     } else {
 
@@ -688,11 +794,15 @@ export default function LudoMasterPage() {
         );
 
       } catch (err) {
+
         console.error(err);
+
       }
 
       alert(`😢 ${aiName} Won the match! You lost.`);
+
     }
+
   };
 
   // ==========================================
@@ -702,7 +812,9 @@ export default function LudoMasterPage() {
   const startGame = async () => {
 
     if (betAmount > balance) {
+
       return alert("Insufficient balance!");
+
     }
 
     setIsProcessing(true);
@@ -718,38 +830,42 @@ export default function LudoMasterPage() {
 
       if (error) throw error;
 
-      if (data.success) {
+      if (data?.success) {
 
         setBalance(data.balance_after);
 
         initTokens();
 
         setGamePhase("playing");
+
         setCurrentTurn("red");
+
         setWinner(null);
 
         setTimeLeft(15);
+
         setSixesCount(0);
+
         setDiceValue(6);
 
         setValidMoves([]);
-        setAnimatingToken(null);
-
-        moveLockRef.current = false;
 
       } else {
 
-        alert(data.error);
+        alert(data?.error || "Unable to start match.");
+
       }
 
     } catch (err: any) {
 
-      alert(err.message);
+      alert(err.message || "Something went wrong.");
 
     } finally {
 
       setIsProcessing(false);
+
     }
+
   };
 
   // ==========================================
@@ -760,6 +876,7 @@ export default function LudoMasterPage() {
 
     let r = 0;
     let c = 0;
+
     let tokenSize = 6.5;
 
     if (token.status === "yard") {
@@ -768,21 +885,26 @@ export default function LudoMasterPage() {
 
       [r, c] = YARD_COORDS[token.color][idx];
 
-      tokenSize = 8.5;
+      // Round yard tokens
+      tokenSize = 6.5;
 
     } else if (token.status === "track") {
 
       [r, c] = TRACK[token.trackIndex];
 
+      tokenSize = 6.5;
+
     } else if (token.status === "home_lane") {
 
-      [r, c] =
-        HOME_LANES[token.color][token.homeLaneIndex];
+      [r, c] = HOME_LANES[token.color][token.homeLaneIndex];
+
+      tokenSize = 6.5;
 
     } else {
 
       r = 7;
       c = 7;
+
     }
 
     const cellSize = 100 / 15;
@@ -796,17 +918,14 @@ export default function LudoMasterPage() {
       transform: "translate(-50%, -50%)",
       transition:
         animatingToken === token.id
-          ? "top 0.18s linear, left 0.18s linear"
+          ? "top 0.14s linear, left 0.14s linear"
           : "none",
-      zIndex:
-        token.status === "track" ||
-        token.status === "home_lane"
-          ? 10
-          : 5,
+      zIndex: token.status === "track" ? 10 : 5,
       cursor: validMoves.includes(token.id)
         ? "pointer"
         : "default"
     } as React.CSSProperties;
+
   };
 
   // ==========================================
@@ -821,6 +940,7 @@ export default function LudoMasterPage() {
 
       for (let c = 0; c < 15; c++) {
 
+        // Skip yards
         if (
           (r < 6 && c < 6) ||
           (r < 6 && c > 8) ||
@@ -828,6 +948,7 @@ export default function LudoMasterPage() {
           (r > 8 && c > 8)
         ) continue;
 
+        // Skip center
         if (
           r >= 6 && r <= 8 &&
           c >= 6 && c <= 8
@@ -854,6 +975,7 @@ export default function LudoMasterPage() {
           if (trackIdx === START_INDEX.yellow) {
             className += "bg-yellow ";
           }
+
         }
 
         if (
@@ -882,7 +1004,9 @@ export default function LudoMasterPage() {
             }}
           />
         );
+
       }
+
     }
 
     return cells;
@@ -890,16 +1014,37 @@ export default function LudoMasterPage() {
   }, []);
 
   // ==========================================
-  // 18. TOKEN SVG
+  // 18. TOKEN GRAPHICS
   // ==========================================
 
-  const TokenSVG = ({ color }: { color: Color }) => {
+  const TokenSVG = ({
+    color,
+    isYard
+  }: {
+    color: Color;
+    isYard: boolean;
+  }) => {
 
     const colors: Record<Color, string> = {
       red: "var(--red)",
       yellow: "var(--yellow)"
     };
 
+    // Yard tokens are round pieces
+    if (isYard) {
+
+      return (
+        <div
+          className="yard-token-face"
+          style={{
+            background: colors[color]
+          }}
+        />
+      );
+
+    }
+
+    // Track tokens retain pin design
     return (
       <svg
         viewBox="0 0 64 70"
@@ -928,6 +1073,7 @@ export default function LudoMasterPage() {
 
       </svg>
     );
+
   };
 
   // ==========================================
@@ -942,13 +1088,13 @@ export default function LudoMasterPage() {
         style={{
           color: "white",
           display: "grid",
-          placeItems: "center",
-          height: "100vh"
+          placeItems: "center"
         }}
       >
         Loading...
       </div>
     );
+
   }
 
   // ==========================================
@@ -961,7 +1107,7 @@ export default function LudoMasterPage() {
 
       <div className="game">
 
-        {/* TOP BAR */}
+        {/* TOP WALLET */}
 
         <div className="wallet-header">
 
@@ -988,13 +1134,18 @@ export default function LudoMasterPage() {
                     : "text-yellow"
                 }`}
               >
-                ●{" "}
-                {currentTurn === "red"
+
+                ● {currentTurn === "red"
                   ? "YOUR TURN"
                   : `${aiName}'S TURN`
-                }
-                {" "}({timeLeft}s)
+                } ({timeLeft}s)
+
               </span>
+
+            )}
+
+            {gamePhase === "finished" && (
+              <span>GAME OVER</span>
             )}
 
           </div>
@@ -1005,6 +1156,16 @@ export default function LudoMasterPage() {
               {aiName || "AI"}
             </span>
 
+            <span
+              style={{
+                fontSize: "9px",
+                color: "#aaa",
+                fontWeight: "bold"
+              }}
+            >
+              AI OPPONENT
+            </span>
+
             <span className="wallet-amount">
               ∞
             </span>
@@ -1013,67 +1174,78 @@ export default function LudoMasterPage() {
 
         </div>
 
-        {/* BOARD */}
+        {/* GAME BOARD */}
 
         <div className="board-container">
 
           <div className="board">
 
             <div className="board-grid">
+
               {renderBoardCells}
+
             </div>
 
             {/* GREEN YARD */}
 
             <div className="yard-wrapper top-left">
+
               <div className="yard yard-green">
-                <div className="yard-inner">
-                  <div className="yard-slot yard-slot-one" />
-                  <div className="yard-slot yard-slot-two" />
-                </div>
+
+                <div className="yard-inner" />
+
               </div>
+
             </div>
 
             {/* YELLOW YARD */}
 
             <div className="yard-wrapper top-right">
+
               <div className="yard yard-yellow">
-                <div className="yard-inner">
-                  <div className="yard-slot yard-slot-one" />
-                  <div className="yard-slot yard-slot-two" />
-                </div>
+
+                <div className="yard-inner" />
+
               </div>
+
             </div>
 
             {/* RED YARD */}
 
             <div className="yard-wrapper bottom-left">
+
               <div className="yard yard-red">
-                <div className="yard-inner">
-                  <div className="yard-slot yard-slot-one" />
-                  <div className="yard-slot yard-slot-two" />
-                </div>
+
+                <div className="yard-inner" />
+
               </div>
+
             </div>
 
             {/* BLUE YARD */}
 
             <div className="yard-wrapper bottom-right">
+
               <div className="yard yard-blue">
-                <div className="yard-inner">
-                  <div className="yard-slot yard-slot-one" />
-                  <div className="yard-slot yard-slot-two" />
-                </div>
+
+                <div className="yard-inner" />
+
               </div>
+
             </div>
 
             {/* CENTER HOME */}
 
             <div className="center-home">
+
               <div className="tri top" />
+
               <div className="tri right" />
+
               <div className="tri bottom" />
+
               <div className="tri left" />
+
             </div>
 
             {/* TOKENS */}
@@ -1084,38 +1256,53 @@ export default function LudoMasterPage() {
                 return null;
               }
 
+              const style = getTokenStyle(token);
+
               return (
+
                 <div
                   key={token.id}
                   className={`token ${
+                    token.status === "yard" ? "yard-token" : ""
+                  } ${
                     validMoves.includes(token.id)
                       ? "glow-move"
                       : ""
                   }`}
-                  style={getTokenStyle(token)}
+                  style={style}
                   onClick={() => {
                     if (validMoves.includes(token.id)) {
                       executeMove(token.id);
                     }
                   }}
                 >
-                  <TokenSVG color={token.color} />
+
+                  <TokenSVG
+                    color={token.color}
+                    isYard={token.status === "yard"}
+                  />
+
                 </div>
+
               );
+
             })}
 
           </div>
+
         </div>
 
-        {/* CONTROLS */}
+        {/* BETTING PANEL */}
 
-        {gamePhase === "betting" ? (
+        {gamePhase === "betting" && (
 
           <div className="betting-panel">
 
             <div className="bet-info">
 
-              <span>Bet Amount (1v1 Match)</span>
+              <span>
+                Bet Amount (1v1 Match)
+              </span>
 
               <div className="bet-controls">
 
@@ -1150,25 +1337,34 @@ export default function LudoMasterPage() {
               onClick={startGame}
               disabled={isProcessing}
             >
-              {isProcessing ? "STARTING..." : "START MATCH"}
+
+              {isProcessing
+                ? "STARTING..."
+                : "START MATCH"
+              }
+
             </button>
 
           </div>
 
-        ) : (
+        )}
+
+        {/* FIXED BOTTOM DICE BAR */}
+
+        {gamePhase === "playing" && (
 
           <div className="control bottom">
 
-            <div className="panel">
+            <div className="dice-status-bar">
 
               <button
                 className={`dice-button ${
-                  (
-                    currentTurn !== "red" ||
-                    isRolling ||
-                    validMoves.length > 0 ||
-                    animatingToken !== null
-                  )
+                  isRolling ? "rolling-dice" : ""
+                } ${
+                  currentTurn !== "red" ||
+                  isRolling ||
+                  validMoves.length > 0 ||
+                  winner !== null
                     ? "disabled-dice"
                     : ""
                 }`}
@@ -1177,7 +1373,6 @@ export default function LudoMasterPage() {
                   currentTurn !== "red" ||
                   isRolling ||
                   validMoves.length > 0 ||
-                  animatingToken !== null ||
                   winner !== null
                 }
               >
@@ -1187,15 +1382,23 @@ export default function LudoMasterPage() {
                   {[...Array(9)].map((_, i) => {
 
                     const patterns: Record<number, number[]> = {
+
                       1: [4],
+
                       2: [0, 8],
+
                       3: [0, 4, 8],
+
                       4: [0, 2, 6, 8],
+
                       5: [0, 2, 4, 6, 8],
+
                       6: [0, 2, 3, 5, 6, 8]
+
                     };
 
                     return (
+
                       <div
                         key={i}
                         className={`dot ${
@@ -1204,36 +1407,62 @@ export default function LudoMasterPage() {
                             : ""
                         }`}
                       />
+
                     );
+
                   })}
 
                 </div>
 
               </button>
 
-            </div>
+              <div className="turn-label">
 
-            <div
-              style={{
-                color: "white",
-                fontSize: "14px",
-                fontWeight: "bold",
-                marginLeft: "15px"
-              }}
-            >
-              {winner
-                ? "GAME OVER"
-                : currentTurn === "red"
-                  ? "YOUR TURN"
-                  : `${aiName} TURN...`
-              }
+                {winner
+                  ? "GAME OVER"
+                  : isRolling
+                    ? "ROLLING..."
+                    : currentTurn === "red"
+                      ? "YOUR TURN"
+                      : `${aiName} TURN...`
+                }
+
+              </div>
+
             </div>
 
           </div>
 
         )}
 
+        {/* FINISHED MATCH */}
+
+        {gamePhase === "finished" && (
+
+          <div className="betting-panel">
+
+            <button
+              className="start-btn"
+              onClick={() => {
+                setGamePhase("betting");
+                setWinner(null);
+                setTokens([]);
+                setValidMoves([]);
+                setDiceValue(6);
+                setTimeLeft(15);
+              }}
+            >
+              PLAY AGAIN
+            </button>
+
+          </div>
+
+        )}
+
       </div>
+
     </div>
+
   );
+
 }
