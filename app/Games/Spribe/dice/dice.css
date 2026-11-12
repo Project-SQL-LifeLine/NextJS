@@ -121,18 +121,31 @@
 .history-item.green { color: #42bd19; }
 .history-item.white { color: #fff; }
 
+/* Updated History Menu Button */
 .history-menu {
-  height: 34px;
-  width: 50px;
+  height: 36px; /* Increased 5% */
+  width: 54px;  /* Increased 5% */
   flex: none;
   border-radius: 25px;
   background: #7421c5;
   border: 2px solid #210b3b;
-  display: grid;
-  place-items: center;
-  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   color: white;
   cursor: pointer;
+  padding: 0;
+}
+
+.hm-clock {
+  width: 18px;
+  height: 18px;
+}
+
+.hm-arrow {
+  width: 16px;
+  height: 16px;
 }
 
 /* Pointer (Notch) */
@@ -837,7 +850,12 @@ input[type=range]::-webkit-slider-thumb {
   .game-shell { padding: 5px; gap: 5px; border-radius: 12px; }
   .history { height: 27px; gap: 3px; padding: 2px; }
   .history-item { height: 20px; font-size: clamp(9px, 2.5vw, 11px); }
-  .history-menu { height: 25px; width: 34px; font-size: 14px; }
+  
+  /* Responsive History Menu Button */
+  .history-menu { height: 27px; width: 37px; gap: 2px; border-width: 1px; }
+  .hm-clock { width: 14px; height: 14px; }
+  .hm-arrow { width: 12px; height: 12px; }
+
   .notch { width: 43px; height: 18px; font-size: 10px; }
   .result-number { min-height: 0; font-size: clamp(38px, 11vw, 48px); height: 40%; }
   .chart-area { min-height: 0; }
