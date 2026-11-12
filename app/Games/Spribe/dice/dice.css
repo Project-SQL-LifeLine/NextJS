@@ -37,6 +37,59 @@
   position: relative;
 }
 
+/* TOP MENU POPUP */
+.top-menu-popup {
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 650px;
+  background: #2a0d52;
+  border: 2px solid #501f8f;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 10px;
+  z-index: 100;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.menu-item svg {
+  width: 24px;
+  height: 24px;
+  color: #ccc;
+  transition: color 0.2s;
+}
+
+.menu-item:hover svg {
+  color: #fff;
+}
+
+.menu-item span {
+  font-size: 10px;
+  color: #a99ab4;
+  text-align: center;
+  line-height: 1.2;
+}
+
 /* HISTORY */
 .history {
   height: 38px;
@@ -82,30 +135,25 @@
   cursor: pointer;
 }
 
-.pointer {
+/* Pointer (Notch) */
+.pointer, .notch {
   position: absolute;
   top: -1px;
   left: 43%;
   width: 60px;
-  height: 18px;
+  height: 22px;
   background: #0e0924;
   border: 1px solid #261344;
   border-top: 0;
+  border-radius: 0 0 8px 8px;
   display: grid;
   place-items: center;
-  z-index: 2;
+  z-index: 20;
+  color: #a6a3b5;
+  font-size: 12px;
+  cursor: pointer;
 }
 
-.pointer:after {
-  content: "";
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 10px solid #a6a3b5;
-}
-
-/* RESULT PANEL */
 .result-panel {
   flex: 1;
   min-height: 0;
@@ -116,6 +164,7 @@
   flex-direction: column;
   padding: 10px 0 10px;
   overflow: hidden;
+  position: relative; /* Notch-এর জন্য */
 }
 
 .result-number {
@@ -125,7 +174,7 @@
   font-size: clamp(50px, 12vw, 80px);
   font-weight: 700;
   letter-spacing: 2px;
-  color: #36bd00;
+  transition: color 0.2s ease;
 }
 
 .chart-area {
@@ -158,9 +207,7 @@
   padding: 0 4px;
 }
 
-/* =========================================
-   Grid Fix: ৭০টি দাগ সবসময় ফিক্সড থাকবে
-   ========================================= */
+/* Grid Fix: ৭০টি দাগ */
 .bar {
   height: 34px;
   display: flex;
@@ -170,13 +217,7 @@
   border-radius: 2px;
 }
 
-.bar .red,
-.bar .cyan,
-.bar .mint {
-  height: 100%;
-  transition: width 0.1s ease;
-}
-
+.bar .red, .bar .cyan, .bar .mint { height: 100%; transition: width 0.1s ease; }
 .bar .red { background-color: #a50949; }
 .bar .cyan { background-color: #10a6d9; }
 .bar .mint { background-color: #36d7b2; }
@@ -243,12 +284,7 @@
   height: 68px;
 }
 
-.payout-label {
-  text-align: center;
-  color: #9c88ad;
-  font-size: 16px;
-  margin-bottom: 4px;
-}
+.payout-label { text-align: center; color: #9c88ad; font-size: 16px; margin-bottom: 4px; }
 
 .multiplier {
   height: 38px;
@@ -260,10 +296,7 @@
   font-size: 24px;
 }
 
-.slider-wrap {
-  position: relative;
-  padding-top: 12px;
-}
+.slider-wrap { position: relative; padding-top: 12px; }
 
 input[type=range] {
   appearance: none;
@@ -289,18 +322,8 @@ input[type=range]::-webkit-slider-thumb {
   cursor: pointer;
 }
 
-.ticks {
-  height: 12px;
-  margin: 0 6px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.ticks i {
-  height: 8px;
-  width: 1px;
-  background: #8972a0;
-}
+.ticks { height: 12px; margin: 0 6px; display: flex; justify-content: space-between; }
+.ticks i { height: 8px; width: 1px; background: #8972a0; }
 
 .payout-bottom {
   height: 48px;
@@ -311,15 +334,8 @@ input[type=range]::-webkit-slider-thumb {
   text-align: center;
 }
 
-.small-label {
-  color: #9b87ae;
-  font-size: 15px;
-}
-
-.small-value {
-  font-size: 18px;
-  margin-top: 2px;
-}
+.small-label { color: #9b87ae; font-size: 15px; }
+.small-value { font-size: 18px; margin-top: 2px; }
 
 /* BET AREA */
 .bet-area {
@@ -334,66 +350,38 @@ input[type=range]::-webkit-slider-thumb {
   justify-content: space-between;
 }
 
-.action-row {
-  display: grid;
-  grid-template-columns: 64px 1fr 1fr;
-  gap: 6px;
-  align-items: center;
-}
+.action-row { display: grid; grid-template-columns: 64px 1fr 1fr; gap: 6px; align-items: center; }
 
-/* =========================================
-   অ্যারো এবং নাম্বারের পজিশন ফিক্স করা হলো
-   ========================================= */
 .action-btn {
   height: 64px;
   border-radius: 25px;
   border: 3px solid #160d32;
   box-shadow: 0 3px 4px #1a0731, inset 0 2px 3px rgba(255, 255, 255, .35);
   display: flex;
-  flex-direction: column; /* অ্যারো উপরে, নাম্বার নিচে */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px; /* অ্যারো এবং নাম্বারের মাঝে সামান্য জায়গা */
+  gap: 2px;
   position: relative;
   cursor: pointer;
 }
 
-.roll {
-  height: 64px;
-  width: 64px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #0785ff, #0050bb);
-  color: white;
-}
+.roll { height: 64px; width: 64px; border-radius: 50%; background: linear-gradient(145deg, #0785ff, #0050bb); color: white; }
+.low { background: linear-gradient(145deg, #04b997, #00816e); }
+.high { background: linear-gradient(145deg, #12a4e8, #006da9); }
 
-.low {
-  background: linear-gradient(145deg, #04b997, #00816e);
-}
-
-.high {
-  background: linear-gradient(145deg, #12a4e8, #006da9);
-}
-
-.arrow-svg {
-  width: 34px;
-  height: 34px;
-  margin-top: -4px; /* অ্যারোটি কিছুটা উপরে তোলা হলো */
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
-}
+.arrow-svg { width: 34px; height: 34px; margin-top: -4px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4)); }
 
 .prob {
-  position: relative; /* absolute সরিয়ে দেওয়া হলো */
-  bottom: 0; /* bottom সরিয়ে দেওয়া হলো */
+  position: relative;
+  bottom: 0;
   background: #12635b;
   border-radius: 6px;
   padding: 1px 12px;
   font-size: 14px;
   line-height: 1.2;
 }
-
-.high .prob {
-  background: #07517a;
-}
+.high .prob { background: #07517a; }
 
 /* BET CONTROLS */
 .bet-row {
@@ -408,21 +396,8 @@ input[type=range]::-webkit-slider-thumb {
   padding: 4px 10px;
 }
 
-.bet-input-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.bet-label {
-  text-align: center;
-  font-size: 12px;
-  color: #fff;
-  line-height: 1;
-  margin-bottom: 2px;
-}
+.bet-input-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+.bet-label { text-align: center; font-size: 12px; color: #fff; line-height: 1; margin-bottom: 2px; }
 
 .bet-input {
   height: 26px;
@@ -453,14 +428,7 @@ input[type=range]::-webkit-slider-thumb {
 .coins { font-size: 18px; }
 
 /* FOOTER */
-.footer {
-  height: 32px;
-  flex: none;
-  display: grid;
-  grid-template-columns: 1fr 32px 1fr 32px;
-  gap: 5px;
-  align-items: center;
-}
+.footer { height: 32px; flex: none; display: grid; grid-template-columns: 1fr 32px 1fr 32px; gap: 5px; align-items: center; }
 
 .dice-tab {
   height: 30px;
@@ -485,13 +453,7 @@ input[type=range]::-webkit-slider-thumb {
   font-size: 18px;
 }
 
-.balance {
-  text-align: right;
-  font-size: 16px;
-  white-space: nowrap;
-  padding-right: 4px;
-}
-
+.balance { text-align: right; font-size: 16px; white-space: nowrap; padding-right: 4px; }
 .balance span { color: #a88ec3; }
 
 .menu {
@@ -513,8 +475,7 @@ input[type=range]::-webkit-slider-thumb {
   .history { height: 27px; gap: 3px; padding: 2px; }
   .history-item { height: 20px; font-size: clamp(9px, 2.5vw, 11px); }
   .history-menu { height: 25px; width: 34px; font-size: 14px; }
-  .pointer { width: 43px; height: 15px; }
-  .pointer:after { border-left-width: 5px; border-right-width: 5px; border-top-width: 8px; }
+  .notch { width: 43px; height: 18px; font-size: 10px; }
   .result-number { min-height: 0; font-size: clamp(38px, 11vw, 48px); height: 40%; }
   .chart-area { min-height: 0; }
   .scale { height: 12px; font-size: 9px; }
@@ -556,4 +517,8 @@ input[type=range]::-webkit-slider-thumb {
   .help { width: 21px; height: 21px; font-size: 14px; border-width: 1px; }
   .balance { font-size: 12px; padding-right: 3px; }
   .menu { width: 22px; height: 22px; font-size: 13px; border-width: 1px; }
+  
+  .top-menu-popup { padding: 8px 5px; gap: 5px; }
+  .menu-item svg { width: 20px; height: 20px; }
+  .menu-item span { font-size: 8px; }
 }
