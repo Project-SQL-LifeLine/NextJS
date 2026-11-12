@@ -1,227 +1,173 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "../../../../lib/supabase/client";
 import "./dice.css";
 
 export default function DiceGamePage() {
-  const router = useRouter();
+  // স্টেট
+  const [bet, setBet] = useState(1.00);
+  const [chance, setChance] = useState(48.5);
+  const [result, setResult] = useState("95.01");
   
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  // হিস্ট্রি ডাটা (HTML এ হার্ডকোড ছিল, সেটাই রাখা হলো)
+  const historyData = [
+    { val: "95.01", isGreen: true },
+    { val: "44.33", isGreen: false },
+    { val: "55.33", isGreen: false },
+    { val: "85.45", isGreen: true },
+    { val: "19.17", isGreen: true },
+    { val: "49", isGreen: false },
+  ];
 
-  const [betAmount, setBetAmount] = useState<number>(1.00);
-  const [target, setTarget] = useState<number>(50.00);
-  const [isOver, setIsOver] = useState<boolean>(false);
-  
-  const [isRolling, setIsRolling] = useState(false);
-  const [rollResult, setRollResult] = useState<number | null>(null);
-  const [winStatus, setWinStatus] = useState<"win" | "lose" | null>(null);
-  
-  // ডামি হিস্ট্রি (পরে ডাটাবেস থেকে আসবে)
-  const [history, setHistory] = useState([95.01, 44.33, 55.33, 85.45, 19.17, 49.00]);
+  // ক্যালকুলেশন
+  const payout = 99 / chance;
+  const highChance = 100 - chance;
+  const potentialWin = bet * payout;
 
-  // লাইভ ম্যাথ
-  const winChance = isOver ? 100 - target : target;
-  const multiplier = winChance > 0 ? (99 / winChance) : 0;
-  const potentialWin = betAmount * multiplier;
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase.from("profiles").select("balance").eq("id", user.id).single();
-        if (data) setProfile(data);
-      }
-      setLoading(false);
-    };
-    fetchProfile();
-  }, []);
-
-  const handleRoll = async () => {
-    if (!profile || betAmount <= 0) return;
-    if (betAmount > profile.balance) {
-      alert("Insufficient balance!");
-      return;
-    }
-
-    setIsRolling(true);
-    setWinStatus(null);
-    setRollResult(null);
-
-    // রোলিং অ্যানিমেশন (আপনি চাইলে ডাটাবেস কলের আগে এটি রাখতে পারেন)
-    const animInterval = setInterval(() => {
-      setRollResult(Math.random() * 100);
-    }, 50);
-
-    try {
-      // আসল RPC কল
-      const { data, error } = await supabase.rpc("play_dice", {
-        p_bet_amount: betAmount,
-        p_target: target,
-        p_is_over: isOver
-      });
-
-      if (error) throw error;
-
-      setTimeout(() => {
-        clearInterval(animInterval);
-        
-        if (data.success) {
-          setRollResult(data.roll);
-          setWinStatus(data.is_win ? "win" : "lose");
-          setProfile({ ...profile, balance: data.balance_after });
-          setHistory(prev => [data.roll, ...prev].slice(0, 6));
-        } else {
-          alert(data.error);
-        }
-        setIsRolling(false);
-      }, 800);
-
-    } catch (err: any) {
-      clearInterval(animInterval);
-      alert(err.message);
-      setIsRolling(false);
-    }
+  // হ্যান্ডলার ফাংশনস
+  const handleRoll = () => {
+    const value = (Math.random() * 100).toFixed(2);
+    setResult(value);
   };
 
-  if (loading) return <div className="dice-page bg-[#421b7a] flex items-center justify-center text-white">Loading...</div>;
+  const handleLow = () => {
+    const value = (Math.random() * chance).toFixed(2);
+    setResult(value);
+  };
+
+  const handleHigh = () => {
+    const value = (chance + Math.random() * (100 - chance)).toFixed(2);
+    setResult(value);
+  };
 
   return (
-    <div className="dice-page">
-      <div className="dice-app">
-        
-        {/* ================= টপ হেডার ================= */}
-        <div className="dice-header">
-          <div className="notch">▼</div>
-          <div className="history-bar">
-            {history.map((val, idx) => (
-              <div key={idx} className={`history-item ${val > 50 ? "win" : ""}`}>
-                {val.toFixed(2)}
-              </div>
-            ))}
-            <button className="refresh-icon-btn" onClick={() => window.location.reload()}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-            </button>
-          </div>
-        </div>
+    <div className="dice-page-wrapper">
+      <main className="game-shell">
 
-        {/* ================= মেইন গেম সেকশন ================= */}
-        <div className="game-section">
-          
-          {/* রেজাল্ট নাম্বার */}
-          <div className={`result-number ${winStatus === "win" ? "text-green" : winStatus === "lose" ? "text-red" : ""}`}>
-            {isRolling ? (rollResult !== null ? rollResult.toFixed(2) : "00.00") : (rollResult !== null ? rollResult.toFixed(2) : target.toFixed(2))}
-          </div>
-
-          {/* কাস্টম স্লাইডার */}
-          <div className="slider-container">
-            <div className="slider-ticks-top">
-              <span>|</span><span>|</span><span>|</span><span>|</span><span>|</span>
+        {/* HISTORY */}
+        <section className="history">
+          <div className="pointer"></div>
+          {historyData.map((item, idx) => (
+            <div key={idx} className={`history-item ${item.isGreen ? "green" : "white"}`}>
+              {item.val}
             </div>
-            <div className="slider-track-wrapper">
-              <div className="slider-bars">
-                <div className="bar-red" style={{ width: isOver ? `${target}%` : `${target}%` }}></div>
-                <div className="bar-blue" style={{ width: isOver ? `${100-target}%` : `${100-target}%` }}></div>
+          ))}
+          <button className="history-menu">◴⌄</button>
+        </section>
+
+        {/* RESULT PANEL */}
+        <section className="result-panel">
+          <div className="result-number" id="result">{result}</div>
+
+          <div className="chart-area">
+            <div className="scale">
+              <i></i><i></i><i></i><i></i><i></i>
+            </div>
+
+            <div className="bars">
+              <div className="bar bar-one">
+                <div className="red"></div>
+                <div className="cyan"></div>
               </div>
-              <div className="slider-bottom-green"></div>
-              
-              <input 
-                type="range" min="2" max="98" step="0.01" 
-                value={target}
-                onChange={(e) => { setTarget(Number(e.target.value)); setRollResult(null); setWinStatus(null); }}
-                className="slider-input" disabled={isRolling}
+              <div className="bar bar-two">
+                <div className="mint"></div>
+                <div className="red"></div>
+              </div>
+            </div>
+
+            <div className="ball"></div>
+
+            <div className="axis">
+              <span>0</span>
+              <span>25</span>
+              <span>50</span>
+              <span>75</span>
+              <span>100</span>
+            </div>
+          </div>
+        </section>
+
+        {/* PAYOUT */}
+        <section className="payout">
+          <div className="payout-top">
+            <div>
+              <div className="payout-label">Payout</div>
+              <div className="multiplier" id="multiplier">{payout.toFixed(2)} x</div>
+            </div>
+
+            <div className="slider-wrap">
+              <input
+                id="chanceSlider"
+                type="range"
+                min="1"
+                max="95"
+                step="0.01"
+                value={chance}
+                onChange={(e) => setChance(Number(e.target.value))}
               />
-            </div>
-            <div className="slider-numbers">
-              <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
-            </div>
-          </div>
-
-          {/* পেআউট সেকশন */}
-          <div className="payout-section">
-            <div className="payout-top">
-              <div className="payout-pill">
-                <span className="label">Payout</span>
-                <span className="value">{multiplier.toFixed(2)} x</span>
-              </div>
-              <div className="payout-slider">
-                <div className="payout-thumb">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
-                </div>
-              </div>
-            </div>
-            <div className="payout-bottom">
-              <div className="p-info">
-                <span className="label">Potential win:</span>
-                <span className="val">{potentialWin.toFixed(2)} BDT</span>
-              </div>
-              <div className="p-info text-right">
-                <span className="label">Chance:</span>
-                <span className="val">{winChance.toFixed(2)} %</span>
+              <div className="ticks">
+                <i></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* ================= কন্ট্রোল প্যানেল ================= */}
-        <div className="control-section">
-          
-          <div className="btn-row">
-            <button className="btn-refresh-blue" onClick={() => window.location.reload()}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+          <div className="payout-bottom">
+            <div>
+              <div className="small-label">Potential win:</div>
+              <div className="small-value" id="potential">{potentialWin.toFixed(2)} BDT</div>
+            </div>
+            <div>
+              <span className="small-label">Chance: </span>
+              <span className="small-value" id="chance">{chance.toFixed(2)} %</span>
+            </div>
+          </div>
+        </section>
+
+        {/* BET AREA */}
+        <section className="bet-area">
+          <div className="action-row">
+            <button className="action-btn roll" id="roll" onClick={handleRoll}>
+              ⟳
+              <span style={{ fontSize: '25px', position: 'absolute' }}>▶</span>
             </button>
-            
-            <button 
-              className={`btn-under ${!isOver ? "active" : ""}`}
-              onClick={() => setIsOver(false)} disabled={isRolling}
-            >
+
+            <button className="action-btn low" id="low" onClick={handleLow}>
               <span className="arrow">⌄</span>
-              <span className="badge">{target.toFixed(2)}</span>
+              <span className="prob" id="lowChance">{chance.toFixed(2)}</span>
             </button>
-            
-            <button 
-              className={`btn-over ${isOver ? "active" : ""}`}
-              onClick={() => setIsOver(true)} disabled={isRolling}
-            >
+
+            <button className="action-btn high" id="high" onClick={handleHigh}>
               <span className="arrow">⌃</span>
-              <span className="badge">{(100 - target).toFixed(2)}</span>
+              <span className="prob" id="highChance">{highChance.toFixed(2)}</span>
             </button>
           </div>
 
-          <div className="bet-input-row">
-            <div className="bet-pill">
-              <span className="bet-label">Bet BDT</span>
-              <input 
-                type="number" value={betAmount} 
-                onChange={(e) => setBetAmount(Number(e.target.value))}
-                disabled={isRolling} className="bet-field"
-              />
+          <div className="bet-row">
+            <div>
+              <div className="bet-label">Bet BDT</div>
+              <div className="bet-input" id="betValue">{bet.toFixed(2)}</div>
             </div>
-            <button className="btn-small-round" onClick={() => setBetAmount(Math.max(1, betAmount - 1))}>−</button>
-            <button className="btn-small-round" onClick={() => setBetAmount(profile?.balance || 1)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-            </button>
-            <button className="btn-small-round" onClick={() => setBetAmount(betAmount + 1)}>+</button>
+
+            <button className="round-control" id="minus" onClick={() => setBet(Math.max(0.01, bet - 1))}>−</button>
+            <button className="round-control coins" id="half" onClick={() => setBet(Math.max(0.01, bet / 2))}>▤</button>
+            <button className="round-control" id="plus" onClick={() => setBet(Math.min(999999, bet + 1))}>+</button>
           </div>
+        </section>
 
-          <button className="btn-main-roll" onClick={handleRoll} disabled={isRolling}>
-            {isRolling ? "ROLLING..." : "ROLL"}
-          </button>
-        </div>
+        {/* FOOTER */}
+        <footer className="footer">
+          <div className="dice-tab">DICE</div>
+          <div className="help">?</div>
+          <div className="balance">
+            4.75 <span>BDT</span>
+          </div>
+          <button className="menu">☰</button>
+        </footer>
 
-        {/* ================= ফুটার ================= */}
-        <div className="footer-bar">
-          <button className="btn-dice-label">DICE</button>
-          <button className="btn-help">?</button>
-          <div className="balance-text">{Number(profile?.balance || 0).toFixed(2)} BDT</div>
-          <button className="btn-menu">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
-          </button>
-        </div>
-
-      </div>
+      </main>
     </div>
   );
 }
