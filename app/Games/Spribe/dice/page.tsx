@@ -1,43 +1,69 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./dice.css";
 
 export default function DiceGamePage() {
   // স্টেট
   const [bet, setBet] = useState(1.00);
   const [chance, setChance] = useState(48.5);
-  const [result, setResult] = useState("95.01");
   
-  // হিস্ট্রি ডাটা (HTML এ হার্ডকোড ছিল, সেটাই রাখা হলো)
-  const historyData = [
+  // রোলিং এবং রেজাল্ট স্টেট
+  const [result, setResult] = useState(95.01);
+  const [isRolling, setIsRolling] = useState(false);
+  const [isWin, setIsWin] = useState<boolean | null>(null);
+
+  // হিস্ট্রি ডাটা
+  const [historyData, setHistoryData] = useState([
     { val: "95.01", isGreen: true },
     { val: "44.33", isGreen: false },
     { val: "55.33", isGreen: false },
     { val: "85.45", isGreen: true },
     { val: "19.17", isGreen: true },
     { val: "49", isGreen: false },
-  ];
+  ]);
 
   // ক্যালকুলেশন
   const payout = 99 / chance;
   const highChance = 100 - chance;
   const potentialWin = bet * payout;
 
-  // হ্যান্ডলার ফাংশনস
-  const handleRoll = () => {
-    const value = (Math.random() * 100).toFixed(2);
-    setResult(value);
-  };
+  // রোল করার ফাংশন (লো এবং হাই উভয়ের জন্য)
+  const handleRoll = (isHigh: boolean) => {
+    if (isRolling) return; // যদি আগে থেকেই রোলিং চলে, তবে আবার রোল হবে না
 
-  const handleLow = () => {
-    const value = (Math.random() * chance).toFixed(2);
-    setResult(value);
-  };
+    setIsRolling(true);
+    setIsWin(null);
 
-  const handleHigh = () => {
-    const value = (chance + Math.random() * (100 - chance)).toFixed(2);
-    setResult(value);
+    let rollCount = 0;
+    const duration = 1000; // ১ সেকেন্ড অ্যানিমেশন
+    const intervalTime = 50; 
+
+    const interval = setInterval(() => {
+      // অ্যানিমেশনের জন্য র‍্যান্ডম নাম্বার জেনারেট
+      const animResult = Math.random() * 100;
+      setResult(Number(animResult.toFixed(2)));
+      rollCount++;
+
+      if (rollCount * intervalTime >= duration) {
+        clearInterval(interval);
+        
+        // আসল রেজাল্ট জেনারেট
+        const finalResult = Math.random() * 100;
+        setResult(Number(finalResult.toFixed(2)));
+        setIsRolling(false);
+
+        // জেতা বা হারা নির্ধারণ
+        const win = isHigh ? finalResult >= chance : finalResult < chance;
+        setIsWin(win);
+
+        // হিস্ট্রি আপডেট
+        setHistoryData(prev => [
+          { val: finalResult.toFixed(2), isGreen: win },
+          ...prev
+        ].slice(0, 6));
+      }
+    }, intervalTime);
   };
 
   return (
@@ -57,25 +83,39 @@ export default function DiceGamePage() {
 
         {/* RESULT PANEL */}
         <section className="result-panel">
-          <div className="result-number" id="result">{result}</div>
+          <div 
+            className="result-number" 
+            id="result"
+            style={{ color: isWin === true ? "#36bd00" : isWin === false ? "#ff4d4d" : "#36bd00" }}
+          >
+            {result.toFixed(2)}
+          </div>
 
           <div className="chart-area">
             <div className="scale">
               <i></i><i></i><i></i><i></i><i></i>
             </div>
 
+            {/* ডাইনামিক বার (যা স্লাইডারের সাথে পরিবর্তন হবে) */}
             <div className="bars">
               <div className="bar bar-one">
-                <div className="red"></div>
-                <div className="cyan"></div>
+                <div className="red" style={{ width: `${100 - chance}%` }}></div>
+                <div className="cyan" style={{ width: `${chance}%` }}></div>
               </div>
               <div className="bar bar-two">
-                <div className="mint"></div>
-                <div className="red"></div>
+                <div className="mint" style={{ width: `${chance}%` }}></div>
+                <div className="red" style={{ width: `${100 - chance}%` }}></div>
               </div>
             </div>
 
-            <div className="ball"></div>
+            {/* ডাইনামিক বল (রোলিং সিম্বল) */}
+            <div 
+              className="ball" 
+              style={{ 
+                left: `calc(${result}% - 28px)`, // ৫৬ পিক্সেল বলের অর্ধেক বাদ দিয়ে সেন্টার করা হয়েছে
+                right: 'auto' // আগের রাইট পজিশন বাতিল
+              }}
+            ></div>
 
             <div className="axis">
               <span>0</span>
@@ -87,7 +127,7 @@ export default function DiceGamePage() {
           </div>
         </section>
 
-        {/* PAYOUT */}
+        {/* PAYOUT & SLIDER */}
         <section className="payout">
           <div className="payout-top">
             <div>
@@ -104,6 +144,7 @@ export default function DiceGamePage() {
                 step="0.01"
                 value={chance}
                 onChange={(e) => setChance(Number(e.target.value))}
+                disabled={isRolling} // রোলিং চলাকালীন স্লাইডার লক থাকবে
               />
               <div className="ticks">
                 <i></i><i></i><i></i><i></i>
@@ -129,17 +170,20 @@ export default function DiceGamePage() {
         {/* BET AREA */}
         <section className="bet-area">
           <div className="action-row">
-            <button className="action-btn roll" id="roll" onClick={handleRoll}>
+            {/* সেন্টার রোল বাটন (এটি ক্লিক করলে ডিফল্টভাবে Low-তে বেট হবে) */}
+            <button className="action-btn roll" id="roll" onClick={() => handleRoll(false)} disabled={isRolling}>
               ⟳
               <span style={{ fontSize: '25px', position: 'absolute' }}>▶</span>
             </button>
 
-            <button className="action-btn low" id="low" onClick={handleLow}>
+            {/* Low (Under) বাটন */}
+            <button className="action-btn low" id="low" onClick={() => handleRoll(false)} disabled={isRolling}>
               <span className="arrow">⌄</span>
               <span className="prob" id="lowChance">{chance.toFixed(2)}</span>
             </button>
 
-            <button className="action-btn high" id="high" onClick={handleHigh}>
+            {/* High (Over) বাটন */}
+            <button className="action-btn high" id="high" onClick={() => handleRoll(true)} disabled={isRolling}>
               <span className="arrow">⌃</span>
               <span className="prob" id="highChance">{highChance.toFixed(2)}</span>
             </button>
