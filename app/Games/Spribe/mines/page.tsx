@@ -173,11 +173,9 @@ export default function MinesGamePage() {
         setTiles(Array(25).fill({ isMine: false, isRevealed: false }).map((_, i) => ({ id: i, isMine: false, isRevealed: false })));
 
         if (isAutoMode && selectedTiles.length > 0) {
-          // Auto Play শুরু হবে (এটি শেষ হলে নিজেই isProcessing false করবে)
           autoPlaySelectedTiles(data.game_id, selectedTiles, data.balance_after);
         } else {
-          // ✅ FIX: ম্যানুয়াল খেলার জন্য isProcessing রিসেট করা হলো
-          setIsProcessing(false); 
+          setIsProcessing(false); // ✅ FIX: ম্যানুয়াল খেলায় গেম শুরু হলেই isProcessing false হবে
         }
       } else { 
         alert(data.error); 
@@ -249,7 +247,7 @@ export default function MinesGamePage() {
 
         if (data.is_mine) {
           playSound('explosion');
-          setIsPlaying(false); 
+          setIsPlaying(false); setIsProcessing(false);
           const minePositions = data.mines_positions || [];
           setTiles(prev => prev.map((t, i) => ({ ...t, isRevealed: true, isMine: minePositions.includes(i) })));
         } else {
@@ -268,8 +266,7 @@ export default function MinesGamePage() {
           }
         }
       }
-    } catch (err: any) { console.error(err); } 
-    finally { setIsProcessing(false); } // ✅ FIX: ম্যানুয়াল প্লেতে কাজ শেষে রিসেট হবে
+    } catch (err: any) { console.error(err); } finally { setIsProcessing(false); }
   };
 
   // 💰 ক্যাশআউট
@@ -287,8 +284,7 @@ export default function MinesGamePage() {
         alert(t(`Cashed out ${data.payout.toFixed(2)} BDT!`, `সফলভাবে টাকা তুলেছেন!`));
         setTiles(prev => prev.map(t => ({ ...t, isRevealed: true })));
       } else { alert(data.error); }
-    } catch (err: any) { alert(err.message); } 
-    finally { setIsProcessing(false); }
+    } catch (err: any) { alert(err.message); } finally { setIsProcessing(false); }
   };
 
   const toggleAutoMode = () => {
