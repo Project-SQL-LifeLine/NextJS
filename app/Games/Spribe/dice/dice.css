@@ -1,435 +1,526 @@
-/* =========================================
-   গ্লোবাল ফুল স্ক্রিন লেআউট (No Scroll)
-   ========================================= */
-.dice-fullscreen {
-  height: 100dvh; /* মোবাইলের ব্রাউজার বার বাদ দিয়ে ডাইনামিক হাইট */
-  width: 100vw;
-  background-color: #421b7a;
+/* Wrapper to center the app and prevent scroll */
+.dice-game-wrapper {
   display: flex;
-  flex-direction: column;
-  overflow: hidden; /* স্ক্রল সম্পূর্ণ বন্ধ */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  user-select: none;
+  justify-content: center;
+  align-items: center;
+  min-height: 100dvh;
+  background-color: #101016; /* Background for the wrapper */
+  overflow: hidden;
 }
 
-/* =========================================
-   টপ সেকশন (নেভিগেশন + হিস্ট্রি)
-   ========================================= */
-.dice-top-section {
-  background-color: #2d0f56;
-  padding-bottom: 2px;
-  flex-shrink: 0; /* যাতে উপরের অংশ চেপে না যায় */
+/* আপনার দেওয়া মূল CSS */
+.app {
+  --purple:#6426b5; --purple2:#7527c6; --panel:#401b70; --panel-dark:#2d1054;
+  --outline:#211039; --muted:#a99ab4; --green:#16b80b; --mint:#49d8b8;
+  --red:#a00045; --blue:#08a8e8;
+
+  width: min(100vw, 839px);
+  height: 100dvh;
+  min-height: 540px;
+  display: grid;
+  grid-template-rows: 7% 88% 5%;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(118deg, #6928b6 0%, #6326b4 48%, #501caf 100%);
+  border: 3px solid #8e46d1;
+  border-radius: clamp(18px, 4vw, 34px);
+  box-shadow: inset 0 0 0 3px rgba(190, 105, 255, .14), inset 0 0 22px rgba(0, 0, 0, .18);
+  font-family: Arial, Helvetica, sans-serif;
+  color: #fff;
 }
 
-.dice-nav-bar {
-  height: 40px; /* হাইট কমানো হয়েছে */
+.app * {
+  box-sizing: border-box;
+}
+
+.app button, .app input {
+  font: inherit;
+}
+
+.historybar {
+  min-height: 0;
+  margin: 0 1%;
+  border-radius: 0 0 25px 25px;
+  background: rgba(57, 17, 105, .72);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 10px;
+  gap: 1.2%;
+  padding: 0 1.1%;
+  overflow: hidden;
+  white-space: nowrap;
   position: relative;
 }
-
-.back-btn {
-  color: #fff;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  z-index: 10;
-  padding: 4px;
-}
-
-/* ট্র্যাপিজয়েড ট্যাব */
-.center-tab {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #18072d;
-  color: #fff;
-  padding: 6px 30px 8px;
-  font-size: 12px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%);
-}
-
-.refresh-btn {
-  background: #5e23ab;
-  border: 2px solid #7b31db;
-  color: #fff;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-/* হিস্ট্রি বার */
-.history-bar {
-  display: flex;
-  gap: 6px;
-  padding: 6px 10px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.history-bar::-webkit-scrollbar { display: none; }
 
 .history-item {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.08);
-}
-.hist-green { color: #22c55e; }
-.hist-red { color: #ef4444; }
-
-/* =========================================
-   মেইন গেম এরিয়া (flex: 1 দেওয়া হয়েছে)
-   ========================================= */
-.game-main-area {
-  flex: 1; /* স্ক্রিনের বাকি জায়গা দখল করবে */
-  min-height: 0; /* ফ্লেক্সবাগ এড়ানোর জন্য */
-  background-color: #5c1ca8;
-  margin: 6px 10px;
-  border-radius: 16px;
-  border: 1px solid #7b31db;
-  padding: 10px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly; /* সবকিছু সমান দূরত্বে থাকবে */
-}
-
-.big-number {
-  font-size: 46px; /* ফন্ট সাইজ ছোট করা হয়েছে */
-  font-weight: 900;
-  color: #fff;
-  text-align: center;
-  font-family: monospace;
-  letter-spacing: -1px;
-  margin-bottom: 4px;
-  text-shadow: 0 4px 10px rgba(0,0,0,0.4);
-  transition: color 0.1s;
-}
-
-/* =========================================
-   কাস্টম স্লাইডার (স্ট্রাইপ ডিজাইন)
-   ========================================= */
-.slider-container {
-  margin-bottom: 4px;
-}
-
-.slider-marks {
-  display: flex;
-  justify-content: space-between;
-  color: #9c6ade;
-  font-size: 11px;
-  padding-bottom: 4px;
-}
-
-.slider-track-wrapper {
-  position: relative;
-  height: 26px; /* হাইট কমানো হয়েছে */
-  border-radius: 4px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-
-.slider-track-stripes {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 5px;
-  z-index: 1;
-}
-
-.slider-track-bottom-line {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 5px;
-  background-color: #2dd4bf;
-  z-index: 2;
-  border-radius: 0 0 4px 4px;
-}
-
-.slider-input {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  z-index: 10;
-  cursor: pointer;
-}
-
-.slider-input::-webkit-slider-thumb {
-  appearance: none;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #fbbf24;
-  border: 4px solid #b45309;
-  box-shadow: 0 0 0 2px #000, 0 4px 8px rgba(0,0,0,0.5);
-  cursor: grab;
-  margin-top: -1px;
-}
-
-.slider-labels {
-  display: flex;
-  justify-content: space-between;
-  color: #9c6ade;
-  font-size: 11px;
-  font-weight: 700;
-  margin-top: 4px;
-}
-
-/* =========================================
-   পেআউট বক্স
-   ========================================= */
-.payout-box {
-  background: #3d0b73;
-  border-radius: 12px;
-  padding: 10px 14px;
-}
-
-.payout-top-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.payout-pill {
-  background: #280b4f;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 60%;
   border-radius: 30px;
-  padding: 6px 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  border: 1px solid #55219e;
+  display: grid;
+  place-items: center;
+  background: #251044;
+  font-size: clamp(13px, 3.1vw, 29px);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, .28);
 }
 
-.p-label { color: #9c6ade; font-size: 11px; font-weight: 600; }
-.p-value { color: #fff; font-size: 15px; font-weight: 800; }
-
-.payout-slider-track {
-  flex: 1;
-  height: 8px;
-  background: #280b4f;
-  border-radius: 4px;
-  position: relative;
+.history-item.win {
+  color: #28bb20;
 }
 
-.payout-slider-thumb {
+.history-action {
+  flex: 0 0 10%;
+  height: 76%;
+  border-radius: 40px;
+  background: #7022bd;
+  border: 2px solid #2b104b;
+  color: white;
+  font-size: clamp(17px, 3vw, 27px);
+  cursor: pointer;
+}
+
+.notch {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 22px;
-  height: 22px;
-  background: #a855f7;
-  border-radius: 50%;
+  z-index: 4;
+  top: 0;
+  left: 43%;
+  width: 14%;
+  height: 40px;
+  background: #110b29;
+  border: 2px solid #24103f;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  text-align: center;
+  color: #aaa;
+  font-size: 24px;
+  pointer-events: none;
+}
+
+main {
+  position: relative;
+  min-height: 0;
+}
+
+.result-panel {
+  position: absolute;
+  left: 1%;
+  right: 1%;
+  top: 17.8%;
+  height: 31.8%;
+  border: 2px solid #24103b;
+  border-radius: 19px;
+  background: rgba(54, 20, 95, .73);
+  overflow: hidden;
+}
+
+.result-number {
+  height: 31%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #d8b4fe;
+  font-size: clamp(65px, 14vw, 122px);
+  font-weight: 500;
+  letter-spacing: 1px;
 }
 
-.payout-bottom-row {
+.graph {
+  height: 69%;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.tickrow {
+  height: 14%;
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 8px;
+  padding: 0 1px;
 }
 
-.p-bottom-item { display: flex; flex-direction: column; gap: 2px; }
-.text-right { text-align: right; }
-.p-val { color: #fff; font-weight: 800; font-size: 14px; }
-
-/* =========================================
-   কন্ট্রোল প্যানেল (নিচের অংশ)
-   ========================================= */
-.control-panel {
-  background: #280b4f;
-  padding: 10px 12px;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px; /* গ্যাপ কমানো হয়েছে */
-  flex-shrink: 0; /* যাতে নিচের অংশ চেপে না যায় */
+.tickrow i {
+  height: 100%;
+  border-left: 2px solid #aaa;
+  opacity: .8;
 }
 
-/* Under / Over বাটন */
-.action-row {
+.bars {
+  height: 25%;
   display: flex;
-  gap: 8px;
-  height: 46px; /* হাইট কমানো হয়েছে */
-}
-
-.btn-blue-icon {
-  width: 46px;
-  background: #2563eb;
-  border: none;
-  border-radius: 10px;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
-  cursor: pointer;
-}
-
-.btn-under, .btn-over {
-  flex: 1;
-  border: none;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  cursor: pointer;
+  overflow: hidden;
   position: relative;
-  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
-  transition: all 0.1s;
 }
 
-.btn-under { background: #10b981; }
-.btn-over { background: #3b82f6; }
-
-.btn-under.active, .btn-over.active {
-  box-shadow: inset 0 3px 8px rgba(0,0,0,0.3);
-  transform: translateY(2px);
+.bars.first {
+  margin-bottom: 2.8%;
 }
 
-/* ভেতরের কালো পিল */
-.inner-badge {
-  background: rgba(0,0,0,0.6);
-  padding: 1px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 800;
-  margin-top: 1px;
+.segment {
+  height: 100%;
+  position: relative;
 }
 
-/* বেট ইনপুট */
-.bet-row {
+.red { background-color: var(--red); }
+.blue { background-color: var(--blue); }
+.green { background-color: var(--mint); }
+
+.segment:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 9px, rgba(20, 0, 35, .62) 9px 11px);
+}
+
+.indicator {
+  position: absolute;
+  z-index: 2;
+  top: 35%;
+  transform: translate(-50%, -50%);
+  width: clamp(52px, 8vw, 68px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #ffb900;
+  border: 3px solid #e99b00;
+  box-shadow: 0 3px 12px #21083d;
+}
+
+.indicator:after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #17102b;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.scale-labels {
+  height: 25%;
   display: flex;
-  gap: 8px;
-  height: 46px; /* হাইট কমানো হয়েছে */
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 1.5%;
+  color: #a99ab2;
+  font-size: clamp(14px, 2.8vw, 22px);
 }
 
-.bet-input-wrapper {
-  flex: 1;
-  background: #18072d;
-  border: 2px solid #421b7a;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.scale-labels span {
+  position: relative;
+}
+
+.scale-labels span:before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -27px;
+  height: 17px;
+  border-left: 2px solid #aaa;
+}
+
+.payout-panel {
+  position: absolute;
+  left: 1%;
+  right: 1%;
+  top: 50.8%;
+  height: 18.4%;
+  border: 2px solid #24103b;
+  border-radius: 19px;
+  background: rgba(53, 19, 92, .82);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 56% 44%;
+}
+
+.payout-top {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 39% 1fr;
   align-items: center;
+  gap: 5%;
+  padding: 2.5% 5% 0;
 }
 
-.bet-label { color: #9c6ade; font-size: 9px; margin-bottom: -2px; }
-.bet-input {
-  background: transparent;
-  border: none;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 800;
+.payout-left {
   text-align: center;
+  min-width: 0;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: clamp(16px, 3.1vw, 26px);
+  line-height: 1.15;
+}
+
+.multiplier {
+  margin-top: 5px;
+  border: 2px solid #6c4888;
+  border-radius: 40px;
+  background: #281044;
+  padding: 4px 7px;
+  font-size: clamp(27px, 5.5vw, 45px);
+  line-height: 1.12;
+  white-space: nowrap;
+}
+
+.slider-wrap {
+  min-width: 0;
+  position: relative;
+  padding: 0 0 16px;
+}
+
+.slider-wrap input {
   width: 100%;
+  height: 34px;
+  appearance: none;
+  background: #1f0b39;
+  border: 2px solid #68418b;
+  border-radius: 20px;
+  outline: none;
+  display: block;
+}
+
+.slider-wrap input::-webkit-slider-thumb {
+  appearance: none;
+  width: clamp(48px, 8vw, 65px);
+  height: clamp(48px, 8vw, 65px);
+  border-radius: 50%;
+  background: #7624c5;
+  border: 3px solid #40106e;
+  box-shadow: 0 2px 5px #170529;
+  cursor: pointer;
+}
+
+.slider-wrap input::-moz-range-thumb {
+  width: clamp(42px, 7vw, 59px);
+  height: clamp(42px, 7vw, 59px);
+  border-radius: 50%;
+  background: #7624c5;
+  border: 3px solid #40106e;
+  cursor: pointer;
+}
+
+.slider-symbol {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: bold;
+  line-height: 1;
+}
+
+.slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin: 2px 4% 0;
+  height: 12px;
+}
+
+.slider-ticks i {
+  border-left: 2px solid #77638e;
+  height: 100%;
+}
+
+.payout-bottom {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  background: rgba(25, 7, 47, .2);
+  padding: 0 5%;
+  gap: 2%;
+  font-size: clamp(17px, 3.5vw, 28px);
+  text-align: center;
+}
+
+.payout-bottom .muted {
+  display: block;
+  margin-bottom: 3px;
+}
+
+.controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 26%;
+  border-radius: 29px 29px 0 0;
+  background: rgba(49, 15, 91, .84);
+  padding: 3.5% 6.2% 3%;
+  display: grid;
+  grid-template-rows: 48% 43%;
+  row-gap: 4%;
+}
+
+.play-row {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  gap: 2.3%;
+}
+
+.circle {
+  flex: 0 0 17%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 4px solid #100b2b;
+  background: linear-gradient(#087de0, #0753bd);
+  color: white;
+  font-size: clamp(30px, 6vw, 52px);
+  box-shadow: 0 3px 7px #17062d;
+  cursor: pointer;
+}
+
+.bet-button {
+  flex: 1;
+  min-width: 0;
+  height: 88%;
+  border-radius: 42px;
+  border: 4px solid #100b2b;
+  color: #fff;
+  font-size: clamp(36px, 7vw, 60px);
+  font-weight: bold;
+  position: relative;
+  box-shadow: 0 3px 8px #18062b;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.low { background: linear-gradient(120deg, #009e80, #00b58a); }
+.high { background: linear-gradient(120deg, #0788ca, #0075b8); }
+
+.bet-button small {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 50, 62, .55);
+  border-radius: 8px;
+  padding: 2px 16px;
+  font-size: clamp(17px, 3.2vw, 27px);
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.bet-area {
+  min-height: 0;
+  border: 2px solid #a04adf;
+  border-radius: 55px;
+  background: #7624c2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 12% 12% 12%;
+  align-items: center;
+  gap: 1.5%;
+  padding: 1.5% 2.3%;
+}
+
+.bet-input {
+  min-width: 0;
+  text-align: center;
+}
+
+.bet-input label {
+  display: block;
+  font-size: clamp(18px, 3.5vw, 29px);
+  line-height: 1.05;
+  margin-bottom: 3px;
+}
+
+.bet-input input {
+  width: 100%;
+  height: clamp(34px, 6vw, 49px);
+  border-radius: 28px;
+  border: 2px solid #210b3d;
+  background: #4b1881;
+  color: #fff;
+  text-align: center;
+  font-size: clamp(22px, 4.3vw, 34px);
+  font-weight: bold;
   outline: none;
 }
 
-.btn-square {
-  width: 46px;
-  background: #4b1b83;
-  border: none;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 20px;
-  font-weight: 800;
-  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-.btn-square:active { transform: translateY(2px); box-shadow: none; }
-
-/* রোল বাটন */
-.btn-roll {
+.small-btn {
   width: 100%;
-  height: 46px; /* হাইট কমানো হয়েছে */
-  background: #10b981;
-  border: none;
-  border-radius: 10px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid #35105e;
+  background: #7624bd;
   color: #fff;
-  font-size: 18px;
-  font-weight: 900;
-  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
+  font-size: clamp(23px, 4vw, 34px);
+  display: grid;
+  place-items: center;
   cursor: pointer;
-  letter-spacing: 1px;
 }
-.btn-roll:active:not(:disabled) { transform: translateY(3px); box-shadow: none; }
 
-/* =========================================
-   ফুটার বার
-   ========================================= */
-.dice-footer {
-  height: 40px; /* হাইট কমানো হয়েছে */
-  background: #18072d;
+.footer {
+  min-height: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 12px;
-  flex-shrink: 0;
+  gap: 1.5%;
+  padding: 0 2%;
 }
 
-.btn-dice {
-  background: #5e23ab;
-  color: #fff;
-  border: none;
-  padding: 4px 14px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 800;
+.dice-label {
+  height: 75%;
+  flex: 0 0 36%;
+  border: 2px solid #39105f;
+  border-radius: 35px;
+  background: #7624c3;
+  display: grid;
+  place-items: center;
+  font-size: clamp(17px, 3.3vw, 27px);
 }
 
-.help-icon {
-  width: 20px;
-  height: 20px;
+.help {
+  height: 80%;
+  aspect-ratio: 1;
   border-radius: 50%;
-  border: 2px solid #fbbf24;
-  color: #fbbf24;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 11px;
+  background: #ff9d00;
+  border: 3px solid #52216e;
+  color: #28103e;
+  font-size: clamp(22px, 4vw, 29px);
+  cursor: pointer;
 }
 
-.footer-balance {
-  color: #fff;
-  font-size: 13px;
-  font-weight: 800;
+.balance {
+  margin-left: auto;
+  font-size: clamp(19px, 3.8vw, 31px);
+  white-space: nowrap;
 }
 
-.menu-btn {
-  background: #5e23ab;
-  color: #fff;
-  border: none;
-  width: 24px;
-  height: 24px;
+.balance span {
+  color: #aaa;
+}
+
+.menu {
+  height: 85%;
+  aspect-ratio: 1;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #7624c3;
+  border: 2px solid #35105c;
+  color: white;
+  font-size: clamp(21px, 3.5vw, 28px);
+  cursor: pointer;
+}
+
+@media(max-width: 520px) {
+  .app { border-radius: 22px; }
+  .history-item { font-size: clamp(12px, 3vw, 18px); }
+  .notch { height: 34px; }
+  .result-panel { top: 17.5%; height: 32%; }
+  .payout-panel { top: 50.7%; height: 18.7%; }
+  .controls { height: 26.5%; padding: 3% 5.5% 2.5%; grid-template-rows: 48% 43%; row-gap: 4%; }
+  .circle { border-width: 3px; }
+  .bet-button { border-width: 3px; }
+  .bet-area { grid-template-columns: minmax(0,1fr) 12% 12% 12%; gap: 1.2%; }
+  .footer { gap: 1.2%; }
+  .dice-label { flex-basis: 36%; }
+}
+
+@media(max-height: 700px) {
+  .app { min-height: 0; }
+  .result-panel { top: 15%; height: 34%; }
+  .payout-panel { top: 50%; height: 19%; }
+  .controls { height: 27%; }
 }
