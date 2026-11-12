@@ -41,8 +41,14 @@ export default function MinesGamePage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [modalHistory, setModalHistory] = useState<any[]>([]);
   
-  // 🆕 Mines Selector Dropdown State
+  // Dropdowns & Selectors
   const [isMinesMenuOpen, setIsMinesMenuOpen] = useState(false);
+  const [isQuickBetOpen, setIsQuickBetOpen] = useState(false);
+
+  // Provably Fair স্টেট
+  const [clientSeed, setClientSeed] = useState("");
+  const [serverSeedHash, setServerSeedHash] = useState("");
+  const [isSeedUpdating, setIsSeedUpdating] = useState(false);
 
   // 🎵 Web Audio API Sound Effects
   const playSound = (type: 'click' | 'win' | 'lose' | 'explosion') => {
@@ -90,8 +96,12 @@ export default function MinesGamePage() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { data } = await supabase.from("profiles").select("balance").eq("id", user.id).single();
-          if (data) setProfile(data);
+          const { data } = await supabase.from("profiles").select("balance, pf_client_seed, pf_server_seed_hash").eq("id", user.id).single();
+          if (data) {
+            setProfile({ balance: data.balance });
+            setClientSeed(data.pf_client_seed || "");
+            setServerSeedHash(data.pf_server_seed_hash || "");
+          }
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -120,6 +130,26 @@ export default function MinesGamePage() {
     }
   }, [minesCount, isPlaying, isAutoMode, selectedTiles.length]);
 
+  // 🔍 Provably Fair Seed Randomize
+  const handleRandomizeClientSeed = async () => {
+    if (isSeedUpdating) return;
+    setIsSeedUpdating(true);
+    try {
+      const newSeed = Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error } = await supabase.from("profiles").update({ pf_client_seed: newSeed }).eq("id", user.id);
+        if (!error) setClientSeed(newSeed);
+      }
+    } catch (err) { console.error(err); } finally { setIsSeedUpdating(false); }
+  };
+
+  const handleCopyText = (text: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    alert(t("Copied to clipboard!", "কপি করা হয়েছে!"));
+  };
+
   // 🔍 মেনু ওপেন ও ডাটা লোড
   const openModal = async (type: string) => {
     playSound('click');
@@ -134,7 +164,7 @@ export default function MinesGamePage() {
             .eq("user_id", user.id)
             .eq("game_name", "mines")
             .order("created_at", { ascending: false })
-            .limit(10);
+            .limit(15);
           if (data) setModalHistory(data);
         }
       } catch (err) { console.error(err); }
@@ -153,12 +183,11 @@ export default function MinesGamePage() {
     });
   };
 
-  // 🆕 Handle Mines Count Change
   const handleMinesSelect = (count: number) => {
     if (isPlaying) return;
     setMinesCount(count);
     setIsMinesMenuOpen(false);
-    setSelectedTiles([]); // রিসেট সিলেকশন
+    setSelectedTiles([]); 
     playSound('click');
   };
 
@@ -403,7 +432,7 @@ export default function MinesGamePage() {
                 </div>
               )}
 
-              {/* ---- HOW TO PLAY MODAL (New Design) ---- */}
+              {/* ---- HOW TO PLAY MODAL ---- */}
               {(activeModal === 'howto' || activeModal === 'rules') && (
                 <div className="modal-inner howto-modal">
                   <div className="modal-header">
@@ -419,12 +448,11 @@ export default function MinesGamePage() {
                       <h3>MINES</h3>
                     </div>
 
-                    {/* Mini Grid for Example */}
                     <div className="howto-example-grid">
                       {[...Array(25)].map((_, i) => {
                         let cellClass = "howto-cell";
-                        if (i === 6 || i === 12 || i === 18) cellClass += " star-cell"; // Yellow with star
-                        if (i === 8) cellClass += " mine-cell"; // Red with mine
+                        if (i === 6 || i === 12 || i === 18) cellClass += " star-cell"; 
+                        if (i === 8) cellClass += " mine-cell"; 
                         
                         return (
                           <div key={i} className={cellClass}>
@@ -448,27 +476,85 @@ export default function MinesGamePage() {
                 </div>
               )}
 
-              {/* ---- OTHER MODALS (Placeholders) ---- */}
+              {/* ---- BET HISTORY MODAL ---- */}
               {activeModal === 'history' && (
                 <div className="modal-inner">
                   <div className="modal-header">
                     <h2>{t("BET HISTORY", "বেট হিস্ট্রি")}</h2>
                     <button className="close-btn" onClick={() => setActiveModal(null)}>✕</button>
                   </div>
+                  <div className="history-table-header">
+                    <span>{t("Time", "সময়")}</span>
+                    <span>{t("Bet", "বেট")}</span>
+                    <span>{t("Cash out", "ক্যাশ আউট")}</span>
+                    <span>X</span>
+                  </div>
                   <div className="history-list">
                     {modalHistory.length > 0 ? modalHistory.map((h, i) => (
                       <div key={i} className="history-row">
-                        <span>{new Date(h.created_at).toLocaleString()}</span>
+                        <span className="text-gray">{new Date(h.created_at).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         <span>{Number(h.bet_amount).toFixed(2)} BDT</span>
                         <span className={h.profit > 0 ? "text-green" : "text-white"}>{h.profit > 0 ? `+${Number(h.profit).toFixed(2)}` : "0.00"} BDT</span>
                         <span className={h.profit > 0 ? "text-green" : "text-white"}>{Number(h.multiplier).toFixed(2)}x</span>
                       </div>
-                    )) : <div className="text-center py-4 text-gray-400">No records</div>}
+                    )) : (
+                      <div className="text-center text-gray py-4">{t("No records found", "কোন রেকর্ড নেই")}</div>
+                    )}
                   </div>
                 </div>
               )}
 
-              {activeModal !== 'main' && activeModal !== 'history' && activeModal !== 'howto' && activeModal !== 'rules' && (
+              {/* ---- PROVABLY FAIR MODAL ---- */}
+              {activeModal === 'provably' && (
+                <div className="modal-inner">
+                  <div className="modal-header">
+                    <h2>{t("PROVABLY FAIR SETTINGS", "প্রুভেবলি ফেয়ার সেটিংস")}</h2>
+                    <button className="close-btn" onClick={() => setActiveModal(null)}>✕</button>
+                  </div>
+                  <p className="modal-desc">
+                    {t("This game uses Provably Fair technology to determine game result. This tool gives you ability to change your seed and check fairness of the game.", "এই গেমটি গেমের ফলাফল নির্ধারণ করতে প্রুভেবলি ফেয়ার প্রযুক্তি ব্যবহার করে। এই টুলটি আপনাকে আপনার সিড পরিবর্তন করতে এবং গেমের ন্যায্যতা পরীক্ষা করার ক্ষমতা দেয়।")}
+                  </p>
+                  <a href="#" className="green-link">{t("What is Provably Fair", "প্রুভেবলি ফেয়ার কি")}</a>
+                  
+                  <div className="pf-box">
+                    <div className="pf-box-title">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                      <div>
+                        <strong>{t("Next client seed:", "পরবর্তী ক্লায়েন্ট সিড:")}</strong>
+                        <span>{t("Generated on Your side", "আপনার দিক থেকে জেনারেট করা হয়েছে")}</span>
+                      </div>
+                    </div>
+                    <div className="pf-input-group">
+                      <input type="text" readOnly value={clientSeed || "Loading..."} />
+                      <button className="pf-icon-btn" onClick={() => handleCopyText(clientSeed)}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                      </button>
+                      <button className="pf-icon-btn" onClick={handleRandomizeClientSeed} disabled={isSeedUpdating}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={isSeedUpdating ? "animate-spin" : ""}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pf-box">
+                    <div className="pf-box-title">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" /></svg>
+                      <div>
+                        <strong>{t("Next server seed SHA256:", "পরবর্তী সার্ভার সিড SHA256:")}</strong>
+                        <span>{t("Encrypted seed, generated on our side", "এনক্রিপ্টেড সিড, আমাদের দিক থেকে জেনারেট করা হয়েছে")}</span>
+                      </div>
+                    </div>
+                    <div className="pf-input-group">
+                      <input type="text" readOnly value={serverSeedHash || "Loading..."} />
+                      <button className="pf-icon-btn" onClick={() => handleCopyText(serverSeedHash)}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ---- OTHER MODALS ---- */}
+              {activeModal !== 'main' && activeModal !== 'history' && activeModal !== 'howto' && activeModal !== 'rules' && activeModal !== 'provably' && (
                 <div className="modal-inner">
                   <div className="modal-header">
                     <h2>{activeModal.toUpperCase()}</h2>
@@ -486,7 +572,6 @@ export default function MinesGamePage() {
 
         {/* TOP CONTROLS */}
         <section className="top-controls">
-          {/* 🆕 Mines Dropdown Selector */}
           <div 
             className="mines-selector" 
             onClick={() => !isPlaying && setIsMinesMenuOpen(!isMinesMenuOpen)}
@@ -495,7 +580,6 @@ export default function MinesGamePage() {
             <span>{t("Mines", "মাইনস")}: {minesCount}</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '16px', height: '16px', transform: isMinesMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.2s' }}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
             
-            {/* Dropdown Menu */}
             {isMinesMenuOpen && (
               <div className="mines-dropdown" onClick={(e) => e.stopPropagation()}>
                 {Array.from({ length: 24 }, (_, i) => i + 1).map(num => (
@@ -580,13 +664,24 @@ export default function MinesGamePage() {
             )}
           </div>
 
-          <div className="bet-input-row" style={{ opacity: isPlaying ? 0.5 : 1, pointerEvents: isPlaying ? 'none' : 'auto' }}>
+          {/* Quick Bet Menu Popup */}
+          <div className="bet-input-row" style={{ opacity: isPlaying ? 0.5 : 1, pointerEvents: isPlaying ? 'none' : 'auto', position: 'relative' }}>
+            {isQuickBetOpen && (
+              <div className="quick-bet-menu">
+                {[100, 200, 500, 10000].map(amt => (
+                  <button key={amt} onClick={() => { setBet(amt); setIsQuickBetOpen(false); }}>
+                    {amt.toFixed(2)}
+                  </button>
+                ))}
+              </div>
+            )}
+            
             <div className="bet-input-wrapper">
               <div className="bet-label">{t("Bet BDT", "বেট BDT")}</div>
               <div className="bet-input">{bet.toFixed(2)}</div>
             </div>
             <button className="round-ctrl" onClick={() => setBet(Math.max(1, bet - 1))} disabled={isPlaying || isProcessing}>−</button>
-            <button className="round-ctrl stack" disabled={isPlaying || isProcessing}>
+            <button className="round-ctrl stack" onClick={() => setIsQuickBetOpen(!isQuickBetOpen)} disabled={isPlaying || isProcessing}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '18px', height: '18px' }}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
             </button>
             <button className="round-ctrl" onClick={() => setBet(bet + 1)} disabled={isPlaying || isProcessing}>+</button>
