@@ -4,16 +4,12 @@ import { useState } from "react";
 import "./dice.css";
 
 export default function DiceGamePage() {
-  // স্টেট (আগের মতোই আছে)
   const [bet, setBet] = useState(1.00);
   const [chance, setChance] = useState(48.5);
-  
-  // রোলিং এবং রেজাল্ট স্টেট
   const [result, setResult] = useState(95.01);
   const [isRolling, setIsRolling] = useState(false);
   const [isWin, setIsWin] = useState<boolean | null>(null);
 
-  // হিস্ট্রি ডাটা
   const [historyData, setHistoryData] = useState([
     { val: "95.01", isGreen: true },
     { val: "44.33", isGreen: false },
@@ -23,12 +19,10 @@ export default function DiceGamePage() {
     { val: "49", isGreen: false },
   ]);
 
-  // ক্যালকুলেশন
   const payout = 99 / chance;
   const highChance = 100 - chance;
   const potentialWin = bet * payout;
 
-  // রোল করার ফাংশন (লজিক আগের মতোই আছে)
   const handleRoll = (isHigh: boolean) => {
     if (isRolling) return;
 
@@ -62,9 +56,8 @@ export default function DiceGamePage() {
     }, intervalTime);
   };
 
-  // মেইন রোল বাটনে ক্লিক করলে ডিফল্টভাবে 'Under' (Low) ধরে রোল হবে
   const handleMainRollClick = () => {
-    handleRoll(false);
+    handleRoll(false); // ডিফল্ট Under
   };
 
   return (
@@ -82,7 +75,7 @@ export default function DiceGamePage() {
           <button className="history-menu">◴⌄</button>
         </section>
 
-        {/* RESULT PANEL */}
+        {/* RESULT & GRAPH PANEL */}
         <section className="result-panel">
           <div 
             className="result-number" 
@@ -111,8 +104,9 @@ export default function DiceGamePage() {
             <div 
               className="ball" 
               style={{ 
-                left: `calc(${result}% - 28px)`,
-                right: 'auto'
+                left: `calc(${result}% - 22px)`, // বল সেন্টার করার জন্য
+                right: 'auto',
+                top: 'calc(50% - 6px)' // বলের পজিশন ঠিক করা হলো
               }}
             ></div>
 
@@ -166,24 +160,19 @@ export default function DiceGamePage() {
           </div>
         </section>
 
-        {/* BET AREA (লাল দাগ দেওয়া বাটনগুলো এখানে) */}
+        {/* BET AREA */}
         <section className="bet-area">
           <div className="action-row">
             
-            {/* ১. বাম দিকের নীল রিফ্রেশ/রোল বাটন */}
+            {/* Rebet / Roll Button */}
             <button className="action-btn roll" id="roll" onClick={handleMainRollClick} disabled={isRolling}>
-              {isRolling ? (
-                <svg className="animate-spin" style={{ width: '40px', height: '40px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              ) : (
-                <svg style={{ width: '40px', height: '40px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              )}
+              <svg style={{ width: '32px', height: '32px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+              </svg>
             </button>
 
-            {/* ২. মাঝের সবুজ ডাউন অ্যারো (Under/Low) */}
+            {/* Low (Under) Button */}
             <button className="action-btn low" id="low" onClick={() => handleRoll(false)} disabled={isRolling}>
               <svg className="arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 9l6 6 6-6" />
@@ -191,7 +180,7 @@ export default function DiceGamePage() {
               <span className="prob" id="lowChance">{chance.toFixed(2)}</span>
             </button>
 
-            {/* ৩. ডান দিকের নীল আপ অ্যারো (Over/High) */}
+            {/* High (Over) Button */}
             <button className="action-btn high" id="high" onClick={() => handleRoll(true)} disabled={isRolling}>
               <svg className="arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 15l-6-6-6 6" />
@@ -201,8 +190,9 @@ export default function DiceGamePage() {
 
           </div>
 
+          {/* Smaller Bet Area */}
           <div className="bet-row">
-            <div>
+            <div className="bet-input-wrapper">
               <div className="bet-label">Bet BDT</div>
               <div className="bet-input" id="betValue">{bet.toFixed(2)}</div>
             </div>
