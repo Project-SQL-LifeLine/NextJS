@@ -1,0 +1,192 @@
+/* ================= GAME HUB PAGE ================= */
+.game-hub-wrapper {
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 0%, #1B2A23 0%, #0d241e 70%);
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 20px 10px;
+}
+
+.game-hub-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.game-hub-header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.game-hub-header h1 {
+  font-size: 28px;
+  color: #F5B041;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 10px rgba(245, 176, 65, 0.3);
+}
+
+.game-hub-header p {
+  font-size: 14px;
+  color: #a99ab4;
+}
+
+.game-category-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.category-title {
+  font-size: 18px;
+  color: #fff;
+  border-left: 4px solid #F5B041;
+  padding-left: 10px;
+  text-transform: capitalize;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 600px) {
+  .games-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 900px) {
+  .games-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ================= GAME CARD PREMIUM ================= */
+.game-card-premium {
+  display: flex;
+  flex-direction: column;
+  background: #1B2A23;
+  border: 2px solid #184f35;
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.game-card-premium:hover {
+  transform: translateY(-5px);
+  border-color: #F5B041;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.8), 0 0 15px rgba(245, 176, 65, 0.2);
+}
+
+.game-card-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1; /* স্কয়ার থাম্বনেইল */
+  background: #0d241e;
+  overflow: hidden;
+}
+
+.game-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.game-card-premium:hover .game-card-image {
+  transform: scale(1.1);
+}
+
+.game-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #444;
+}
+
+.game-card-placeholder svg {
+  width: 40px;
+  height: 40px;
+}
+
+.game-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.game-card-premium:hover .game-card-overlay {
+  opacity: 1;
+}
+
+.play-btn {
+  width: 40px;
+  height: 40px;
+  background: #F5B041;
+  color: #000;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  padding-left: 4px; /* অপটিক্যাল সেন্টার */
+  box-shadow: 0 0 15px rgba(245, 176, 65, 0.6);
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+
+.game-card-premium:hover .play-btn {
+  transform: scale(1);
+}
+
+.game-card-content {
+  padding: 12px;
+  text-align: center;
+  background: linear-gradient(to top, #0d241e, #1B2A23);
+}
+
+.game-card-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Loading */
+.games-loading {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #0d241e;
+  color: #fff;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(245, 176, 65, 0.2);
+  border-top-color: #F5B041;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.no-games {
+  text-align: center;
+  padding: 40px;
+  color: #a99ab4;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  border: 1px dashed #333;
+}
