@@ -20,25 +20,21 @@ const TRACK = [
 
 const HOME_LANES = {
   red: [[13,7], [12,7], [11,7], [10,7], [9,7], [8,7]],
-  green: [[7,1], [7,2], [7,3], [7,4], [7,5], [7,6]],
   yellow: [[1,7], [2,7], [3,7], [4,7], [5,7], [6,7]],
-  blue: [[7,13], [7,12], [7,11], [7,10], [7,9], [7,8]]
 };
 
-// Starting index for each color on the TRACK array
-const START_INDEX = { red: 39, green: 0, yellow: 13, blue: 26 };
-// Safe zones (Start cells + Star cells)
-const SAFE_INDICES = [0, 8, 13, 21, 26, 33, 39, 46];
+const START_INDEX = { red: 39, yellow: 13 };
+const SAFE_INDICES = [13, 21, 39, 46]; // Adjusted for 1v1 (start cells + some stars)
 
-// Yard coordinates for 4 tokens per player (inside the white box)
+// Yard positions for 2 tokens each
 const YARD_COORDS = {
-  red: [[10,1], [10,4], [13,1], [13,4]],
-  green: [[1,1], [1,4], [4,1], [4,4]],
-  yellow: [[1,10], [1,13], [4,10], [4,13]],
-  blue: [[10,10], [10,13], [13,10], [13,13]]
+  red: [[10,1], [13,4]], // Bottom-left corner
+  yellow: [[1,10], [4,13]], // Top-right corner
 };
 
-type Color = 'red' | 'green' | 'yellow' | 'blue';
+const AI_NAMES = ["Sabbir_99", "Rakib_Hasan", "Mehedi_07", "Tanjim_Khan", "Arif_BD"];
+
+type Color = 'red' | 'yellow';
 type TokenStatus = 'yard' | 'track' | 'home_lane' | 'finished';
 
 interface Token {
@@ -67,22 +63,16 @@ export default function LudoMasterPage() {
   const [winner, setWinner] = useState<Color | null>(null);
   const [animatingToken, setAnimatingToken] = useState<string | null>(null);
   
+  // AI Name State
+  const [aiName, setAiName] = useState("");
+
   // Timer
   const [timeLeft, setTimeLeft] = useState(15);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const initTokens = () => {
-    const newTokens: Token[] = [];
-    (['red', 'green', 'yellow', 'blue'] as Color[]).forEach(color => {
-      for (let i = 0; i < 4; i++) {
-        newTokens.push({ id: `${color}-${i}`, color, status: 'yard', trackIndex: -1, homeLaneIndex: -1 });
-      }
-    });
-    setTokens(newTokens);
-  };
-
-  // Load Balance
+  // Initialize
   useEffect(() => {
+    setAiName(AI_NAMES[Math.floor(Math.random() * AI_NAMES.length)]);
     const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -93,6 +83,17 @@ export default function LudoMasterPage() {
     };
     fetchProfile();
   }, []);
+
+  const initTokens = () => {
+    // 2 tokens per player
+    const newTokens: Token[] = [
+      { id: `red-0`, color: 'red', status: 'yard', trackIndex: -1, homeLaneIndex: -1 },
+      { id: `red-1`, color: 'red', status: 'yard', trackIndex: -1, homeLaneIndex: -1 },
+      { id: `yellow-0`, color: 'yellow', status: 'yard', trackIndex: -1, homeLaneIndex: -1 },
+      { id: `yellow-1`, color: 'yellow', status: 'yard', trackIndex: -1, homeLaneIndex: -1 },
+    ];
+    setTokens(newTokens);
+  };
 
   // Turn Timer
   useEffect(() => {
@@ -109,12 +110,12 @@ export default function LudoMasterPage() {
 
   // AI Logic
   useEffect(() => {
-    if (gamePhase === 'playing' && currentTurn !== 'red' && !winner && validMoves.length === 0 && !isRolling && !animatingToken) {
+    if (gamePhase === 'playing' && currentTurn === 'yellow' && !winner && validMoves.length === 0 && !isRolling && !animatingToken) {
       const aiTimer = setTimeout(() => rollDice(), 1200);
       return () => clearTimeout(aiTimer);
     }
     
-    if (gamePhase === 'playing' && currentTurn !== 'red' && validMoves.length > 0 && !animatingToken) {
+    if (gamePhase === 'playing' && currentTurn === 'yellow' && validMoves.length > 0 && !animatingToken) {
       const aiMoveTimer = setTimeout(() => {
         let bestMoveId = validMoves[0];
         const yardMoves = validMoves.filter(id => tokens.find(t => t.id === id)?.status === 'yard');
@@ -123,7 +124,7 @@ export default function LudoMasterPage() {
       }, 1200);
       return () => clearTimeout(aiMoveTimer);
     }
-  }, [currentTurn, gamePhase, validMoves, isRolling, animatingToken, winner]);
+  }, [currentTurn, gamePhase, validMoves, isRolling, animatingToken, winner, tokens]);
 
   const rollDice = () => {
     if (isRolling || animatingToken || gamePhase !== 'playing' || winner) return;
@@ -219,7 +220,7 @@ export default function LudoMasterPage() {
       }
     }
 
-    // Check capture
+    // Capture logic
     let capturedTokenIds: string[] = [];
     if (newStatus === 'track') {
       const isSafe = SAFE_INDICES.includes(newTrackIndex);
@@ -246,6 +247,7 @@ export default function LudoMasterPage() {
     setTimeout(() => {
       setAnimatingToken(null);
       
+      // 2 Tokens win condition
       const playerTokens = updatedTokens.filter(t => t.color === player);
       if (playerTokens.every(t => t.status === 'finished')) {
         handleWin(player);
@@ -258,16 +260,14 @@ export default function LudoMasterPage() {
       } else {
         nextTurn();
       }
-    }, 400); // 400ms for animation
+    }, 300); // 300ms for animation
   };
 
   const nextTurn = () => {
     setSixesCount(0);
     setValidMoves([]);
     setTimeLeft(15);
-    const colors: Color[] = ['red', 'green', 'yellow', 'blue'];
-    const currentIndex = colors.indexOf(currentTurn);
-    setCurrentTurn(colors[(currentIndex + 1) % 4]);
+    setCurrentTurn(prev => prev === 'red' ? 'yellow' : 'red');
   };
 
   const handleWin = async (winningPlayer: Color) => {
@@ -285,7 +285,7 @@ export default function LudoMasterPage() {
       try {
         await supabase.rpc("finish_ludo_match", { p_bet_amount: betAmount, p_is_win: false });
       } catch (err) { console.error(err); }
-      alert(`😢 ${winningPlayer.toUpperCase()} Won the match! You lost.`);
+      alert(`😢 ${aiName} Won the match! You lost.`);
     }
   };
 
@@ -310,12 +310,12 @@ export default function LudoMasterPage() {
   // Rendering Helpers
   const getTokenStyle = (token: Token) => {
     let r = 0, c = 0;
-    let tokenSize = 6.5; // % of board width
+    let tokenSize = 6.5; 
     
     if (token.status === 'yard') {
       const idx = parseInt(token.id.split('-')[1]);
       [r, c] = YARD_COORDS[token.color][idx];
-      tokenSize = 9;
+      tokenSize = 10;
     } else if (token.status === 'track') {
       [r, c] = TRACK[token.trackIndex];
     } else if (token.status === 'home_lane') {
@@ -356,15 +356,11 @@ export default function LudoMasterPage() {
           className += "track ";
           if (isSafe) className += "safe ";
           if (trackIdx === START_INDEX.red) className += "bg-red ";
-          if (trackIdx === START_INDEX.green) className += "bg-green ";
           if (trackIdx === START_INDEX.yellow) className += "bg-yellow ";
-          if (trackIdx === START_INDEX.blue) className += "bg-blue ";
         }
 
         if (HOME_LANES.red.some(p => p[0] === r && p[1] === c)) className += "lane-red ";
-        if (HOME_LANES.green.some(p => p[0] === r && p[1] === c)) className += "lane-green ";
         if (HOME_LANES.yellow.some(p => p[0] === r && p[1] === c)) className += "lane-yellow ";
-        if (HOME_LANES.blue.some(p => p[0] === r && p[1] === c)) className += "lane-blue ";
 
         cells.push(<div key={`${r}-${c}`} className={className} style={{ gridRow: r + 1, gridColumn: c + 1 }} />);
       }
@@ -373,7 +369,7 @@ export default function LudoMasterPage() {
   }, []);
 
   const TokenSVG = ({ color }: { color: Color }) => {
-    const colors: Record<Color, string> = { red: 'var(--red)', green: 'var(--green)', yellow: 'var(--yellow)', blue: 'var(--blue)' };
+    const colors: Record<Color, string> = { red: 'var(--red)', yellow: 'var(--yellow)' };
     return (
       <svg viewBox="0 0 64 70" style={{ width: '100%', height: '100%', display: 'block' }}>
         <path d="M32 3 C16 3 5 14 5 28 C5 44 32 66 32 66 C32 66 59 44 59 28 C59 14 48 3 32 3Z" fill="white" stroke="#333" strokeWidth="3" />
@@ -391,15 +387,21 @@ export default function LudoMasterPage() {
         {/* TOP BAR */}
         <div className="wallet-header">
           <div className="wallet-box">
-            <span className="wallet-label">BALANCE</span>
+            <span className="wallet-label">YOU (RED)</span>
             <span className="wallet-amount">{balance.toFixed(2)} BDT</span>
           </div>
+          
           <div className="match-status">
-            {gamePhase === 'playing' && <span className="status-live">● {currentTurn.toUpperCase()} TURN ({timeLeft}s)</span>}
+            {gamePhase === 'playing' && (
+              <span className={`status-live ${currentTurn === 'red' ? 'text-red' : 'text-yellow'}`}>
+                ● {currentTurn === 'red' ? "YOUR TURN" : `${aiName}'S TURN`} ({timeLeft}s)
+              </span>
+            )}
           </div>
+
           <div className="wallet-box ai-wallet">
-            <span className="wallet-label">OPPONENTS</span>
-            <span className="wallet-amount">3 AI</span>
+            <span className="wallet-label">{aiName || "AI"}</span>
+            <span className="wallet-amount">∞</span>
           </div>
         </div>
 
@@ -410,7 +412,7 @@ export default function LudoMasterPage() {
                {renderBoardCells}
             </div>
             
-            {/* YARDS */}
+            {/* YARDS - only red and yellow have tokens now */}
             <div className="yard-wrapper top-left"><div className="yard yard-green"><div className="yard-inner"></div></div></div>
             <div className="yard-wrapper top-right"><div className="yard yard-yellow"><div className="yard-inner"></div></div></div>
             <div className="yard-wrapper bottom-left"><div className="yard yard-red"><div className="yard-inner"></div></div></div>
@@ -446,7 +448,7 @@ export default function LudoMasterPage() {
         {gamePhase === 'betting' ? (
           <div className="betting-panel">
             <div className="bet-info">
-              <span>Bet Amount</span>
+              <span>Bet Amount (1v1 Match)</span>
               <div className="bet-controls">
                 <button onClick={() => setBetAmount(Math.max(10, betAmount - 10))}>-</button>
                 <input type="number" value={betAmount} readOnly />
@@ -476,7 +478,7 @@ export default function LudoMasterPage() {
               </button>
             </div>
             <div style={{color:"white", fontSize:"14px", fontWeight:"bold", marginLeft:"15px"}}>
-              {winner ? "GAME OVER" : currentTurn === 'red' ? "YOUR TURN" : "AI TURN..."}
+              {winner ? "GAME OVER" : currentTurn === 'red' ? "YOUR TURN" : `${aiName} TURN...`}
             </div>
           </div>
         )}
