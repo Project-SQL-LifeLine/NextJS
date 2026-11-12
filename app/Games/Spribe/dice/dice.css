@@ -15,6 +15,7 @@
   overflow: hidden;
   display: flex;
   justify-content: center;
+  align-items: center; /* গেমটিকে মাঝখানে রাখার জন্য */
 }
 
 .dice-page-wrapper * {
@@ -34,6 +35,8 @@
   gap: 9px;
   box-shadow: inset 0 0 0 2px rgba(28, 0, 68, .35);
   position: relative;
+  /* স্ক্রিনে ফিট করার জন্য জুম কমানো হলো */
+  zoom: 0.85; 
 }
 
 /* HISTORY */
@@ -199,7 +202,7 @@
   box-shadow: 0 3px 9px #18082b;
   display: grid;
   place-items: center;
-  transition: left 0.1s linear; /* বলের মুভমেন্ট স্মুথ করার জন্য */
+  transition: left 0.1s linear;
 }
 
 .ball:after {
@@ -502,7 +505,13 @@ input[type=range]::-webkit-slider-thumb {
 
 /* COMPACT MOBILE DESIGN */
 @media(max-width: 500px) {
-  .game-shell { padding: 6px; gap: 6px; border-radius: 16px; }
+  .game-shell { 
+    padding: 6px; 
+    gap: 6px; 
+    border-radius: 16px; 
+    /* মোবাইলে আরও জুম কমানো হলো যাতে সব ফিট হয় */
+    zoom: 0.80; 
+  }
   .history { height: 34px; gap: 4px; padding: 3px; }
   .history-item { height: 25px; font-size: clamp(11px, 3.1vw, 14px); }
   .history-menu { height: 32px; width: 43px; font-size: 18px; }
