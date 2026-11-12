@@ -32,9 +32,7 @@
   gap: 10px;
 }
 
-/* ======================================= */
-/* 💰 WALLET HEADER (NEW) */
-/* ======================================= */
+/* WALLET HEADER */
 .wallet-header {
   width: 100%;
   display: flex;
@@ -67,13 +65,11 @@
 
 .wallet-amount {
   font-size: 14px;
-  color: #00e701; /* Neon Green for money */
+  color: #00e701;
   font-weight: bold;
 }
 
-.ai-wallet .wallet-amount {
-  color: #ff4d4d; /* Red for AI */
-}
+.ai-wallet .wallet-amount { color: #ff4d4d; }
 
 .match-status {
   font-size: 12px;
@@ -90,9 +86,7 @@
   100% { opacity: 1; }
 }
 
-/* ======================================= */
-/* PLAYER CONTROL */
-/* ======================================= */
+/* CONTROL */
 .control {
   display: flex;
   align-items: center;
@@ -101,15 +95,8 @@
   min-height: 80px;
 }
 
-.control.bottom {
-  justify-content: flex-start;
-  padding-left: 3%;
-}
-
-.control.top {
-  justify-content: flex-end;
-  padding-right: 3%;
-}
+.control.bottom { justify-content: flex-start; padding-left: 3%; }
+.control.top { justify-content: flex-end; padding-right: 3%; }
 
 .panel {
   display: flex;
@@ -168,9 +155,7 @@
   text-shadow: 2px 3px 3px #633;
 }
 
-/* ======================================= */
 /* BOARD */
-/* ======================================= */
 .board {
   width: min(96vw, 610px);
   aspect-ratio: 1;
@@ -292,9 +277,7 @@
 .token-red-3 { top: 83%; left: 45%; }
 .token-red-4 { top: 90%; left: 45%; }
 
-/* ======================================= */
-/* 💰 BETTING PANEL (NEW) */
-/* ======================================= */
+/* BETTING PANEL */
 .betting-panel {
   width: 100%;
   background: rgba(0, 0, 0, 0.5);
@@ -401,21 +384,20 @@
   transition: all 0.1s;
 }
 
-.start-btn:active {
+.start-btn:active:not(:disabled) {
   transform: translateY(4px);
   box-shadow: 0 0 0 #a37a00;
 }
 
-/* Demo Finish Button */
+.start-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
 .finish-demo-btn {
-  background: #ff4d4d;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 8px 12px;
   border-radius: 8px;
-  margin-left: auto;
-  margin-right: 3%;
   font-weight: bold;
+  font-size: 12px;
   cursor: pointer;
 }
 
