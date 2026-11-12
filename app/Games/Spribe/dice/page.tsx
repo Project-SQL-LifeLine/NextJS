@@ -28,7 +28,7 @@ export default function DiceGamePage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [modalHistory, setModalHistory] = useState<any[]>([]);
 
-  // Provably Fair স্টেট (নতুন)
+  // Provably Fair স্টেট
   const [clientSeed, setClientSeed] = useState("");
   const [serverSeedHash, setServerSeedHash] = useState("");
   const [isSeedUpdating, setIsSeedUpdating] = useState(false);
@@ -140,7 +140,6 @@ export default function DiceGamePage() {
   const handleCopyText = (text: string) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
-    // চাইলে এখানে একটি ছোট টোস্ট মেসেজ দিতে পারেন, আপাতত alert দেওয়া হলো
     alert(t("Copied to clipboard!", "কপি করা হয়েছে!"));
   };
 
@@ -242,7 +241,18 @@ export default function DiceGamePage() {
               {item.val}
             </div>
           )) : <div className="text-xs text-gray-400 w-full text-center">{t("No History", "কোন হিস্ট্রি নেই")}</div>}
-          <button className="history-menu" onClick={() => openModal('history')}>◴⌄</button>
+          
+          {/* Updated History Menu Button with Aligned SVGs */}
+          <button className="history-menu" onClick={() => openModal('history')}>
+            <svg className="hm-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+              <path d="M12 7v5l4 2" />
+            </svg>
+            <svg className="hm-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
         </section>
 
         {/* RESULT & GRAPH PANEL */}
@@ -564,7 +574,7 @@ export default function DiceGamePage() {
                 </div>
               )}
 
-              {/* ---- PROVABLY FAIR MODAL (Real Data Connected) ---- */}
+              {/* ---- PROVABLY FAIR MODAL ---- */}
               {activeModal === 'provably' && (
                 <div className="modal-inner">
                   <div className="modal-header">
