@@ -4,7 +4,7 @@
   --panel: #351567;
 }
 
-/* Wrapper for Next.js page */
+/* Wrapper */
 .dice-page-wrapper {
   margin: 0;
   width: 100%;
@@ -21,27 +21,25 @@
   box-sizing: border-box;
 }
 
-/* =========================================
-   মেইন শেল (সবকিছু ২০% ছোট করা হয়েছে)
-   ========================================= */
+/* Main Shell */
 .game-shell {
   width: min(100vw, 709px);
   height: 100dvh;
   min-height: 0;
-  padding: 8px; /* আগে 10px */
+  padding: 8px;
   background: linear-gradient(135deg, #712bb7, #5520a9 52%, #4b19a1);
-  border: 2px solid #8b48d0; /* আগে 3px */
-  border-radius: 18px; /* আগে 23px */
+  border: 2px solid #8b48d0;
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
-  gap: 7px; /* আগে 9px */
+  gap: 6px; /* গ্যাপ কমানো হয়েছে */
   box-shadow: inset 0 0 0 2px rgba(28, 0, 68, .35);
   position: relative;
 }
 
 /* HISTORY */
 .history {
-  height: 41px; /* 51 -> 41 */
+  height: 38px;
   flex: none;
   border-radius: 20px;
   background: #40147d;
@@ -55,7 +53,7 @@
 }
 
 .history-item {
-  height: 29px; /* 36 -> 29 */
+  height: 26px;
   min-width: 0;
   flex: 1;
   border-radius: 20px;
@@ -63,7 +61,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(10px, 2.8vw, 19px); /* ছোট করা হয়েছে */
+  font-size: clamp(10px, 2.8vw, 16px);
   white-space: nowrap;
 }
 
@@ -71,15 +69,15 @@
 .history-item.white { color: #fff; }
 
 .history-menu {
-  height: 38px; /* 47 -> 38 */
-  width: 56px; /* 70 -> 56 */
+  height: 34px;
+  width: 50px;
   flex: none;
   border-radius: 25px;
   background: #7421c5;
   border: 2px solid #210b3b;
   display: grid;
   place-items: center;
-  font-size: 22px;
+  font-size: 18px;
   color: white;
   cursor: pointer;
 }
@@ -88,8 +86,8 @@
   position: absolute;
   top: -1px;
   left: 43%;
-  width: 74px;
-  height: 23px;
+  width: 60px;
+  height: 18px;
   background: #0e0924;
   border: 1px solid #261344;
   border-top: 0;
@@ -102,12 +100,12 @@
   content: "";
   width: 0;
   height: 0;
-  border-left: 7px solid transparent;
-  border-right: 7px solid transparent;
-  border-top: 13px solid #a6a3b5;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 10px solid #a6a3b5;
 }
 
-/* RESULT PANEL */
+/* RESULT PANEL (ফাঁকা জায়গা সরিয়ে ছোট করা হয়েছে) */
 .result-panel {
   flex: 1;
   min-height: 0;
@@ -116,26 +114,26 @@
   background: linear-gradient(145deg, #4c1b79, #39146f 58%, #42157f);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  padding: 10px 0 10px;
   overflow: hidden;
 }
 
 .result-number {
-  height: 22%;
-  min-height: 80px;
+  height: 40%;
   display: grid;
   place-items: center;
-  font-size: clamp(46px, 11vw, 84px); /* ছোট করা হয়েছে */
+  font-size: clamp(50px, 12vw, 80px);
   font-weight: 700;
   letter-spacing: 2px;
   color: #36bd00;
 }
 
 .chart-area {
-  height: 47%;
-  min-height: 144px;
+  height: 60%;
   position: relative;
-  padding: 0 0 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .scale {
@@ -143,70 +141,69 @@
   display: flex;
   justify-content: space-between;
   color: #9b87ae;
-  font-size: 14px;
+  font-size: 13px;
+  padding: 0 6px;
 }
 
 .scale i {
-  height: 14px;
+  height: 12px;
   width: 2px;
   background: #b0a0bf;
 }
 
 .bars {
-  height: calc(100% - 46px);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+  padding: 0 4px;
 }
 
+/* =========================================
+   Grid Fix: ৭০টি দাগ সবসময় ফিক্সড থাকবে
+   ========================================= */
 .bar {
-  height: 39px; /* 49 -> 39 */
+  height: 34px;
   display: flex;
   overflow: hidden;
   position: relative;
   background: #80103e;
+  border-radius: 2px;
 }
 
-/* =========================================
-   এখানে গ্রিড লাইন ৭০টি করা হয়েছে
-   ========================================= */
 .bar .red,
 .bar .cyan,
 .bar .mint {
   height: 100%;
-  /* ১০০% কে ৭০ ভাগে ভাগ করা হয়েছে */
-  background-size: calc(100% / 70) 100%;
-  background-image: linear-gradient(
-    90deg,
-    rgba(10, 0, 30, .6) 1.5px,
-    transparent 1.5px,
-    transparent 100%
-  );
+  transition: width 0.1s ease;
 }
 
 .bar .red { background-color: #a50949; }
 .bar .cyan { background-color: #10a6d9; }
 .bar .mint { background-color: #36d7b2; }
 
-.bar-one .red { width: 51.5%; }
-.bar-one .cyan { width: 48.5%; }
-
-.bar-two .mint { width: 48.5%; }
-.bar-two .red { width: 51.5%; }
+/* গ্রিড লাইন ওভারলে (সবসময় ৭০টি দাগ থাকবে) */
+.bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(90deg, rgba(10, 0, 30, 0.4) 1px, transparent 1px);
+  /* ১০০% ভাগ ৭০ = ১.৪২৮% প্রতি ঘরে একটি দাগ */
+  background-size: calc(100% / 70) 100%;
+  z-index: 5;
+  pointer-events: none;
+}
 
 .ball {
   position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 45px; /* 56 -> 45 */
-  height: 45px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #ffd72c, #ffad00 65%, #ed8c00);
   box-shadow: 0 3px 9px #18082b;
   display: grid;
   place-items: center;
   transition: left 0.1s linear;
+  z-index: 10;
 }
 
 .ball:after {
@@ -221,20 +218,20 @@
   display: flex;
   justify-content: space-between;
   color: #9380a9;
-  font-size: 14px;
-  padding: 0 2px;
-  margin-top: 2px;
+  font-size: 13px;
+  padding: 0 6px;
+  margin-top: 6px;
 }
 
 /* PAYOUT */
 .payout {
-  height: 158px; /* 198 -> 158 */
+  height: 140px;
   flex: none;
   border: 2px solid #1c0c32;
   border-radius: 14px;
   background: linear-gradient(140deg, #4a1b7c, #32115d);
   position: relative;
-  padding: 14px 5% 0;
+  padding: 12px 5% 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -245,36 +242,36 @@
   grid-template-columns: 40% 1fr;
   align-items: center;
   gap: 8%;
-  height: 75px;
+  height: 68px;
 }
 
 .payout-label {
   text-align: center;
   color: #9c88ad;
-  font-size: 18px;
-  margin-bottom: 5px;
+  font-size: 16px;
+  margin-bottom: 4px;
 }
 
 .multiplier {
-  height: 44px;
-  border-radius: 24px;
+  height: 38px;
+  border-radius: 20px;
   background: #260e47;
   border: 2px solid #70518c;
   display: grid;
   place-items: center;
-  font-size: 29px;
+  font-size: 24px;
 }
 
 .slider-wrap {
   position: relative;
-  padding-top: 15px;
+  padding-top: 12px;
 }
 
 input[type=range] {
   appearance: none;
   width: 100%;
-  height: 22px;
-  border-radius: 14px;
+  height: 20px;
+  border-radius: 12px;
   background: #200c3c;
   border: 2px solid #765296;
   outline: none;
@@ -282,8 +279,8 @@ input[type=range] {
 
 input[type=range]::-webkit-slider-thumb {
   appearance: none;
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: #7c27ca;
   border: 3px solid #4a167d;
@@ -295,20 +292,20 @@ input[type=range]::-webkit-slider-thumb {
 }
 
 .ticks {
-  height: 14px;
-  margin: 0 8px;
+  height: 12px;
+  margin: 0 6px;
   display: flex;
   justify-content: space-between;
 }
 
 .ticks i {
-  height: 10px;
+  height: 8px;
   width: 1px;
   background: #8972a0;
 }
 
 .payout-bottom {
-  height: 56px;
+  height: 48px;
   border-top: 1px solid rgba(20, 4, 38, .35);
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -318,38 +315,37 @@ input[type=range]::-webkit-slider-thumb {
 
 .small-label {
   color: #9b87ae;
-  font-size: 18px;
+  font-size: 15px;
 }
 
 .small-value {
-  font-size: 22px;
+  font-size: 18px;
   margin-top: 2px;
 }
 
-/* BET AREA */
+/* BET AREA (উচ্চতা কমানো হয়েছে) */
 .bet-area {
-  height: 229px; /* 286 -> 229 */
+  height: 180px; /* আগে ২২৯ ছিল */
   flex: none;
-  border-radius: 19px;
+  border-radius: 16px;
   background: #35116e;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
-  padding: 24px 5% 15px;
+  padding: 16px 5% 12px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  gap: 13px;
+  justify-content: space-between; /* স্পেস ঠিক করার জন্য */
 }
 
 .action-row {
   display: grid;
-  grid-template-columns: 74px 1fr 1fr;
-  gap: 7px;
+  grid-template-columns: 64px 1fr 1fr;
+  gap: 6px;
   align-items: center;
 }
 
 .action-btn {
-  height: 79px; /* 99 -> 79 */
-  border-radius: 30px;
+  height: 64px;
+  border-radius: 25px;
   border: 3px solid #160d32;
   box-shadow: 0 3px 4px #1a0731, inset 0 2px 3px rgba(255, 255, 255, .35);
   display: flex;
@@ -360,8 +356,8 @@ input[type=range]::-webkit-slider-thumb {
 }
 
 .roll {
-  height: 77px; /* 96 -> 77 */
-  width: 77px;
+  height: 64px;
+  width: 64px;
   border-radius: 50%;
   background: linear-gradient(145deg, #0785ff, #0050bb);
   color: white;
@@ -375,106 +371,106 @@ input[type=range]::-webkit-slider-thumb {
   background: linear-gradient(145deg, #12a4e8, #006da9);
 }
 
-/* SVG অ্যারো বাটন স্টাইল */
 .arrow-svg {
-  width: 40px; /* 50 -> 40 */
-  height: 40px;
-  margin-bottom: 10px;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 8px;
   filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
-}
-
-/* স্পিনিং অ্যানিমেশন */
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 .prob {
   position: absolute;
-  bottom: 6px;
+  bottom: 5px;
   background: #12635b;
   border-radius: 6px;
-  padding: 2px 14px;
-  font-size: 17px;
+  padding: 1px 12px;
+  font-size: 14px;
 }
 
 .high .prob {
   background: #07517a;
 }
 
-/* BET CONTROLS */
+/* BET CONTROLS (আরও ছোট করা হয়েছে) */
 .bet-row {
-  height: 77px; /* 96 -> 77 */
-  border-radius: 48px;
+  height: 56px; /* আগে ৭৭ ছিল */
+  border-radius: 38px;
   background: #7225c5;
   border: 2px solid #32105c;
   display: grid;
-  grid-template-columns: 1fr 56px 56px 56px;
-  gap: 6px;
+  grid-template-columns: 1fr 48px 48px 48px;
+  gap: 5px;
   align-items: center;
-  padding: 6px 14px;
+  padding: 4px 10px;
+}
+
+.bet-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .bet-label {
   text-align: center;
-  font-size: 20px;
-  margin-bottom: 3px;
+  font-size: 12px;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 2px;
 }
 
 .bet-input {
-  height: 34px;
-  border-radius: 22px;
+  height: 26px;
+  width: 100%;
+  border-radius: 16px;
   background: #4b197f;
   border: 2px solid #1d0b3a;
   text-align: center;
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 700;
   display: grid;
   place-items: center;
 }
 
 .round-control {
-  height: 55px; /* 69 -> 55 */
-  width: 55px;
+  height: 42px;
+  width: 42px;
   border-radius: 50%;
   border: 2px solid #32105c;
   background: #7123bf;
   display: grid;
   place-items: center;
-  font-size: 27px;
+  font-size: 20px;
   box-shadow: inset 0 1px 2px #b05ae9;
   cursor: pointer;
 }
 
-.coins { font-size: 22px; }
+.coins { font-size: 18px; }
 
 /* FOOTER */
 .footer {
-  height: 38px; /* 48 -> 38 */
+  height: 32px;
   flex: none;
   display: grid;
-  grid-template-columns: 1fr 38px 1fr 38px;
-  gap: 6px;
+  grid-template-columns: 1fr 32px 1fr 32px;
+  gap: 5px;
   align-items: center;
 }
 
 .dice-tab {
-  height: 36px;
-  border-radius: 24px;
+  height: 30px;
+  border-radius: 20px;
   background: #7022bd;
   border: 2px solid #2a104b;
   display: grid;
   place-items: center;
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .help {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: #ffad13;
   color: #40105f;
@@ -482,27 +478,27 @@ input[type=range]::-webkit-slider-thumb {
   display: grid;
   place-items: center;
   font-weight: bold;
-  font-size: 22px;
+  font-size: 18px;
 }
 
 .balance {
   text-align: right;
-  font-size: 22px;
+  font-size: 16px;
   white-space: nowrap;
-  padding-right: 8px;
+  padding-right: 4px;
 }
 
 .balance span { color: #a88ec3; }
 
 .menu {
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #7524c5;
   border: 2px solid #2b104c;
   display: grid;
   place-items: center;
-  font-size: 22px;
+  font-size: 16px;
   color: white;
   cursor: pointer;
 }
@@ -515,64 +511,45 @@ input[type=range]::-webkit-slider-thumb {
   .history-menu { height: 25px; width: 34px; font-size: 14px; }
   .pointer { width: 43px; height: 15px; }
   .pointer:after { border-left-width: 5px; border-right-width: 5px; border-top-width: 8px; }
-  .result-number { min-height: 0; font-size: clamp(38px, 11vw, 48px); height: 22%; }
-  .chart-area { min-height: 92px; padding-bottom: 19px; }
+  .result-number { min-height: 0; font-size: clamp(38px, 11vw, 48px); height: 40%; }
+  .chart-area { min-height: 0; }
   .scale { height: 12px; font-size: 9px; }
   .scale i { height: 8px; width: 1px; }
-  .bars { height: calc(100% - 31px); gap: 8px; }
-  .bar { height: 21px; }
-  .ball { width: 26px; height: 26px; right: 4px; }
+  .bars { gap: 8px; }
+  .bar { height: 24px; }
+  .ball { width: 28px; height: 28px; }
   .ball:after { width: 6px; height: 6px; }
   .axis { font-size: 9px; margin-top: 2px; }
-  .payout { height: 88px; padding: 6px 4% 0; border-radius: 10px; }
-  .payout-top { height: 42px; grid-template-columns: 40% 1fr; gap: 5%; }
-  .payout-label { font-size: 10px; margin-bottom: 2px; }
-  .multiplier { height: 25px; font-size: 17px; }
+  
+  .payout { height: 100px; padding: 8px 4% 0; border-radius: 10px; }
+  .payout-top { height: 48px; grid-template-columns: 40% 1fr; gap: 5%; }
+  .payout-label { font-size: 12px; margin-bottom: 2px; }
+  .multiplier { height: 28px; font-size: 18px; }
   .slider-wrap { padding-top: 8px; }
-  input[type=range] { height: 13px; }
-  input[type=range]::-webkit-slider-thumb { width: 26px; height: 26px; }
+  input[type=range] { height: 14px; }
+  input[type=range]::-webkit-slider-thumb { width: 28px; height: 28px; }
   .ticks { height: 7px; margin: 0 4px; }
   .ticks i { height: 5px; }
-  .payout-bottom { height: 31px; }
-  .small-label { font-size: 10px; }
-  .small-value { font-size: 12px; margin-top: 1px; }
-  .bet-area { height: 128px; padding: 10px 4% 8px; gap: 7px; border-radius: 14px; }
-  .action-row { grid-template-columns: 42px 1fr 1fr; gap: 5px; }
-  .action-btn { height: 44px; border-width: 2px; border-radius: 18px; }
-  .roll { height: 42px; width: 42px; font-size: 23px; }
+  .payout-bottom { height: 35px; }
+  .small-label { font-size: 11px; }
+  .small-value { font-size: 14px; margin-top: 1px; }
   
-  /* মোবাইলে SVG অ্যারো সাইজ আরও ছোট */
-  .arrow-svg { width: 24px; height: 24px; margin-bottom: 5px; }
+  .bet-area { height: 125px; padding: 10px 4% 8px; gap: 6px; border-radius: 14px; }
+  .action-row { grid-template-columns: 45px 1fr 1fr; gap: 5px; }
+  .action-btn { height: 45px; border-width: 2px; border-radius: 18px; }
+  .roll { height: 45px; width: 45px; }
+  .arrow-svg { width: 24px; height: 24px; margin-bottom: 4px; }
+  .prob { bottom: 2px; padding: 1px 8px; font-size: 11px; border-radius: 4px; }
   
-  .prob { bottom: 2px; padding: 1px 7px; font-size: 10px; border-radius: 4px; }
-  .bet-row { height: 44px; grid-template-columns: 1fr 32px 32px 32px; padding: 3px 7px; gap: 4px; }
-  .bet-label { font-size: 11px; margin-bottom: 1px; }
-  .bet-input { height: 20px; font-size: 13px; border-width: 1px; }
-  .round-control { width: 31px; height: 31px; font-size: 17px; border-width: 1px; }
-  .coins { font-size: 14px; }
+  .bet-row { height: 40px; grid-template-columns: 1fr 32px 32px 32px; padding: 3px 7px; gap: 4px; }
+  .bet-label { font-size: 10px; }
+  .bet-input { height: 18px; font-size: 12px; border-width: 1px; }
+  .round-control { width: 30px; height: 30px; font-size: 15px; border-width: 1px; }
+  .coins { font-size: 12px; }
+  
   .footer { height: 22px; grid-template-columns: 1fr 22px 1fr 24px; gap: 4px; }
   .dice-tab { height: 21px; font-size: 10px; border-width: 1px; }
   .help { width: 21px; height: 21px; font-size: 14px; border-width: 1px; }
   .balance { font-size: 12px; padding-right: 3px; }
   .menu { width: 22px; height: 22px; font-size: 13px; border-width: 1px; }
-}
-
-@media(max-height: 760px) and (min-width: 501px) {
-  .game-shell { gap: 5px; padding: 6px; }
-  .history { height: 34px; }
-  .history-item { height: 23px; }
-  .payout { height: 132px; padding-top: 8px; }
-  .payout-top { height: 62px; }
-  .multiplier { height: 36px; font-size: 24px; }
-  .payout-bottom { height: 47px; }
-  .small-label { font-size: 14px; }
-  .small-value { font-size: 18px; }
-  .bet-area { height: 188px; padding-top: 12px; gap: 8px; }
-  .action-btn { height: 62px; }
-  .roll { height: 61px; width: 61px; }
-  .bet-row { height: 66px; grid-template-columns: 1fr 46px 46px 46px; }
-  .round-control { width: 46px; height: 46px; }
-  .footer { height: 34px; }
-  .dice-tab { height: 32px; }
-  .help, .menu { width: 32px; height: 32px; }
 }
