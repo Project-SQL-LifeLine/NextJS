@@ -4,7 +4,7 @@ import { useState } from "react";
 import "./dice.css";
 
 export default function DiceGamePage() {
-  // স্টেট
+  // স্টেট (আগের মতোই আছে)
   const [bet, setBet] = useState(1.00);
   const [chance, setChance] = useState(48.5);
   
@@ -28,19 +28,18 @@ export default function DiceGamePage() {
   const highChance = 100 - chance;
   const potentialWin = bet * payout;
 
-  // রোল করার ফাংশন (লো এবং হাই উভয়ের জন্য)
+  // রোল করার ফাংশন (লজিক আগের মতোই আছে)
   const handleRoll = (isHigh: boolean) => {
-    if (isRolling) return; // যদি আগে থেকেই রোলিং চলে, তবে আবার রোল হবে না
+    if (isRolling) return;
 
     setIsRolling(true);
     setIsWin(null);
 
     let rollCount = 0;
-    const duration = 1000; // ১ সেকেন্ড অ্যানিমেশন
+    const duration = 1000;
     const intervalTime = 50; 
 
     const interval = setInterval(() => {
-      // অ্যানিমেশনের জন্য র‍্যান্ডম নাম্বার জেনারেট
       const animResult = Math.random() * 100;
       setResult(Number(animResult.toFixed(2)));
       rollCount++;
@@ -48,22 +47,24 @@ export default function DiceGamePage() {
       if (rollCount * intervalTime >= duration) {
         clearInterval(interval);
         
-        // আসল রেজাল্ট জেনারেট
         const finalResult = Math.random() * 100;
         setResult(Number(finalResult.toFixed(2)));
         setIsRolling(false);
 
-        // জেতা বা হারা নির্ধারণ
         const win = isHigh ? finalResult >= chance : finalResult < chance;
         setIsWin(win);
 
-        // হিস্ট্রি আপডেট
         setHistoryData(prev => [
           { val: finalResult.toFixed(2), isGreen: win },
           ...prev
         ].slice(0, 6));
       }
     }, intervalTime);
+  };
+
+  // মেইন রোল বাটনে ক্লিক করলে ডিফল্টভাবে 'Under' (Low) ধরে রোল হবে
+  const handleMainRollClick = () => {
+    handleRoll(false);
   };
 
   return (
@@ -96,7 +97,6 @@ export default function DiceGamePage() {
               <i></i><i></i><i></i><i></i><i></i>
             </div>
 
-            {/* ডাইনামিক বার (যা স্লাইডারের সাথে পরিবর্তন হবে) */}
             <div className="bars">
               <div className="bar bar-one">
                 <div className="red" style={{ width: `${100 - chance}%` }}></div>
@@ -108,12 +108,11 @@ export default function DiceGamePage() {
               </div>
             </div>
 
-            {/* ডাইনামিক বল (রোলিং সিম্বল) */}
             <div 
               className="ball" 
               style={{ 
-                left: `calc(${result}% - 28px)`, // ৫৬ পিক্সেল বলের অর্ধেক বাদ দিয়ে সেন্টার করা হয়েছে
-                right: 'auto' // আগের রাইট পজিশন বাতিল
+                left: `calc(${result}% - 28px)`,
+                right: 'auto'
               }}
             ></div>
 
@@ -144,7 +143,7 @@ export default function DiceGamePage() {
                 step="0.01"
                 value={chance}
                 onChange={(e) => setChance(Number(e.target.value))}
-                disabled={isRolling} // রোলিং চলাকালীন স্লাইডার লক থাকবে
+                disabled={isRolling}
               />
               <div className="ticks">
                 <i></i><i></i><i></i><i></i>
@@ -167,26 +166,39 @@ export default function DiceGamePage() {
           </div>
         </section>
 
-        {/* BET AREA */}
+        {/* BET AREA (লাল দাগ দেওয়া বাটনগুলো এখানে) */}
         <section className="bet-area">
           <div className="action-row">
-            {/* সেন্টার রোল বাটন (এটি ক্লিক করলে ডিফল্টভাবে Low-তে বেট হবে) */}
-            <button className="action-btn roll" id="roll" onClick={() => handleRoll(false)} disabled={isRolling}>
-              ⟳
-              <span style={{ fontSize: '25px', position: 'absolute' }}>▶</span>
+            
+            {/* ১. বাম দিকের নীল রিফ্রেশ/রোল বাটন */}
+            <button className="action-btn roll" id="roll" onClick={handleMainRollClick} disabled={isRolling}>
+              {isRolling ? (
+                <svg className="animate-spin" style={{ width: '40px', height: '40px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              ) : (
+                <svg style={{ width: '40px', height: '40px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              )}
             </button>
 
-            {/* Low (Under) বাটন */}
+            {/* ২. মাঝের সবুজ ডাউন অ্যারো (Under/Low) */}
             <button className="action-btn low" id="low" onClick={() => handleRoll(false)} disabled={isRolling}>
-              <span className="arrow">⌄</span>
+              <svg className="arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
               <span className="prob" id="lowChance">{chance.toFixed(2)}</span>
             </button>
 
-            {/* High (Over) বাটন */}
+            {/* ৩. ডান দিকের নীল আপ অ্যারো (Over/High) */}
             <button className="action-btn high" id="high" onClick={() => handleRoll(true)} disabled={isRolling}>
-              <span className="arrow">⌃</span>
+              <svg className="arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 15l-6-6-6 6" />
+              </svg>
               <span className="prob" id="highChance">{highChance.toFixed(2)}</span>
             </button>
+
           </div>
 
           <div className="bet-row">
