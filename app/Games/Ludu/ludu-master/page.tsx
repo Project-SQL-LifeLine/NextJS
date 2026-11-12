@@ -1,23 +1,43 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../../../lib/supabase/client"; // পাথ আপনার প্রজেক্ট অনুযায়ী চেক করে নিন
 import "./ludu.css";
 
 export default function LudoMasterPage() {
-  // Language Toggle Placeholder
+  const router = useRouter();
   const t = (en: string, bn: string) => en;
 
-  // 💰 ক্যাসিনো স্টেটস (নতুন)
-  const [balance, setBalance] = useState(1000);
+  // 💰 ক্যাসিনো স্টেটস
+  const [loading, setLoading] = useState(true);
+  const [balance, setBalance] = useState(0);
   const [betAmount, setBetAmount] = useState(100);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [gameResult, setGameResult] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // ডাইস স্টেট
   const [diceVal, setDiceVal] = useState(1);
   const [isRolling, setIsRolling] = useState(false);
 
-  // ডাইসের ডট প্যাটার্ন
+  // ১. ইউজারের রিয়েল ব্যালেন্স লোড করা
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await supabase.from("profiles").select("balance").eq("id", user.id).single();
+          if (data) setBalance(data.balance);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const dicePatterns: Record<number, string> = {
     1: "radial-gradient(circle, black 7px, transparent 8px)",
     2: "radial-gradient(circle at 25% 25%, black 6px, transparent 7px), radial-gradient(circle at 75% 75%, black 6px, transparent 7px)",
@@ -27,7 +47,7 @@ export default function LudoMasterPage() {
     6: "radial-gradient(circle at 25% 20%, black 6px, transparent 7px), radial-gradient(circle at 75% 20%, black 6px, transparent 7px), radial-gradient(circle at 25% 50%, black 6px, transparent 7px), radial-gradient(circle at 75% 50%, black 6px, transparent 7px), radial-gradient(circle at 25% 80%, black 6px, transparent 7px), radial-gradient(circle at 75% 80%, black 6px, transparent 7px)"
   };
 
-  // 🎲 ডাইস রোল করার ফাংশন
+  // 🎲 ডাইস রোল অ্যানিমেশন
   const rollDice = () => {
     if (!isPlaying || isRolling) return;
     setIsRolling(true);
@@ -43,30 +63,64 @@ export default function LudoMasterPage() {
     }, 50);
   };
 
-  // 🚀 গেম শুরু করার ফাংশন (ব্যালেন্স কাটা হবে)
-  const startGame = () => {
+  // 🚀 গেম শুরু (RPC কল)
+  const startGame = async () => {
     if (betAmount > balance) {
       alert(t("Insufficient balance!", "পর্যাপ্ত ব্যালেন্স নেই!"));
       return;
     }
-    setBalance((prev) => prev - betAmount);
-    setIsPlaying(true);
-    setGameResult(null);
-  };
+    
+    setIsProcessing(true);
+    try {
+      // Supabase RPC কল
+      const { data, error } = await supabase.rpc("start_ludo_match", {
+        p_bet_amount: betAmount
+      });
 
-  // 🏆 গেম শেষ করার ফাংশন (ডেমো - জেতার পর ব্যালেন্স যোগ)
-  const finishGame = (isWin: boolean) => {
-    setIsPlaying(false);
-    if (isWin) {
-      const winAmount = betAmount * 1.9; // 10% house edge
-      setBalance((prev) => prev + winAmount);
-      setGameResult("WIN");
-    } else {
-      setGameResult("LOSS");
+      if (error) throw error;
+
+      if (data.success) {
+        setBalance(data.balance_after);
+        setIsPlaying(true);
+      } else {
+        alert(data.error);
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  // ১৫x১৫ বোর্ড গ্রিড জেনারেট করা
+  // 🏆 গেম শেষ (RPC কল)
+  const finishGame = async (isWin: boolean) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    
+    try {
+      const { data, error } = await supabase.rpc("finish_ludo_match", {
+        p_bet_amount: betAmount,
+        p_is_win: isWin
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setBalance(data.balance_after);
+        setIsPlaying(false);
+        if (isWin) {
+          alert(t(`You won ${(betAmount * 1.9).toFixed(2)} BDT!`, `আপনি ${(betAmount * 1.9).toFixed(2)} টাকা জিতেছেন!`));
+        } else {
+          alert(t("You lost the match!", "আপনি ম্যাচটি হেরেছেন!"));
+        }
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const gridCells = useMemo(() => {
     const cells = [];
     for (let r = 1; r <= 15; r++) {
@@ -117,15 +171,17 @@ export default function LudoMasterPage() {
     </svg>
   );
 
+  if (loading) return <div className="ludo-wrapper" style={{color:"white", display:"flex", alignItems:"center", justifyContent:"center", height:"100vh"}}>Loading...</div>;
+
   return (
     <div className="ludo-wrapper">
       <div className="game">
         
-        {/* 💰 NEW: WALLET / BALANCE HEADER */}
+        {/* 💰 WALLET HEADER */}
         <div className="wallet-header">
           <div className="wallet-box">
             <span className="wallet-label">{t("Balance", "ব্যালেন্স")}</span>
-            <span className="wallet-amount">{balance.toFixed(2)} BDT</span>
+            <span className="wallet-amount">{Number(balance).toFixed(2)} BDT</span>
           </div>
           <div className="match-status">
             {isPlaying ? <span className="status-live">● {t("LIVE MATCH", "লাইভ ম্যাচ")}</span> : <span className="status-idle">{t("READY TO PLAY", "খেলতে প্রস্তুত")}</span>}
@@ -136,7 +192,7 @@ export default function LudoMasterPage() {
           </div>
         </div>
 
-        {/* TOP PLAYER (Yellow) */}
+        {/* TOP PLAYER */}
         <div className="control top">
           <div className="panel">
             <div className="player-box">
@@ -144,7 +200,7 @@ export default function LudoMasterPage() {
                 <TokenSVG color="var(--yellow)" />
               </div>
             </div>
-            <button className={`dice-button ${(!isPlaying || isRolling) ? 'disabled-dice' : ''}`} onClick={rollDice}>
+            <button className={`dice-button ${(!isPlaying || isRolling || isProcessing) ? 'disabled-dice' : ''}`} onClick={rollDice}>
               <div className="dice-face" style={{ background: dicePatterns[diceVal] }}></div>
             </button>
           </div>
@@ -193,7 +249,6 @@ export default function LudoMasterPage() {
             <div className="triangle green"></div>
           </div>
 
-          {/* ACTIVE TOKENS */}
           <div className="token token-yellow-1"><TokenSVG color="var(--yellow)" /></div>
           <div className="token token-yellow-2"><TokenSVG color="var(--yellow)" /></div>
           <div className="token token-yellow-3"><TokenSVG color="var(--yellow)" /></div>
@@ -204,7 +259,7 @@ export default function LudoMasterPage() {
           <div className="token token-red-4"><TokenSVG color="var(--red)" /></div>
         </div>
 
-        {/* 💰 NEW: BETTING PANEL (Shows when not playing) */}
+        {/* BETTING OR CONTROLS */}
         {!isPlaying ? (
           <div className="betting-panel">
             <div className="bet-info">
@@ -229,12 +284,11 @@ export default function LudoMasterPage() {
               <strong>{(betAmount * 1.9).toFixed(2)} BDT</strong>
             </div>
 
-            <button className="start-btn" onClick={startGame}>
-              {t("START MATCH", "ম্যাচ শুরু করুন")}
+            <button className="start-btn" onClick={startGame} disabled={isProcessing}>
+              {isProcessing ? t("STARTING...", "শুরু হচ্ছে...") : t("START MATCH", "ম্যাচ শুরু করুন")}
             </button>
           </div>
         ) : (
-          /* BOTTOM PLAYER (Red) - Shows when playing */
           <div className="control bottom">
             <div className="panel">
               <div className="player-box">
@@ -242,13 +296,17 @@ export default function LudoMasterPage() {
                   <TokenSVG color="var(--red)" />
                 </div>
               </div>
-              <button className={`dice-button ${isRolling ? 'disabled-dice' : ''}`} onClick={rollDice}>
+              <button className={`dice-button ${(isRolling || isProcessing) ? 'disabled-dice' : ''}`} onClick={rollDice}>
                 <div className="dice-face" style={{ background: dicePatterns[diceVal] }}></div>
               </button>
               <div className="arrow">◀</div>
             </div>
-            {/* ডেমো ফিনিশ বাটন */}
-            <button className="finish-demo-btn" onClick={() => finishGame(true)}>Finish</button>
+            
+            {/* ডেমো ফিনিশ বাটন (পরে এটি অটোমেটিক এআই জেতা/হারার সাথে কানেক্ট হবে) */}
+            <div style={{display:"flex", flexDirection:"column", gap:"5px", marginLeft:"auto", marginRight:"3%"}}>
+                <button className="finish-demo-btn" style={{background:"#00e701", margin:0}} onClick={() => finishGame(true)} disabled={isProcessing}>Win Demo</button>
+                <button className="finish-demo-btn" style={{background:"#ff4d4d", margin:0}} onClick={() => finishGame(false)} disabled={isProcessing}>Lose Demo</button>
+            </div>
           </div>
         )}
 
