@@ -11,23 +11,26 @@
   --yellow: #ffca05;
   --blue: #0795e8;
   --bg: #07120f;
-  --panel: rgba(27, 42, 35, 0.85);
+  --panel: rgba(27, 42, 35, 0.92);
 }
 
 .ludo-wrapper {
+  width: 100%;
   height: 100dvh;
+  min-height: 100dvh;
   overflow: hidden;
   background: radial-gradient(circle at center, #112a22 0%, #05100c 100%);
   font-family: Arial, sans-serif;
   display: flex;
   justify-content: center;
+  color: #fff;
 }
 
 .game {
   width: 100%;
   max-width: 500px;
   height: 100%;
-  padding: 8px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -40,28 +43,31 @@
   justify-content: space-between;
   align-items: center;
   background: var(--panel);
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.12);
   flex-shrink: 0;
+  min-height: 76px;
 }
 
 .wallet-box {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .wallet-label {
-  font-size: 10px;
+  font-size: 11px;
   color: #aaa;
   font-weight: bold;
   text-transform: uppercase;
 }
 
 .wallet-amount {
-  font-size: 14px;
+  font-size: 15px;
   color: #00e701;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .ai-wallet {
@@ -69,13 +75,15 @@
 }
 
 .ai-wallet .wallet-amount {
-  color: #ffca05;
+  color: var(--yellow);
+  font-size: 23px;
 }
 
 .match-status {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   text-align: center;
+  padding: 0 5px;
 }
 
 .status-live {
@@ -91,7 +99,7 @@
 }
 
 @keyframes blink {
-  50% { opacity: 0.5; }
+  50% { opacity: 0.55; }
 }
 
 /* BOARD */
@@ -99,6 +107,7 @@
 .board-container {
   flex: 1;
   min-height: 0;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -106,14 +115,15 @@
 
 .board {
   width: 100%;
+  max-width: 100%;
   max-height: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 1;
   position: relative;
   background: #fff;
-  border: 2px solid #222;
-  border-radius: 8px;
+  border: 3px solid #252525;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 0 15px rgba(0,0,0,0.8);
+  box-shadow: 0 0 15px rgba(0,0,0,0.65);
 }
 
 .board-grid {
@@ -142,7 +152,7 @@
   font-size: 12px;
   top: 50%;
   left: 50%;
-  transform: translate(-50%,-50%);
+  transform: translate(-50%, -50%);
 }
 
 .bg-red {
@@ -152,6 +162,8 @@
 .bg-yellow {
   background: var(--yellow);
 }
+
+/* HOME LANES */
 
 .lane-red {
   background: var(--red);
@@ -196,11 +208,11 @@
 .yard {
   width: 100%;
   height: 100%;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 15%;
   position: relative;
   border: 4px solid;
-  box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.25);
 }
 
 .yard-green {
@@ -227,36 +239,12 @@
   width: 100%;
   height: 100%;
   background: #fff;
-  border-radius: 4px;
-  border: 2px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  border: 3px solid rgba(0,0,0,0.12);
   position: relative;
-  overflow: visible;
 }
 
-/* PERFECT CENTERED YARD TOKENS */
-
-.yard-token {
-  position: absolute;
-  width: 22%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.9);
-  transform: translate(-50%, -50%);
-  box-shadow:
-    0 3px 7px rgba(0,0,0,0.3),
-    inset 0 2px 4px rgba(255,255,255,0.4);
-  z-index: 12;
-}
-
-.yard-token.red {
-  background: var(--red);
-}
-
-.yard-token.yellow {
-  background: var(--yellow);
-}
-
-/* CENTER HOME */
+/* CENTER */
 
 .center-home {
   position: absolute;
@@ -294,22 +282,42 @@
   background: var(--red);
 }
 
-/* TRACK TOKENS */
+/* TOKENS */
 
 .token {
+  position: absolute;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  will-change: top, left;
 }
 
 .token svg {
+  width: 100%;
+  height: 100%;
+  display: block;
   filter: drop-shadow(0 3px 3px rgba(0,0,0,0.4));
 }
 
+/* Yard tokens: perfectly round */
+
+.yard-token-face {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.95);
+  box-shadow:
+    inset 0 -4px 5px rgba(0,0,0,0.2),
+    0 3px 7px rgba(0,0,0,0.35);
+}
+
 .glow-move {
-  filter:
-    drop-shadow(0 0 5px #fff)
-    drop-shadow(0 0 10px #ffca05);
+  filter: drop-shadow(0 0 5px #fff)
+          drop-shadow(0 0 10px #ffca05);
   animation: pulse 0.8s infinite alternate;
-  z-index: 20 !important;
+  z-index: 30 !important;
 }
 
 @keyframes pulse {
@@ -317,35 +325,35 @@
     transform: translate(-50%, -50%) scale(1);
   }
   to {
-    transform: translate(-50%, -50%) scale(1.15);
+    transform: translate(-50%, -50%) scale(1.12);
   }
 }
 
-/* BOTTOM CONTROL BAR */
+/* BOTTOM DICE BAR */
 
-.control {
+.control.bottom {
   width: 100%;
-  height: 100px;
+  height: 105px;
   flex-shrink: 0;
   display: flex;
-  align-items: center;
   justify-content: center;
-  position: relative;
+  align-items: center;
 }
 
-.control .panel {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+.dice-status-bar {
+  width: 100%;
+  min-height: 90px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  gap: 18px;
 }
 
 .dice-button {
-  width: 80px;
-  height: 80px;
-  border-radius: 18px;
+  width: 78px;
+  height: 78px;
+  flex-shrink: 0;
+  border-radius: 17px;
   border: 5px solid #e4c438;
   background: #f4c6b8;
   display: grid;
@@ -359,15 +367,37 @@
 }
 
 .dice-button.disabled-dice {
-  filter: grayscale(0.5) brightness(0.8);
+  filter: grayscale(0.45) brightness(0.85);
   cursor: not-allowed;
 }
 
-/* DICE FACE */
+/* Dice rolling animation: number stays unchanged */
+
+.dice-button.rolling-dice {
+  animation: dice-roll 0.13s infinite linear;
+}
+
+@keyframes dice-roll {
+  0% {
+    transform: rotate(-7deg) scale(0.96);
+  }
+  25% {
+    transform: rotate(7deg) scale(1.04);
+  }
+  50% {
+    transform: rotate(-7deg) scale(1.02);
+  }
+  75% {
+    transform: rotate(7deg) scale(0.97);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
 
 .dice-face {
-  width: 58px;
-  height: 58px;
+  width: 56px;
+  height: 56px;
   background: #fff;
   border-radius: 11px;
   border: 3px solid #aaa;
@@ -376,7 +406,7 @@
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   padding: 6px;
-  gap: 3px;
+  gap: 2px;
 }
 
 .dot {
@@ -391,38 +421,11 @@
   box-shadow: inset 0 1px 2px rgba(255,255,255,0.5);
 }
 
-/* DICE ROLL ANIMATION */
-
-.dice-button.is-rolling {
-  animation: dice-shake 0.13s infinite;
-  pointer-events: none;
-}
-
-.dice-button.is-rolling .dice-face {
-  animation: dice-spin 0.45s infinite ease-in-out;
-}
-
-@keyframes dice-shake {
-  0% { transform: rotate(-8deg) scale(1); }
-  25% { transform: rotate(8deg) scale(1.05); }
-  50% { transform: rotate(-6deg) scale(0.96); }
-  75% { transform: rotate(6deg) scale(1.04); }
-  100% { transform: rotate(-8deg) scale(1); }
-}
-
-@keyframes dice-spin {
-  0% { transform: rotate(0deg); }
-  50% { transform: rotate(180deg); }
-  100% { transform: rotate(360deg); }
-}
-
 .turn-label {
-  position: absolute;
-  left: calc(50% + 55px);
-  white-space: nowrap;
   color: #fff;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 /* BETTING PANEL */
@@ -437,26 +440,32 @@
 .bet-info {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   color: #fff;
   margin-bottom: 10px;
+  gap: 8px;
+  font-size: 13px;
 }
 
 .bet-controls {
   display: flex;
   background: #111;
   border-radius: 8px;
+  overflow: hidden;
 }
 
 .bet-controls button {
-  width: 30px;
+  width: 32px;
+  height: 34px;
   background: #333;
   color: #fff;
   border: none;
   cursor: pointer;
+  font-size: 18px;
 }
 
 .bet-controls input {
-  width: 60px;
+  width: 65px;
   text-align: center;
   background: transparent;
   color: #ffca05;
@@ -466,11 +475,56 @@
 
 .start-btn {
   width: 100%;
-  padding: 12px;
+  padding: 13px;
   background: #ffca05;
   border: none;
   border-radius: 8px;
   font-weight: bold;
   font-size: 16px;
   cursor: pointer;
+}
+
+.start-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* SMALL MOBILE */
+
+@media (max-width: 380px) {
+  .game {
+    padding: 7px;
+    gap: 6px;
+  }
+
+  .wallet-header {
+    padding: 9px;
+    min-height: 68px;
+  }
+
+  .wallet-amount {
+    font-size: 13px;
+  }
+
+  .match-status {
+    font-size: 11px;
+  }
+
+  .control.bottom {
+    height: 90px;
+  }
+
+  .dice-button {
+    width: 70px;
+    height: 70px;
+  }
+
+  .dice-face {
+    width: 51px;
+    height: 51px;
+  }
+
+  .turn-label {
+    font-size: 14px;
+  }
 }
