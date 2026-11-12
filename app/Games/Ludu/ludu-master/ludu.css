@@ -1,426 +1,267 @@
-:root {
-  --bg-color: #07120f;
-  --panel-bg: rgba(27, 42, 35, 0.85);
-  --board-dark: #1a1a1a;
-  --board-light: #2a2a2a;
-  --gold: #FFD700;
-  --gold-dark: #B8860B;
-  --red: #FF3333;
-  --red-dark: #8B0000;
-  --green: #00E701;
-  --border-color: #444;
-}
-
-/* Wrapper */
-.ludo-wrapper {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100dvh;
-  background: radial-gradient(circle at center, #112a22 0%, #05100c 100%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  overflow: hidden;
-}
+/* 
+  আপনার দেওয়া CSS-এ body এবং * সিলেক্টর ছিল। 
+  Next.js-এ গ্লোবাল স্টাইল নষ্ট না করার জন্য 
+  এগুলোকে .ludo-wrapper এর ভেতর স্কোপ করা হয়েছে।
+*/
 
 .ludo-wrapper * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* Main Container */
-.game-container {
+:root {
+  --green: #008b50;
+  --yellow: #ffca05;
+  --red: #ef321d;
+  --blue: #0795e8;
+}
+
+.ludo-wrapper {
+  min-height: 100vh;
+  background: repeating-linear-gradient(35deg, transparent 0 55px, rgba(35, 135, 230, .15) 57px 78px, transparent 80px 130px),
+              radial-gradient(circle at center, #0875c9, #06264f 70%, #03152f);
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+}
+
+.game {
   width: 100%;
-  max-width: 480px;
-  height: 100%;
-  max-height: 900px;
-  padding: 8px;
+  max-width: 650px;
+  min-height: 100vh;
+  padding: 18px 10px;
   display: flex;
   flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
   gap: 12px;
-  z-index: 1;
 }
 
-/* ================= TOP BAR ================= */
-.top-bar {
-  background: var(--panel-bg);
-  border: 1px solid rgba(255, 215, 0, 0.2);
-  border-radius: 16px;
-  padding: 10px 12px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Match Info */
-.match-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  padding-bottom: 6px;
-}
-.match-id {
-  font-size: 10px;
-  color: #888;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-}
-.game-type {
-  font-size: 10px;
-  color: var(--gold);
-  font-weight: bold;
-}
-
-/* Player vs AI Layout */
-.player-vs-ai {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.profile-card {
+/* PLAYER CONTROL */
+.control {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  width: 40%;
-}
-
-/* Active Turn Glow */
-.profile-card.active-turn {
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-}
-
-.ai-card.active-turn {
-  box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
-}
-
-/* Avatar */
-.avatar-container {
-  position: relative;
-  width: 42px;
-  height: 42px;
-}
-
-.avatar {
+  justify-content: center;
   width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 20px;
-  border: 2px solid rgba(255,255,255,0.1);
-  box-shadow: inset 0 -3px 5px rgba(0,0,0,0.4);
 }
 
-.player-av { background: linear-gradient(135deg, #ffdf8a, var(--gold-dark)); }
-.ai-av { background: linear-gradient(135deg, #ff9999, var(--red-dark)); }
-
-.online-dot {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 10px;
-  height: 10px;
-  background: var(--green);
-  border-radius: 50%;
-  border: 2px solid var(--panel-bg);
-  box-shadow: 0 0 5px var(--green);
+.control.bottom {
+  justify-content: flex-start;
+  padding-left: 3%;
 }
 
-/* Profile Details */
-.profile-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
+.control.top {
+  justify-content: flex-end;
+  padding-right: 3%;
 }
 
-.profile-details.align-right {
-  align-items: flex-end;
-  text-align: right;
-}
-
-.name-row {
+.panel {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  color: #fff;
-  font-weight: 600;
+  width: 245px;
+  height: 76px;
 }
 
-.level-badge {
-  font-size: 8px;
-  padding: 1px 4px;
-  border-radius: 4px;
-  font-weight: 800;
-}
-.gold-badge { background: var(--gold-dark); color: #000; }
-.red-badge { background: var(--red-dark); color: #fff; }
-
-.balance {
-  font-size: 11px;
-  color: var(--gold);
-  font-weight: 700;
-}
-.ai-card .balance { color: var(--red); }
-
-/* VS & Timer */
-.vs-section {
+.player-box {
+  height: 65px;
+  width: 145px;
+  border: 5px solid #e5c332;
+  border-radius: 18px;
+  background: linear-gradient(130deg, #0870c2, #043a82);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  width: 20%;
+  justify-content: center;
+  box-shadow: 0 4px 8px #00172c;
 }
 
-.vs-badge {
-  font-size: 14px;
-  font-weight: 900;
-  color: #666;
-  font-style: italic;
-}
-
-.timer {
-  font-size: 12px;
-  font-weight: bold;
-  color: #fff;
-  background: rgba(0,0,0,0.5);
-  padding: 2px 8px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.timer.danger {
-  color: var(--red);
-  border-color: var(--red);
-  animation: pulse-red 1s infinite;
-}
-
-@keyframes pulse-red {
-  0% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.4); }
-  70% { box-shadow: 0 0 0 6px rgba(255, 51, 51, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0); }
-}
-
-/* ================= BOARD ================= */
-.board-wrapper {
-  flex: 1;
-  background: #111;
-  padding: 6px;
-  border-radius: 16px;
-  border: 2px solid var(--gold-dark);
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.9), 0 0 20px rgba(255, 215, 0, 0.1);
+.dice-button {
+  width: 112px;
+  height: 76px;
+  margin-left: -5px;
+  border: 5px solid #e4c438;
+  border-radius: 20px;
+  background: #f4c6b8;
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 }
 
-.ludo-board {
+.dice-face {
+  width: 78px;
+  height: 62px;
+  background: linear-gradient(145deg, #fff, #dedede);
+  border: 3px solid #aaa;
+  border-radius: 19px;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 2px 5px #bbb;
+  transition: background 0.2s;
+}
+
+/* 
+  .dice-dot ক্লাসটি React-এ ব্যবহার করা হয়নি কারণ 
+  আমরা সরাসরি background প্যাটার্ন সেট করেছি। 
+  তবে ভবিষ্যতে ব্যবহারের জন্য রেখে দেওয়া হলো।
+*/
+.dice-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #000;
+}
+
+.arrow {
+  color: #ffae00;
+  font-size: 55px;
+  margin-left: 12px;
+  text-shadow: 2px 3px 3px #633;
+}
+
+/* BOARD */
+.board {
+  width: min(96vw, 610px);
+  aspect-ratio: 1;
+  position: relative;
+  background: #fff;
+  border: 3px solid white;
+  overflow: hidden;
+  box-shadow: 0 5px 20px #00152b;
+}
+
+.board-grid {
+  position: absolute;
+  inset: 0;
   display: grid;
   grid-template-columns: repeat(15, 1fr);
   grid-template-rows: repeat(15, 1fr);
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background: var(--board-dark);
-  border: 2px solid #000;
-  border-radius: 10px;
-  overflow: hidden;
-  position: relative;
 }
 
-/* Cells */
 .cell {
-  border: 1px solid rgba(0,0,0,0.6);
-  position: relative;
-  background: var(--board-light);
+  border: 1px solid #c6c6c6;
+  background: white;
+  display: grid;
+  place-items: center;
 }
 
-/* Paths */
-.cell.path-white { background: #2a2a2a; }
-.cell.path-gold { background: linear-gradient(135deg, #FFD700, #B8860B); }
-.cell.path-red { background: linear-gradient(135deg, #FF3333, #8B0000); }
+.green-lane { background: var(--green); }
+.yellow-lane { background: var(--yellow); }
+.red-lane { background: var(--red); }
+.blue-lane { background: var(--blue); }
 
-/* Safe Zones */
-.cell.safe::after {
-  content: '★';
+.safe {
+  color: #999;
+  font-size: clamp(12px, 3vw, 23px);
+}
+
+.start {
+  font-size: clamp(16px, 4vw, 26px);
+}
+
+/* HOMES */
+.home {
   position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 14px;
-  color: rgba(255,255,255,0.3);
-}
-.cell.path-gold.safe::after { color: #4a3000; }
-.cell.path-red.safe::after { color: #400000; }
-
-/* Home Bases */
-.home-base {
-  border: 2px solid #000;
+  width: 40%;
+  height: 40%;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 15%;
-  position: relative;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+  z-index: 3;
 }
-.home-base.gold { background: linear-gradient(135deg, #B8860B, #8a6508); }
-.home-base.red { background: linear-gradient(135deg, #8B0000, #550000); }
-.home-base.gray { background: #222; }
+
+.home.green { top: 0; left: 0; background: var(--green); }
+.home.yellow { top: 0; right: 0; background: var(--yellow); }
+.home.red { bottom: 0; left: 0; background: var(--red); }
+.home.blue { bottom: 0; right: 0; background: var(--blue); }
 
 .home-inner {
-  width: 100%;
-  height: 100%;
-  background: #111;
-  border-radius: 12px;
+  width: 64%;
+  height: 64%;
+  background: #fff;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 15%;
-  padding: 15%;
-  border: 2px solid rgba(255,255,255,0.1);
-  box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+  padding: 8%;
+  gap: 9%;
 }
 
-.home-circle {
+.home-dot {
+  width: 75%;
+  aspect-ratio: 1;
   border-radius: 50%;
-  border: 2px solid rgba(0,0,0,0.5);
-  box-shadow: inset 0 4px 6px rgba(0,0,0,0.5);
-  position: relative;
-  background: #222;
+  justify-self: center;
+  align-self: center;
 }
 
-/* Center Home */
-.center-home {
-  position: relative;
-  background: #111;
-  border: 2px solid #000;
-  overflow: hidden;
-}
-.center-triangle { position: absolute; width: 100%; height: 100%; }
-.center-triangle.top { clip-path: polygon(0 0, 100% 0, 50% 50%); background: linear-gradient(to bottom, var(--red), #8B0000); }
-.center-triangle.bottom { clip-path: polygon(0 100%, 100% 100%, 50% 50%); background: linear-gradient(to top, var(--gold), #B8860B); }
-.center-triangle.left { clip-path: polygon(0 0, 0 100%, 50% 50%); background: #333; }
-.center-triangle.right { clip-path: polygon(100% 0, 100% 100%, 50% 50%); background: #333; }
+.green .home-dot { background: var(--green); }
+.yellow .home-dot { background: var(--yellow); }
+.red .home-dot { background: var(--red); }
+.blue .home-dot { background: var(--blue); }
 
-/* SVG Pawns */
-.token-svg {
+.player-name {
   position: absolute;
-  width: 95%;
-  height: 95%;
-  top: -5%;
-  left: 2.5%;
-  z-index: 10;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-.token-svg.p {
-  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.8)) drop-shadow(0 0 6px rgba(255, 215, 0, 0.4));
-}
-.token-svg.a {
-  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.8)) drop-shadow(0 0 6px rgba(255, 51, 51, 0.4));
-}
-
-/* ================= CONTROLS ================= */
-.controls-area {
-  background: var(--panel-bg);
-  border: 1px solid rgba(255, 215, 0, 0.2);
-  border-radius: 16px;
-  padding: 12px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-}
-
-.turn-info {
-  font-size: 14px;
+  bottom: 3%;
+  color: white;
   font-weight: bold;
-}
-.text-gold { color: var(--gold); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-.text-red { color: var(--red); text-shadow: 0 0 10px rgba(255,51,51,0.5); }
-
-.dice-container { display: flex; align-items: center; gap: 15px; }
-
-/* Premium Dice */
-.dice {
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(135deg, #fff, #e0e0e0);
-  border-radius: 10px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr;
-  padding: 6px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 -4px 5px rgba(0,0,0,0.2), 0 0 10px rgba(255, 215, 0, 0.3);
-  border: 1px solid var(--gold);
-  transition: transform 0.1s;
+  font-size: clamp(12px, 3.5vw, 21px);
+  text-shadow: 1px 2px 3px #333;
 }
 
-.dice.rolling {
-  animation: roll-anim 0.5s infinite;
+.yellow .player-name {
+  transform: rotate(180deg);
 }
 
-@keyframes roll-anim {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.1); }
-  100% { transform: rotate(360deg) scale(1); }
+/* CENTER */
+.center {
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  width: 20%;
+  height: 20%;
+  z-index: 4;
 }
 
-.dot {
-  background: transparent;
-  border-radius: 50%;
-  margin: 2px;
-}
-.dot.active {
-  background: #111;
-  box-shadow: inset 0 2px 2px rgba(255,255,255,0.3);
+.triangle {
+  position: absolute;
+  inset: 0;
 }
 
-/* Roll Button */
-.roll-btn {
-  background: linear-gradient(180deg, #ffdf8a, var(--gold), var(--gold-dark));
-  color: #000;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-weight: 900;
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow: 0 4px 0 #5c3a08, 0 8px 15px rgba(255, 215, 0, 0.4), inset 0 2px 0 rgba(255,255,255,0.8);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.1s;
+.triangle.yellow { background: var(--yellow); clip-path: polygon(0 0, 100% 0, 50% 50%); }
+.triangle.blue { background: var(--blue); clip-path: polygon(100% 0, 100% 100%, 50% 50%); }
+.triangle.red { background: var(--red); clip-path: polygon(0 100%, 100% 100%, 50% 50%); }
+.triangle.green { background: var(--green); clip-path: polygon(0 0, 0 100%, 50% 50%); }
+
+/* TOKENS */
+.token {
+  position: absolute;
+  width: clamp(25px, 8vw, 46px);
+  height: clamp(30px, 9vw, 53px);
+  z-index: 8;
+  filter: drop-shadow(1px 3px 2px rgba(0, 0, 0, .65));
+  overflow: visible;
 }
 
-.roll-btn:active:not(.disabled) {
-  transform: translateY(4px);
-  box-shadow: 0 0 0 #5c3a08, 0 2px 5px rgba(255, 215, 0, 0.4);
+.token svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
 }
 
-.roll-btn.disabled {
-  background: #333;
-  color: #666;
-  box-shadow: none;
-  cursor: not-allowed;
-  border: 1px solid #444;
-}
+/* TOKEN POSITION */
+.token-yellow-1 { top: 19%; left: 45%; }
+.token-yellow-2 { top: 29%; left: 45%; }
+.token-yellow-3 { top: 48%; right: 1%; }
 
-/* Responsive Mobile */
-@media(max-width: 400px) {
-  .game-container { padding: 6px; gap: 8px; }
-  .top-bar { padding: 8px; }
-  .avatar { width: 36px; height: 36px; font-size: 16px; }
-  .player-name { font-size: 11px; }
-  .balance { font-size: 10px; }
-  .dice { width: 42px; height: 42px; }
-  .roll-btn { padding: 10px 16px; font-size: 14px; }
+.token-blue-1 { top: 54%; left: 63%; }
+
+.token-red-1 { top: 69%; left: 45%; }
+.token-red-2 { top: 76%; left: 45%; }
+.token-red-3 { top: 83%; left: 45%; }
+.token-red-4 { top: 90%; left: 45%; }
+
+@media(max-width: 380px) {
+  .game { padding: 8px 4px; }
+  .panel { transform: scale(.88); }
 }
