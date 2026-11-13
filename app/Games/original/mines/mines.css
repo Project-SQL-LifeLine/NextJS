@@ -1,6 +1,8 @@
 /* app/Games/original/mines/mines.css */
 
-/* ✅ limbo.css এর বদলে ভ্যারিয়েবলগুলো এখানে সরাসরি দেওয়া হলো যাতে ফাইল মিসিং এরর না আসে */
+/* ========================================= */
+/* ✅ Base Variables (লিম্বো থিম থেকে নেওয়া) */
+/* ========================================= */
 :root {
   --limbo-bg: #18221E;
   --limbo-card: #1c2a24;
@@ -11,6 +13,399 @@
   --limbo-accent: #00E701;
   --limbo-danger: #ff4d4d;
 }
+
+.limbo-game-container {
+  background-color: var(--limbo-bg);
+  min-height: 100vh;
+  width: 100%;
+  color: var(--limbo-text);
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  padding-bottom: 10px; 
+}
+
+.limbo-main-area {
+  padding: 8px; 
+  margin: 2px auto; 
+  max-width: 600px; 
+  width: calc(100% - 12px); 
+  border: 1px solid var(--limbo-border); 
+  border-radius: 12px; 
+  background-color: var(--limbo-card); 
+  box-sizing: border-box;
+  height: fit-content; 
+}
+
+/* History Section */
+.limbo-history-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  height: 28px; 
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.limbo-history-container {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth; 
+}
+
+.limbo-history-container::-webkit-scrollbar { display: none; }
+
+.limbo-history-item {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.limbo-history-item.win {
+  background: var(--limbo-accent);
+  color: #000;
+}
+
+.limbo-history-item.lose {
+  background: var(--limbo-input-bg);
+  color: var(--limbo-text);
+  border: 1px solid var(--limbo-border);
+}
+
+/* Inputs Layout */
+.limbo-inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.limbo-input-group label {
+  display: block;
+  color: var(--limbo-muted);
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+}
+
+.limbo-input-wrapper {
+  background: var(--limbo-input-bg);
+  border: 1px solid var(--limbo-border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  height: 44px; 
+}
+
+.limbo-input-wrapper input,
+.limbo-input-wrapper select {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--limbo-text);
+  font-size: 0.95rem;
+  outline: none;
+  font-weight: 700;
+}
+
+.limbo-input-wrapper i, 
+.limbo-input-wrapper span {
+  color: var(--limbo-muted);
+  font-size: 0.85rem;
+}
+
+.limbo-input-wrapper.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Bet Button */
+.limbo-bet-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--limbo-accent); 
+  color: #000; 
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 15px; 
+  min-height: 48px; 
+}
+
+.limbo-bet-btn:hover { background: #00c701; } 
+.limbo-bet-btn.rolling { opacity: 0.7; cursor: not-allowed; }
+.limbo-bet-btn.stop-btn { background: var(--limbo-danger); color: #fff; }
+.limbo-bet-btn.stop-btn:hover { background: #e60000; }
+
+/* Amount Section */
+.limbo-amount-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; 
+  margin-bottom: 15px;
+}
+
+.limbo-label-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.limbo-label-row label {
+  color: var(--limbo-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.limbo-currency {
+  color: var(--limbo-muted);
+  font-size: 0.75rem;
+}
+
+.limbo-amount-input-wrap {
+  background: var(--limbo-input-bg);
+  border: 1px solid var(--limbo-border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  height: 44px;
+  width: 100%; 
+  box-sizing: border-box; 
+}
+
+.limbo-amount-input-wrap input {
+  flex: 1;
+  min-width: 0; 
+  background: transparent;
+  border: none;
+  color: var(--limbo-text);
+  font-size: 1rem;
+  outline: none;
+  font-weight: 700;
+}
+
+.limbo-quick-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.limbo-quick-btns button {
+  background: var(--limbo-border);
+  border: none;
+  color: var(--limbo-text);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.limbo-quick-btns button:hover { background: #365244; }
+
+/* Tabs */
+.limbo-bottom-tabs {
+  display: flex;
+  background: var(--limbo-input-bg);
+  border: 1px solid var(--limbo-border);
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 15px;
+}
+
+.limbo-bottom-tabs button {
+  flex: 1;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: var(--limbo-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.limbo-bottom-tabs button.active {
+  background: var(--limbo-border);
+  color: var(--limbo-text);
+}
+
+/* Modals */
+.limbo-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(24, 34, 30, 0.85); 
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.limbo-modal-overlay.no-blur {
+  backdrop-filter: none;
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.limbo-modal-content {
+  background: var(--limbo-card); 
+  border: 1px solid var(--limbo-border); 
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.limbo-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--limbo-border);
+}
+
+.limbo-modal-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.limbo-modal-header button {
+  background: transparent;
+  border: none;
+  color: #a0aab2;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.limbo-modal-body {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.limbo-setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--limbo-border);
+}
+
+.limbo-setting-row span {
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.limbo-btn-secondary {
+  background: var(--limbo-border);
+  color: #ffffff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.limbo-btn-secondary:hover { background: #365244; }
+.limbo-btn-secondary.verified { background: var(--limbo-accent) !important; color: #000 !important; }
+
+.limbo-fairness-group { margin-bottom: 16px; }
+.limbo-fairness-group label { display: block; color: var(--limbo-muted); font-size: 0.8rem; margin-bottom: 6px; font-weight: 600; }
+.limbo-fairness-input { background: var(--limbo-input-bg); border: 1px solid var(--limbo-border); border-radius: 8px; padding: 10px; }
+.limbo-fairness-input code { color: var(--limbo-accent); font-size: 0.8rem; word-break: break-all; font-family: monospace; }
+.limbo-fairness-input input { width: 100%; background: transparent; border: none; color: #ffffff; font-size: 0.85rem; outline: none; }
+.limbo-fairness-btn-group { display: flex; gap: 10px; margin-top: 10px; }
+.limbo-fairness-btn-group .limbo-btn-secondary { flex: 1; }
+.limbo-back-btn { background: transparent; border: none; color: var(--limbo-muted); cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; font-size: 0.9rem; }
+.limbo-verify-result-box { background: var(--limbo-input-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--limbo-border); margin-bottom: 15px; text-align: center; }
+
+/* Auto Settings */
+.limbo-auto-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+  background: var(--limbo-card); 
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--limbo-border);
+}
+
+.auto-advanced-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.auto-advanced-toggle label {
+  color: var(--limbo-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.toggle-switch {
+  width: 46px;
+  height: 24px;
+  background: var(--limbo-border);
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.toggle-switch.active { background: var(--limbo-accent); }
+
+.toggle-knob {
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.3s;
+}
+
+.toggle-switch.active .toggle-knob { transform: translateX(22px); }
+
+.advanced-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--limbo-border);
+}
+
+.adv-row { display: flex; flex-direction: column; gap: 6px; }
+.adv-row label { color: var(--limbo-muted); font-size: 0.8rem; }
+.adv-inputs { display: flex; gap: 10px; }
+.adv-inputs select { flex: 1; background: var(--limbo-input-bg); border: 1px solid var(--limbo-border); color: var(--limbo-text); padding: 0 10px; border-radius: 8px; outline: none; font-size: 0.85rem; }
+
+/* ========================================= */
+/* ✅ Mines Specific Styles                  */
+/* ========================================= */
 
 /* মাইনস গ্রিড স্টাইল */
 .mines-grid-container {
@@ -75,7 +470,6 @@
   cursor: not-allowed;
 }
 
-/* কাস্টম সিলেক্ট ড্রপডাউন */
 .mines-select {
   background: var(--limbo-input-bg);
   border: 1px solid var(--limbo-border);
@@ -90,9 +484,7 @@
   cursor: pointer;
 }
 
-.mines-select:focus {
-  border-color: var(--limbo-accent);
-}
+.mines-select:focus { border-color: var(--limbo-accent); }
 
 /* Suggested Games Section */
 .suggested-section {
@@ -116,7 +508,6 @@
   gap: 8px;
 }
 
-/* ✅ ৪টি করে পাশাপাশি গ্রিড লেআউট */
 .suggested-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -125,7 +516,6 @@
   padding-bottom: 10px;
 }
 
-/* ✅ প্রিমিয়াম কার্ড স্টাইল */
 .premium-game-card {
   position: relative;
   border-radius: 10px;
@@ -140,34 +530,27 @@
   width: 100%;
 }
 
-.premium-game-card:hover {
-  transform: translateY(-4px);
-}
+.premium-game-card:hover { transform: translateY(-4px); }
 
 .premium-card-img {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   object-fit: cover;
   z-index: 1;
 }
 
 .premium-card-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 60%);
   z-index: 2;
 }
 
 .premium-card-ribbon {
   position: absolute;
-  top: 0;
-  left: 50%;
+  top: 0; left: 50%;
   transform: translateX(-50%);
   padding: 2px 6px;
   border-bottom-left-radius: 6px;
@@ -202,24 +585,11 @@
 /* ========================================= */
 /* ✅ Live Stats Modal নতুন কালার ওভাররাইড */
 /* ========================================= */
-
-/* মেইন মডাল ব্যাকগ্রাউন্ড */
-.limbo-modal-content {
-  background: #1B2A23 !important; 
-  border: 1px solid #263C32 !important;
-}
-
-.limbo-modal-header {
-  border-bottom: 1px solid #263C32 !important;
-}
-
-/* স্ট্যাটস কার্ড (মেইন কন্টেইনার) */
 .limbo-stats-main-card {
   background: #18231F !important;
   border: 1px solid #263C32 !important;
 }
 
-/* স্ট্যাটস গ্রিড বক্স (যেখানে Profit, Wins লেখা থাকে) */
 .limbo-stats-layout {
   background: #1B2A23 !important;
   border: 1px solid #263C32 !important;
@@ -229,12 +599,10 @@
   color: #A0ADB0 !important;
 }
 
-/* ডিভাইডার লাইন */
 .limbo-stats-divider {
   background: #263C32 !important;
 }
 
-/* গ্রাফ এরিয়া */
 .limbo-graph-card-wrapper {
   background: #1B2A23 !important;
   border: 1px solid #263C32 !important;
@@ -244,7 +612,6 @@
   background: #121816 !important;
 }
 
-/* গ্রাফের ভেতরের বেসলাইন */
 .limbo-graph-area-new svg line {
   stroke: #263C32 !important; 
 }
