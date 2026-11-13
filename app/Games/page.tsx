@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "../../lib/supabase/client"; // আপনার পাথ চেক করে নিন
+import { supabase } from "../../lib/supabase/client"; 
 import GameCard from "../../components/GameCard";
 import "./games.css";
 
@@ -9,14 +9,11 @@ export default function GameHubPage() {
   const [games, setGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("All games");
-  
-  // Language Toggle Placeholder (আপনার প্রজেক্টের গ্লোবাল ফাংশন দিয়ে রিপ্লেস করবেন)
   const t = (en: string, bn: string) => en;
 
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        // ডাটাবেস থেকে ডাটা আনা
         const { data, error } = await supabase
           .from("home_categories_create")
           .select("*")
@@ -36,10 +33,8 @@ export default function GameHubPage() {
     fetchGames();
   }, []);
 
-  // ক্যাটাগরি লিস্ট তৈরি করা (All games + Unique Categories)
   const categories = ["All games", ...Array.from(new Set(games.map(g => g.category_group || "General")))];
 
-  // সিলেক্ট করা ক্যাটাগরি অনুযায়ী গেম ফিল্টার করা
   const filteredGames = activeTab === "All games" 
     ? games 
     : games.filter(g => (g.category_group || "General") === activeTab);
@@ -57,13 +52,11 @@ export default function GameHubPage() {
     <div className="game-hub-wrapper">
       <div className="game-hub-container">
         
-        {/* হেডার */}
         <header className="game-hub-header">
           <h1>{t("Game Hub", "গেম হাব")}</h1>
           <p>{t("Select your favorite game and start playing.", "আপনার প্রিয় গেম চয়ন করুন এবং খেলা শুরু করুন।")}</p>
         </header>
 
-        {/* ক্যাটাগরি ট্যাব (পাশাপাশি স্ক্রল হবে) */}
         <div className="category-tabs-container">
           {categories.map((catName) => (
             <button 
@@ -76,7 +69,6 @@ export default function GameHubPage() {
           ))}
         </div>
 
-        {/* গেম গ্রিড (মোবাইলে ৩টি কলাম) */}
         {filteredGames.length === 0 ? (
           <div className="no-games">
             {t("No games available right now.", "এই মুহূর্তে কোন গেম উপলব্ধ নেই।")}
@@ -91,7 +83,8 @@ export default function GameHubPage() {
                 link_url={game.link_url} 
                 category_group={game.category_group} 
                 theme_color={game.theme_color}
-                show_title={game.show_title} /* 👈 টাইটেল অন/অফ করার প্রপ */
+                show_title={game.show_title}
+                show_category_ribbon={game.show_category_ribbon} /* 👈 নতুন প্রপ পাস হলো */
               />
             ))}
           </div>
