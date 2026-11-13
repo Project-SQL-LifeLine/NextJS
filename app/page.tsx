@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
+import GameCard from "../components/GameCard"; // 👈 নতুন গেম কার্ড ইমপোর্ট
 import { supabase } from "../lib/supabase/client";
 import { useLanguage } from "../lib/LanguageContext";
 
@@ -38,7 +39,10 @@ export default function Home() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [banners, setBanners] = useState<any[]>([]);
   const [currentBanner, setCurrentBanner] = useState(0);
+  
+  // ডাটা স্টেট
   const [categories, setCategories] = useState<any[]>([]);
+  const [homeGames, setHomeGames] = useState<any[]>([]); // 👈 হোম পেজের গেমগুলোর জন্য নতুন স্টেট
   
   const { t, language } = useLanguage();
 
@@ -65,6 +69,7 @@ export default function Home() {
     };
 
     const fetchData = async () => {
+      // ১. ব্যানার ফেচ
       const { data: bannerData } = await supabase
         .from("home_banners")
         .select("*")
@@ -72,12 +77,22 @@ export default function Home() {
         .order("serial", { ascending: true });
       if (bannerData) setBanners(bannerData);
 
+      // ২. ক্যাটাগরি এবং গেম ফেচ (Home Page এর জন্য)
       const { data: catData } = await supabase
         .from("home_categories_create")
         .select("*")
         .eq("is_active", true)
+        .contains("display_locations", ["home"]) // শুধু হোম পেজের জন্য টিক দেওয়া ডাটা
         .order("serial", { ascending: true });
-      if (catData) setCategories(catData);
+
+      if (catData) {
+        // ডাটাকে দুই ভাগে ভাগ করা: ক্যাটাগরি বাটন এবং গেম কার্ড
+        const categoryItems = catData.filter(item => !item.is_game);
+        const gameItems = catData.filter(item => item.is_game);
+        
+        setCategories(categoryItems);
+        setHomeGames(gameItems);
+      }
     };
 
     checkSession();
@@ -116,7 +131,8 @@ export default function Home() {
     : (banners.length > 0 && banners[0].notice_text ? banners[0].notice_text : "করুণ! 👑 দৈনিক প্রথম আমানত বোনাস ২০%! ✨");
 
   return (
-    <div className="min-h-screen bg-[#0F212E] pb-20 relative overflow-hidden">
+    // 👇 মেইন ব্যাকগ্রাউন্ড কালার আপনার দেওয়া কোড (#0d241e) এ আপডেট করা হয়েছে
+    <div className="min-h-screen bg-[#0d241e] pb-20 relative overflow-hidden">
       
       <style>{`
         @keyframes marquee {
@@ -181,28 +197,42 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ডাইনামিক ক্যাটাগরি বাটন (ফ্রি সাইজ ফ্লেক্স লেআউট) */}
-      <div className="px-3 mt-4 flex flex-wrap gap-2">
-        {categories.map((cat) => (
-          <a 
-            key={cat.id}
-            href={cat.link_url}
-            className="inline-flex items-center justify-center gap-2 bg-[#1A2C38] border border-[#2F4553] rounded-lg px-4 py-2 hover:bg-[#253B49] transition-colors"
-          >
-            <CategoryIcon name={cat.icon_name} />
-            <span className="text-white text-sm font-semibold whitespace-nowrap">{cat.title}</span>
-          </a>
-        ))}
-      </div>
+      {/* ডাইনামিক ক্যাটাগরি বাটন */}
+      {categories.length > 0 && (
+        <div className="px-3 mt-4 flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <a 
+              key={cat.id}
+              href={cat.link_url}
+              // 👇 বাটন কালার আপনার দেওয়া কোড (#183f35) এ আপডেট করা হয়েছে
+              className="inline-flex items-center justify-center gap-2 bg-[#183f35] border border-[#2F4553] rounded-lg px-4 py-2 hover:bg-[#205a4b] transition-colors shadow-lg"
+            >
+              <CategoryIcon name={cat.icon_name} />
+              <span className="text-white text-sm font-semibold whitespace-nowrap">{cat.title}</span>
+            </a>
+          ))}
+        </div>
+      )}
 
-      {/* গেম কার্ড */}
-      <div className="px-3 mt-6 grid grid-cols-3 gap-2">
-        {[1, 2, 3, 4, 5, 6].map((game) => (
-          <div key={game} className="bg-[#1A2C38] rounded-md overflow-hidden relative aspect-square border border-[#2F4553]">
-             <img src={`https://placehold.co/150x150/1A2C38/FFF?text=Game+${game}`} alt={`Game ${game}`} className="w-full h-full object-cover" />
+      {/* ডাইনামিক গেম কার্ড গ্রিড (৩ কলাম) */}
+      {homeGames.length > 0 && (
+        <div className="px-3 mt-6">
+          <div className="grid grid-cols-3 gap-2">
+            {homeGames.map((game) => (
+              <GameCard
+                key={game.id}
+                title={game.title}
+                image_path={game.image_path}
+                link_url={game.link_url}
+                category_group={game.category_group}
+                theme_color={game.theme_color}
+                show_title={game.show_title}
+                show_category_ribbon={game.show_category_ribbon}
+              />
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       {/* ফ্লোটিং বাটন */}
       <div className="fixed right-3 bottom-24 flex flex-col gap-3 z-50">
