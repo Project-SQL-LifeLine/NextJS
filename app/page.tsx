@@ -179,7 +179,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 🚀 ব্যানার (Smooth Sliding Effect) */}
+      {/* ব্যানার */}
       <div className="px-3 mt-3">
         <div 
           ref={sliderRef}
@@ -192,7 +192,6 @@ export default function Home() {
         >
           {banners.length > 0 ? (
             <>
-              {/* স্লাইডার কন্টেইনার */}
               <div 
                 className="flex transition-transform duration-500 ease-in-out w-full h-full"
                 style={{ transform: `translateX(-${currentBanner * 100}%)` }}
@@ -208,7 +207,6 @@ export default function Home() {
                 ))}
               </div>
               
-              {/* ডট ইন্ডিকেটর */}
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-20 pointer-events-none">
                 {banners.map((_, idx) => (
                   <div key={idx} className={`w-2 h-2 rounded-full transition-colors ${idx === currentBanner ? "bg-yellow-400" : "bg-white/40"}`} />
@@ -268,19 +266,19 @@ export default function Home() {
         )}
       </div>
 
-      {/* 🚀 নতুন লাইভ সাপোর্ট ফ্লোটিং বাটন */}
+      {/* 🚀 লাইভ সাপোর্ট ফ্লোটিং বাটন (শুধু সাদা SVG আইকন) */}
       {supportLink && (
         <div className="fixed right-3 bottom-24 flex flex-col gap-3 z-50">
           <a 
             href={supportLink} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-[#1A2C38] border border-[#2F4553] text-[#00E701] px-4 py-2.5 rounded-full shadow-lg font-bold text-sm hover:bg-[#253B49] hover:scale-105 transition-all"
+            className="w-12 h-12 flex items-center justify-center bg-[#1A2C38] border border-[#2F4553] rounded-full shadow-lg hover:bg-[#253B49] hover:scale-105 transition-all"
+            title="Live Support"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
             </svg>
-            Live Support
           </a>
         </div>
       )}
