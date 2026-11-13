@@ -1,7 +1,7 @@
 /* app/Games/original/mines/page.tsx */
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../../../components/Header";
 import GameBottomBar from "../../../../components/GameBottomBar/GameBottomBar";
@@ -179,8 +179,11 @@ export default function MinesGamePage() {
 
       if (data) {
         setGameId(data.game_id);
-        setBalance(data.balance_after);
-        setUserProfile((prev: any) => prev ? { ...prev, balance: data.balance_after } : prev);
+        // ✅ নতুন SQL এর balance_after হ্যান্ডেল করা হলো
+        const newBal = data.balance_after || data.new_balance;
+        setBalance(newBal);
+        setUserProfile((prev: any) => prev ? { ...prev, balance: newBal } : prev);
+        
         setIsPlaying(true);
         setMultiplier(1.00);
         setProfit(0);
@@ -263,9 +266,9 @@ export default function MinesGamePage() {
 
       if (data) {
         setIsPlaying(false);
-        const newBalance = data.balance_after || data.new_balance;
-        setBalance(newBalance);
-        setUserProfile((prev: any) => prev ? { ...prev, balance: newBalance } : prev);
+        const newBal = data.balance_after || data.new_balance;
+        setBalance(newBal);
+        setUserProfile((prev: any) => prev ? { ...prev, balance: newBal } : prev);
         playSound("win");
         
         setTiles(prev => {
@@ -344,9 +347,9 @@ export default function MinesGamePage() {
       if (startData && startData.success === false) throw new Error(startData.error);
       
       setGameId(startData.game_id);
-      const startBalance = startData.balance_after || startData.new_balance;
-      setBalance(startBalance);
-      setUserProfile((prev: any) => prev ? { ...prev, balance: startBalance } : prev);
+      const startBal = startData.balance_after || startData.new_balance;
+      setBalance(startBal);
+      setUserProfile((prev: any) => prev ? { ...prev, balance: startBal } : prev);
       
       let newTilesState = Array.from({ length: 25 }, (_, i) => ({ index: i, isRevealed: false, isBomb: false }));
       setTiles([...newTilesState]);
@@ -388,9 +391,9 @@ export default function MinesGamePage() {
             if (cashoutError) throw cashoutError;
             
             isRoundWin = true;
-            const endBalance = cashoutData.balance_after || cashoutData.new_balance;
-            setBalance(endBalance);
-            setUserProfile((prev: any) => prev ? { ...prev, balance: endBalance } : prev);
+            const endBal = cashoutData.balance_after || cashoutData.new_balance;
+            setBalance(endBal);
+            setUserProfile((prev: any) => prev ? { ...prev, balance: endBal } : prev);
             roundProfit = (currentBet * currentMultiplier) - currentBet;
             
             cashoutData.bombs.forEach((bIdx: number) => { newTilesState[bIdx] = { ...newTilesState[bIdx], isRevealed: true, isBomb: true }; });
