@@ -7,28 +7,10 @@ import GameCard from "../components/GameCard";
 import { supabase } from "../lib/supabase/client";
 import { useLanguage } from "../lib/LanguageContext";
 
-// ডাইনামিক SVG আইকন হেল্পার
-const CategoryIcon = ({ name }: { name: string }) => {
-  const baseClass = "w-4 h-4 text-white"; // আইকন সাইজ একটু ছোট করা হয়েছে
-  
-  if (name === "gamepad") {
-    return (
-      <svg className={baseClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    );
-  }
-  if (name === "coins") {
-    return (
-      <svg className={baseClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    );
-  }
-  // ডিফল্ট আইকন
+// ডাইনামিক SVG আইকন হেল্পার (ডিফল্ট আইকন)
+const CategoryIcon = () => {
   return (
-    <svg className={baseClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
     </svg>
   );
@@ -41,10 +23,10 @@ export default function Home() {
   const [currentBanner, setCurrentBanner] = useState(0);
   
   // ক্যাটাগরি এবং গেম স্টেট
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>([]); // 👈 এখন শুধু ক্যাটাগরির নাম থাকবে
   const [allHomeGames, setAllHomeGames] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(""); 
-  const [filteredGames, setFilteredGames] = useState<any[]>([]); // ফিল্টার করা গেম
+  const [filteredGames, setFilteredGames] = useState<any[]>([]); 
   
   const { t, language } = useLanguage();
 
@@ -79,24 +61,25 @@ export default function Home() {
         .order("serial", { ascending: true });
       if (bannerData) setBanners(bannerData);
 
-      // ২. ক্যাটাগরি এবং গেম ফেচ
-      const { data: catData } = await supabase
+      // ২. শুধুমাত্র গেমগুলো ফেচ করা হবে (is_game = true)
+      const { data: gameData } = await supabase
         .from("home_categories_create")
         .select("*")
         .eq("is_active", true)
+        .eq("is_game", true) 
         .contains("display_locations", ["home"]) 
         .order("serial", { ascending: true });
 
-      if (catData) {
-        const categoryItems = catData.filter(item => !item.is_game);
-        const gameItems = catData.filter(item => item.is_game);
-        
-        setCategories(categoryItems);
-        setAllHomeGames(gameItems);
+      if (gameData) {
+        setAllHomeGames(gameData);
 
-        // ডিফল্টভাবে প্রথম ক্যাটাগরিটি সিলেক্ট করে দেওয়া হবে
-        if (categoryItems.length > 0) {
-          setSelectedCategory(categoryItems[0].title); // ক্যাটাগরির নাম দিয়ে ফিল্টার হবে
+        // 🚀 গেমগুলোর category_group থেকে অটোমেটিক ইউনিক ক্যাটাগরি বের করা
+        const uniqueCats = Array.from(new Set(gameData.map(g => g.category_group || "General")));
+        setCategories(uniqueCats as string[]);
+
+        // ডিফল্টভাবে প্রথম ক্যাটাগরিটি সিলেক্ট হবে
+        if (uniqueCats.length > 0) {
+          setSelectedCategory(uniqueCats[0] as string);
         }
       }
     };
@@ -118,7 +101,6 @@ export default function Home() {
   // ক্যাটাগরি সিলেক্ট করলে গেম ফিল্টার হওয়ার লজিক
   useEffect(() => {
     if (selectedCategory) {
-      // এখানে game.category_group এর সাথে ক্যাটাগরি নাম মিলানো হচ্ছে
       const filtered = allHomeGames.filter(game => 
         (game.category_group || "General").toLowerCase() === selectedCategory.toLowerCase()
       );
@@ -164,14 +146,8 @@ export default function Home() {
           white-space: nowrap;
           animation: marquee 15s linear infinite;
         }
-        /* ক্যাটাগরি স্ক্রলবার হাইড */
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
       <Header isLoggedIn={isLoggedIn} userProfile={userProfile} />
@@ -220,28 +196,28 @@ export default function Home() {
               </div>
             </>
           ) : (
-            <div className="py-8 text-textSec text-sm">No banners available</div>
+            <div className="py-8 text-gray-400 text-sm">No banners available</div>
           )}
         </div>
       </div>
 
-      {/* 🚀 ডাইনামিক ক্যাটাগরি বাটন (পাশাপাশি স্ক্রলিং) */}
+      {/* 🚀 অটোমেটিক ক্যাটাগরি বাটন (পাশাপাশি স্ক্রলিং) */}
       {categories.length > 0 && (
         <div className="px-3 mt-4 flex overflow-x-auto hide-scrollbar gap-2 pb-1">
-          {categories.map((cat) => {
-            const isActive = selectedCategory === cat.title;
+          {categories.map((catName, index) => {
+            const isActive = selectedCategory === catName;
             return (
               <button 
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.title)}
+                key={index}
+                onClick={() => setSelectedCategory(catName)}
                 className={`inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 whitespace-nowrap transition-all border ${
                   isActive 
                   ? "bg-[#183f35] border-[#183f35] text-white shadow-lg" // আপনার কালার কোড
                   : "bg-[#1A2C38] border-[#2F4553] text-gray-400 hover:bg-[#253B49]"
                 }`}
               >
-                <CategoryIcon name={cat.icon_name} />
-                <span className="text-xs font-semibold">{cat.title}</span>
+                <CategoryIcon />
+                <span className="text-xs font-semibold">{catName}</span>
               </button>
             );
           })}
@@ -267,7 +243,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="text-center text-gray-500 text-sm mt-10">
-            No games found in this category.
+            No games available in this category.
           </div>
         )}
       </div>
