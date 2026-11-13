@@ -12,7 +12,7 @@ export default function AdminCategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
-  // ফর্ম স্টেটে theme_color যোগ করা হলো
+  // ফর্ম স্টেট
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -24,7 +24,8 @@ export default function AdminCategoriesPage() {
     category_group: "General",
     display_home: true,
     display_game_hub: false,
-    theme_color: "#8b5cf6", // ডিফল্ট কালার (বেগুনি)
+    theme_color: "#8b5cf6",
+    show_title: true, // 👈 নতুন ফিল্ড যোগ করা হলো
   });
 
   useEffect(() => {
@@ -64,6 +65,7 @@ export default function AdminCategoriesPage() {
         display_home: locations.includes("home"),
         display_game_hub: locations.includes("game_hub"),
         theme_color: category.theme_color || "#8b5cf6",
+        show_title: category.show_title !== undefined ? category.show_title : true, // 👈
       });
     } else {
       setFormData({
@@ -78,6 +80,7 @@ export default function AdminCategoriesPage() {
         display_home: true,
         display_game_hub: false,
         theme_color: "#8b5cf6",
+        show_title: true, // 👈
       });
     }
     setIsModalOpen(true);
@@ -113,7 +116,8 @@ export default function AdminCategoriesPage() {
         is_game: formData.is_game,
         category_group: formData.category_group.trim(),
         display_locations: locations,
-        theme_color: formData.theme_color, // কালার পেলোডে পাঠানো হলো
+        theme_color: formData.theme_color,
+        show_title: formData.show_title, // 👈 পেলোডে যোগ হলো
       };
 
       if (editingCategory) {
@@ -160,8 +164,7 @@ export default function AdminCategoriesPage() {
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Game & Category Manager</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage games, categories, locations, and colors.</p>
+          <h1 className="text-2xl font-bold text-gray-900">Game Manager</h1>
         </div>
         <button onClick={() => openModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -181,9 +184,8 @@ export default function AdminCategoriesPage() {
             <tr className="bg-gray-50 text-gray-600 text-sm border-b">
               <th className="p-4 font-semibold">Serial</th>
               <th className="p-4 font-semibold">Title</th>
+              <th className="p-4 font-semibold">Group</th>
               <th className="p-4 font-semibold">Color</th>
-              <th className="p-4 font-semibold">Locations</th>
-              <th className="p-4 font-semibold">Route</th>
               <th className="p-4 font-semibold">Status</th>
               <th className="p-4 font-semibold text-right">Actions</th>
             </tr>
@@ -193,18 +195,10 @@ export default function AdminCategoriesPage() {
               <tr key={cat.id} className="border-b hover:bg-gray-50 text-sm">
                 <td className="p-4 font-bold">#{cat.serial}</td>
                 <td className="p-4 font-bold text-gray-900">{cat.title}</td>
+                <td className="p-4"><span className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-bold">{cat.category_group}</span></td>
                 <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full border border-gray-300" style={{ backgroundColor: cat.theme_color || '#22c55e' }}></div>
-                    <span className="text-xs font-mono">{cat.theme_color || '#22c55e'}</span>
-                  </div>
+                   <div className="w-5 h-5 rounded-full border border-gray-300" style={{ backgroundColor: cat.theme_color || '#22c55e' }}></div>
                 </td>
-                <td className="p-4 flex gap-1 flex-wrap">
-                  {cat.display_locations?.map((loc: string) => (
-                    <span key={loc} className="bg-blue-50 text-blue-600 px-2 py-1 rounded text-[10px] font-bold uppercase">{loc}</span>
-                  ))}
-                </td>
-                <td className="p-4 text-blue-600 font-mono text-xs max-w-[150px] truncate">{cat.link_url}</td>
                 <td className="p-4">
                   <button onClick={() => toggleStatus(cat.id, cat.is_active)} className={`px-3 py-1 rounded-full text-xs font-bold ${cat.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                     {cat.is_active ? "Active" : "Inactive"}
@@ -240,7 +234,7 @@ export default function AdminCategoriesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-semibold mb-1 block">Category Group</label>
-                  <input type="text" name="category_group" value={formData.category_group} onChange={handleChange} className="w-full border rounded-lg p-2" placeholder="e.g. Originals" required />
+                  <input type="text" name="category_group" value={formData.category_group} onChange={handleChange} className="w-full border rounded-lg p-2" required />
                 </div>
                 <div>
                   <label className="text-sm font-semibold mb-1 block">Serial (Order)</label>
@@ -248,30 +242,35 @@ export default function AdminCategoriesPage() {
                 </div>
               </div>
 
-              {/* 👇 কালার পিকার (নতুন) */}
               <div>
                 <label className="text-sm font-semibold mb-1 block">Card Theme Color</label>
                 <div className="flex items-center gap-3">
                   <input type="color" name="theme_color" value={formData.theme_color} onChange={handleChange} className="w-10 h-10 p-0 border-0 rounded cursor-pointer" />
-                  <input type="text" name="theme_color" value={formData.theme_color} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm uppercase" placeholder="#8B5CF6" />
+                  <input type="text" name="theme_color" value={formData.theme_color} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm uppercase" />
                 </div>
-                <p className="text-xs text-gray-400 mt-1">This color will be used for the card border and ribbon.</p>
               </div>
 
               <div>
                 <label className="text-sm font-semibold mb-1 block">Route URL</label>
-                <input type="text" name="link_url" value={formData.link_url} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm" placeholder="/Games/Spribe/dice" required />
+                <input type="text" name="link_url" value={formData.link_url} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm" required />
               </div>
 
               <div>
                 <label className="text-sm font-semibold mb-1 block">Image URL</label>
-                <input type="text" name="image_path" value={formData.image_path} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm" placeholder="https://example.com/image.png" />
+                <input type="text" name="image_path" value={formData.image_path} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm" />
               </div>
 
               <div className="flex items-center gap-2 p-3 bg-gray-50 border rounded-lg">
                 <input type="checkbox" name="is_game" id="is_game" checked={formData.is_game} onChange={handleChange} className="w-5 h-5" />
                 <label htmlFor="is_game" className="text-sm font-bold">Is this a playable Game?</label>
               </div>
+
+              {/* 👇 নতুন যোগ করা টাইটেল অন/অফ চেকবক্স */}
+              <div className="flex items-center gap-2 p-3 bg-gray-50 border rounded-lg">
+                <input type="checkbox" name="show_title" id="show_title" checked={formData.show_title} onChange={handleChange} className="w-5 h-5" />
+                <label htmlFor="show_title" className="text-sm font-bold">Show Game Title on Card?</label>
+              </div>
+              {/* 👆 নতুন চেকবক্স শেষ */}
 
               <div>
                 <label className="text-sm font-semibold mb-2 block">Where to display?</label>
@@ -283,7 +282,7 @@ export default function AdminCategoriesPage() {
 
               <div className="flex justify-end gap-3 mt-4 pt-4 border-t">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 font-semibold">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold disabled:opacity-50">{saving ? "Saving..." : "Save"}</button>
+                <button type="submit" disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold">{saving ? "Saving..." : "Save"}</button>
               </div>
             </form>
           </div>
