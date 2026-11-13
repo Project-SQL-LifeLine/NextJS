@@ -10,7 +10,7 @@ interface GameCardProps {
   link_url: string;
   category_group?: string;
   theme_color?: string;
-  show_title?: boolean; // 👈 নতুন প্রপ
+  show_title?: boolean; // টাইটেল অন/অফ করার প্রপ
 }
 
 export default function GameCard({ 
@@ -19,7 +19,7 @@ export default function GameCard({
   link_url, 
   category_group = "CASINO",
   theme_color = "#22c55e",
-  show_title = true // 👈 ডিফল্ট true
+  show_title = true 
 }: GameCardProps) {
   const [imgError, setImgError] = useState(false);
   const showFallback = !image_path || imgError;
@@ -28,6 +28,7 @@ export default function GameCard({
     <Link 
       href={link_url} 
       className="shuffle-game-card"
+      // বর্ডার কালার সবসময় থাকবে
       style={{ border: `2px solid ${theme_color}` }} 
     >
       <div className="card-inner">
@@ -45,13 +46,16 @@ export default function GameCard({
           </div>
         )}
         
-        <div className="card-ribbon" style={{ backgroundColor: theme_color }}>
-          {category_group}
-        </div>
+        {/* show_title true হলে তবেই রিবন (ব্যাকগ্রাউন্ড কালার) দেখাবে */}
+        {show_title && (
+          <div className="card-ribbon" style={{ backgroundColor: theme_color }}>
+            {category_group}
+          </div>
+        )}
 
         <div className="card-gradient"></div>
         
-        {/* 👇 এখানে শর্ত দেওয়া হলো: show_title true হলে তবেই টাইটেল দেখাবে */}
+        {/* show_title true হলে তবেই টাইটেল দেখাবে */}
         {show_title && (
           <h3 className="card-title">{title}</h3>
         )}
