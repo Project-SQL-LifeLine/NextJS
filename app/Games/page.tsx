@@ -10,11 +10,13 @@ export default function GameHubPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("All games");
   
+  // Language Toggle Placeholder (আপনার প্রজেক্টের গ্লোবাল ফাংশন দিয়ে রিপ্লেস করবেন)
   const t = (en: string, bn: string) => en;
 
   useEffect(() => {
     const fetchGames = async () => {
       try {
+        // ডাটাবেস থেকে ডাটা আনা
         const { data, error } = await supabase
           .from("home_categories_create")
           .select("*")
@@ -69,7 +71,6 @@ export default function GameHubPage() {
               className={`category-tab ${activeTab === catName ? 'active' : ''}`}
               onClick={() => setActiveTab(catName)}
             >
-              {/* ক্যাটাগরি নাম */}
               {catName}
             </button>
           ))}
@@ -89,7 +90,8 @@ export default function GameHubPage() {
                 image_path={game.image_path} 
                 link_url={game.link_url} 
                 category_group={game.category_group} 
-                theme_color={game.theme_color} /* 🚨 এখানে কালার পাস হচ্ছে */
+                theme_color={game.theme_color}
+                show_title={game.show_title} /* 👈 টাইটেল অন/অফ করার প্রপ */
               />
             ))}
           </div>
