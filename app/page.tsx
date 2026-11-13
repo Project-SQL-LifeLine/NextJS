@@ -6,6 +6,7 @@ import BottomNav from "../components/BottomNav";
 import GameCard from "../components/GameCard";
 import { supabase } from "../lib/supabase/client";
 import { useLanguage } from "../lib/LanguageContext";
+import "./Loader.css"; // 👈 নতুন লোডার CSS ইমপোর্ট করা হলো
 
 // ডাইনামিক SVG আইকন হেল্পার
 const CategoryIcon = () => {
@@ -30,6 +31,9 @@ export default function Home() {
 
   // লাইভ সাপোর্ট লিংক স্টেট
   const [supportLink, setSupportLink] = useState<string>("");
+  
+  // 🚀 নতুন লোডিং স্টেট
+  const [isLoading, setIsLoading] = useState(true);
   
   const { t, language } = useLanguage();
 
@@ -56,45 +60,51 @@ export default function Home() {
     };
 
     const fetchData = async () => {
-      // ১. ব্যানার ফেচ
-      const { data: bannerData } = await supabase
-        .from("home_banners")
-        .select("*")
-        .eq("is_active", true)
-        .order("serial", { ascending: true });
-      if (bannerData) setBanners(bannerData);
+      try {
+        setIsLoading(true); // লোডিং শুরু
 
-      // ২. অ্যাডমিন সেটিংস থেকে সাপোর্ট লিংক ফেচ
-      const { data: settingsData } = await supabase
-        .from("admin_settings")
-        .select("support_link")
-        .limit(1)
-        .maybeSingle();
-        
-      if (settingsData && settingsData.support_link) {
-        setSupportLink(settingsData.support_link);
-      }
+        // ১. ব্যানার ফেচ
+        const { data: bannerData } = await supabase
+          .from("home_banners")
+          .select("*")
+          .eq("is_active", true)
+          .order("serial", { ascending: true });
+        if (bannerData) setBanners(bannerData);
 
-      // ৩. গেম ফেচ (Home Page এর জন্য)
-      const { data: gameData } = await supabase
-        .from("home_categories_create")
-        .select("*")
-        .eq("is_active", true)
-        .eq("is_game", true) 
-        .contains("display_locations", ["home"]) 
-        .order("serial", { ascending: true });
-
-      if (gameData) {
-        setAllHomeGames(gameData);
-
-        // অটোমেটিক ইউনিক ক্যাটাগরি বের করা
-        const uniqueCats = Array.from(new Set(gameData.map(g => g.category_group || "General")));
-        setCategories(uniqueCats as string[]);
-
-        // ডিফল্টভাবে প্রথম ক্যাটাগরিটি সিলেক্ট হবে
-        if (uniqueCats.length > 0) {
-          setSelectedCategory(uniqueCats[0] as string);
+        // ২. অ্যাডমিন সেটিংস থেকে সাপোর্ট লিংক ফেচ
+        const { data: settingsData } = await supabase
+          .from("admin_settings")
+          .select("support_link")
+          .limit(1)
+          .maybeSingle();
+          
+        if (settingsData && settingsData.support_link) {
+          setSupportLink(settingsData.support_link);
         }
+
+        // ৩. গেম ফেচ (Home Page এর জন্য)
+        const { data: gameData } = await supabase
+          .from("home_categories_create")
+          .select("*")
+          .eq("is_active", true)
+          .eq("is_game", true) 
+          .contains("display_locations", ["home"]) 
+          .order("serial", { ascending: true });
+
+        if (gameData) {
+          setAllHomeGames(gameData);
+
+          const uniqueCats = Array.from(new Set(gameData.map(g => g.category_group || "General")));
+          setCategories(uniqueCats as string[]);
+
+          if (uniqueCats.length > 0) {
+            setSelectedCategory(uniqueCats[0] as string);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false); // ডাটা আসা শেষ হলে লোডিং বন্ধ হবে
       }
     };
 
@@ -134,7 +144,6 @@ export default function Home() {
     }
   }, [banners.length, isDragging]);
 
-  // ম্যানুয়াল সোয়াইপ হ্যান্ডলার
   const handleStart = (x: number) => { setIsDragging(true); setStartX(x); };
   const handleEnd = (x: number) => {
     setIsDragging(false);
@@ -147,6 +156,18 @@ export default function Home() {
     ? "Daily first deposit bonus 20%! ✨"
     : (banners.length > 0 && banners[0].notice_text ? banners[0].notice_text : "করুণ! 👑 দৈনিক প্রথম আমানত বোনাস ২০%! ✨");
 
+  // 🚀 ডাটা লোড হওয়ার সময় শুধু এই স্পিনারটি দেখাবে
+  if (isLoading) {
+    return (
+      <div className="loader-wrapper">
+        <svg className="svg-spinner" viewBox="0 0 50 50">
+          <circle className="path" cx="25" cy="25" r="20"></circle>
+        </svg>
+      </div>
+    );
+  }
+
+  // ডাটা লোড হয়ে গেলে মূল কন্টেন্ট দেখাবে
   return (
     <div className="min-h-screen bg-[#0d241e] pb-20 relative overflow-hidden">
       
@@ -266,7 +287,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* 🚀 লাইভ সাপোর্ট ফ্লোটিং বাটন (কাস্টমার সাপোর্ট হেডসেট আইকন) */}
+      {/* লাইভ সাপোর্ট ফ্লোটিং বাটন */}
       {supportLink && (
         <div className="fixed right-4 bottom-24 flex flex-col gap-3 z-50">
           <a 
@@ -276,7 +297,6 @@ export default function Home() {
             className="w-12 h-12 flex items-center justify-center bg-[#1A2C38] border border-[#2F4553] rounded-full shadow-lg hover:bg-[#253B49] hover:scale-105 transition-all"
             title="Live Support"
           >
-            {/* কাস্টমার সাপোর্ট হেডসেট SVG */}
             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 18v-6a9 9 0 0118 0v6" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z" />
