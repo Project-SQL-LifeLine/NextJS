@@ -1,0 +1,51 @@
+/* Loader.css */
+
+.loader-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #0d241e; /* আপনার মেইন ব্যাকগ্রাউন্ড কালার */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* সবার ওপরে থাকবে */
+}
+
+.svg-spinner {
+  width: 60px;
+  height: 60px;
+  animation: rotate 2s linear infinite;
+}
+
+.svg-spinner .path {
+  fill: none;
+  stroke: #ffffff; /* সাদা কালার */
+  stroke-width: 4;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+/* ঘোরার অ্যানিমেশন */
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* লাইন ছোট-বড় হওয়ার অ্যানিমেশন */
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
