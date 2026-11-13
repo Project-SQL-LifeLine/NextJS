@@ -1,0 +1,145 @@
+/* ================= SHUFFLE STYLE GAME CARD ================= */
+
+.shuffle-game-card {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4; /* Shuffle এর মতো লম্বা কার্ড */
+  border-radius: 12px;
+  border: 2px solid transparent; /* কালার ইনলাইন স্টাইল থেকে আসবে */
+  overflow: hidden;
+  text-decoration: none;
+  background: #111;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.shuffle-game-card:hover {
+  transform: translateY(-5px);
+}
+
+.card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.shuffle-game-card:hover .card-image {
+  transform: scale(1.08); /* জুম ইফেক্ট */
+}
+
+/* ইমেজ না থাকলে ফলব্যাক ডিজাইন */
+.card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  place-items: center;
+  justify-content: center;
+  background: #1a1a1a;
+  color: #555;
+}
+
+.card-placeholder svg {
+  width: 40px;
+  height: 40px;
+}
+
+.placeholder-text {
+  font-size: 12px;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* টপ রিবন */
+.card-ribbon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 6px 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 3;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+/* নিচের কালো গ্রেডিয়েন্ট */
+.card-overlay-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 45%, rgba(0,0,0,0.2) 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* গেমের নাম (বড় এবং বোল্ড) */
+.card-title-bottom {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 3;
+  text-shadow: 
+    0 2px 4px rgba(0,0,0,0.9),
+    0 0 10px rgba(0,0,0,0.7);
+  margin: 0;
+  padding: 0 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* হোভার করলে প্লে বাটন */
+.card-hover-effect {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  z-index: 4;
+  transition: opacity 0.3s ease;
+}
+
+.shuffle-game-card:hover .card-hover-effect {
+  opacity: 1;
+}
+
+.play-icon {
+  width: 46px;
+  height: 46px;
+  background: #fff;
+  color: #000;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  padding-left: 4px; /* অপটিক্যাল সেন্টার */
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  transform: scale(0.8);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.shuffle-game-card:hover .play-icon {
+  transform: scale(1);
+}
