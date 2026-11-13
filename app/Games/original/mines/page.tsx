@@ -47,21 +47,17 @@ export default function MinesGamePage() {
   const [betAmount, setBetAmount] = useState("10.00");
   const [minesCount, setMinesCount] = useState(3);
 
-  // ট্যাব স্টেট
   const [activeTab, setActiveTab] = useState<"manual" | "auto">("manual");
 
-  // গেম স্টেট
   const [gameId, setGameId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   
-  // গ্রিড ও মাল্টিপ্লায়ার স্টেট
   const [tiles, setTiles] = useState<Tile[]>(Array.from({ length: 25 }, (_, i) => ({ index: i, isRevealed: false, isBomb: false })));
   const [multiplier, setMultiplier] = useState(1.00);
   const [profit, setProfit] = useState(0);
 
-  // অটো বেট স্টেট
   const [isAutoBetting, setIsAutoBetting] = useState(false);
   const [autoStats, setAutoStats] = useState({ bets: 0, profit: 0 });
   const isAutoRef = useRef(false);
@@ -75,19 +71,16 @@ export default function MinesGamePage() {
   const [stopOnProfit, setStopOnProfit] = useState("0.00");
   const [stopOnLoss, setStopOnLoss] = useState("0.00");
 
-  // হিস্টোরি, গ্রাফ ও সাজেশন
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [suggestedGames, setSuggestedGames] = useState<SuggestedGame[]>([]);
   const historyContainerRef = useRef<HTMLDivElement>(null);
   const graphContainerRef = useRef<HTMLDivElement>(null);
 
-  // Modals
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isGraphOpen, setIsGraphOpen] = useState(false);
   const [isFairnessOpen, setIsFairnessOpen] = useState(false);
   const [isBetHistoryOpen, setIsBetHistoryOpen] = useState(false); 
 
-  // Settings & Fairness
   const [instantBet, setInstantBet] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [clientSeed, setClientSeed] = useState("my_client_seed_123");
@@ -155,7 +148,6 @@ export default function MinesGamePage() {
     }
   }, [history]);
 
-  // 🎮 ম্যানুয়াল গেম শুরু
   const handleStartGame = async () => {
     if (!isLoggedIn || !userProfile) {
       router.push("/user/login");
@@ -196,7 +188,6 @@ export default function MinesGamePage() {
     }
   };
 
-  // 💎 ম্যানুয়াল ঘর খোলা
   const handleRevealTile = async (index: number) => {
     if (!isLoggedIn || !isPlaying || isProcessing || tiles[index].isRevealed) return;
 
@@ -250,7 +241,6 @@ export default function MinesGamePage() {
     }
   };
 
-  // 💰 ম্যানুয়াল ক্যাশআউট
   const handleCashout = async () => {
     if (!isLoggedIn || !isPlaying || multiplier <= 1.00) return;
 
@@ -292,7 +282,6 @@ export default function MinesGamePage() {
     }
   };
 
-  // 🤖 অটো বেট টগল
   const toggleAutoBet = () => {
     if (!isLoggedIn || !userProfile) {
       router.push("/user/login");
@@ -317,7 +306,6 @@ export default function MinesGamePage() {
     }
   };
 
-  // 🤖 অটো বেট লুপ
   const runAutoLoop = async (currentBet: number, currentCount: number, currentProfit: number) => {
     if (!isAutoRef.current) return;
 
@@ -709,8 +697,7 @@ export default function MinesGamePage() {
 
           </div>
 
-          {/* ✅ Suggested Games Section */}
-          {suggestedGames && suggestedGames.length > 0 && (
+          {suggestedGames.length > 0 && (
             <div className="suggested-section">
               <h2 className="suggested-title">
                 <i className="fa-solid fa-gamepad" style={{ color: '#00E701' }}></i> {t("Suggested Games", "প্রস্তাবিত গেমস")}
@@ -751,7 +738,6 @@ export default function MinesGamePage() {
         </div>
       </main>
 
-      {/* ================= ✅ Modals ================= */}
       {isSettingsOpen && (
         <div className="limbo-modal-overlay" onClick={() => setIsSettingsOpen(false)}>
           <div className="limbo-modal-content" onClick={e => e.stopPropagation()}>
