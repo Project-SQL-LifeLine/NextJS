@@ -9,15 +9,15 @@ interface GameCardProps {
   image_path: string;
   link_url: string;
   category_group?: string;
-  theme_color?: string; // কালার রিসিভ করার প্রপ
+  theme_color?: string; // অ্যাডমিন থেকে আসা কালার
 }
 
 export default function GameCard({ 
   title, 
   image_path, 
   link_url, 
-  category_group = "CASINO",
-  theme_color = "#22c55e" // ডিফল্ট কালার যদি ডাটাবেসে না থাকে
+  category_group = "SHUFFLE", // ডিফল্ট নাম
+  theme_color = "#8b5cf6" // ডিফল্ট কালার (বেগুনি)
 }: GameCardProps) {
   const [imgError, setImgError] = useState(false);
   const showFallback = !image_path || imgError;
@@ -26,42 +26,34 @@ export default function GameCard({
     <Link 
       href={link_url} 
       className="shuffle-game-card"
-      style={{ 
-        // এখানে কালারটি ডাইনামিকভাবে সেট হচ্ছে
-        borderColor: theme_color, 
-        boxShadow: `0 4px 10px rgba(0,0,0,0.5), inset 0 0 15px ${theme_color}40` 
-      }}
+      style={{ borderColor: theme_color }} // বর্ডার কালার
     >
-      <div className="card-image-wrapper">
+      <div className="card-inner">
+        {/* ইমেজ */}
         {!showFallback ? (
           <img 
             src={image_path} 
             alt={title} 
-            className="card-image" 
+            className="card-img" 
             onError={() => setImgError(true)} 
             loading="lazy"
           />
         ) : (
           <div className="card-placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <path d="M21 15l-5-5L5 21" />
-            </svg>
+            <span>No Image</span>
           </div>
         )}
         
-        {/* রিবনে কালার সেট হচ্ছে */}
+        {/* টপ রিবন */}
         <div className="card-ribbon" style={{ backgroundColor: theme_color }}>
           {category_group}
         </div>
 
-        <div className="card-overlay-gradient"></div>
-        <h3 className="card-title-bottom">{title}</h3>
+        {/* নিচের কালো শ্যাডো (টেক্সট ফুটিয়ে তোলার জন্য) */}
+        <div className="card-gradient"></div>
         
-        <div className="card-hover-effect">
-          <div className="play-icon">▶</div>
-        </div>
+        {/* গেমের নাম */}
+        <h3 className="card-title">{title}</h3>
       </div>
     </Link>
   );
