@@ -266,9 +266,9 @@ export default function Home() {
         )}
       </div>
 
-      {/* 🚀 লাইভ সাপোর্ট ফ্লোটিং বাটন (শুধু সাদা SVG আইকন) */}
+      {/* 🚀 লাইভ সাপোর্ট ফ্লোটিং বাটন (কাস্টমার সাপোর্ট হেডসেট আইকন) */}
       {supportLink && (
-        <div className="fixed right-3 bottom-24 flex flex-col gap-3 z-50">
+        <div className="fixed right-4 bottom-24 flex flex-col gap-3 z-50">
           <a 
             href={supportLink} 
             target="_blank" 
@@ -276,8 +276,10 @@ export default function Home() {
             className="w-12 h-12 flex items-center justify-center bg-[#1A2C38] border border-[#2F4553] rounded-full shadow-lg hover:bg-[#253B49] hover:scale-105 transition-all"
             title="Live Support"
           >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+            {/* কাস্টমার সাপোর্ট হেডসেট SVG */}
+            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 18v-6a9 9 0 0118 0v6" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z" />
             </svg>
           </a>
         </div>
