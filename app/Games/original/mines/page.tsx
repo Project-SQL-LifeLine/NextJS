@@ -47,17 +47,21 @@ export default function MinesGamePage() {
   const [betAmount, setBetAmount] = useState("10.00");
   const [minesCount, setMinesCount] = useState(3);
 
+  // ট্যাব স্টেট
   const [activeTab, setActiveTab] = useState<"manual" | "auto">("manual");
 
+  // গেম স্টেট
   const [gameId, setGameId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   
+  // গ্রিড ও মাল্টিপ্লায়ার স্টেট
   const [tiles, setTiles] = useState<Tile[]>(Array.from({ length: 25 }, (_, i) => ({ index: i, isRevealed: false, isBomb: false })));
   const [multiplier, setMultiplier] = useState(1.00);
   const [profit, setProfit] = useState(0);
 
+  // অটো বেট স্টেট
   const [isAutoBetting, setIsAutoBetting] = useState(false);
   const [autoStats, setAutoStats] = useState({ bets: 0, profit: 0 });
   const isAutoRef = useRef(false);
@@ -71,16 +75,19 @@ export default function MinesGamePage() {
   const [stopOnProfit, setStopOnProfit] = useState("0.00");
   const [stopOnLoss, setStopOnLoss] = useState("0.00");
 
+  // হিস্টোরি, গ্রাফ ও সাজেশন
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [suggestedGames, setSuggestedGames] = useState<SuggestedGame[]>([]);
   const historyContainerRef = useRef<HTMLDivElement>(null);
   const graphContainerRef = useRef<HTMLDivElement>(null);
 
+  // Modals
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isGraphOpen, setIsGraphOpen] = useState(false);
   const [isFairnessOpen, setIsFairnessOpen] = useState(false);
   const [isBetHistoryOpen, setIsBetHistoryOpen] = useState(false); 
 
+  // Settings & Fairness
   const [instantBet, setInstantBet] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [clientSeed, setClientSeed] = useState("my_client_seed_123");
@@ -148,6 +155,7 @@ export default function MinesGamePage() {
     }
   }, [history]);
 
+  // 🎮 ম্যানুয়াল গেম শুরু
   const handleStartGame = async () => {
     if (!isLoggedIn || !userProfile) {
       router.push("/user/login");
@@ -171,6 +179,7 @@ export default function MinesGamePage() {
 
       if (data) {
         setGameId(data.game_id);
+        // ✅ নতুন SQL এর balance_after হ্যান্ডেল করা হলো
         const newBal = Number(data.balance_after || data.new_balance);
         setBalance(newBal);
         setUserProfile((prev: any) => prev ? { ...prev, balance: newBal } : prev);
@@ -188,6 +197,7 @@ export default function MinesGamePage() {
     }
   };
 
+  // 💎 ম্যানুয়াল ঘর খোলা
   const handleRevealTile = async (index: number) => {
     if (!isLoggedIn || !isPlaying || isProcessing || tiles[index].isRevealed) return;
 
@@ -222,9 +232,10 @@ export default function MinesGamePage() {
           }]);
           setNonce(prev => prev + 1);
         } else {
-          const newMult = Number(data.new_multiplier);
-          setMultiplier(newMult);
-          setProfit(Number(betAmount) * newMult - Number(betAmount));
+          const mult = data.new_multiplier !== undefined ? data.new_multiplier : data.multiplier;
+          const newMult = Number(mult);
+          setMultiplier(isNaN(newMult) ? 1.00 : newMult);
+          setProfit(Number(betAmount) * (isNaN(newMult) ? 1.00 : newMult) - Number(betAmount));
           playSound("click");
           
           setTiles(prev => {
@@ -241,6 +252,7 @@ export default function MinesGamePage() {
     }
   };
 
+  // 💰 ম্যানুয়াল ক্যাশআউট
   const handleCashout = async () => {
     if (!isLoggedIn || !isPlaying || multiplier <= 1.00) return;
 
@@ -248,7 +260,8 @@ export default function MinesGamePage() {
     setErrorMsg("");
 
     try {
-      const { data, error } = await supabase.rpc("cashout_mines", {
+      // ✅ নতুন SQL এর নাম cashout_mines_game
+      const { data, error } = await supabase.rpc("cashout_mines_game", {
         p_game_id: gameId
       });
 
@@ -263,9 +276,11 @@ export default function MinesGamePage() {
         
         setTiles(prev => {
           const newTiles = [...prev];
-          data.bombs.forEach((bombIdx: number) => {
-            newTiles[bombIdx] = { ...newTiles[bombIdx], isRevealed: true, isBomb: true };
-          });
+          if (data.bombs) {
+            data.bombs.forEach((bombIdx: number) => {
+              newTiles[bombIdx] = { ...newTiles[bombIdx], isRevealed: true, isBomb: true };
+            });
+          }
           return newTiles;
         });
 
@@ -282,6 +297,7 @@ export default function MinesGamePage() {
     }
   };
 
+  // 🤖 অটো বেট টগল
   const toggleAutoBet = () => {
     if (!isLoggedIn || !userProfile) {
       router.push("/user/login");
@@ -306,6 +322,7 @@ export default function MinesGamePage() {
     }
   };
 
+  // 🤖 অটো বেট লুপ
   const runAutoLoop = async (currentBet: number, currentCount: number, currentProfit: number) => {
     if (!isAutoRef.current) return;
 
@@ -364,18 +381,21 @@ export default function MinesGamePage() {
         if (tileData.is_bomb) {
           isRoundWin = false;
           roundProfit = -currentBet;
-          tileData.bombs.forEach((bIdx: number) => { newTilesState[bIdx] = { ...newTilesState[bIdx], isRevealed: true, isBomb: true }; });
+          if (tileData.bombs) {
+            tileData.bombs.forEach((bIdx: number) => { newTilesState[bIdx] = { ...newTilesState[bIdx], isRevealed: true, isBomb: true }; });
+          }
           setTiles([...newTilesState]);
           playSound("lose");
           break; 
         } else {
-          currentMultiplier = Number(tileData.new_multiplier);
+          const mult = tileData.new_multiplier !== undefined ? tileData.new_multiplier : tileData.multiplier;
+          currentMultiplier = isNaN(Number(mult)) ? 1.00 : Number(mult);
           newTilesState[tileIndex] = { ...newTilesState[tileIndex], isRevealed: true, isBomb: false };
           setTiles([...newTilesState]);
           playSound("click");
 
           if (i === tilesToReveal - 1) {
-            const { data: cashoutData, error: cashoutError } = await supabase.rpc("cashout_mines", { p_game_id: startData.game_id });
+            const { data: cashoutData, error: cashoutError } = await supabase.rpc("cashout_mines_game", { p_game_id: startData.game_id });
             if (cashoutError) throw cashoutError;
             
             isRoundWin = true;
@@ -384,7 +404,9 @@ export default function MinesGamePage() {
             setUserProfile((prev: any) => prev ? { ...prev, balance: endBal } : prev);
             roundProfit = (currentBet * currentMultiplier) - currentBet;
             
-            cashoutData.bombs.forEach((bIdx: number) => { newTilesState[bIdx] = { ...newTilesState[bIdx], isRevealed: true, isBomb: true }; });
+            if (cashoutData.bombs) {
+              cashoutData.bombs.forEach((bIdx: number) => { newTilesState[bIdx] = { ...newTilesState[bIdx], isRevealed: true, isBomb: true }; });
+            }
             setTiles([...newTilesState]);
             playSound("win");
           }
