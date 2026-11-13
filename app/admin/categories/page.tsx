@@ -12,7 +12,7 @@ export default function AdminCategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
-  // ফর্ম স্টেট
+  // ফর্ম স্টেট (নতুন show_category_ribbon যোগ করা হলো)
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -25,7 +25,8 @@ export default function AdminCategoriesPage() {
     display_home: true,
     display_game_hub: false,
     theme_color: "#8b5cf6",
-    show_title: true, // 👈 নতুন ফিল্ড যোগ করা হলো
+    show_title: true, 
+    show_category_ribbon: true, // 👈 নতুন স্টেট
   });
 
   useEffect(() => {
@@ -65,7 +66,8 @@ export default function AdminCategoriesPage() {
         display_home: locations.includes("home"),
         display_game_hub: locations.includes("game_hub"),
         theme_color: category.theme_color || "#8b5cf6",
-        show_title: category.show_title !== undefined ? category.show_title : true, // 👈
+        show_title: category.show_title !== undefined ? category.show_title : true,
+        show_category_ribbon: category.show_category_ribbon !== undefined ? category.show_category_ribbon : true, // 👈
       });
     } else {
       setFormData({
@@ -80,7 +82,8 @@ export default function AdminCategoriesPage() {
         display_home: true,
         display_game_hub: false,
         theme_color: "#8b5cf6",
-        show_title: true, // 👈
+        show_title: true,
+        show_category_ribbon: true, // 👈
       });
     }
     setIsModalOpen(true);
@@ -117,7 +120,8 @@ export default function AdminCategoriesPage() {
         category_group: formData.category_group.trim(),
         display_locations: locations,
         theme_color: formData.theme_color,
-        show_title: formData.show_title, // 👈 পেলোডে যোগ হলো
+        show_title: formData.show_title, 
+        show_category_ribbon: formData.show_category_ribbon, // 👈 পেলোডে যোগ হলো
       };
 
       if (editingCategory) {
@@ -186,6 +190,8 @@ export default function AdminCategoriesPage() {
               <th className="p-4 font-semibold">Title</th>
               <th className="p-4 font-semibold">Group</th>
               <th className="p-4 font-semibold">Color</th>
+              <th className="p-4 font-semibold">Title</th>
+              <th className="p-4 font-semibold">Ribbon</th>
               <th className="p-4 font-semibold">Status</th>
               <th className="p-4 font-semibold text-right">Actions</th>
             </tr>
@@ -198,6 +204,16 @@ export default function AdminCategoriesPage() {
                 <td className="p-4"><span className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-bold">{cat.category_group}</span></td>
                 <td className="p-4">
                    <div className="w-5 h-5 rounded-full border border-gray-300" style={{ backgroundColor: cat.theme_color || '#22c55e' }}></div>
+                </td>
+                <td className="p-4">
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${cat.show_title ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {cat.show_title ? 'ON' : 'OFF'}
+                  </span>
+                </td>
+                <td className="p-4">
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${cat.show_category_ribbon !== false ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {cat.show_category_ribbon !== false ? 'ON' : 'OFF'}
+                  </span>
                 </td>
                 <td className="p-4">
                   <button onClick={() => toggleStatus(cat.id, cat.is_active)} className={`px-3 py-1 rounded-full text-xs font-bold ${cat.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
@@ -265,12 +281,31 @@ export default function AdminCategoriesPage() {
                 <label htmlFor="is_game" className="text-sm font-bold">Is this a playable Game?</label>
               </div>
 
-              {/* 👇 নতুন যোগ করা টাইটেল অন/অফ চেকবক্স */}
-              <div className="flex items-center gap-2 p-3 bg-gray-50 border rounded-lg">
-                <input type="checkbox" name="show_title" id="show_title" checked={formData.show_title} onChange={handleChange} className="w-5 h-5" />
-                <label htmlFor="show_title" className="text-sm font-bold">Show Game Title on Card?</label>
+              {/* 👇 টাইটেল অন/অফ সুইচ */}
+              <div className="flex items-center justify-between p-3 bg-gray-50 border rounded-lg">
+                <label htmlFor="show_title" className="text-sm font-bold cursor-pointer">Show Game Title (Bottom Text)</label>
+                <input 
+                  type="checkbox" 
+                  name="show_title" 
+                  id="show_title" 
+                  checked={formData.show_title} 
+                  onChange={handleChange} 
+                  className="w-6 h-6 cursor-pointer accent-blue-600"
+                />
               </div>
-              {/* 👆 নতুন চেকবক্স শেষ */}
+
+              {/* 👇 রিবন অন/অফ সুইচ (নতুন) */}
+              <div className="flex items-center justify-between p-3 bg-gray-50 border rounded-lg">
+                <label htmlFor="show_category_ribbon" className="text-sm font-bold cursor-pointer">Show Category Ribbon (Top Bar)</label>
+                <input 
+                  type="checkbox" 
+                  name="show_category_ribbon" 
+                  id="show_category_ribbon" 
+                  checked={formData.show_category_ribbon} 
+                  onChange={handleChange} 
+                  className="w-6 h-6 cursor-pointer accent-blue-600"
+                />
+              </div>
 
               <div>
                 <label className="text-sm font-semibold mb-2 block">Where to display?</label>
