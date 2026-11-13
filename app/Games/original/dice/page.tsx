@@ -4,7 +4,8 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../../../components/Header";
-import GameBottomBar from "../../../../components/GameBottomBar";
+// ✅ GameBottomBar এর সঠিক পাথ (আপনার আগের কোডের মতো)
+import GameBottomBar from "../../../../components/GameBottomBar/GameBottomBar";
 import { supabase } from "../../../../lib/supabase/client";
 import { useLanguage } from "../../../../lib/LanguageContext";
 import "./dice.css";
