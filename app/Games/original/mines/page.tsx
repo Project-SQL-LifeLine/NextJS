@@ -1,10 +1,9 @@
-/* app/Games/Original/mines/page.tsx */
+/* app/Games/original/mines/page.tsx */
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../../../components/Header";
-// ✅ GameBottomBar এর সঠিক পাথ
 import GameBottomBar from "../../../../components/GameBottomBar/GameBottomBar";
 import { supabase } from "../../../../lib/supabase/client";
 import { useLanguage } from "../../../../lib/LanguageContext";
@@ -111,7 +110,6 @@ export default function MinesGamePage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // ১. ইউজার প্রোফাইল ও ব্যালেন্স ফেচ
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setIsLoggedIn(true);
@@ -122,7 +120,6 @@ export default function MinesGamePage() {
         }
       }
 
-      // ২. সাজেস্টেড গেমস ফেচ
       const { data: suggestData } = await supabase
         .from("suggested_game")
         .select("*")
@@ -182,7 +179,6 @@ export default function MinesGamePage() {
 
       if (data) {
         setGameId(data.game_id);
-        // ✅ নতুন SQL অনুযায়ী balance_after আপডেট করা হলো
         setBalance(data.balance_after);
         setUserProfile((prev: any) => prev ? { ...prev, balance: data.balance_after } : prev);
         setIsPlaying(true);
@@ -267,7 +263,6 @@ export default function MinesGamePage() {
 
       if (data) {
         setIsPlaying(false);
-        // ✅ নতুন SQL অনুযায়ী balance_after আপডেট করা হলো
         const newBalance = data.balance_after || data.new_balance;
         setBalance(newBalance);
         setUserProfile((prev: any) => prev ? { ...prev, balance: newBalance } : prev);
