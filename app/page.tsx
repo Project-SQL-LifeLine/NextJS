@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
-import GameCard from "../components/GameCard"; // 👈 নতুন গেম কার্ড ইমপোর্ট
+import GameCard from "../components/GameCard";
 import { supabase } from "../lib/supabase/client";
 import { useLanguage } from "../lib/LanguageContext";
 
 // ডাইনামিক SVG আইকন হেল্পার
 const CategoryIcon = ({ name }: { name: string }) => {
-  const baseClass = "w-5 h-5 text-white";
+  const baseClass = "w-4 h-4 text-white"; // আইকন সাইজ একটু ছোট করা হয়েছে
   
   if (name === "gamepad") {
     return (
@@ -40,9 +40,11 @@ export default function Home() {
   const [banners, setBanners] = useState<any[]>([]);
   const [currentBanner, setCurrentBanner] = useState(0);
   
-  // ডাটা স্টেট
+  // ক্যাটাগরি এবং গেম স্টেট
   const [categories, setCategories] = useState<any[]>([]);
-  const [homeGames, setHomeGames] = useState<any[]>([]); // 👈 হোম পেজের গেমগুলোর জন্য নতুন স্টেট
+  const [allHomeGames, setAllHomeGames] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>(""); 
+  const [filteredGames, setFilteredGames] = useState<any[]>([]); // ফিল্টার করা গেম
   
   const { t, language } = useLanguage();
 
@@ -77,21 +79,25 @@ export default function Home() {
         .order("serial", { ascending: true });
       if (bannerData) setBanners(bannerData);
 
-      // ২. ক্যাটাগরি এবং গেম ফেচ (Home Page এর জন্য)
+      // ২. ক্যাটাগরি এবং গেম ফেচ
       const { data: catData } = await supabase
         .from("home_categories_create")
         .select("*")
         .eq("is_active", true)
-        .contains("display_locations", ["home"]) // শুধু হোম পেজের জন্য টিক দেওয়া ডাটা
+        .contains("display_locations", ["home"]) 
         .order("serial", { ascending: true });
 
       if (catData) {
-        // ডাটাকে দুই ভাগে ভাগ করা: ক্যাটাগরি বাটন এবং গেম কার্ড
         const categoryItems = catData.filter(item => !item.is_game);
         const gameItems = catData.filter(item => item.is_game);
         
         setCategories(categoryItems);
-        setHomeGames(gameItems);
+        setAllHomeGames(gameItems);
+
+        // ডিফল্টভাবে প্রথম ক্যাটাগরিটি সিলেক্ট করে দেওয়া হবে
+        if (categoryItems.length > 0) {
+          setSelectedCategory(categoryItems[0].title); // ক্যাটাগরির নাম দিয়ে ফিল্টার হবে
+        }
       }
     };
 
@@ -108,6 +114,20 @@ export default function Home() {
 
     return () => authListener.subscription.unsubscribe();
   }, []);
+
+  // ক্যাটাগরি সিলেক্ট করলে গেম ফিল্টার হওয়ার লজিক
+  useEffect(() => {
+    if (selectedCategory) {
+      // এখানে game.category_group এর সাথে ক্যাটাগরি নাম মিলানো হচ্ছে
+      const filtered = allHomeGames.filter(game => 
+        (game.category_group || "General").toLowerCase() === selectedCategory.toLowerCase()
+      );
+      setFilteredGames(filtered);
+    } else {
+      setFilteredGames([]);
+    }
+  }, [selectedCategory, allHomeGames]);
+
 
   useEffect(() => {
     if (banners.length > 1 && !isDragging) {
@@ -131,9 +151,9 @@ export default function Home() {
     : (banners.length > 0 && banners[0].notice_text ? banners[0].notice_text : "করুণ! 👑 দৈনিক প্রথম আমানত বোনাস ২০%! ✨");
 
   return (
-    // 👇 মেইন ব্যাকগ্রাউন্ড কালার আপনার দেওয়া কোড (#0d241e) এ আপডেট করা হয়েছে
     <div className="min-h-screen bg-[#0d241e] pb-20 relative overflow-hidden">
       
+      {/* গ্লোবাল স্টাইল (স্ক্রলবার হাইড করার জন্য) */}
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(100%); }
@@ -143,6 +163,14 @@ export default function Home() {
           display: inline-block;
           white-space: nowrap;
           animation: marquee 15s linear infinite;
+        }
+        /* ক্যাটাগরি স্ক্রলবার হাইড */
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
 
@@ -197,28 +225,34 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ডাইনামিক ক্যাটাগরি বাটন */}
+      {/* 🚀 ডাইনামিক ক্যাটাগরি বাটন (পাশাপাশি স্ক্রলিং) */}
       {categories.length > 0 && (
-        <div className="px-3 mt-4 flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <a 
-              key={cat.id}
-              href={cat.link_url}
-              // 👇 বাটন কালার আপনার দেওয়া কোড (#183f35) এ আপডেট করা হয়েছে
-              className="inline-flex items-center justify-center gap-2 bg-[#183f35] border border-[#2F4553] rounded-lg px-4 py-2 hover:bg-[#205a4b] transition-colors shadow-lg"
-            >
-              <CategoryIcon name={cat.icon_name} />
-              <span className="text-white text-sm font-semibold whitespace-nowrap">{cat.title}</span>
-            </a>
-          ))}
+        <div className="px-3 mt-4 flex overflow-x-auto hide-scrollbar gap-2 pb-1">
+          {categories.map((cat) => {
+            const isActive = selectedCategory === cat.title;
+            return (
+              <button 
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.title)}
+                className={`inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 whitespace-nowrap transition-all border ${
+                  isActive 
+                  ? "bg-[#183f35] border-[#183f35] text-white shadow-lg" // আপনার কালার কোড
+                  : "bg-[#1A2C38] border-[#2F4553] text-gray-400 hover:bg-[#253B49]"
+                }`}
+              >
+                <CategoryIcon name={cat.icon_name} />
+                <span className="text-xs font-semibold">{cat.title}</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {/* ডাইনামিক গেম কার্ড গ্রিড (৩ কলাম) */}
-      {homeGames.length > 0 && (
-        <div className="px-3 mt-6">
+      {/* 🚀 ফিল্টার করা গেম কার্ড গ্রিড (৩ কলাম) */}
+      <div className="px-3 mt-4">
+        {filteredGames.length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
-            {homeGames.map((game) => (
+            {filteredGames.map((game) => (
               <GameCard
                 key={game.id}
                 title={game.title}
@@ -231,8 +265,12 @@ export default function Home() {
               />
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="text-center text-gray-500 text-sm mt-10">
+            No games found in this category.
+          </div>
+        )}
+      </div>
 
       {/* ফ্লোটিং বাটন */}
       <div className="fixed right-3 bottom-24 flex flex-col gap-3 z-50">
