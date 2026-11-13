@@ -1,28 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "../../../lib/supabase/client"; // আপনার পাথ চেক করে নিন
+import { supabase } from "../../../lib/supabase/client"; 
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
 
-  // মডাল স্টেট
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
-  // ফর্ম স্টেট
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
     icon_name: "gamepad",
     link_url: "",
     serial: 0,
-    image_path: "",
+    image_path: "", // এখানে এখন এক্সটার্নাল URL সেভ হবে
     is_game: false,
-    category_group: "General", // নতুন: কাস্টম ক্যাটাগরি
+    category_group: "General",
     display_home: true,
     display_game_hub: false,
   });
@@ -109,7 +107,7 @@ export default function AdminCategoriesPage() {
         serial: Number(formData.serial),
         image_path: formData.image_path.trim(),
         is_game: formData.is_game,
-        category_group: formData.category_group.trim(), // কাস্টম ক্যাটাগরি
+        category_group: formData.category_group.trim(),
         display_locations: locations,
       };
 
@@ -126,6 +124,7 @@ export default function AdminCategoriesPage() {
       setIsModalOpen(false);
       fetchCategories();
     } catch (err: any) {
+      alert("Error: " + err.message);
       setMessage({ type: "error", text: err.message });
     } finally {
       setSaving(false);
@@ -229,8 +228,8 @@ export default function AdminCategoriesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-semibold mb-1 block">Category Group (Custom Name)</label>
-                  <input type="text" name="category_group" value={formData.category_group} onChange={handleChange} className="w-full border rounded-lg p-2" placeholder="e.g. Originals, Slots, Ludo" required />
+                  <label className="text-sm font-semibold mb-1 block">Category Group</label>
+                  <input type="text" name="category_group" value={formData.category_group} onChange={handleChange} className="w-full border rounded-lg p-2" placeholder="e.g. Originals" required />
                 </div>
                 <div>
                   <label className="text-sm font-semibold mb-1 block">Serial (Order)</label>
@@ -243,9 +242,11 @@ export default function AdminCategoriesPage() {
                 <input type="text" name="link_url" value={formData.link_url} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm" placeholder="/Games/Spribe/dice" required />
               </div>
 
+              {/* 👇 এখানে লেবেল এবং প্লেসহোল্ডার আপডেট করা হয়েছে */}
               <div>
-                <label className="text-sm font-semibold mb-1 block">Image Path</label>
-                <input type="text" name="image_path" value={formData.image_path} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm" placeholder="/images/dice.png" />
+                <label className="text-sm font-semibold mb-1 block">Image URL (Full Link)</label>
+                <input type="text" name="image_path" value={formData.image_path} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm" placeholder="https://example.com/image.png" />
+                <p className="text-xs text-gray-400 mt-1">Paste direct image link starting with http:// or https://</p>
               </div>
 
               <div className="flex items-center gap-2 p-3 bg-gray-50 border rounded-lg">
