@@ -7,7 +7,7 @@ import GameCard from "../components/GameCard";
 import { supabase } from "../lib/supabase/client";
 import { useLanguage } from "../lib/LanguageContext";
 
-// ডাইনামিক SVG আইকন হেল্পার (ডিফল্ট আইকন)
+// ডাইনামিক SVG আইকন হেল্পার
 const CategoryIcon = () => {
   return (
     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,10 +23,13 @@ export default function Home() {
   const [currentBanner, setCurrentBanner] = useState(0);
   
   // ক্যাটাগরি এবং গেম স্টেট
-  const [categories, setCategories] = useState<string[]>([]); // 👈 এখন শুধু ক্যাটাগরির নাম থাকবে
+  const [categories, setCategories] = useState<string[]>([]);
   const [allHomeGames, setAllHomeGames] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(""); 
   const [filteredGames, setFilteredGames] = useState<any[]>([]); 
+
+  // লাইভ সাপোর্ট লিংক স্টেট
+  const [supportLink, setSupportLink] = useState<string>("");
   
   const { t, language } = useLanguage();
 
@@ -61,7 +64,18 @@ export default function Home() {
         .order("serial", { ascending: true });
       if (bannerData) setBanners(bannerData);
 
-      // ২. শুধুমাত্র গেমগুলো ফেচ করা হবে (is_game = true)
+      // ২. অ্যাডমিন সেটিংস থেকে সাপোর্ট লিংক ফেচ
+      const { data: settingsData } = await supabase
+        .from("admin_settings")
+        .select("support_link")
+        .limit(1)
+        .maybeSingle();
+        
+      if (settingsData && settingsData.support_link) {
+        setSupportLink(settingsData.support_link);
+      }
+
+      // ৩. গেম ফেচ (Home Page এর জন্য)
       const { data: gameData } = await supabase
         .from("home_categories_create")
         .select("*")
@@ -73,7 +87,7 @@ export default function Home() {
       if (gameData) {
         setAllHomeGames(gameData);
 
-        // 🚀 গেমগুলোর category_group থেকে অটোমেটিক ইউনিক ক্যাটাগরি বের করা
+        // অটোমেটিক ইউনিক ক্যাটাগরি বের করা
         const uniqueCats = Array.from(new Set(gameData.map(g => g.category_group || "General")));
         setCategories(uniqueCats as string[]);
 
@@ -110,7 +124,7 @@ export default function Home() {
     }
   }, [selectedCategory, allHomeGames]);
 
-
+  // ব্যানার অটো স্লাইড
   useEffect(() => {
     if (banners.length > 1 && !isDragging) {
       const interval = setInterval(() => {
@@ -120,6 +134,7 @@ export default function Home() {
     }
   }, [banners.length, isDragging]);
 
+  // ম্যানুয়াল সোয়াইপ হ্যান্ডলার
   const handleStart = (x: number) => { setIsDragging(true); setStartX(x); };
   const handleEnd = (x: number) => {
     setIsDragging(false);
@@ -135,7 +150,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#0d241e] pb-20 relative overflow-hidden">
       
-      {/* গ্লোবাল স্টাইল (স্ক্রলবার হাইড করার জন্য) */}
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(100%); }
@@ -165,11 +179,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ব্যানার */}
+      {/* 🚀 ব্যানার (Smooth Sliding Effect) */}
       <div className="px-3 mt-3">
         <div 
           ref={sliderRef}
-          className="bg-[#092238] border border-[#2F4553] rounded-xl overflow-hidden relative flex items-center justify-center w-full min-h-[100px] cursor-grab active:cursor-grabbing touch-pan-y"
+          className="bg-[#092238] border border-[#2F4553] rounded-xl overflow-hidden relative w-full min-h-[100px] cursor-grab active:cursor-grabbing touch-pan-y flex flex-col"
           onMouseDown={(e) => handleStart(e.clientX)}
           onMouseUp={(e) => handleEnd(e.clientX)}
           onMouseLeave={() => setIsDragging(false)}
@@ -178,17 +192,23 @@ export default function Home() {
         >
           {banners.length > 0 ? (
             <>
-              {banners.map((banner, index) => (
-                <a 
-                  key={banner.id}
-                  href={banner.redirect_url || "#"} 
-                  className={`w-full transition-opacity duration-700 ease-in-out ${
-                    index === currentBanner ? "opacity-100 z-10 relative block" : "opacity-0 z-0 absolute pointer-events-none hidden"
-                  }`}
-                >
-                  <img src={banner.image_url} alt="Banner" className="w-full h-auto object-contain pointer-events-none" />
-                </a>
-              ))}
+              {/* স্লাইডার কন্টেইনার */}
+              <div 
+                className="flex transition-transform duration-500 ease-in-out w-full h-full"
+                style={{ transform: `translateX(-${currentBanner * 100}%)` }}
+              >
+                {banners.map((banner, index) => (
+                  <a 
+                    key={banner.id}
+                    href={banner.redirect_url || "#"} 
+                    className="w-full flex-shrink-0 block"
+                  >
+                    <img src={banner.image_url} alt="Banner" className="w-full h-auto object-contain pointer-events-none" />
+                  </a>
+                ))}
+              </div>
+              
+              {/* ডট ইন্ডিকেটর */}
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-20 pointer-events-none">
                 {banners.map((_, idx) => (
                   <div key={idx} className={`w-2 h-2 rounded-full transition-colors ${idx === currentBanner ? "bg-yellow-400" : "bg-white/40"}`} />
@@ -196,12 +216,12 @@ export default function Home() {
               </div>
             </>
           ) : (
-            <div className="py-8 text-gray-400 text-sm">No banners available</div>
+            <div className="py-8 text-center text-gray-400 text-sm">No banners available</div>
           )}
         </div>
       </div>
 
-      {/* 🚀 অটোমেটিক ক্যাটাগরি বাটন (পাশাপাশি স্ক্রলিং) */}
+      {/* ক্যাটাগরি বাটন */}
       {categories.length > 0 && (
         <div className="px-3 mt-4 flex overflow-x-auto hide-scrollbar gap-2 pb-1">
           {categories.map((catName, index) => {
@@ -212,7 +232,7 @@ export default function Home() {
                 onClick={() => setSelectedCategory(catName)}
                 className={`inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 whitespace-nowrap transition-all border ${
                   isActive 
-                  ? "bg-[#183f35] border-[#183f35] text-white shadow-lg" // আপনার কালার কোড
+                  ? "bg-[#183f35] border-[#183f35] text-white shadow-lg"
                   : "bg-[#1A2C38] border-[#2F4553] text-gray-400 hover:bg-[#253B49]"
                 }`}
               >
@@ -224,7 +244,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* 🚀 ফিল্টার করা গেম কার্ড গ্রিড (৩ কলাম) */}
+      {/* গেম কার্ড গ্রিড */}
       <div className="px-3 mt-4">
         {filteredGames.length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
@@ -248,13 +268,22 @@ export default function Home() {
         )}
       </div>
 
-      {/* ফ্লোটিং বাটন */}
-      <div className="fixed right-3 bottom-24 flex flex-col gap-3 z-50">
-        <button className="w-10 h-10 rounded-full bg-[#00E701] flex items-center justify-center text-black shadow-lg">✈️</button>
-        <button className="w-10 h-10 rounded-full bg-[#00E701] flex items-center justify-center text-black shadow-lg">✈️</button>
-        <button className="w-10 h-10 rounded-full bg-[#1A2C38] border border-[#2F4553] flex items-center justify-center text-white shadow-lg">f</button>
-        <button className="w-10 h-10 rounded-full bg-[#1A2C38] border border-[#2F4553] flex items-center justify-center text-white shadow-lg">🎧</button>
-      </div>
+      {/* 🚀 নতুন লাইভ সাপোর্ট ফ্লোটিং বাটন */}
+      {supportLink && (
+        <div className="fixed right-3 bottom-24 flex flex-col gap-3 z-50">
+          <a 
+            href={supportLink} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 bg-[#1A2C38] border border-[#2F4553] text-[#00E701] px-4 py-2.5 rounded-full shadow-lg font-bold text-sm hover:bg-[#253B49] hover:scale-105 transition-all"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            Live Support
+          </a>
+        </div>
+      )}
 
       <BottomNav />
     </div>
