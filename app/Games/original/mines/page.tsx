@@ -179,8 +179,7 @@ export default function MinesGamePage() {
 
       if (data) {
         setGameId(data.game_id);
-        // ✅ নতুন SQL এর balance_after হ্যান্ডেল করা হলো
-        const newBal = data.balance_after || data.new_balance;
+        const newBal = Number(data.balance_after || data.new_balance);
         setBalance(newBal);
         setUserProfile((prev: any) => prev ? { ...prev, balance: newBal } : prev);
         
@@ -232,8 +231,9 @@ export default function MinesGamePage() {
           }]);
           setNonce(prev => prev + 1);
         } else {
-          setMultiplier(data.new_multiplier);
-          setProfit(Number(betAmount) * data.new_multiplier - Number(betAmount));
+          const newMult = Number(data.new_multiplier);
+          setMultiplier(newMult);
+          setProfit(Number(betAmount) * newMult - Number(betAmount));
           playSound("click");
           
           setTiles(prev => {
@@ -266,7 +266,7 @@ export default function MinesGamePage() {
 
       if (data) {
         setIsPlaying(false);
-        const newBal = data.balance_after || data.new_balance;
+        const newBal = Number(data.balance_after || data.new_balance);
         setBalance(newBal);
         setUserProfile((prev: any) => prev ? { ...prev, balance: newBal } : prev);
         playSound("win");
@@ -279,9 +279,9 @@ export default function MinesGamePage() {
           return newTiles;
         });
 
-        const winProfit = Number(betAmount) * multiplier - Number(betAmount);
+        const winProfit = Number(betAmount) * Number(multiplier) - Number(betAmount);
         setHistory(prev => [...prev, {
-          id: Date.now().toString(), value: multiplier, isWin: true, profit: winProfit, nonce: nonce, betAmount: Number(betAmount)
+          id: Date.now().toString(), value: Number(multiplier), isWin: true, profit: winProfit, nonce: nonce, betAmount: Number(betAmount)
         }]);
         setNonce(prev => prev + 1);
       }
@@ -347,7 +347,7 @@ export default function MinesGamePage() {
       if (startData && startData.success === false) throw new Error(startData.error);
       
       setGameId(startData.game_id);
-      const startBal = startData.balance_after || startData.new_balance;
+      const startBal = Number(startData.balance_after || startData.new_balance);
       setBalance(startBal);
       setUserProfile((prev: any) => prev ? { ...prev, balance: startBal } : prev);
       
@@ -381,7 +381,7 @@ export default function MinesGamePage() {
           playSound("lose");
           break; 
         } else {
-          currentMultiplier = tileData.new_multiplier;
+          currentMultiplier = Number(tileData.new_multiplier);
           newTilesState[tileIndex] = { ...newTilesState[tileIndex], isRevealed: true, isBomb: false };
           setTiles([...newTilesState]);
           playSound("click");
@@ -391,7 +391,7 @@ export default function MinesGamePage() {
             if (cashoutError) throw cashoutError;
             
             isRoundWin = true;
-            const endBal = cashoutData.balance_after || cashoutData.new_balance;
+            const endBal = Number(cashoutData.balance_after || cashoutData.new_balance);
             setBalance(endBal);
             setUserProfile((prev: any) => prev ? { ...prev, balance: endBal } : prev);
             roundProfit = (currentBet * currentMultiplier) - currentBet;
@@ -512,7 +512,7 @@ export default function MinesGamePage() {
               <div className="limbo-history-container" ref={historyContainerRef}>
                 {history.map((item) => (
                   <div key={item.id} className={`limbo-history-item ${item.isWin ? 'win' : 'lose'}`}>
-                    {item.isWin ? `${item.value.toFixed(2)}x` : t("Loss", "হার")}
+                    {item.isWin ? `${Number(item.value).toFixed(2)}x` : t("Loss", "হার")}
                   </div>
                 ))}
               </div>
@@ -565,7 +565,7 @@ export default function MinesGamePage() {
               <div className="limbo-input-group">
                 <label>{t("Multiplier", "মাল্টিপ্লায়ার")}</label>
                 <div className="limbo-input-wrapper">
-                  <input type="text" value={`${multiplier.toFixed(2)}x`} readOnly style={{ color: multiplier > 1 ? 'var(--limbo-accent)' : '#fff' }} />
+                  <input type="text" value={`${Number(multiplier).toFixed(2)}x`} readOnly style={{ color: multiplier > 1 ? 'var(--limbo-accent)' : '#fff' }} />
                 </div>
               </div>
             </div>
@@ -573,7 +573,7 @@ export default function MinesGamePage() {
             {activeTab === "manual" ? (
               isPlaying ? (
                 <button className="limbo-bet-btn" onClick={handleCashout} disabled={isProcessing || multiplier <= 1.00} style={{ background: multiplier > 1 ? 'var(--limbo-accent)' : '#365244', color: multiplier > 1 ? '#000' : '#fff' }}>
-                  {isProcessing ? t("Processing...", "প্রসেসিং...") : multiplier > 1 ? `${t("Cashout", "ক্যাশআউট")} ৳ ${(Number(betAmount) * multiplier).toFixed(2)}` : t("Pick a Tile", "ঘর বেছে নিন")}
+                  {isProcessing ? t("Processing...", "প্রসেসিং...") : multiplier > 1 ? `${t("Cashout", "ক্যাশআউট")} ৳ ${(Number(betAmount) * Number(multiplier)).toFixed(2)}` : t("Pick a Tile", "ঘর বেছে নিন")}
                 </button>
               ) : (
                 <button className={`limbo-bet-btn ${isProcessing ? "rolling" : ""}`} onClick={handleStartGame} disabled={isProcessing}>
@@ -590,7 +590,7 @@ export default function MinesGamePage() {
               <div className="limbo-amount-group">
                 <div className="limbo-label-row">
                   <label>{t("Bet Amount", "বেট পরিমাণ")}</label>
-                  <span className="limbo-currency">{t("Balance", "ব্যালেন্স")}: {balance.toFixed(2)} BDT</span>
+                  <span className="limbo-currency">{t("Balance", "ব্যালেন্স")}: {Number(balance).toFixed(2)} BDT</span>
                 </div>
                 <div className={`limbo-amount-input-wrap ${(isPlaying || isAutoBetting) ? 'disabled' : ''}`}>
                   <span style={{ color: 'var(--limbo-muted)', fontSize: '1.1rem', fontWeight: 'bold', marginRight: '8px' }}>৳</span>
@@ -608,7 +608,7 @@ export default function MinesGamePage() {
                 </div>
                 <div className={`limbo-amount-input-wrap ${(isPlaying || isAutoBetting) ? 'disabled' : ''}`}>
                   <span style={{ color: 'var(--limbo-muted)', fontSize: '1.1rem', fontWeight: 'bold', marginRight: '8px' }}>৳</span>
-                  <input type="number" value={activeTab === "manual" ? (isPlaying ? profit.toFixed(2) : 0) : autoStats.profit.toFixed(2)} readOnly style={{ color: (activeTab === "manual" ? profit : autoStats.profit) > 0 ? 'var(--limbo-accent)' : (activeTab === "manual" ? profit : autoStats.profit) < 0 ? 'var(--limbo-danger)' : '#fff' }} />
+                  <input type="number" value={activeTab === "manual" ? (isPlaying ? Number(profit).toFixed(2) : 0) : Number(autoStats.profit).toFixed(2)} readOnly style={{ color: (activeTab === "manual" ? profit : autoStats.profit) > 0 ? 'var(--limbo-accent)' : (activeTab === "manual" ? profit : autoStats.profit) < 0 ? 'var(--limbo-danger)' : '#fff' }} />
                 </div>
               </div>
             </div>
@@ -619,7 +619,7 @@ export default function MinesGamePage() {
                   <div style={{ background: "rgba(0, 231, 1, 0.1)", border: "1px solid #00e701", padding: "10px", borderRadius: "8px", marginBottom: "15px", display: "flex", justifyContent: "space-between" }}>
                     <span style={{ color: "#fff", fontSize: "13px" }}>{t("Bets", "বেট")}: <strong>{autoStats.bets}</strong></span>
                     <span style={{ color: autoStats.profit >= 0 ? "#00e701" : "#ff4d4d", fontSize: "13px", fontWeight: "bold" }}>
-                      {t("Profit", "লাভ")}: {autoStats.profit.toFixed(2)} BDT
+                      {t("Profit", "লাভ")}: {Number(autoStats.profit).toFixed(2)} BDT
                     </span>
                   </div>
                 )}
@@ -710,7 +710,7 @@ export default function MinesGamePage() {
           </div>
 
           {/* ✅ Suggested Games Section */}
-          {suggestedGames.length > 0 && (
+          {suggestedGames && suggestedGames.length > 0 && (
             <div className="suggested-section">
               <h2 className="suggested-title">
                 <i className="fa-solid fa-gamepad" style={{ color: '#00E701' }}></i> {t("Suggested Games", "প্রস্তাবিত গেমস")}
@@ -804,10 +804,10 @@ export default function MinesGamePage() {
                     {history.slice().reverse().map((h) => (
                       <tr key={h.id} style={{ borderBottom: '1px dashed #23332b' }}>
                         <td style={{ padding: '8px 4px', color: '#a0aab2' }}>{h.nonce}</td>
-                        <td style={{ padding: '8px 4px' }}>{h.isWin ? `${h.value.toFixed(2)}x` : t("Loss", "হার")}</td>
+                        <td style={{ padding: '8px 4px' }}>{h.isWin ? `${Number(h.value).toFixed(2)}x` : t("Loss", "হার")}</td>
                         <td style={{ padding: '8px 4px', color: h.isWin ? '#00e701' : '#ff4d4d' }}>{h.isWin ? t("Win", "জয়") : t("Loss", "হার")}</td>
                         <td style={{ padding: '8px 4px', textAlign: 'right', color: h.profit > 0 ? '#00e701' : '#ff4d4d' }}>
-                          {h.profit > 0 ? '+' : ''}{h.profit.toFixed(2)}
+                          {h.profit > 0 ? '+' : ''}{Number(h.profit).toFixed(2)}
                         </td>
                       </tr>
                     ))}
@@ -839,11 +839,11 @@ export default function MinesGamePage() {
                   <div className="limbo-stats-column">
                     <div className="limbo-stat-row-new">
                       <span className="limbo-stat-label-new">{t("Profit", "লাভ")}</span>
-                      <span className="limbo-stat-value-new" style={{ color: totalProfit >= 0 ? '#00E701' : '#ff4d4d' }}>{totalProfit >= 0 ? '' : '-'}৳{Math.abs(totalProfit).toFixed(2)}</span>
+                      <span className="limbo-stat-value-new" style={{ color: totalProfit >= 0 ? '#00E701' : '#ff4d4d' }}>{totalProfit >= 0 ? '' : '-'}৳{Math.abs(Number(totalProfit)).toFixed(2)}</span>
                     </div>
                     <div className="limbo-stat-row-new">
                       <span className="limbo-stat-label-new">{t("Wagered", "ওয়েজার্ড")}</span>
-                      <span className="limbo-stat-value-new" style={{ color: '#fff' }}>৳{totalWagered.toFixed(2)}</span>
+                      <span className="limbo-stat-value-new" style={{ color: '#fff' }}>৳{Number(totalWagered).toFixed(2)}</span>
                     </div>
                   </div>
                   <div className="limbo-stats-divider"></div>
@@ -902,7 +902,7 @@ export default function MinesGamePage() {
                   {latestResult ? (
                     <div className="limbo-verify-result-box">
                       <p>{t("Last Multiplier", "সর্বশেষ মাল্টিপ্লায়ার")}:</p>
-                      <h4 style={{ color: latestResult.isWin ? '#00E701' : '#ff4d4d' }}>{latestResult.isWin ? `${latestResult.value.toFixed(2)}x (Win)` : t("Loss", "হার")}</h4>
+                      <h4 style={{ color: latestResult.isWin ? '#00E701' : '#ff4d4d' }}>{latestResult.isWin ? `${Number(latestResult.value).toFixed(2)}x (Win)` : t("Loss", "হার")}</h4>
                       <p style={{ marginTop: '10px' }}>{t("Verify Number", "ভেরিফাই নম্বর")}: <strong>{latestResult.nonce}</strong></p>
                     </div>
                   ) : (
