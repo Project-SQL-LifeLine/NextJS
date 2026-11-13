@@ -9,15 +9,15 @@ interface GameCardProps {
   image_path: string;
   link_url: string;
   category_group?: string;
-  theme_color?: string; // অ্যাডমিন থেকে আসা কালার
+  theme_color?: string; // অ্যাডমিন প্যানেল থেকে আসা কালার
 }
 
 export default function GameCard({ 
   title, 
   image_path, 
   link_url, 
-  category_group = "SHUFFLE", // ডিফল্ট নাম
-  theme_color = "#8b5cf6" // ডিফল্ট কালার (বেগুনি)
+  category_group = "CASINO",
+  theme_color = "#22c55e" // যদি ডাটাবেসে কালার না থাকে
 }: GameCardProps) {
   const [imgError, setImgError] = useState(false);
   const showFallback = !image_path || imgError;
@@ -25,11 +25,11 @@ export default function GameCard({
   return (
     <Link 
       href={link_url} 
+      // 🚨 এখানেই কালারটি ডাইনামিকভাবে বর্ডারে সেট হচ্ছে
       className="shuffle-game-card"
-      style={{ borderColor: theme_color }} // বর্ডার কালার
+      style={{ border: `2px solid ${theme_color}` }} 
     >
       <div className="card-inner">
-        {/* ইমেজ */}
         {!showFallback ? (
           <img 
             src={image_path} 
@@ -44,15 +44,12 @@ export default function GameCard({
           </div>
         )}
         
-        {/* টপ রিবন */}
+        {/* রিবনে কালার সেট হচ্ছে */}
         <div className="card-ribbon" style={{ backgroundColor: theme_color }}>
           {category_group}
         </div>
 
-        {/* নিচের কালো শ্যাডো (টেক্সট ফুটিয়ে তোলার জন্য) */}
         <div className="card-gradient"></div>
-        
-        {/* গেমের নাম */}
         <h3 className="card-title">{title}</h3>
       </div>
     </Link>
