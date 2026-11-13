@@ -1,23 +1,26 @@
+
 .shuffle-game-card {
   display: block;
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 4; /* কার্ডের সাইজ */
-  border-radius: 8px;
+  aspect-ratio: 3 / 4;
+  border-radius: 9px;
   overflow: hidden;
   text-decoration: none;
   background: #111;
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .shuffle-game-card:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 
 .card-inner {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 .card-img {
@@ -26,6 +29,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .card-placeholder {
@@ -34,8 +38,8 @@
   background: #1a1a1a;
   display: grid;
   place-items: center;
-  color: #555;
-  font-size: 10px;
+  color: #777;
+  font-size: 11px;
 }
 
 .card-ribbon {
@@ -43,35 +47,44 @@
   top: 0;
   left: 0;
   width: 100%;
-  padding: 4px 0;
+  min-height: 22px;
+  padding: 4px 2px;
   text-align: center;
-  font-size: 9px;
+  font-size: 8px;
+  letter-spacing: 1.5px;
   font-weight: 900;
   color: #fff;
   text-transform: uppercase;
   z-index: 3;
+  box-sizing: border-box;
 }
 
 .card-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 40%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.92) 0%,
+    rgba(0, 0, 0, 0.25) 28%,
+    transparent 55%
+  );
   z-index: 1;
+  pointer-events: none;
 }
 
 .card-title {
   position: absolute;
-  bottom: 8px;
-  left: 0;
-  width: 100%;
+  bottom: 9px;
+  left: 4px;
+  width: calc(100% - 8px);
   text-align: center;
-  font-size: 14px;
-  font-weight: 900;
+  font-size: clamp(13px, 3vw, 24px);
+  font-weight: 1000;
   color: #fff;
   text-transform: uppercase;
   margin: 0;
   z-index: 2;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
