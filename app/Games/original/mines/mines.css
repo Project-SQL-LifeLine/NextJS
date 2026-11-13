@@ -1,16 +1,5 @@
 /* app/Games/original/mines/mines.css */
-
-/* ✅ limbo.css এর বদলে ভ্যারিয়েবলগুলো এখানে সরাসরি দেওয়া হলো */
-:root {
-  --limbo-bg: #18221E;
-  --limbo-card: #1c2a24;
-  --limbo-input-bg: #111815;
-  --limbo-border: #2b4236;
-  --limbo-text: #ffffff;
-  --limbo-muted: #a0aab2;
-  --limbo-accent: #00E701;
-  --limbo-danger: #ff4d4d;
-}
+@import "../limbo/limbo.css";
 
 /* মাইনস গ্রিড স্টাইল */
 .mines-grid-container {
@@ -215,18 +204,18 @@
 
 /* স্ট্যাটস কার্ড (মেইন কন্টেইনার) */
 .limbo-stats-main-card {
-  background: #18231F !important;
+  background: #18231F !important; /* আপনার দেওয়া bg-primary */
   border: 1px solid #263C32 !important;
 }
 
 /* স্ট্যাটস গ্রিড বক্স (যেখানে Profit, Wins লেখা থাকে) */
 .limbo-stats-layout {
-  background: #1B2A23 !important;
+  background: #1B2A23 !important; /* আপনার দেওয়া bg-card */
   border: 1px solid #263C32 !important;
 }
 
 .limbo-stat-label-new {
-  color: #A0ADB0 !important;
+  color: #A0ADB0 !important; /* আপনার দেওয়া text-secondary */
 }
 
 /* ডিভাইডার লাইন */
@@ -241,7 +230,7 @@
 }
 
 .limbo-graph-area-new {
-  background: #121816 !important;
+  background: #121816 !important; /* আপনার দেওয়া bg-input */
 }
 
 /* গ্রাফের ভেতরের বেসলাইন */
