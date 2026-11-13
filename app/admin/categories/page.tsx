@@ -12,17 +12,19 @@ export default function AdminCategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
+  // ফর্ম স্টেটে theme_color যোগ করা হলো
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
     icon_name: "gamepad",
     link_url: "",
     serial: 0,
-    image_path: "", // এখানে এখন এক্সটার্নাল URL সেভ হবে
+    image_path: "",
     is_game: false,
     category_group: "General",
     display_home: true,
     display_game_hub: false,
+    theme_color: "#8b5cf6", // ডিফল্ট কালার (বেগুনি)
   });
 
   useEffect(() => {
@@ -61,6 +63,7 @@ export default function AdminCategoriesPage() {
         category_group: category.category_group || "General",
         display_home: locations.includes("home"),
         display_game_hub: locations.includes("game_hub"),
+        theme_color: category.theme_color || "#8b5cf6",
       });
     } else {
       setFormData({
@@ -74,6 +77,7 @@ export default function AdminCategoriesPage() {
         category_group: "General",
         display_home: true,
         display_game_hub: false,
+        theme_color: "#8b5cf6",
       });
     }
     setIsModalOpen(true);
@@ -109,6 +113,7 @@ export default function AdminCategoriesPage() {
         is_game: formData.is_game,
         category_group: formData.category_group.trim(),
         display_locations: locations,
+        theme_color: formData.theme_color, // কালার পেলোডে পাঠানো হলো
       };
 
       if (editingCategory) {
@@ -156,7 +161,7 @@ export default function AdminCategoriesPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Game & Category Manager</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage games, categories, and locations.</p>
+          <p className="text-gray-500 text-sm mt-1">Manage games, categories, locations, and colors.</p>
         </div>
         <button onClick={() => openModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -176,7 +181,7 @@ export default function AdminCategoriesPage() {
             <tr className="bg-gray-50 text-gray-600 text-sm border-b">
               <th className="p-4 font-semibold">Serial</th>
               <th className="p-4 font-semibold">Title</th>
-              <th className="p-4 font-semibold">Group</th>
+              <th className="p-4 font-semibold">Color</th>
               <th className="p-4 font-semibold">Locations</th>
               <th className="p-4 font-semibold">Route</th>
               <th className="p-4 font-semibold">Status</th>
@@ -188,7 +193,12 @@ export default function AdminCategoriesPage() {
               <tr key={cat.id} className="border-b hover:bg-gray-50 text-sm">
                 <td className="p-4 font-bold">#{cat.serial}</td>
                 <td className="p-4 font-bold text-gray-900">{cat.title}</td>
-                <td className="p-4"><span className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-bold border border-indigo-100">{cat.category_group}</span></td>
+                <td className="p-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full border border-gray-300" style={{ backgroundColor: cat.theme_color || '#22c55e' }}></div>
+                    <span className="text-xs font-mono">{cat.theme_color || '#22c55e'}</span>
+                  </div>
+                </td>
                 <td className="p-4 flex gap-1 flex-wrap">
                   {cat.display_locations?.map((loc: string) => (
                     <span key={loc} className="bg-blue-50 text-blue-600 px-2 py-1 rounded text-[10px] font-bold uppercase">{loc}</span>
@@ -215,6 +225,7 @@ export default function AdminCategoriesPage() {
           <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold text-gray-900 mb-4">{editingCategory ? "Edit Item" : "Add New Item"}</h2>
             <form onSubmit={handleSave} className="flex flex-col gap-4">
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-semibold mb-1 block">Title</label>
@@ -237,16 +248,24 @@ export default function AdminCategoriesPage() {
                 </div>
               </div>
 
+              {/* 👇 কালার পিকার (নতুন) */}
+              <div>
+                <label className="text-sm font-semibold mb-1 block">Card Theme Color</label>
+                <div className="flex items-center gap-3">
+                  <input type="color" name="theme_color" value={formData.theme_color} onChange={handleChange} className="w-10 h-10 p-0 border-0 rounded cursor-pointer" />
+                  <input type="text" name="theme_color" value={formData.theme_color} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm uppercase" placeholder="#8B5CF6" />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">This color will be used for the card border and ribbon.</p>
+              </div>
+
               <div>
                 <label className="text-sm font-semibold mb-1 block">Route URL</label>
                 <input type="text" name="link_url" value={formData.link_url} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm" placeholder="/Games/Spribe/dice" required />
               </div>
 
-              {/* 👇 এখানে লেবেল এবং প্লেসহোল্ডার আপডেট করা হয়েছে */}
               <div>
-                <label className="text-sm font-semibold mb-1 block">Image URL (Full Link)</label>
+                <label className="text-sm font-semibold mb-1 block">Image URL</label>
                 <input type="text" name="image_path" value={formData.image_path} onChange={handleChange} className="w-full border rounded-lg p-2 font-mono text-sm" placeholder="https://example.com/image.png" />
-                <p className="text-xs text-gray-400 mt-1">Paste direct image link starting with http:// or https://</p>
               </div>
 
               <div className="flex items-center gap-2 p-3 bg-gray-50 border rounded-lg">
