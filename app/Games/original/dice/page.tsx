@@ -4,7 +4,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../../../components/Header";
-// ✅ GameBottomBar এর সঠিক পাথ (আপনার আগের কোডের মতো)
 import GameBottomBar from "../../../../components/GameBottomBar/GameBottomBar";
 import { supabase } from "../../../../lib/supabase/client";
 import { useLanguage } from "../../../../lib/LanguageContext";
@@ -176,21 +175,28 @@ export default function DiceGamePage() {
     playDiceSound();
 
     try {
-      const { data, error } = await supabase.rpc("play_dice_bet", {
+      // ✅ আপনার SQL অনুযায়ী ফাংশনের নাম 'play_dice' এবং p_multiplier বাদ দেওয়া হলো
+      const { data, error } = await supabase.rpc("play_dice", {
         p_bet_amount: amountToBet,
         p_target: rollOver,
         p_is_over: isOver,
-        p_multiplier: multiplier,
       });
 
       if (error) throw error;
+      
+      // SQL যদি success: false রিটার্ন করে (যেমন ব্যালেন্স কম), তবে এরর থ্রো করবে
+      if (data && data.success === false) {
+         throw new Error(data.error);
+      }
 
       if (data) {
         setVisualSliderValue(data.roll);
         setResult(data.roll);
         setIsWin(data.is_win);
-        setBalance(data.new_balance);
-        setUserProfile((prev: any) => prev ? { ...prev, balance: data.new_balance } : prev);
+        
+        // ✅ আপনার SQL এ new_balance এর বদলে balance_after রিটার্ন হচ্ছে
+        setBalance(data.balance_after);
+        setUserProfile((prev: any) => prev ? { ...prev, balance: data.balance_after } : prev);
 
         setHistory(prev => [...prev, {
           id: Date.now().toString(),
