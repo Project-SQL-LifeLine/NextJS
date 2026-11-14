@@ -1,195 +1,812 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client"; 
-import Link from "next/link"; // 👈 Deposit লিংকের জন্য ইমপোর্ট করা হলো
-import "./MenuBar.css";
+import { useEffect, useState, useRef } from "react";
+import { supabase } from "@/lib/supabase/client";
+import MenuBar from "./Components/MenuBar"; 
+import "./royel.css";
 
 const t = (en: string, bn: string) => en;
 
-interface MenuBarProps {
-  recentResults: any[];
-  onOpenModal: (title: string, content: string) => void;
-  isSoundOn: boolean;
-  onToggleSound: () => void;
-  clientSeed: string;
-  serverSeedHash: string;
-  nonce: number;
-  onChangeClientSeed: (newSeed: string) => void;
-  onOpenStats: () => void; 
-  onShowRecent: () => void;
-}
+const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
+  { number: 2,    multiplier: 2,   weight: 2500 },
+  { number: 70,   multiplier: 40,  weight: 600  },
+  { number: 3,    multiplier: 3,   weight: 2000 },
+  { number: 1000, multiplier: 50,  weight: 400  },
+  { number: 5,    multiplier: 5,   weight: 1000 },
+  { number: 90,   multiplier: 60,  weight: 300  },
+  { number: 8,    multiplier: 8,   weight: 800  },
+  { number: 300,  multiplier: 70,  weight: 200  },
+  { number: 10,   multiplier: 10,  weight: 500  },
+  { number: 150,  multiplier: 80,  weight: 150  },
+  { number: 200,  multiplier: 15,  weight: 400  },
+  { number: 20,   multiplier: 100, weight: 100  },
+  { number: 30,   multiplier: 20,  weight: 300  },
+  { number: 40,   multiplier: 150, weight: 50   },
+  { number: 500,  multiplier: 25,  weight: 200  },
+  { number: 60,   multiplier: 200, weight: 30, hot: true },
+  { number: 50,   multiplier: 30,  weight: 200  },
+  { number: 80,   multiplier: 300, weight: 15, hot: true },
+  { number: 700,  multiplier: 35,  weight: 100  },
+  { number: 100,  multiplier: 500, weight: 5, hot: true },
+];
 
-export default function MenuBar({
-  recentResults,
-  onOpenModal,
-  isSoundOn,
-  onToggleSound,
-  clientSeed,
-  serverSeedHash,
-  nonce,
-  onChangeClientSeed,
-  onOpenStats,
-  onShowRecent,
-}: MenuBarProps) {
-  const [isOpen, setIsOpen] = useState(false);
+const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
+
+const getChipImage = (amount: number) => {
+  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    return `/chip/${amount}.png`;
+  }
+  return `/NextJS/chip/${amount}.png`;
+};
+
+const colors: string[] = [
+  "#214E3A", "#8B2929", "#28563E", "#7B2929",
+  "#244A38", "#922F2F", "#28563E", "#7B2929",
+  "#214E3A", "#922F2F", "#28563E", "#7B2929",
+  "#214E3A", "#922F2F", "#28563E", "#7B2929",
+  "#214E3A", "#922F2F", "#28563E", "#7B2929",
+];
+
+const ROUND_COUNTDOWN = 20;
+const BET_LOCK_SECONDS = 5;
+const SPIN_DURATION = 7000;
+
+const WheelLoader = () => (
+  <svg viewBox="0 0 100 100" className="wheel-loader-svg">
+    <circle cx="50" cy="50" r="45" stroke="rgba(255,255,255,0.15)" strokeWidth="5" fill="none" />
+    <circle cx="50" cy="50" r="45" stroke="#ffffff" strokeWidth="5" fill="none" strokeDasharray="60 220" strokeLinecap="round" />
+    <circle cx="50" cy="50" r="28" stroke="rgba(255,255,255,0.4)" strokeWidth="3" fill="none" />
+    {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+      <line key={deg} x1="50" y1="15" x2="50" y2="25" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" transform={`rotate(${deg} 50 50)`} />
+    ))}
+    <circle cx="50" cy="50" r="6" fill="#ffffff" />
+  </svg>
+);
+
+export default function RoyelPage() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [recentResults, setRecentResults] = useState<{ number: number; multiplier: number; color: string }[]>([]);
+  const [isRecentOpen, setIsRecentOpen] = useState(false);
 
   useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest(".mb-wrapper")) {
-        setIsOpen(false);
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("wheel_recent_results");
+      if (saved) {
+        try { setRecentResults(JSON.parse(saved)); } catch (e) {}
       }
-    };
-    document.addEventListener("click", handleOutsideClick);
-    return () => document.removeEventListener("click", handleOutsideClick);
+    }
   }, []);
 
-  useEffect(() => {
-    (window as any).saveClientSeed = (newSeed: string) => {
-      if (!newSeed.trim()) return;
-      onChangeClientSeed(newSeed.trim());
-      
-      const input = document.getElementById("client-seed-input") as HTMLInputElement;
-      if(input) input.value = newSeed.trim();
+  const [soundOn, setSoundOn] = useState(true);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
 
-      const btn = document.getElementById("save-seed-btn");
-      if (btn) {
-        btn.textContent = "Seed Changed!";
-        btn.style.background = "#35e59a";
-        setTimeout(() => {
-          btn.textContent = "Generate New Seed";
-          btn.style.background = "#F5C451";
-        }, 2000);
+  const [clientSeed, setClientSeed] = useState("");
+  const [serverSeedHash, setServerSeedHash] = useState("");
+  const [nonce, setNonce] = useState(0);
+  
+  const [selectedChip, setSelectedChip] = useState(10);
+  const [isChipMenuOpen, setIsChipMenuOpen] = useState(false);
+
+  const [modal, setModal] = useState({ open: false, title: "", content: "" });
+
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const soundRef = useRef(soundOn);
+
+  useEffect(() => { soundRef.current = soundOn; }, [soundOn]);
+
+  const playSound = (type: "bet" | "win") => {
+    if (!soundRef.current) return;
+    try {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
-    };
-    return () => { delete (window as any).saveClientSeed; };
-  }, [onChangeClientSeed]);
-
-  const handleHistory = () => {
-    if (!recentResults.length) {
-      onOpenModal(t("HISTORY", "হিস্ট্রি"), `<p class="modal-text">${t("No results available yet.", "এখনো কোনো রেজাল্ট নেই।")}</p>`);
-    } else {
-      const html = `<div class="history-list">${recentResults.map((r) => `
-        <div class="history-item" style="background:${r.color}">
-          ${r.number}<small>${r.multiplier}X</small>
-        </div>`).join("")}</div>`;
-      onOpenModal(t("RESULT HISTORY", "রেজাল্ট হিস্ট্রি"), html);
-    }
-    setIsOpen(false);
+      const ctx = audioCtxRef.current;
+      if (ctx.state === "suspended") ctx.resume();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      if (type === "bet") { osc.frequency.value = 600; gain.gain.value = 0.1; }
+      if (type === "win") { osc.frequency.value = 800; gain.gain.value = 0.2; }
+      
+      osc.start();
+      osc.stop(ctx.currentTime + 0.1);
+    } catch (e) { /* ignore */ }
   };
 
-  const handlePayoutLimit = () => {
-    onOpenModal(t("PAYOUT LIMIT", "পেআউট লিমিট"), `
-      <div class="modal-text">
-        <p style="margin-bottom:10px;"><strong>1.5% House Fee:</strong> A 1.5% fee is applied to all winning payouts.</p>
-        <p style="margin-bottom:10px;"><strong>Dynamic Safe Pool:</strong> To ensure platform stability, the maximum payout and bet limits are dynamically adjusted based on the current round's total bets.</p>
-        <p><strong>System Protection:</strong> Bets that exceed the safe limit may have their win probability dynamically adjusted by the system to protect the house edge.</p>
-      </div>
-    `);
-    setIsOpen(false);
+  const playSpinSound = (durationMs: number) => {
+    if (!soundRef.current) return;
+    try {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx.state === "suspended") ctx.resume();
+
+      const bufferSize = ctx.sampleRate * (durationMs / 1000);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const noiseSource = ctx.createBufferSource();
+      noiseSource.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(600, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + (durationMs / 1000));
+      filter.Q.value = 1.5;
+
+      const gainNode = ctx.createGain();
+      gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (durationMs / 1000));
+
+      noiseSource.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      noiseSource.start();
+      noiseSource.stop(ctx.currentTime + (durationMs / 1000));
+    } catch (e) { /* ignore */ }
   };
 
-  const handleFairness = () => {
-    const autoNewSeed = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+  const openModal = (title: string, content: string) => {
+    setModal({ open: true, title, content });
+  };
+
+  const handleClientSeedChange = async (newSeed: string) => {
+    setClientSeed(newSeed);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("profiles").update({ pf_client_seed: newSeed }).eq("id", user.id);
+      }
+    } catch (e) { console.warn(e); }
+  };
+
+  const buildBeadRoad = () => {
+    if (recentResults.length === 0) return [];
+    const history = [...recentResults].reverse();
+    const columns: { number: number; color: string; type: string }[][] = [];
+    let currentCol: { number: number; color: string; type: string }[] = [];
+    let lastType = "";
+
+    history.forEach((res, index) => {
+      const isGreen = res.color === "#214E3A" || res.color === "#28563E" || res.color === "#244A38";
+      const type = isGreen ? "Green" : "Red";
+
+      if (index === 0) {
+        currentCol.push({ ...res, type });
+      } else {
+        if (type === lastType) {
+          currentCol.push({ ...res, type });
+        } else {
+          columns.push(currentCol);
+          currentCol = [{ ...res, type }];
+        }
+      }
+      lastType = type;
+    });
     
-    const html = `
-      <div class="modal-text">
-        <p><strong>Server Seed Hash:</strong><br/>
-          <span style="word-break:break-all; font-size:10px; color:#a9c4b3; background:#0d241e; padding:4px; display:block; border-radius:4px; margin-top:4px;">${serverSeedHash || "Loading..."}</span>
-        </p>
-        <p style="margin-top:15px;"><strong>Client Seed:</strong><br/>
-           <input type="text" id="client-seed-input" value="${clientSeed}" readonly style="width:100%; padding:8px; margin:5px 0; border-radius:5px; border:1px solid #fff; background:#0d241e; color:#fff; font-size:11px; box-sizing:border-box; opacity: 0.8;"/>
-           <button id="save-seed-btn" onclick="window.saveClientSeed('${autoNewSeed}')" style="padding:6px 12px; background:#F5C451; color:#000; border-radius:4px; font-weight:bold; font-size:11px; margin-top:5px; cursor:pointer; border:none;">Generate New Seed</button>
-        </p>
-        <p style="margin-top:15px;"><strong>Current Nonce:</strong> ${nonce}</p>
-        <p style="margin-top:15px; font-size:10px; color:#a9c4b3;">The result is generated using HMAC-SHA256(Client Seed : Nonce, Server Seed).</p>
-      </div>
-    `;
-    onOpenModal(t("FAIRNESS & SEEDS", "ফেয়ারনেস ও সিড"), html);
-    setIsOpen(false);
+    if (currentCol.length > 0) columns.push(currentCol);
+    return columns;
   };
 
-  const handlePolicy = () => {
-    onOpenModal(t("POLICY & WARNINGS", "পলিসি ও সতর্কতা"), `
-      <div class="modal-text" style="color:#ffb3b3;">
-        <h4 style="color:#ff4d4d; margin-bottom:8px;">Strict Anti-Fraud Policy</h4>
-        <ul style="padding-left:15px; margin-bottom:10px; line-height:1.5;">
-          <li style="margin-bottom:5px;">Any attempt to manipulate the game using external software, bots, scripts, or exploiting system bugs is strictly prohibited.</li>
-          <li style="margin-bottom:5px;">Using VPNs or proxies to bypass regional restrictions or multi-accounting is not allowed.</li>
-          <li>If an account is found violating these rules, the account will be immediately terminated and all balances will be forfeited without prior notice.</li>
-        </ul>
-        <p style="color:#a9c4b3; font-size:10px; margin-top:10px;">Play responsibly. Gambling can be addictive.</p>
-      </div>
-    `);
-    setIsOpen(false);
+  const calculateStats = () => {
+    const total = recentResults.length;
+    if (total === 0) return { greenPct: 0, redPct: 0 };
+    
+    let greenCount = 0;
+    let redCount = 0;
+
+    recentResults.forEach(r => {
+      const isGreen = r.color === "#214E3A" || r.color === "#28563E" || r.color === "#244A38";
+      if (isGreen) greenCount++;
+      else redCount++;
+    });
+
+    return {
+      greenPct: ((greenCount / total) * 100).toFixed(1),
+      redPct: ((redCount / total) * 100).toFixed(1)
+    };
   };
+
+  const stats = calculateStats();
+  const beadRoadColumns = buildBeadRoad();
+
+  useEffect(() => {
+    let balance = 0;
+    let balanceLoaded = false;
+    let bets: Record<number, number> = {};
+    let betChips: Record<number, number[]> = {};
+    let betHistory: { number: number; amount: number }[] = []; 
+    let spinning = false;
+    let wheelRotation = 0;
+    let bettingOpen = true;
+    let roundPhase = "betting";
+    let currentUserId: string | null = null;
+    let lastWinnerNumber: number | null = null;
+
+    const ROUND_KEY = 'wheel_round_start_time';
+    let roundStartTime = typeof window !== "undefined" ? parseInt(localStorage.getItem(ROUND_KEY) || '0') : Date.now();
+    if (!roundStartTime || Date.now() - roundStartTime > (ROUND_COUNTDOWN + 10) * 1000) {
+      roundStartTime = Date.now();
+      if (typeof window !== "undefined") localStorage.setItem(ROUND_KEY, roundStartTime.toString());
+    }
+
+    const wheel = document.getElementById("wheel") as HTMLDivElement;
+    const wheelLabels = document.getElementById("wheelLabels") as unknown as SVGSVGElement;
+    const grid = document.getElementById("numberGrid") as HTMLDivElement;
+    const segmentAngle = 360 / numbers.length;
+    const svgNS = "http://www.w3.org/2000/svg";
+
+    function format(n: number): string { return Number(n).toLocaleString("en-US"); }
+    function money(n: number): string { return "৳" + format(n); }
+    function getTotalBet(): number { return Object.values(bets).reduce((s, a) => s + a, 0); }
+
+    function updateBottomBar(): void {
+      const balanceEl = document.getElementById("bottomBalance") as HTMLElement;
+      balanceEl.textContent = balanceLoaded ? money(balance) : "...";
+      document.getElementById("bottomTotalBet")!.textContent = money(getTotalBet());
+    }
+
+    async function fetchBalance(): Promise<void> {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const user = userData?.user;
+        if (!user) {
+          currentUserId = null; balanceLoaded = true; balance = 0; updateBottomBar(); return;
+        }
+        currentUserId = user.id;
+        
+        const { data: profile, error } = await supabase
+          .from("profiles").select("balance, pf_client_seed, pf_server_seed_hash, game_nonces").eq("id", user.id).single();
+          
+        if (error) { balanceLoaded = true; updateBottomBar(); return; }
+        
+        balance = profile?.balance != null ? Number(profile.balance) : 0;
+        setClientSeed(profile?.pf_client_seed || "");
+        setServerSeedHash(profile?.pf_server_seed_hash || "");
+        setNonce(profile?.game_nonces?.wheel || 0);
+
+        balanceLoaded = true; updateBottomBar(); renderGrid();
+      } catch (err) {
+        balanceLoaded = true; updateBottomBar();
+      }
+    }
+
+    const gradient = colors.map((color, index) => `${color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`).join(",");
+    wheel.style.background = `conic-gradient(${gradient})`;
+
+    const centerX = 145;
+    const centerY = 145;
+    const labelRadius = 92;
+
+    numbers.forEach((item, index) => {
+      const segmentCenter = index * segmentAngle + segmentAngle / 2;
+
+      const group = document.createElementNS(svgNS, "g");
+      group.setAttribute("transform", `rotate(${segmentCenter} ${centerX} ${centerY})`);
+
+      const numberText = document.createElementNS(svgNS, "text");
+      numberText.setAttribute("x", String(centerX));
+      numberText.setAttribute("y", String(centerY - labelRadius - 4));
+      numberText.setAttribute("class", "wheel-number");
+      numberText.textContent = String(item.number);
+
+      const multiplierText = document.createElementNS(svgNS, "text");
+      multiplierText.setAttribute("x", String(centerX));
+      multiplierText.setAttribute("y", String(centerY - labelRadius + 8));
+      multiplierText.setAttribute("class", "wheel-multiplier");
+      multiplierText.textContent = item.multiplier + "X";
+
+      group.appendChild(numberText);
+      group.appendChild(multiplierText);
+      wheelLabels.appendChild(group);
+    });
+
+    function applyWheelRotation(degrees: number): void {
+      wheelRotation = degrees;
+      wheel.style.transform = `translate(-50%,-50%) rotate(${degrees}deg)`;
+      wheelLabels.style.transform = `translate(-50%,-50%) rotate(${degrees}deg)`;
+    }
+
+    function addBet(number: number): void {
+      if (!bettingOpen || spinning) return;
+      if (!balanceLoaded) return;
+      const amount = selectedChip;
+      if (balance < amount) return; 
+      
+      playSound("bet"); 
+      
+      balance -= amount;
+      bets[number] = (bets[number] || 0) + amount;
+      if (!betChips[number]) betChips[number] = [];
+      betChips[number].push(amount);
+      betHistory.push({ number, amount });
+
+      updateBottomBar();
+      renderGrid();
+    }
+
+    function handleUndo(): void {
+      if (!bettingOpen || spinning) return;
+      if (betHistory.length === 0) return;
+
+      const lastBet = betHistory.pop()!;
+      balance += lastBet.amount;
+      bets[lastBet.number] -= lastBet.amount;
+
+      if (bets[lastBet.number] <= 0) {
+        delete bets[lastBet.number];
+        delete betChips[lastBet.number];
+      } else {
+        if (betChips[lastBet.number]) {
+          betChips[lastBet.number].pop();
+        }
+      }
+
+      playSound("bet");
+      updateBottomBar();
+      renderGrid();
+    }
+
+    function handleDouble(): void {
+      if (!bettingOpen || spinning) return;
+      const totalBet = getTotalBet();
+      if (totalBet === 0) return;
+      
+      if (balance < totalBet) {
+        openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${t("Insufficient balance to double.", "ডাবল করার জন্য পর্যাপ্ত ব্যালেন্স নেই।")}</p>`);
+        return;
+      }
+
+      balance -= totalBet;
+      Object.keys(bets).forEach(k => {
+        const num = Number(k);
+        betHistory.push({ number: num, amount: bets[num] });
+        bets[num] *= 2;
+        if (!betChips[num]) betChips[num] = [];
+        betChips[num].push(bets[num] / 2);
+      });
+
+      playSound("bet");
+      updateBottomBar();
+      renderGrid();
+    }
+
+    function renderGrid(): void {
+      grid.innerHTML = "";
+      numbers.forEach((item, index) => {
+        const amount = bets[item.number] || 0;
+        const chips = betChips[item.number] || [];
+        const isRed = index % 2 === 1;
+        const colorClass = isRed ? "roulette-red" : "roulette-green";
+        const isWinner = lastWinnerNumber === item.number;
+        const hitClass = isWinner ? (isRed ? "hit-red" : "hit-green") : "";
+
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className =
+          "number-card " + colorClass +
+          (amount > 0 ? " selected" : "") +
+          (isWinner ? " " + hitClass : "") +
+          (!bettingOpen ? " locked" : "") +
+          (item.hot ? " hot" : "");
+
+        let chipDisplay = "";
+        if (amount > 0) {
+          const lastChip = chips.length ? chips[chips.length - 1] : selectedChip;
+          chipDisplay = `
+           <span class="bet-chip-display">
+            <span class="mini-chip" style="background-image: url('${getChipImage(lastChip)}');"></span>
+           </span>`;
+        }
+
+        const hotBadge = item.hot ? '<span class="hot-badge">🔥 HOT</span>' : '';
+
+        card.innerHTML = `
+         ${hotBadge}
+         <span class="number">${item.number}</span>
+         <span class="multiplier">${item.multiplier}X</span>
+         ${chipDisplay}`;
+
+        card.addEventListener("click", () => addBet(item.number));
+        grid.appendChild(card);
+      });
+    }
+
+    function updateCenterTimer(value: number | string | null, type: string = ""): void {
+      const timer = document.getElementById("wheelCountdown") as HTMLElement;
+      if (value === null) { timer.className = "center-countdown hidden"; return; }
+      timer.textContent = String(value);
+      timer.className = "center-countdown" + (type ? " " + type : "");
+    }
+
+    function animateWheel(startAngle: number, endAngle: number, duration: number): Promise<void> {
+      return new Promise((resolve) => {
+        wheel.style.transition = `transform ${duration}ms cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
+        wheelLabels.style.transition = `transform ${duration}ms cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
+        void wheel.offsetHeight;
+        wheel.style.transform = `translate(-50%,-50%) rotate(${endAngle}deg)`;
+        wheelLabels.style.transform = `translate(-50%,-50%) rotate(${endAngle}deg)`;
+        setTimeout(() => {
+          wheel.style.transition = 'none';
+          wheelLabels.style.transition = 'none';
+          wheelRotation = endAngle;
+          resolve();
+        }, duration);
+      });
+    }
+
+    function resetRound(): void {
+      spinning = false; bettingOpen = true; roundPhase = "betting"; 
+      
+      roundStartTime = Date.now();
+      if (typeof window !== "undefined") localStorage.setItem(ROUND_KEY, roundStartTime.toString());
+
+      renderGrid(); updateBottomBar(); updateCenterTimer(ROUND_COUNTDOWN);
+      void fetchBalance();
+    }
+
+    async function startAutomaticSpin(): Promise<void> {
+      if (spinning) return;
+      spinning = true; bettingOpen = false; roundPhase = "spinning";
+      renderGrid(); updateCenterTimer(null);
+
+      const totalBet = getTotalBet();
+      let winnerNumber = 0;
+      let rpcData = null;
+
+      if (totalBet > 0) {
+        const payload = Object.keys(bets).map(k => ({ number: Number(k), amount: bets[Number(k)] }));
+        try {
+          const { data, error } = await supabase.rpc('play_wheel', { p_bets: payload });
+          if (error) {
+            openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${error.message}</p>`);
+            resetRound(); return;
+          }
+          rpcData = data;
+          winnerNumber = Number(data.winner_number);
+          setNonce(data.nonce);
+        } catch (err: any) {
+          openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${err.message || "Network Error"}</p>`);
+          resetRound(); return;
+        }
+      } else {
+        // 👇 ডেমো স্পিনে ননস (Nonce) ভিত্তিক ফেজ লজিক 👇
+        const currentPhase = nonce % 3;
+        let baseWeights = [];
+
+        if (currentPhase === 0) {
+          // Balanced (50% Green, 50% Red)
+          baseWeights = numbers.map(n => {
+            const isRed = n.number % 2 !== 0;
+            return { ...n, adjustedWeight: isRed ? 500 : 500 };
+          });
+        } else if (currentPhase === 1) {
+          // Green Heavy (70% Green, 30% Red)
+          baseWeights = numbers.map(n => {
+            const isRed = n.number % 2 !== 0;
+            let w = isRed ? 100 : 800;
+            if ([70, 1000, 90].includes(n.number)) w = 300; // লো মাল্টিপ্লায়ার রেড
+            return { ...n, adjustedWeight: w };
+          });
+        } else {
+          // Red Heavy (40% Green, 60% Red)
+          baseWeights = numbers.map(n => {
+            const isRed = n.number % 2 !== 0;
+            let w = isRed ? 400 : 400;
+            if ([70, 1000, 90].includes(n.number)) w = 800; // লো মাল্টিপ্লায়ার রেড বেশি
+            else if ([80, 100, 60, 40].includes(n.number)) w = 50; // হাই মাল্টিপ্লায়ার রেড কম
+            return { ...n, adjustedWeight: w };
+          });
+        }
+
+        const totalWeight = baseWeights.reduce((sum, n) => sum + n.adjustedWeight, 0);
+        let rand = Math.random() * totalWeight;
+        let cum = 0;
+        for (let i = 0; i < baseWeights.length; i++) {
+          cum += baseWeights[i].adjustedWeight;
+          if (rand < cum) { winnerNumber = baseWeights[i].number; break; }
+        }
+      }
+
+      const winnerIndex = numbers.findIndex(n => n.number === winnerNumber);
+      const segmentCenter = winnerIndex * segmentAngle + segmentAngle / 2;
+      const current = ((wheelRotation % 360) + 360) % 360;
+      const target = (360 - segmentCenter + 360) % 360;
+      const extraSpins = 360 * 8;
+      const distance = (target - current + 360) % 360;
+      const endRotation = wheelRotation + extraSpins + distance;
+
+      playSpinSound(SPIN_DURATION);
+
+      await animateWheel(wheelRotation, endRotation, SPIN_DURATION);
+      finishDraw(winnerNumber, rpcData);
+    }
+
+    function finishDraw(winnerNumber: number, rpcData: any): void {
+      const winLossElement = document.getElementById("winLoss") as HTMLElement;
+      
+      if (rpcData) {
+        const netResult = Number(rpcData.profit);
+        if (netResult > 0) {
+          playSound("win"); 
+          winLossElement.textContent = "+" + money(netResult);
+          winLossElement.className = "bottom-value win";
+        } else if (netResult < 0) {
+          winLossElement.textContent = "-" + money(Math.abs(netResult));
+          winLossElement.className = "bottom-value loss";
+        } else {
+          winLossElement.textContent = money(0);
+          winLossElement.className = "bottom-value neutral";
+        }
+      } else {
+        winLossElement.textContent = "—";
+        winLossElement.className = "bottom-value neutral";
+      }
+
+      const winData = numbers.find(n => n.number === winnerNumber);
+      const newResult = {
+        number: winnerNumber,
+        multiplier: winData ? winData.multiplier : 0,
+        color: colors[numbers.findIndex((n) => n.number === winnerNumber)],
+      };
+      
+      setRecentResults(prev => {
+        const updated = [newResult, ...prev].slice(0, 50);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("wheel_recent_results", JSON.stringify(updated));
+        }
+        return updated;
+      });
+      
+      lastWinnerNumber = winnerNumber;
+
+      bets = {};
+      betChips = {};
+      betHistory = []; 
+      resetRound();
+    }
+
+    function updateTimer(): void {
+      if (roundPhase === "betting") {
+        const elapsed = (Date.now() - roundStartTime) / 1000;
+        const remaining = Math.max(0, ROUND_COUNTDOWN - Math.floor(elapsed));
+        if (remaining > BET_LOCK_SECONDS) {
+          bettingOpen = true; updateCenterTimer(remaining);
+        } else if (remaining > 0) {
+          bettingOpen = false; updateCenterTimer(remaining, "warning");
+          renderGrid();
+        } else {
+          bettingOpen = false; updateCenterTimer(null);
+          startAutomaticSpin();
+        }
+      } else if (roundPhase === "spinning") {
+        updateCenterTimer(null);
+      }
+    }
+
+    let dataLoaded = false;
+    let minTimePassed = false;
+
+    const checkReady = () => {
+      if (dataLoaded && minTimePassed) setIsLoading(false);
+    };
+
+    fetchBalance().then(() => { dataLoaded = true; checkReady(); });
+    setTimeout(() => { minTimePassed = true; checkReady(); }, 2500);
+
+    applyWheelRotation(0); renderGrid(); updateBottomBar();
+    roundPhase = "betting"; bettingOpen = true; 
+    
+    updateTimer();
+    const timerInterval = setInterval(updateTimer, 100);
+
+    const handleUndoEvent = () => handleUndo();
+    const handleDoubleEvent = () => handleDouble();
+    document.addEventListener('undoBet', handleUndoEvent);
+    document.addEventListener('doubleBet', handleDoubleEvent);
+
+    return () => {
+      clearInterval(timerInterval);
+      wheelLabels.innerHTML = "";
+      document.removeEventListener('undoBet', handleUndoEvent);
+      document.removeEventListener('doubleBet', handleDoubleEvent);
+    };
+  }, []); 
 
   return (
-    <div className="mb-wrapper">
-      <button
-        className={`mb-toggle-btn ${isOpen ? "active" : ""}`}
-        type="button"
-        onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
-        aria-label="Open menu"
-      >
-        <svg viewBox="0 0 24 24">
-          <path d="M4 6h16"></path>
-          <path d="M4 12h16"></path>
-          <path d="M4 18h16"></path>
-        </svg>
-      </button>
-
-      <div className={`mb-panel ${isOpen ? "open" : ""}`}>
-        
-        {/* 👇 নতুন Deposit বাটন (History এর ঠিক উপরে) 👇 */}
-        <Link 
-          href="/wallets/voucher-center" 
-          className="mb-option" 
-          style={{ textDecoration: "none", color: "inherit", display: "flex", justifyContent: "space-between", alignItems: "center" }}
-          onClick={() => setIsOpen(false)}
-        >
-          <span style={{ fontWeight: "900", color: "#F5C451" }}>{t("Deposit", "ডিপোজিট")}</span>
-          <span style={{ fontSize: "10px", color: "#a9c4b3" }}>Voucher</span>
-        </Link>
-
-        <button className="mb-option" onClick={handleHistory}>
-          <span>{t("History", "হিস্ট্রি")}</span>
-        </button>
-
-        <div style={{ display: 'flex', gap: '5px', margin: '4px 0' }}>
-          <button className="mb-option" style={{ flex: 1, padding: '12px 10px' }} onClick={() => { setIsOpen(false); onShowRecent(); }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <svg viewBox="0 0 24 24" style={{ width: '16px', height: '16px', stroke: '#fff', fill: 'none', strokeWidth: 2 }}>
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              <span>{t("Recent", "সাম্প্রতিক")}</span>
-            </div>
-          </button>
-          
-          <button className="mb-option" style={{ flex: 1.5, padding: '12px 10px' }} onClick={() => { setIsOpen(false); onOpenStats(); }}>
-            <span>{t("Statistics", "পরিসংখ্যান")}</span>
-          </button>
-        </div>
-        
-        <button className="mb-option" onClick={handlePayoutLimit}>
-          <span>{t("Payout Limit", "পেআউট লিমিট")}</span>
-        </button>
-        
-        <button className="mb-option" onClick={handleFairness}>
-          <span>{t("Fairness", "ফেয়ারনেস")}</span>
-        </button>
-        
-        <button className="mb-option" onClick={onToggleSound}>
-          <span>{t("Sound", "সাউন্ড")}</span>
-          <div className={`mb-switch ${isSoundOn ? "on" : ""}`}></div>
-        </button>
-        
-        <button className="mb-option" onClick={handlePolicy}>
-          <span>{t("Policy's", "পলিসি")}</span>
-        </button>
+    <>
+      <div className={`loading-overlay ${isLoading ? "" : "hidden"}`}>
+        <WheelLoader />
       </div>
-    </div>
+
+      <div className="royel-page" id="royelPage">
+        <div className="round-bar">
+          <div className="recent-content">
+            <div className="recent-grid">
+              {recentResults.slice(0, 5).map((r, i) => (
+                <div key={i} className="recent-cell" style={{ background: r.color }}>
+                  <span>{r.number}</span><small>{r.multiplier}X</small>
+                </div>
+              ))}
+            </div>
+            <div className="top-controls" style={{ position: "relative" }}>
+              
+              <button className="top-icon-btn" onClick={() => setIsRecentOpen(!isRecentOpen)}>
+                <svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </button>
+
+              <MenuBar
+                recentResults={recentResults}
+                onOpenModal={openModal}
+                isSoundOn={soundOn}
+                onToggleSound={() => setSoundOn(prev => !prev)}
+                clientSeed={clientSeed}
+                serverSeedHash={serverSeedHash}
+                nonce={nonce}
+                onChangeClientSeed={handleClientSeedChange}
+                onOpenStats={() => setIsStatsOpen(true)}
+                onShowRecent={() => setIsRecentOpen(!isRecentOpen)}
+              />
+
+              {isRecentOpen && (
+                <>
+                  <div style={{ position: "fixed", inset: 0, zIndex: 99 }} onClick={() => setIsRecentOpen(false)}></div>
+                  <div className="recent-dropdown-container" style={{ zIndex: 100 }}>
+                    <div className="recent-dropdown-header">
+                      <span>RECENT RESULTS (Last 25)</span>
+                      <button className="recent-dropdown-close" onClick={() => setIsRecentOpen(false)}>×</button>
+                    </div>
+                    <div className="recent-dropdown-grid">
+                      {recentResults.length > 0 ? recentResults.slice(0, 25).map((r, i) => (
+                        <div key={i} className="recent-cell" style={{ background: r.color }}>
+                          <span>{r.number}</span><small>{r.multiplier}X</small>
+                        </div>
+                      )) : <div style={{color: "#a9c4b3", fontSize: "11px", padding: "10px"}}>No results yet.</div>}
+                    </div>
+                  </div>
+                </>
+              )}
+
+            </div>
+          </div>
+        </div>
+
+        <div className="wheel-area">
+          <div className="wheel-frame">
+            <div className="wheel" id="wheel"></div>
+            <svg className="wheel-label" id="wheelLabels" viewBox="0 0 290 290" aria-hidden="true"></svg>
+            <div className="pointer-rotator"></div>
+            <div className="wheel-center">
+              <strong className="center-countdown" id="wheelCountdown">20</strong>
+            </div>
+          </div>
+        </div>
+
+        <div className="wheel-underline"></div>
+
+        <section className="section">
+          <div className="section-head">
+            <h3>{t("SELECT YOUR NUMBERS", "আপনার নাম্বার সিলেক্ট করুন")}</h3>
+            <span>{t("20 NUMBERS", "২০টি নাম্বার")}</span>
+          </div>
+          <div className="number-grid" id="numberGrid"></div>
+        </section>
+
+        <div className="bottom-card">
+          <div className="chip-radial-container">
+            <div className="chip-controls-row" style={{ display: isChipMenuOpen ? "none" : "flex" }}>
+              <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('undoBet'))}>
+                <svg viewBox="0 0 24 24">
+                  <path d="M3 7v6h6"></path>
+                  <path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path>
+                </svg>
+              </button>
+
+              <button 
+                className="chip-main-btn"
+                style={{ backgroundImage: `url('${getChipImage(selectedChip)}')` }}
+                onClick={() => setIsChipMenuOpen(true)}
+              ></button>
+
+              <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('doubleBet'))}>
+                2X
+              </button>
+            </div>
+
+            <div className={`chip-serial-overlay ${isChipMenuOpen ? "open" : ""}`}>
+              <div className="chip-serial-scroll">
+                {chipAmounts.map((amount) => (
+                  <button
+                    key={amount}
+                    className={`chip-serial-item ${selectedChip === amount ? "active" : ""}`}
+                    style={{ backgroundImage: `url('${getChipImage(amount)}')` }}
+                    onClick={() => {
+                      setSelectedChip(amount);
+                      setIsChipMenuOpen(false);
+                    }}
+                  ></button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="bottom-stats">
+            <div className="bottom-item">
+              <span className="bottom-label">{t("BALANCE", "ব্যালেন্স")}</span>
+              <span className="bottom-value bottom-money" id="bottomBalance">...</span>
+            </div>
+            <div className="bottom-item center">
+              <span className="bottom-label">{t("TOTAL BET", "মোট বাজি")}</span>
+              <span className="bottom-value bottom-money" id="bottomTotalBet">৳0</span>
+            </div>
+            <div className="bottom-item right">
+              <span className="bottom-label">{t("WIN / LOSS", "লাভ / লস")}</span>
+              <span className="bottom-value neutral" id="winLoss">—</span>
+            </div>
+          </div>
+        </div>
+
+        {isStatsOpen && (
+          <div className="stats-backdrop" onClick={() => setIsStatsOpen(false)}></div>
+        )}
+        <div className={`stats-drawer ${isStatsOpen ? "open" : ""}`}>
+          <div className="stats-handle" onClick={() => setIsStatsOpen(false)}></div>
+          
+          <div className="stats-header">
+            <h3>STATISTICS</h3>
+            <span>Last {recentResults.length} Results</span>
+          </div>
+
+          <div className="bead-road-wrapper">
+            <div className="bead-road-grid">
+              {beadRoadColumns.map((col, colIdx) => (
+                <div key={colIdx} className="bead-column">
+                  {col.map((cell, cellIdx) => {
+                    const isGreen = cell.type === "Green";
+                    return (
+                      <div 
+                        key={cellIdx} 
+                        className={`bead-cell ${isGreen ? "green" : "red"}`}
+                      >
+                        {cell.number}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="stats-summary-bar">
+            <div className="summary-green" style={{ width: `${stats.greenPct}%` }}>
+              {stats.greenPct}%
+            </div>
+            <div className="summary-red" style={{ width: `${stats.redPct}%` }}>
+              {stats.redPct}%
+            </div>
+          </div>
+        </div>
+
+        <div className={`modal-backdrop ${modal.open ? "open" : ""}`} onClick={() => setModal(prev => ({ ...prev, open: false }))}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <h3>{modal.title}</h3>
+              <button className="modal-close" onClick={() => setModal(prev => ({ ...prev, open: false }))}>×</button>
+            </div>
+            <div id="modalContent" dangerouslySetInnerHTML={{ __html: modal.content }}></div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
