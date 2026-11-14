@@ -390,14 +390,14 @@
  white-space:nowrap;
 }
 
-/* MINI CHIP (Now using Image) */
+/* MINI CHIP */
 .mini-chip{
  width:28px;
  height:28px;
  flex-shrink:0;
  border-radius:50%;
  box-shadow:0 1px 4px #0009;
- background-size: cover;
+ background-size: contain;
  background-position: center;
  background-repeat: no-repeat;
 }
@@ -417,40 +417,41 @@
  z-index:999;
  padding:7px 10px 9px;
 }
+
+/* CHIP ROW - CENTERING FIX */
 .chip-row{
  display:grid;
  grid-template-columns:repeat(7,minmax(0,1fr));
  gap:5px;
  padding-bottom:8px;
  border-bottom:1px solid #426b58;
+ align-items:center;
+ justify-items:center; /* চিপগুলো মাঝে রাখার জন্য */
 }
 
-/* 👇 MAIN CHIPS FIXED 👇 */
+/* MAIN CHIPS - PERFECT CIRCLE FIX */
 .chip{
  width:100%;
- aspect-ratio:1/1;
- max-height:40px;
+ max-width:40px;    /* চওড়া আটকে দেওয়া হলো */
+ aspect-ratio: 1/1; /* উচ্চতা ও প্রস্থা সমান রাখার জন্য */
  border-radius:50%;
  position:relative;
  display:flex;
  align-items:center;
  justify-content:center;
  box-shadow:0 2px 4px #0008;
- border:none; /* বর্ডার বাদ দেওয়া হয়েছে */
- background-size: cover;
+ border:none;
+ background-size: contain; /* ইমেজ চ্যাপ্টা হওয়া বন্ধ করবে */
  background-position: center;
  background-repeat: no-repeat;
  padding:0;
  transition:transform .2s;
- overflow:hidden; /* ইমেজ যেন বাইরে না যায় */
 }
 
-/* আউটলাইন বাদ দিয়ে বক্স-শ্যাডো দিয়ে গোল বর্ডার */
 .chip.active{
  transform:translateY(-3px);
  box-shadow: 0 0 0 2px #fff, 0 0 12px #F5C451;
 }
-/* 👆 MAIN CHIPS FIXED 👆 */
 
 .bottom-stats{
  display:grid;
@@ -569,7 +570,7 @@
  .bottom-value{font-size:10px}
  .bottom-label{font-size:7px}
  .chip-row{gap:3px}
- .chip{max-height:34px;}
+ .chip{max-width:34px;} /* ছোট স্ক্রিনে চিপ ছোট হবে */
  .recent-cell{height:27px}
  .top-icon-btn{width:27px;height:29px}
  .mini-chip{width:24px;height:24px;}
