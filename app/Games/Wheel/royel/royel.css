@@ -45,6 +45,49 @@
 .top-icon-btn:hover { background: rgba(255,255,255,0.1); }
 .top-icon-btn svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
+/* 👇 Recent Result ড্রপডাউন 👇 */
+.recent-dropdown-container {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  background: #1B2A23;
+  border: 1px solid #52745e;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+  padding: 12px;
+  animation: dropDownFade 0.2s ease;
+}
+@keyframes dropDownFade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.recent-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 6px;
+}
+.recent-dropdown-header span {
+  font-size: 11px;
+  font-weight: 900;
+  color: #F5C451;
+}
+.recent-dropdown-close {
+  background: transparent;
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.recent-dropdown-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
 /* WHEEL */
 .wheel-area{ display:flex; justify-content:center; align-items:center; padding:5px 0 7px; }
 .wheel-frame{ width:310px; height:310px; position:relative; display:flex; align-items:center; justify-content:center; }
@@ -53,6 +96,18 @@
 .wheel-label text{ text-anchor:middle; dominant-baseline:middle; font-family:Arial,sans-serif; font-weight:900; paint-order:stroke; stroke:#17231E; stroke-width:1.5px; stroke-linejoin:round; }
 .wheel-label .wheel-number{fill:#fff;font-size:10px}
 .wheel-label .wheel-multiplier{fill:#FFD76A;font-size:8px}
+
+/* 👇 বিজয়ী নাম্বারের গ্লোয়িং ইফেক্ট 👇 */
+.wheel-label g.winner-highlight text {
+  fill: #FFD76A !important;
+  filter: drop-shadow(0 0 6px #F5C451) drop-shadow(0 0 12px #ffca05);
+  animation: textGlowPulse 1s infinite alternate;
+}
+@keyframes textGlowPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.15); }
+}
+
 .pointer-rotator{ position:absolute; inset:0; width:310px; height:310px; z-index:5; pointer-events:none; }
 .pointer-rotator::before{ content:""; position:absolute; top:-1px; left:50%; transform:translateX(-50%); width:0;height:0; border-left:12px solid transparent; border-right:12px solid transparent; border-top:27px solid #e83b3b; filter:drop-shadow(0 2px 3px #000); }
 .wheel-center{ position:absolute; z-index:6; width:62px; height:62px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#ff7777,#b51f32 65%,#64101c); border:5px solid #a52b32; display:flex; align-items:center; justify-content:center; color:#fff; box-shadow: inset 0 2px 5px #ffffff55, inset 0 -4px 7px #470b16, 0 2px 10px #000b, 0 0 0 3px #5e2022; }
@@ -63,12 +118,11 @@
 /* GOLD LINE */
 .wheel-underline{ width:76%; max-width:300px; height:2px; margin:-2px auto 10px; border-radius:50%; background:linear-gradient(90deg,transparent,#8b2929 15%,#e75a50 50%,#8b2929 85%,transparent); box-shadow:0 1px 5px #d83b3b55; }
 
-/* NUMBER GRID (30% SMALLER) */
+/* NUMBER GRID */
 .section{padding:0 10px;margin-bottom:8px}
 .section-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
 .section-head h3{font-size:12px}
 .section-head span{font-size:9px;color:#A6B6BF}
-
 .number-grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); grid-auto-rows:68px; gap:4px; }
 .number-card{ min-width:0; width:100%; height:68px; min-height:0; border-radius:6px; color:#fff; padding:2px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; position:relative; overflow:hidden; border:2px solid transparent; box-shadow: inset 0 1px 3px #ffffff18, inset 0 -3px 5px #0005, 0 2px 4px #0007; transition:border-color .2s,box-shadow .2s; }
 .number-card.roulette-red{ background:linear-gradient(145deg,#963434,#762323); border-color:#a54b45; box-shadow: inset 0 2px 4px #ffffff20, inset 0 -3px 6px #3c1010aa, 0 2px 4px #0008; }
@@ -92,20 +146,9 @@
 
 /* COMBINED BOTTOM CARD */
 .bottom-card{
- position:fixed;
- bottom:0;
- left:50%;
- transform:translateX(-50%);
- width:100%;
- max-width:480px;
- background:#183f35;
- border-top:1px solid #52745e;
- box-shadow:0 -5px 18px #0006;
- z-index:999;
- padding:10px 10px 12px;
- display: flex;
- flex-direction: column;
- align-items: center;
+ position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+ width:100%; max-width:480px; background:#183f35; border-top:1px solid #52745e; box-shadow:0 -5px 18px #0006; z-index:999; padding:10px 10px 12px;
+ display: flex; flex-direction: column; align-items: center;
 }
 
 /* চিপ কন্ট্রোল সেকশন */
@@ -140,9 +183,7 @@
 }
 .chip-serial-item.active { box-shadow: 0 0 0 3px #F5C451, 0 0 15px #F5C451; transform: scale(1.1); z-index: 2; }
 
-.bottom-stats{
- display:grid; grid-template-columns:1fr 1fr 1fr; align-items:center; width: 100%; padding-top:8px; border-top: 1px solid #426b58;
-}
+.bottom-stats{ display:grid; grid-template-columns:1fr 1fr 1fr; align-items:center; width: 100%; padding-top:8px; border-top: 1px solid #426b58; }
 .bottom-item{ min-width:0; display:flex; flex-direction:column; gap:4px; }
 .bottom-item.center{align-items:center;text-align:center}
 .bottom-item.right{align-items:flex-end;text-align:right}
@@ -154,133 +195,31 @@
 .bottom-money{color:#F5C451}
 
 /* 👇 Statistics Drawer (Bead Road) 👇 */
-.stats-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 1998;
-  animation: fadeIn 0.3s ease;
-}
-
+.stats-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1998; animation: fadeIn 0.3s ease; }
 .stats-drawer {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translate(-50%, 100%);
-  width: 100%;
-  max-width: 480px;
-  height: 60vh;
-  background: #1B2A23; /* ডার্ক গ্রিন */
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  box-shadow: 0 -10px 30px rgba(0,0,0,0.7);
-  z-index: 1999;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  border-top: 1px solid rgba(255,255,255,0.1);
+  position: fixed; bottom: 0; left: 50%; transform: translate(-50%, 100%);
+  width: 100%; max-width: 480px; height: 60vh; background: #1B2A23; border-top-left-radius: 16px; border-top-right-radius: 16px;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.7); z-index: 1999; display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid rgba(255,255,255,0.1);
 }
-
-.stats-drawer.open {
-  transform: translate(-50%, 0);
-}
-
-.stats-handle {
-  width: 40px;
-  height: 4px;
-  background: rgba(255,255,255,0.3);
-  border-radius: 2px;
-  margin: 10px auto;
-  cursor: pointer;
-}
-
-.stats-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 15px 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
+.stats-drawer.open { transform: translate(-50%, 0); }
+.stats-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; margin: 10px auto; cursor: pointer; }
+.stats-header { display: flex; justify-content: space-between; align-items: center; padding: 0 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .stats-header h3 { font-size: 13px; color: #F5C451; letter-spacing: 1px; }
 .stats-header span { font-size: 10px; color: #a9c4b3; }
 
-.bead-road-wrapper {
-  flex: 1;
-  overflow: auto;
-  padding: 15px;
-  background: rgba(0,0,0,0.2);
-  /* স্ক্রলবার লুকাতে */
-  scrollbar-width: thin;
-  scrollbar-color: #52745e transparent;
-}
+.bead-road-wrapper { flex: 1; overflow: auto; padding: 15px; background: rgba(0,0,0,0.2); scrollbar-width: thin; scrollbar-color: #52745e transparent; }
+.bead-road-grid { display: flex; gap: 4px; min-width: max-content; }
+.bead-column { display: flex; flex-direction: column; gap: 4px; }
 
-.bead-road-grid {
-  display: flex;
-  gap: 4px;
-  min-width: max-content;
-}
+/* 👇 কালার পরিবর্তন করে হুইলের সাথে ম্যাচ করা হয়েছে 👇 */
+.bead-cell { width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 900; color: #fff; box-shadow: inset 0 1px 3px rgba(255,255,255,0.2), 0 1px 2px rgba(0,0,0,0.5); }
+.bead-cell.green { background: #28563E; border: 1px solid #477b60; }
+.bead-cell.red { background: #8B2929; border: 1px solid #a54b45; }
 
-.bead-column {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.bead-cell {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 10px;
-  font-weight: 900;
-  color: #fff;
-  box-shadow: inset 0 1px 3px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.5);
-}
-
-.bead-cell.green {
-  background: #00E701; /* Neon Green */
-  border: 1px solid #35e59a;
-  color: #000;
-}
-
-.bead-cell.red {
-  background: #ff4d4d; /* Red */
-  border: 1px solid #ff7777;
-}
-
-.stats-summary-bar {
-  display: flex;
-  height: 40px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  background: #0d241e;
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
-  overflow: hidden;
-}
-
-.summary-green {
-  background: #00E701;
-  color: #000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 900;
-  transition: width 0.5s ease;
-}
-
-.summary-red {
-  background: #ff4d4d;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 900;
-  transition: width 0.5s ease;
-}
+.stats-summary-bar { display: flex; height: 36px; border-top: 1px solid rgba(255,255,255,0.1); background: #0d241e; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; overflow: hidden; }
+/* 👇 টেক্সট সাইজ ৫০% ছোট করা হয়েছে এবং কালার হুইলের সাথে ম্যাচ করা হয়েছে 👇 */
+.summary-green { background: #28563E; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: 900; transition: width 0.5s ease; border-right: 1px solid #0d241e; }
+.summary-red { background: #8B2929; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: 900; transition: width 0.5s ease; }
 
 /* INFO MODAL */
 .modal-backdrop{ display:none; position:fixed; inset:0; background:#000b; z-index:2000; align-items:center; justify-content:center; padding:20px; }
