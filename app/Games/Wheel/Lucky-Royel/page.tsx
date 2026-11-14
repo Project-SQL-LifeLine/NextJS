@@ -2,31 +2,35 @@
 
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { useLanguage } from "@/lib/LanguageContext"; // 👈 গ্লোবাল ভাষা ইমপোর্ট
+import { useLanguage } from "@/lib/LanguageContext"; 
 import MenuBar from "../royel/Components/MenuBar";
 import "./royel.css";
 
+// 👇 ছোট থেকে বড় সাইজ অনুযায়ী সাজানো হয়েছে 👇
 const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
   { number: 2,    multiplier: 2,   weight: 2500 },
-  { number: 70,   multiplier: 40,  weight: 600  },
   { number: 3,    multiplier: 3,   weight: 2000 },
-  { number: 1000, multiplier: 50,  weight: 400  },
   { number: 5,    multiplier: 5,   weight: 1000 },
-  { number: 90,   multiplier: 60,  weight: 300  },
   { number: 8,    multiplier: 8,   weight: 800  },
-  { number: 300,  multiplier: 70,  weight: 200  },
   { number: 10,   multiplier: 10,  weight: 500  },
-  { number: 150,  multiplier: 80,  weight: 150  },
-  { number: 200,  multiplier: 15,  weight: 400  },
   { number: 20,   multiplier: 100, weight: 100  },
+  
   { number: 30,   multiplier: 20,  weight: 300  },
   { number: 40,   multiplier: 150, weight: 50   },
-  { number: 500,  multiplier: 25,  weight: 200  },
-  { number: 60,   multiplier: 200, weight: 30, hot: true },
   { number: 50,   multiplier: 30,  weight: 200  },
+  { number: 60,   multiplier: 200, weight: 30, hot: true },
+  { number: 70,   multiplier: 40,  weight: 600  },
   { number: 80,   multiplier: 300, weight: 15, hot: true },
-  { number: 700,  multiplier: 35,  weight: 100  },
+  
+  { number: 90,   multiplier: 60,  weight: 300  },
   { number: 100,  multiplier: 500, weight: 5, hot: true },
+  { number: 150,  multiplier: 80,  weight: 150  },
+  { number: 200,  multiplier: 15,  weight: 400  },
+  { number: 300,  multiplier: 70,  weight: 200  },
+  { number: 500,  multiplier: 25,  weight: 200  },
+  
+  { number: 700,  multiplier: 35,  weight: 100  },
+  { number: 1000, multiplier: 50,  weight: 400  }
 ];
 
 const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
@@ -63,7 +67,7 @@ const WheelLoader = () => (
 );
 
 export default function RoyelPage() {
-  const { t } = useLanguage(); // 👈 গ্লোবাল ফাংশন ব্যবহার
+  const { t } = useLanguage(); 
 
   const [isLoading, setIsLoading] = useState(true);
   const [recentResults, setRecentResults] = useState<{ number: number; multiplier: number; color: string }[]>([]);
