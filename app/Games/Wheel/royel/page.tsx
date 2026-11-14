@@ -7,27 +7,28 @@ import "./royel.css";
 
 const t = (en: string, bn: string) => en;
 
+// 👇 ব্যালেন্সড ওয়েট (ডাইনামিক লজিকের জন্য বেস) 👇
 const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
   { number: 2,    multiplier: 2,   weight: 2500 },
-  { number: 70,   multiplier: 40,  weight: 200  },
+  { number: 70,   multiplier: 40,  weight: 600  },
   { number: 3,    multiplier: 3,   weight: 2000 },
-  { number: 1000, multiplier: 50,  weight: 150  },
+  { number: 1000, multiplier: 50,  weight: 400  },
   { number: 5,    multiplier: 5,   weight: 1000 },
-  { number: 90,   multiplier: 60,  weight: 100  },
+  { number: 90,   multiplier: 60,  weight: 300  },
   { number: 8,    multiplier: 8,   weight: 800  },
-  { number: 300,  multiplier: 70,  weight: 100  },
+  { number: 300,  multiplier: 70,  weight: 200  },
   { number: 10,   multiplier: 10,  weight: 500  },
-  { number: 150,  multiplier: 80,  weight: 80   },
-  { number: 200,  multiplier: 15,  weight: 500  },
-  { number: 20,   multiplier: 100, weight: 50   },
-  { number: 30,   multiplier: 20,  weight: 400  },
-  { number: 40,   multiplier: 150, weight: 30   },
-  { number: 500,  multiplier: 25,  weight: 300  },
-  { number: 60,   multiplier: 200, weight: 50, hot: true },
-  { number: 50,   multiplier: 30,  weight: 300  },
-  { number: 80,   multiplier: 300, weight: 30, hot: true }, 
-  { number: 700,  multiplier: 35,  weight: 200  },
-  { number: 100,  multiplier: 500, weight: 10, hot: true }, 
+  { number: 150,  multiplier: 80,  weight: 150  },
+  { number: 200,  multiplier: 15,  weight: 400  },
+  { number: 20,   multiplier: 100, weight: 100  },
+  { number: 30,   multiplier: 20,  weight: 300  },
+  { number: 40,   multiplier: 150, weight: 50   },
+  { number: 500,  multiplier: 25,  weight: 200  },
+  { number: 60,   multiplier: 200, weight: 30, hot: true },
+  { number: 50,   multiplier: 30,  weight: 200  },
+  { number: 80,   multiplier: 300, weight: 15, hot: true },
+  { number: 700,  multiplier: 35,  weight: 100  },
+  { number: 100,  multiplier: 500, weight: 5, hot: true },
 ];
 
 const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
@@ -66,8 +67,6 @@ const WheelLoader = () => (
 export default function RoyelPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [recentResults, setRecentResults] = useState<{ number: number; multiplier: number; color: string }[]>([]);
-  
-  // 👇 Recent Result ড্রপডাউনের স্টেট 👇
   const [isRecentOpen, setIsRecentOpen] = useState(false);
 
   useEffect(() => {
@@ -94,9 +93,7 @@ export default function RoyelPage() {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const soundRef = useRef(soundOn);
 
-  useEffect(() => {
-    soundRef.current = soundOn;
-  }, [soundOn]);
+  useEffect(() => { soundRef.current = soundOn; }, [soundOn]);
 
   const playSound = (type: "bet" | "win") => {
     if (!soundRef.current) return;
@@ -130,11 +127,10 @@ export default function RoyelPage() {
       if (user) {
         await supabase.from("profiles").update({ pf_client_seed: newSeed }).eq("id", user.id);
       }
-    } catch (e) {
-      console.warn("Failed to save client seed to DB", e);
-    }
+    } catch (e) { console.warn(e); }
   };
 
+  // 👇 বিড রোড (Bead Road) জেনারেট করার লজিক 👇
   const buildBeadRoad = () => {
     if (recentResults.length === 0) return [];
     const history = [...recentResults].reverse();
@@ -258,7 +254,6 @@ export default function RoyelPage() {
 
       const group = document.createElementNS(svgNS, "g");
       group.setAttribute("transform", `rotate(${segmentCenter} ${centerX} ${centerY})`);
-      // 👇 হাইলাইট করার জন্য ডাটা অ্যাট্রিবিউট 👇
       group.setAttribute("data-num", String(item.number));
 
       const numberText = document.createElementNS(svgNS, "text");
@@ -427,7 +422,6 @@ export default function RoyelPage() {
       spinning = true; bettingOpen = false; roundPhase = "spinning";
       renderGrid(); updateCenterTimer(null);
 
-      // 👇 নতুন রাউন্ড শুরু হলে আগের হাইলাইট সরিয়ে নেওয়া হবে 👇
       wheelLabels.querySelectorAll('g').forEach(g => g.classList.remove('winner-highlight'));
 
       const totalBet = getTotalBet();
@@ -450,11 +444,32 @@ export default function RoyelPage() {
           resetRound(); return;
         }
       } else {
-        let rand = Math.random() * 9300;
+        // 👇 ডেমো স্পিনে ডাইনামিক ওয়েট লজিক 👇
+        let recentGreens = 0;
+        let recentReds = 0;
+        
+        recentResults.slice(0, 20).forEach(r => {
+          const isGreen = r.color === "#214E3A" || r.color === "#28563E" || r.color === "#244A38";
+          if (isGreen) recentGreens++; else recentReds++;
+        });
+
+        const baseWeights = numbers.map(n => {
+          const isRed = n.number % 2 !== 0; // গ্রিডের রঙের সাথে মিল রেখে
+          let w = n.weight;
+          if (recentGreens >= 14) {
+            w = isRed ? w * 1.5 : w * 0.8;
+          } else if (recentReds >= 8) {
+            w = isRed ? w * 0.7 : w * 1.2;
+          }
+          return { ...n, adjustedWeight: w };
+        });
+
+        const totalWeight = baseWeights.reduce((sum, n) => sum + n.adjustedWeight, 0);
+        let rand = Math.random() * totalWeight;
         let cum = 0;
-        for (let i = 0; i < numbers.length; i++) {
-          cum += numbers[i].weight;
-          if (rand < cum) { winnerNumber = numbers[i].number; break; }
+        for (let i = 0; i < baseWeights.length; i++) {
+          cum += baseWeights[i].adjustedWeight;
+          if (rand < cum) { winnerNumber = baseWeights[i].number; break; }
         }
       }
 
@@ -508,7 +523,7 @@ export default function RoyelPage() {
       
       lastWinnerNumber = winnerNumber;
 
-      // 👇 হুইলে বিজয়ী নাম্বারটি গ্লোয়িং হাইলাইট করা হলো 👇
+      // হুইল হাইলাইট
       const winningGroup = wheelLabels.querySelector(`[data-num="${winnerNumber}"]`);
       if (winningGroup) {
         winningGroup.classList.add('winner-highlight');
@@ -545,15 +560,8 @@ export default function RoyelPage() {
       if (dataLoaded && minTimePassed) setIsLoading(false);
     };
 
-    fetchBalance().then(() => {
-      dataLoaded = true;
-      checkReady();
-    });
-
-    setTimeout(() => {
-      minTimePassed = true;
-      checkReady();
-    }, 2500);
+    fetchBalance().then(() => { dataLoaded = true; checkReady(); });
+    setTimeout(() => { minTimePassed = true; checkReady(); }, 2500);
 
     applyWheelRotation(0); renderGrid(); updateBottomBar();
     roundPhase = "betting"; bettingOpen = true; 
@@ -581,7 +589,6 @@ export default function RoyelPage() {
       </div>
 
       <div className="royel-page" id="royelPage">
-        
         <div className="round-bar">
           <div className="recent-content">
             <div className="recent-grid">
@@ -593,7 +600,6 @@ export default function RoyelPage() {
             </div>
             <div className="top-controls" style={{ position: "relative" }}>
               
-              {/* 👇 ঘড়ির আইকনে ক্লিক করলে ড্রপডাউন ওপেন হবে 👇 */}
               <button className="top-icon-btn" onClick={() => setIsRecentOpen(!isRecentOpen)}>
                 <svg viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10"></circle>
@@ -614,7 +620,6 @@ export default function RoyelPage() {
                 onShowRecent={() => setIsRecentOpen(!isRecentOpen)}
               />
 
-              {/* 👇 ড্রপডাউন কন্টেইনার 👇 */}
               {isRecentOpen && (
                 <>
                   <div style={{ position: "fixed", inset: 0, zIndex: 99 }} onClick={() => setIsRecentOpen(false)}></div>
