@@ -45,7 +45,7 @@
 .top-icon-btn:hover { background: rgba(255,255,255,0.1); }
 .top-icon-btn svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-/* 👇 Recent Result ড্রপডাউন 👇 */
+/* Recent Dropdown */
 .recent-dropdown-container {
   position: absolute;
   top: calc(100% + 8px);
@@ -97,7 +97,7 @@
 .wheel-label .wheel-number{fill:#fff;font-size:10px}
 .wheel-label .wheel-multiplier{fill:#FFD76A;font-size:8px}
 
-/* 👇 বিজয়ী নাম্বারের গ্লোয়িং ইফেক্ট 👇 */
+/* Winner Highlight */
 .wheel-label g.winner-highlight text {
   fill: #FFD76A !important;
   filter: drop-shadow(0 0 6px #F5C451) drop-shadow(0 0 12px #ffca05);
@@ -118,7 +118,7 @@
 /* GOLD LINE */
 .wheel-underline{ width:76%; max-width:300px; height:2px; margin:-2px auto 10px; border-radius:50%; background:linear-gradient(90deg,transparent,#8b2929 15%,#e75a50 50%,#8b2929 85%,transparent); box-shadow:0 1px 5px #d83b3b55; }
 
-/* NUMBER GRID */
+/* NUMBER GRID (30% Smaller) */
 .section{padding:0 10px;margin-bottom:8px}
 .section-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
 .section-head h3{font-size:12px}
@@ -151,7 +151,6 @@
  display: flex; flex-direction: column; align-items: center;
 }
 
-/* চিপ কন্ট্রোল সেকশন */
 .chip-radial-container {
   position: relative; width: 100%; height: 56px; margin-bottom: 8px;
   display: flex; justify-content: center; align-items: center; z-index: 1000;
@@ -194,7 +193,7 @@
 .bottom-value.neutral{color:#F5C451}
 .bottom-money{color:#F5C451}
 
-/* 👇 Statistics Drawer (Bead Road) 👇 */
+/* STATISTICS DRAWER */
 .stats-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1998; animation: fadeIn 0.3s ease; }
 .stats-drawer {
   position: fixed; bottom: 0; left: 50%; transform: translate(-50%, 100%);
@@ -210,14 +209,11 @@
 .bead-road-wrapper { flex: 1; overflow: auto; padding: 15px; background: rgba(0,0,0,0.2); scrollbar-width: thin; scrollbar-color: #52745e transparent; }
 .bead-road-grid { display: flex; gap: 4px; min-width: max-content; }
 .bead-column { display: flex; flex-direction: column; gap: 4px; }
-
-/* 👇 কালার পরিবর্তন করে হুইলের সাথে ম্যাচ করা হয়েছে 👇 */
 .bead-cell { width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 900; color: #fff; box-shadow: inset 0 1px 3px rgba(255,255,255,0.2), 0 1px 2px rgba(0,0,0,0.5); }
 .bead-cell.green { background: #28563E; border: 1px solid #477b60; }
 .bead-cell.red { background: #8B2929; border: 1px solid #a54b45; }
 
 .stats-summary-bar { display: flex; height: 36px; border-top: 1px solid rgba(255,255,255,0.1); background: #0d241e; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; overflow: hidden; }
-/* 👇 টেক্সট সাইজ ৫০% ছোট করা হয়েছে এবং কালার হুইলের সাথে ম্যাচ করা হয়েছে 👇 */
 .summary-green { background: #28563E; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: 900; transition: width 0.5s ease; border-right: 1px solid #0d241e; }
 .summary-red { background: #8B2929; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: 900; transition: width 0.5s ease; }
 
