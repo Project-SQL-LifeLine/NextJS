@@ -107,11 +107,29 @@
   box-shadow: none;
 }
 
+/* Dark Curve Background (ছবির মতো নিচে কালো শ্যাডো) */
+.chip-curve-bg {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 200px;
+  background: radial-gradient(ellipse at bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+.chip-curve-bg.open {
+  opacity: 1;
+}
+
 /* 👇 RADIAL CHIP MENU STYLES 👇 */
 .chip-radial-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.65);
+  background: rgba(0,0,0,0.75); /* একটু বেশি ডার্ক করা হলো */
   z-index: 998;
 }
 
@@ -126,12 +144,11 @@
   z-index: 1000;
 }
 
-/* 👇 নতুন কন্ট্রোল রো (Undo, Chip, 2x) 👇 */
 .chip-controls-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 25px; /* বাটনগুলোর মাঝখানে গ্যাপ */
+  gap: 20px;
   position: relative;
   z-index: 15;
 }
@@ -141,12 +158,12 @@
   height: 42px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
-  border: 2px solid #fff; /* সাদা বর্ডার */
+  border: 2px solid #fff;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  color: #fff; /* সাদা টেক্সট (2X) */
+  color: #fff;
   font-weight: 900;
   font-size: 15px;
   transition: transform 0.2s, background 0.2s;
@@ -169,7 +186,7 @@
 }
 
 .chip-main-btn {
-  width: 60px; /* মেইন বাটন একটু বড় করা হলো */
+  width: 60px;
   height: 60px;
   border-radius: 50%;
   background-size: contain;
@@ -178,9 +195,9 @@
   border: none;
   cursor: pointer;
   pointer-events: auto;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.6), 0 0 0 3px #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6), 0 0 0 3px #fff, 0 0 20px rgba(255, 255, 255, 0.2);
   transition: transform 0.2s;
-  position: relative; /* absolute থেকে relative করা হলো */
+  position: relative;
 }
 
 .chip-main-btn:active {
@@ -189,7 +206,7 @@
 
 .chip-arc {
   position: absolute;
-  bottom: 30px; /* মেইন বাটনের ঠিক মাঝখানে */
+  bottom: 30px; 
   left: 50%;
   width: 0;
   height: 0;
@@ -214,12 +231,14 @@
 
 .chip-arc.open .chip-arc-item {
   pointer-events: auto;
-  opacity: 1;
-  transform: translate(-50%, 0) rotate(var(--angle)) translateY(-120px) rotate(calc(var(--angle) * -1)) scale(1);
+  /* এখানে opacity এবং scale ব্যবহার করা হলো ডার্ক কার্ভ ইফেক্টের জন্য */
+  opacity: var(--opacity, 1); 
+  transform: translate(-50%, 0) rotate(var(--angle)) translateY(-110px) rotate(calc(var(--angle) * -1)) scale(var(--scale, 1));
 }
 
 .chip-arc-item.active {
   box-shadow: 0 0 0 3px #F5C451, 0 0 15px #F5C451;
+  z-index: 10;
 }
 /* 👆 RADIAL CHIP MENU STYLES END 👆 */
 
@@ -290,7 +309,7 @@
  
  .chip-arc-item { width: 36px; height: 36px; }
  .chip-arc.open .chip-arc-item {
-   transform: translate(-50%, 0) rotate(var(--angle)) translateY(-100px) rotate(calc(var(--angle) * -1)) scale(1);
+   transform: translate(-50%, 0) rotate(var(--angle)) translateY(-90px) rotate(calc(var(--angle) * -1)) scale(var(--scale, 1));
  }
  .chip-arc { bottom: 25px; }
  .chip-radial-container { height: 50px; }
