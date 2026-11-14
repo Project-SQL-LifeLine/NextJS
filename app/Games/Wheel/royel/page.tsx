@@ -487,9 +487,7 @@ export default function RoyelPage() {
 
       <div className="royel-page" id="royelPage">
         
-        {isChipMenuOpen && (
-          <div className="chip-radial-backdrop" onClick={() => setIsChipMenuOpen(false)}></div>
-        )}
+        {/* 👇 ড্রাক মোড বা ব্যাকড্রপ সম্পূর্ণ বাদ দেওয়া হয়েছে 👇 */}
 
         <div className="round-bar">
           <div className="recent-content">
@@ -536,35 +534,31 @@ export default function RoyelPage() {
           <div className="number-grid" id="numberGrid"></div>
         </section>
 
-        <div className={`bottom-card ${isChipMenuOpen ? "menu-open" : ""}`}>
+        <div className="bottom-card">
           
           <div className="chip-radial-container">
             
-            {/* ১. মূল চিপ ও অ্যাকশন বাটন */}
-            <div className="chip-controls-row">
-              {!isChipMenuOpen && (
-                <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('undoBet'))}>
-                  <svg viewBox="0 0 24 24">
-                    <path d="M3 7v6h6"></path>
-                    <path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path>
-                  </svg>
-                </button>
-              )}
+            {/* মূল চিপ এবং বাটন (Undo ও 2X) */}
+            <div className="chip-controls-row" style={{ display: isChipMenuOpen ? "none" : "flex" }}>
+              <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('undoBet'))}>
+                <svg viewBox="0 0 24 24">
+                  <path d="M3 7v6h6"></path>
+                  <path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path>
+                </svg>
+              </button>
 
               <button 
                 className="chip-main-btn"
                 style={{ backgroundImage: `url('${getChipImage(selectedChip)}')` }}
-                onClick={() => setIsChipMenuOpen(!isChipMenuOpen)}
+                onClick={() => setIsChipMenuOpen(true)}
               ></button>
 
-              {!isChipMenuOpen && (
-                <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('doubleBet'))}>
-                  2X
-                </button>
-              )}
+              <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('doubleBet'))}>
+                2X
+              </button>
             </div>
 
-            {/* ২. সিরিয়াল চিপ লিস্ট (মেনু ওপেন হলে দেখাবে) */}
+            {/* সিরিয়াল চিপ লিস্ট (মেইন চিপে ক্লিক করলে এখানে দেখাবে) */}
             <div className={`chip-serial-overlay ${isChipMenuOpen ? "open" : ""}`}>
               <div className="chip-serial-scroll">
                 {chipAmounts.map((amount) => (
@@ -583,7 +577,8 @@ export default function RoyelPage() {
 
           </div>
 
-          <div className={`bottom-stats ${isChipMenuOpen ? "hidden" : ""}`}>
+          {/* Bottom Stats (এখন সবসময় দেখা যাবে) */}
+          <div className="bottom-stats">
             <div className="bottom-item">
               <span className="bottom-label">{t("BALANCE", "ব্যালেন্স")}</span>
               <span className="bottom-value bottom-money" id="bottomBalance">...</span>
