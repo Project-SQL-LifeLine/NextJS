@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client"; 
-import Link from "next/link"; // 👈 Deposit লিংকের জন্য ইমপোর্ট করা হলো
+import Link from "next/link"; 
 import "./MenuBar.css";
 
 const t = (en: string, bn: string) => en;
@@ -142,7 +142,21 @@ export default function MenuBar({
 
       <div className={`mb-panel ${isOpen ? "open" : ""}`}>
         
-        {/* 👇 নতুন Deposit বাটন (History এর ঠিক উপরে) 👇 */}
+        {/* 👇 নতুন Home বাটন (Deposit এর ঠিক উপরে) 👇 */}
+        <Link 
+          href="/" 
+          className="mb-option" 
+          style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: "8px" }}
+          onClick={() => setIsOpen(false)}
+        >
+          <svg viewBox="0 0 24 24" style={{ width: "16px", height: "16px", stroke: "#fff", fill: "none", strokeWidth: 2.5, strokeLinecap: "round", strokeLinejoin: "round" }}>
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span style={{ fontWeight: "700" }}>{t("Home", "হোম")}</span>
+        </Link>
+
+        {/* Deposit বাটন */}
         <Link 
           href="/wallets/voucher-center" 
           className="mb-option" 
