@@ -15,6 +15,7 @@ interface MenuBarProps {
   serverSeedHash: string;
   nonce: number;
   onChangeClientSeed: (newSeed: string) => void;
+  onOpenStats: () => void; // 👈 নতুন প্রপ
 }
 
 export default function MenuBar({
@@ -26,6 +27,7 @@ export default function MenuBar({
   serverSeedHash,
   nonce,
   onChangeClientSeed,
+  onOpenStats,
 }: MenuBarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -61,40 +63,6 @@ export default function MenuBar({
     return () => { delete (window as any).saveClientSeed; };
   }, [onChangeClientSeed]);
 
-  const handleStatistics = () => {
-    const total = recentResults.length;
-    if (total === 0) {
-      onOpenModal("STATISTICS", "<p class='modal-text'>No data available to show statistics.</p>");
-      return;
-    }
-    const counts: Record<number, number> = {};
-    recentResults.forEach(r => {
-      counts[r.number] = (counts[r.number] || 0) + 1;
-    });
-
-    // Filter to only show numbers that have appeared, sorted by count
-    const sortedStats = Object.keys(counts).sort((a,b) => counts[Number(b)] - counts[Number(a)]);
-
-    let html = `<div class="stats-grid">`;
-    sortedStats.forEach(numStr => {
-      const num = Number(numStr);
-      const count = counts[num];
-      const pct = ((count / total) * 100).toFixed(1);
-      html += `
-        <div class="stat-item">
-          <div class="stat-num">${num}</div>
-          <div class="stat-details">
-            <div class="stat-count">${count} Times</div>
-            <div class="stat-pct">${pct}%</div>
-          </div>
-        </div>
-      `;
-    });
-    html += `</div>`;
-    onOpenModal(`STATISTICS (Last ${total})`, html);
-    setIsOpen(false);
-  };
-
   const handleHistory = () => {
     if (!recentResults.length) {
       onOpenModal(t("HISTORY", "হিস্ট্রি"), `<p class="modal-text">${t("No results available yet.", "এখনো কোনো রেজাল্ট নেই।")}</p>`);
@@ -120,7 +88,6 @@ export default function MenuBar({
   };
 
   const handleFairness = () => {
-    // 👇 অটো নতুন সিড জেনারেট করার লজিক 👇
     const autoNewSeed = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
     
     const html = `
@@ -175,7 +142,8 @@ export default function MenuBar({
           <span>{t("History", "হিস্ট্রি")}</span>
         </button>
 
-        <button className="mb-option" onClick={handleStatistics}>
+        {/* 👇 Statistics বাটন 👇 */}
+        <button className="mb-option" onClick={() => { setIsOpen(false); onOpenStats(); }}>
           <span>{t("Statistics", "পরিসংখ্যান")}</span>
         </button>
         
