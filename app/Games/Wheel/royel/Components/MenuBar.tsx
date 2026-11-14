@@ -9,7 +9,8 @@ const t = (en: string, bn: string) => en;
 
 interface MenuBarProps {
   recentResults: any[];
-  onOpenModal: (title: string, content: string, isFullScreen?: boolean) => void; // 👈 isFullScreen যোগ হলো
+  // 👇 এখানে isFullScreen অপশনাল প্যারামিটার যোগ করা হলো 👇
+  onOpenModal: (title: string, content: string, isFullScreen?: boolean) => void; 
   isSoundOn: boolean;
   onToggleSound: () => void;
   clientSeed: string;
@@ -86,7 +87,7 @@ export default function MenuBar({
     setIsOpen(false);
     setLoadingHistory(true);
     
-    // 👇 isFullScreen = true পাস করা হচ্ছে 👇
+    // 👇 ৩ নম্বর প্যারামিটার (true) পাঠানো হচ্ছে, যাতে মোডাল ফুল-স্ক্রিন হয় 👇
     onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">${t("Loading...", "লোড হচ্ছে...")}</p>`, true);
 
     try {
@@ -121,7 +122,7 @@ export default function MenuBar({
         const winMult = row.game_data?.winner_multiplier || '—';
         const betsData = row.game_data?.bets || [];
         
-        const betsHtml = betsData.map((b:any) => `<span style="background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; margin:3px; display:inline-block; font-size:11px;">${b.number} (৳${b.amount})</span>`).join("");
+        const betsHtml = betsData.map((b:any) => `<span class="bet-tag">${b.number} (৳${b.amount})</span>`).join("");
 
         const betId = row.bet_id || 'N/A';
 
