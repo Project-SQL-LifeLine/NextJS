@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { supabase } from "@/lib/supabase/client";
 import "./royel.css";
 
 const numbers: { number: number; multiplier: number }[] = [
@@ -37,7 +38,8 @@ const SPIN_DURATION = 7000;
 
 export default function RoyelPage() {
   useEffect(() => {
-    let balance = 10000;
+    let balance = 0;
+    let balanceLoaded = false;
     let bets: Record<number, number> = {};
     let betChips: Record<number, number[]> = {};
     let selectedChip = 10;
@@ -48,6 +50,7 @@ export default function RoyelPage() {
     let roundStartTime = Date.now();
     let recentResults: { number: number; multiplier: number; color: string }[] = [];
     let timerInterval: ReturnType<typeof setInterval> | null = null;
+    let currentUserId: string | null = null;
 
     let lastWinnerNumber: number | null = null;
 
@@ -70,8 +73,57 @@ export default function RoyelPage() {
 
     /* BOTTOM SUMMARY */
     function updateBottomBar(): void {
+      const balanceEl = document.getElementById("bottomBalance") as HTMLElement;
+      balanceEl.textContent = balanceLoaded ? money(balance) : "...";
       document.getElementById("bottomTotalBet")!.textContent = money(getTotalBet());
-      document.getElementById("bottomBalance")!.textContent = money(balance);
+    }
+
+    /* FETCH BALANCE FROM SUPABASE */
+    async function fetchBalance(): Promise<void> {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const user = userData?.user;
+
+        if (!user) {
+          currentUserId = null;
+          balanceLoaded = true;
+          balance = 0;
+          updateBottomBar();
+          return;
+        }
+
+        currentUserId = user.id;
+
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("balance")
+          .eq("id", user.id)
+          .single();
+
+        if (error) {
+          console.warn("Balance fetch error:", error.message);
+          balanceLoaded = true;
+          updateBottomBar();
+          return;
+        }
+
+        if (profile && typeof profile.balance === "number") {
+          balance = profile.balance;
+        } else if (profile && profile.balance != null) {
+          balance = Number(profile.balance);
+        } else {
+          balance = 0;
+        }
+
+        balanceLoaded = true;
+        updateBottomBar();
+        renderGrid();
+        renderChips();
+      } catch (err) {
+        console.warn("Balance fetch exception:", err);
+        balanceLoaded = true;
+        updateBottomBar();
+      }
     }
 
     /* MENU */
@@ -264,6 +316,7 @@ export default function RoyelPage() {
     /* PLACE BET BY SELECTED CHIP */
     function addBet(number: number): void {
       if (!bettingOpen || spinning) return;
+      if (!balanceLoaded) return;
 
       const amount = selectedChip;
 
@@ -441,6 +494,9 @@ export default function RoyelPage() {
       updateBottomBar();
 
       updateCenterTimer(ROUND_COUNTDOWN);
+
+      /* Refresh real balance from DB after spin (read-only) */
+      void fetchBalance();
     }
 
     /* COUNTDOWN */
@@ -478,6 +534,9 @@ export default function RoyelPage() {
     roundPhase = "betting";
     bettingOpen = true;
     updateCenterTimer("20");
+
+    /* Fetch real balance from Supabase */
+    void fetchBalance();
 
     timerInterval = setInterval(updateTimer, 100);
 
@@ -550,7 +609,7 @@ export default function RoyelPage() {
         <div className="bottom-stats">
           <div className="bottom-item">
             <span className="bottom-label">BALANCE</span>
-            <span className="bottom-value bottom-money" id="bottomBalance">৳10,000</span>
+            <span className="bottom-value bottom-money" id="bottomBalance">...</span>
           </div>
 
           <div className="bottom-item center">
