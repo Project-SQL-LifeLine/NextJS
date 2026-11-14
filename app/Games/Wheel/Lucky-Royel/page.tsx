@@ -38,13 +38,13 @@ const getChipImage = (amount: number) => {
   return `/NextJS/chip/${amount}.png`;
 };
 
-// 👇 নতুন থিমের কালার (Deep Blue & Deep Violet) 👇
+// 👇 হাই-কন্ট্রাস্ট নীল ও বেগুনি কালার 👇
 const colors: string[] = [
-  "#1E3A8A", "#4C1D95", "#1E3A8A", "#4C1D95", // Navy Blue, Deep Purple
-  "#1E3A8A", "#4C1D95", "#1E3A8A", "#4C1D95",
-  "#1E3A8A", "#4C1D95", "#1E3A8A", "#4C1D95",
-  "#1E3A8A", "#4C1D95", "#1E3A8A", "#4C1D95",
-  "#1E3A8A", "#4C1D95", "#1E3A8A", "#4C1D95",
+  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE", // Vibrant Blue, Vibrant Purple
+  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
+  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
+  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
+  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
 ];
 
 const ROUND_COUNTDOWN = 20;
@@ -177,8 +177,8 @@ export default function LuckyRoyelPage() {
     let lastType = "";
 
     history.forEach((res, index) => {
-      const isGreen = res.color === "#1E3A8A"; // এখন নীলকে গ্রিনের জায়গায় ধরা হচ্ছে
-      const type = isGreen ? "Green" : "Red";
+      const isGreen = res.color === "#1D4ED8"; // Blue
+      const type = isGreen ? "Green" : "Red"; // Keeping logic same
 
       if (index === 0) {
         currentCol.push({ ...res, type });
@@ -205,7 +205,7 @@ export default function LuckyRoyelPage() {
     let redCount = 0;
 
     recentResults.forEach(r => {
-      const isGreen = r.color === "#1E3A8A";
+      const isGreen = r.color === "#1D4ED8";
       if (isGreen) greenCount++;
       else redCount++;
     });
