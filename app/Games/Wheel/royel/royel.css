@@ -15,8 +15,8 @@ html, body {
  margin:0 auto;
  min-height:100vh;
  padding-bottom:140px; 
- overflow-x: hidden; /* 👈 বাম-ডানে স্ক্রল বন্ধ করবে */
- touch-action: pan-y; /* 👈 শুধু ওপর-নিচে টাচ কাজ করবে */
+ overflow-x: hidden;
+ touch-action: pan-y;
  
  --menu-bg: #183f35;
  --menu-btn-bg: #0d241e;
@@ -166,7 +166,7 @@ html, body {
 .chip-main-btn {
   width: 60px; height: 60px; border-radius: 50%; background-size: contain; background-position: center; background-repeat: no-repeat;
   border: none; cursor: pointer; pointer-events: auto; 
-  box-shadow: 0 4px 10px rgba(0,0,0,0.6), 0 0 0 3px #183f35; /* 👈 মেইন চিপের গ্লো/বর্ডার কালার */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6), 0 0 0 3px #183f35; 
   transition: transform 0.2s; position: relative;
 }
 .chip-main-btn:active { transform: scale(0.95); }
@@ -178,11 +178,17 @@ html, body {
 .chip-serial-overlay.open { opacity: 1; pointer-events: auto; }
 .chip-serial-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px; scrollbar-width: none; -ms-overflow-style: none; }
 .chip-serial-scroll::-webkit-scrollbar { display: none; }
+
+/* 👇 এখানে সিলেক্টেড চিপের গোল্ডেন বর্ডার #183f35 করা হয়েছে 👇 */
 .chip-serial-item {
   width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; background-size: contain; background-position: center; background-repeat: no-repeat;
   border: none; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.4); transition: transform 0.2s, box-shadow 0.2s;
 }
-.chip-serial-item.active { box-shadow: 0 0 0 3px #F5C451, 0 0 15px #F5C451; transform: scale(1.1); z-index: 2; }
+.chip-serial-item.active { 
+  box-shadow: 0 0 0 3px #183f35, 0 0 15px #183f35; 
+  transform: scale(1.1); 
+  z-index: 2; 
+}
 
 .bottom-stats{ display:grid; grid-template-columns:1fr 1fr 1fr; align-items:center; width: 100%; padding-top:8px; border-top: 1px solid #426b58; }
 .bottom-item{ min-width:0; display:flex; flex-direction:column; gap:4px; }
