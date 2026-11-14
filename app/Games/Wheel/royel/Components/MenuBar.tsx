@@ -33,6 +33,7 @@ export default function MenuBar({
   onShowRecent,
 }: MenuBarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -63,20 +64,111 @@ export default function MenuBar({
         }, 2000);
       }
     };
-    return () => { delete (window as any).saveClientSeed; };
+
+    // 👇 কপি ফাংশন 👇
+    (window as any).copyBetId = (id: string) => {
+      if (!id) return;
+      navigator.clipboard.writeText(id).then(() => {
+        const el = document.getElementById(`copy-${id}`);
+        if (el) {
+          el.innerHTML = "✔️";
+          setTimeout(() => { el.innerHTML = "📋"; }, 1500);
+        }
+      });
+    };
+
+    return () => { 
+      delete (window as any).saveClientSeed; 
+      delete (window as any).copyBetId;
+    };
   }, [onChangeClientSeed]);
 
-  const handleHistory = () => {
-    if (!recentResults.length) {
-      onOpenModal(t("HISTORY", "হিস্ট্রি"), `<p class="modal-text">${t("No results available yet.", "এখনো কোনো রেজাল্ট নেই।")}</p>`);
-    } else {
-      const html = `<div class="history-list">${recentResults.map((r) => `
-        <div class="history-item" style="background:${r.color}">
-          ${r.number}<small>${r.multiplier}X</small>
-        </div>`).join("")}</div>`;
-      onOpenModal(t("RESULT HISTORY", "রেজাল্ট হিস্ট্রি"), html);
-    }
+  // 👇 নতুন History ফাংশন 👇
+  const handleHistory = async () => {
     setIsOpen(false);
+    setLoadingHistory(true);
+    onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">${t("Loading...", "লোড হচ্ছে...")}</p>`);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        onOpenModal("BETTING HISTORY", `<p class="modal-text">Please login to view history.</p>`);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('original_bets_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('game_name', 'wheel')
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">No history found.</p>`);
+        return;
+      }
+
+      const html = data.map(row => {
+        const isWin = row.profit > 0;
+        const isLoss = row.profit < 0;
+        const profitColor = isWin ? '#35e59a' : (isLoss ? '#ff6868' : '#F5C451');
+        const profitText = isWin ? `+৳${row.profit}` : (isLoss ? `-৳${Math.abs(row.profit)}` : '৳0');
+        
+        const winNum = row.game_data?.winner_number || '—';
+        const winMult = row.game_data?.winner_multiplier || '—';
+        const betsData = row.game_data?.bets || [];
+        
+        // বাজি লিস্ট তৈরি
+        const betsHtml = betsData.map((b:any) => `<span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; margin:2px; display:inline-block; font-size:10px;">${b.number} (৳${b.amount})</span>`).join("");
+
+        const betId = row.bet_id || 'N/A';
+
+        return `
+          <div class="history-full-item">
+            <div class="hfi-header">
+              <div class="hfi-id" onclick="window.copyBetId('${betId}')" title="Copy ID">
+                <span>ID: ${betId}</span>
+                <span id="copy-${betId}" style="margin-left:5px; cursor:pointer;">📋</span>
+              </div>
+              <div class="hfi-profit" style="color:${profitColor}">
+                ${profitText}
+              </div>
+            </div>
+            
+            <div class="hfi-details">
+              <div class="hfi-col">
+                <span class="hfi-label">Winner</span>
+                <span class="hfi-val" style="color:#FFD76A;">${winNum} (${winMult}X)</span>
+              </div>
+              <div class="hfi-col">
+                <span class="hfi-label">Total Bet</span>
+                <span class="hfi-val">৳${row.bet_amount}</span>
+              </div>
+              <div class="hfi-col">
+                <span class="hfi-label">Balance After</span>
+                <span class="hfi-val">৳${row.balance_after}</span>
+              </div>
+            </div>
+
+            <div class="hfi-bets">
+              <span class="hfi-label" style="margin-bottom:4px; display:block;">Your Bets:</span>
+              ${betsHtml}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      onOpenModal("BETTING HISTORY", `<div class="history-full-list">${html}</div>`);
+      
+    } catch (err) {
+      console.error(err);
+      onOpenModal("ERROR", `<p class="modal-text" style="color:#ff4d4d">Failed to load history.</p>`);
+    } finally {
+      setLoadingHistory(false);
+    }
   };
 
   const handlePayoutLimit = () => {
@@ -142,7 +234,6 @@ export default function MenuBar({
 
       <div className={`mb-panel ${isOpen ? "open" : ""}`}>
         
-        {/* 👇 নতুন Home বাটন (Deposit এর ঠিক উপরে) 👇 */}
         <Link 
           href="/" 
           className="mb-option" 
@@ -156,7 +247,6 @@ export default function MenuBar({
           <span style={{ fontWeight: "700" }}>{t("Home", "হোম")}</span>
         </Link>
 
-        {/* Deposit বাটন */}
         <Link 
           href="/wallets/voucher-center" 
           className="mb-option" 
