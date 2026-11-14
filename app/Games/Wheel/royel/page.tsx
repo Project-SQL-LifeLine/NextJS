@@ -430,7 +430,6 @@ export default function RoyelPage() {
 
       <div className="royel-page" id="royelPage">
         
-        {/* Backdrop for Chip Menu (Moved outside bottom-card to cover full screen) */}
         {isChipMenuOpen && (
           <div className="chip-radial-backdrop" onClick={() => setIsChipMenuOpen(false)}></div>
         )}
@@ -480,13 +479,14 @@ export default function RoyelPage() {
           <div className="number-grid" id="numberGrid"></div>
         </section>
 
-        <div className="bottom-card">
+        <div className={`bottom-card ${isChipMenuOpen ? "menu-open" : ""}`}>
           <div className="chip-radial-container">
             <div className={`chip-arc ${isChipMenuOpen ? "open" : ""}`}>
               {chipAmounts.map((amount, index) => {
                 const totalChips = chipAmounts.length;
-                const startAngle = -70;
-                const endAngle = 70;
+                // এখানে -85 থেকে +85 ডিগ্রি করা হয়েছে, যাতে আরও চওড়া হয়
+                const startAngle = -85; 
+                const endAngle = 85;
                 const angleStep = (endAngle - startAngle) / (totalChips - 1);
                 const angle = startAngle + index * angleStep;
                 
@@ -514,7 +514,7 @@ export default function RoyelPage() {
             ></button>
           </div>
 
-          <div className="bottom-stats">
+          <div className={`bottom-stats ${isChipMenuOpen ? "hidden" : ""}`}>
             <div className="bottom-item">
               <span className="bottom-label">{t("BALANCE", "ব্যালেন্স")}</span>
               <span className="bottom-value bottom-money" id="bottomBalance">...</span>
