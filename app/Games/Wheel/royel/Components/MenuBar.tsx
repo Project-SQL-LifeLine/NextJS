@@ -9,7 +9,7 @@ const t = (en: string, bn: string) => en;
 
 interface MenuBarProps {
   recentResults: any[];
-  onOpenModal: (title: string, content: string) => void;
+  onOpenModal: (title: string, content: string, isFullScreen?: boolean) => void; // 👈 isFullScreen যোগ হলো
   isSoundOn: boolean;
   onToggleSound: () => void;
   clientSeed: string;
@@ -65,7 +65,6 @@ export default function MenuBar({
       }
     };
 
-    // 👇 কপি ফাংশন 👇
     (window as any).copyBetId = (id: string) => {
       if (!id) return;
       navigator.clipboard.writeText(id).then(() => {
@@ -83,16 +82,17 @@ export default function MenuBar({
     };
   }, [onChangeClientSeed]);
 
-  // 👇 নতুন History ফাংশন 👇
   const handleHistory = async () => {
     setIsOpen(false);
     setLoadingHistory(true);
-    onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">${t("Loading...", "লোড হচ্ছে...")}</p>`);
+    
+    // 👇 isFullScreen = true পাস করা হচ্ছে 👇
+    onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">${t("Loading...", "লোড হচ্ছে...")}</p>`, true);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        onOpenModal("BETTING HISTORY", `<p class="modal-text">Please login to view history.</p>`);
+        onOpenModal("BETTING HISTORY", `<p class="modal-text">Please login to view history.</p>`, true);
         return;
       }
 
@@ -107,7 +107,7 @@ export default function MenuBar({
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">No history found.</p>`);
+        onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">No history found.</p>`, true);
         return;
       }
 
@@ -121,8 +121,7 @@ export default function MenuBar({
         const winMult = row.game_data?.winner_multiplier || '—';
         const betsData = row.game_data?.bets || [];
         
-        // বাজি লিস্ট তৈরি
-        const betsHtml = betsData.map((b:any) => `<span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; margin:2px; display:inline-block; font-size:10px;">${b.number} (৳${b.amount})</span>`).join("");
+        const betsHtml = betsData.map((b:any) => `<span style="background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; margin:3px; display:inline-block; font-size:11px;">${b.number} (৳${b.amount})</span>`).join("");
 
         const betId = row.bet_id || 'N/A';
 
@@ -149,23 +148,23 @@ export default function MenuBar({
               </div>
               <div class="hfi-col">
                 <span class="hfi-label">Balance After</span>
-                <span class="hfi-val">৳${row.balance_after}</span>
+                <span class="hfi-val">৳${Number(row.balance_after).toFixed(2)}</span>
               </div>
             </div>
 
             <div class="hfi-bets">
               <span class="hfi-label" style="margin-bottom:4px; display:block;">Your Bets:</span>
-              ${betsHtml}
+              <div style="display: flex; flex-wrap: wrap;">${betsHtml}</div>
             </div>
           </div>
         `;
       }).join("");
 
-      onOpenModal("BETTING HISTORY", `<div class="history-full-list">${html}</div>`);
+      onOpenModal("BETTING HISTORY", `<div class="history-full-list">${html}</div>`, true);
       
     } catch (err) {
       console.error(err);
-      onOpenModal("ERROR", `<p class="modal-text" style="color:#ff4d4d">Failed to load history.</p>`);
+      onOpenModal("ERROR", `<p class="modal-text" style="color:#ff4d4d">Failed to load history.</p>`, true);
     } finally {
       setLoadingHistory(false);
     }
