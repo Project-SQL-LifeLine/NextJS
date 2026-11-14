@@ -22,7 +22,7 @@ const numbers: { number: number; multiplier: number; weight: number; hot?: boole
   { number: 30,   multiplier: 20,  weight: 400  },
   { number: 40,   multiplier: 150, weight: 30   },
   { number: 500,  multiplier: 25,  weight: 300  },
-  { number: 60,   multiplier: 200, weight: 50, hot: true }, // 🔥 ২০০x HOT
+  { number: 60,   multiplier: 200, weight: 50, hot: true },
   { number: 50,   multiplier: 30,  weight: 300  },
   { number: 80,   multiplier: 300, weight: 30   },
   { number: 700,  multiplier: 35,  weight: 200  },
@@ -160,46 +160,39 @@ export default function RoyelPage() {
     const gradient = colors.map((color, index) => `${color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`).join(",");
     wheel.style.background = `conic-gradient(${gradient})`;
 
-    const centerX = 145; const centerY = 145; const labelRadius = 105; const labelGroups: SVGGElement[] = [];
+    const centerX = 145;
+    const centerY = 145;
+    const labelRadius = 92; // সেন্টার থেকে টেক্সটের দূরত্ব
 
     numbers.forEach((item, index) => {
       const segmentCenter = index * segmentAngle + segmentAngle / 2;
-      const angle = ((segmentCenter - 90) * Math.PI) / 180;
-      const x = centerX + Math.cos(angle) * labelRadius;
-      const y = centerY + Math.sin(angle) * labelRadius;
 
       const group = document.createElementNS(svgNS, "g");
-      group.setAttribute("data-x", String(x));
-      group.setAttribute("data-y", String(y));
+      // পুরো গ্রুপটিকে স্লাইসের কোণ অনুযায়ী ঘোরানো হচ্ছে
+      group.setAttribute("transform", `rotate(${segmentCenter} ${centerX} ${centerY})`);
 
       const numberText = document.createElementNS(svgNS, "text");
-      numberText.setAttribute("x", String(x));
-      numberText.setAttribute("y", String(y - 4));
+      numberText.setAttribute("x", String(centerX));
+      numberText.setAttribute("y", String(centerY - labelRadius - 4));
       numberText.setAttribute("class", "wheel-number");
-      // 🔥 HOT ইমোজি হুইলে দেখানোর জন্য
       numberText.textContent = item.hot ? `🔥${item.number}` : String(item.number);
 
       const multiplierText = document.createElementNS(svgNS, "text");
-      multiplierText.setAttribute("x", String(x));
-      multiplierText.setAttribute("y", String(y + 7));
+      multiplierText.setAttribute("x", String(centerX));
+      multiplierText.setAttribute("y", String(centerY - labelRadius + 8));
       multiplierText.setAttribute("class", "wheel-multiplier");
       multiplierText.textContent = item.multiplier + "X";
 
       group.appendChild(numberText);
       group.appendChild(multiplierText);
       wheelLabels.appendChild(group);
-      labelGroups.push(group);
     });
 
     function applyWheelRotation(degrees: number): void {
       wheelRotation = degrees;
       wheel.style.transform = `translate(-50%,-50%) rotate(${degrees}deg)`;
       wheelLabels.style.transform = `translate(-50%,-50%) rotate(${degrees}deg)`;
-      labelGroups.forEach((group) => {
-        const x = Number(group.getAttribute("data-x"));
-        const y = Number(group.getAttribute("data-y"));
-        group.setAttribute("transform", `rotate(${-degrees} ${x} ${y})`);
-      });
+      // আর আলাদা করে টেক্সটকে উল্টো ঘোরানোর দরকার নেই, তারা হুইলের সাথেই ঘুরবে
     }
 
     function renderRecentResults(): void {
@@ -261,7 +254,7 @@ export default function RoyelPage() {
           (amount > 0 ? " selected" : "") +
           (isWinner ? " " + hitClass : "") +
           (!bettingOpen ? " locked" : "") +
-          (item.hot ? " hot" : ""); // 🔥 HOT ক্লাস
+          (item.hot ? " hot" : "");
 
         let chipDisplay = "";
         if (amount > 0) {
@@ -269,7 +262,6 @@ export default function RoyelPage() {
           chipDisplay = `<span class="bet-chip-display"><span class="bet-total">${money(amount)}</span><span class="mini-chip">${format(lastChip)}</span></span>`;
         }
 
-        // 🔥 HOT ইমোজি গ্রিডে দেখানোর জন্য
         const hotBadge = item.hot ? '<span class="hot-badge">🔥 HOT</span>' : '';
 
         card.innerHTML = `
@@ -324,8 +316,6 @@ export default function RoyelPage() {
         const payload = Object.keys(bets).map(k => ({ number: Number(k), amount: bets[Number(k)] }));
         try {
           const { data, error } = await supabase.rpc('play_wheel', { p_bets: payload });
-          
-          // RPC থেকে আসা এরর (যেমন ব্যালেন্স কম) ছাড়া অন্য কোনো এরর নেই
           if (error) {
             openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${error.message}</p>`);
             resetRound(); return;
