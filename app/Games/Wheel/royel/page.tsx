@@ -773,4 +773,37 @@ export default function RoyelPage() {
                     return (
                       <div 
                         key={cellIdx} 
-                        className={`bead-cell ${
+                        className={`bead-cell ${isGreen ? "green" : "red"}`}
+                      >
+                        {cell.number}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="stats-summary-bar">
+            <div className="summary-green" style={{ width: `${stats.greenPct}%` }}>
+              {stats.greenPct}%
+            </div>
+            <div className="summary-red" style={{ width: `${stats.redPct}%` }}>
+              {stats.redPct}%
+            </div>
+          </div>
+        </div>
+
+        <div className={`modal-backdrop ${modal.open ? "open" : ""}`} onClick={() => setModal(prev => ({ ...prev, open: false }))}>
+          <div className={`modal-box ${modal.isFullScreen ? "is-fullscreen" : ""}`} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <h3>{modal.title}</h3>
+              <button className="modal-close" onClick={() => setModal(prev => ({ ...prev, open: false }))}>×</button>
+            </div>
+            <div id="modalContent" dangerouslySetInnerHTML={{ __html: modal.content }}></div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
