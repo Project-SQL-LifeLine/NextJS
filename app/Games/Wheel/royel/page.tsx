@@ -68,6 +68,8 @@ export default function RoyelPage() {
   
   const [recentResults, setRecentResults] = useState<{ number: number; multiplier: number; color: string }[]>([]);
   const [soundOn, setSoundOn] = useState(true);
+  const [showRecentDropdown, setShowRecentDropdown] = useState(false);
+  
   const [clientSeed, setClientSeed] = useState("");
   const [serverSeedHash, setServerSeedHash] = useState("");
   const [nonce, setNonce] = useState(0);
@@ -78,9 +80,14 @@ export default function RoyelPage() {
   const [modal, setModal] = useState({ open: false, title: "", content: "" });
 
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const soundRef = useRef(soundOn); // 👈 সাউন্ড ট্র্যাক করার জন্য রেফ
+
+  useEffect(() => {
+    soundRef.current = soundOn;
+  }, [soundOn]);
 
   const playSound = (type: "bet" | "win") => {
-    if (!soundOn) return;
+    if (!soundRef.current) return;
     try {
       if (!audioCtxRef.current) {
         audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -102,19 +109,6 @@ export default function RoyelPage() {
 
   const openModal = (title: string, content: string) => {
     setModal({ open: true, title, content });
-  };
-
-  // 👇 নতুন ঘড়ির আইকনে ক্লিক করলে ২০টি রেজাল্ট দেখাবে 👇
-  const handleHistoryClick = () => {
-    if (!recentResults.length) {
-      openModal(t("HISTORY", "হিস্ট্রি"), `<p class="modal-text">${t("No results available yet.", "এখনো কোনো রেজাল্ট নেই।")}</p>`);
-      return;
-    }
-    const html = `<div class="history-list">${recentResults.map((r) => `
-      <div class="history-item" style="background:${r.color}">
-        ${r.number}<small>${r.multiplier}X</small>
-      </div>`).join("")}</div>`;
-    openModal(t("LAST 20 RESULTS", "সর্বশেষ ২০টি রেজাল্ট"), html);
   };
 
   const handleClientSeedChange = async (newSeed: string) => {
@@ -139,10 +133,16 @@ export default function RoyelPage() {
     let wheelRotation = 0;
     let bettingOpen = true;
     let roundPhase = "betting";
-    let roundStartTime = Date.now();
-    let timerInterval: ReturnType<typeof setInterval> | null = null;
     let currentUserId: string | null = null;
     let lastWinnerNumber: number | null = null;
+
+    // 👇 পেজ রিলোড হলেও টাইমার ধরে রাখার লজিক 👇
+    const ROUND_KEY = 'wheel_round_start_time';
+    let roundStartTime = typeof window !== "undefined" ? parseInt(localStorage.getItem(ROUND_KEY) || '0') : Date.now();
+    if (!roundStartTime || Date.now() - roundStartTime > (ROUND_COUNTDOWN + 10) * 1000) {
+      roundStartTime = Date.now();
+      if (typeof window !== "undefined") localStorage.setItem(ROUND_KEY, roundStartTime.toString());
+    }
 
     const wheel = document.getElementById("wheel") as HTMLDivElement;
     const wheelLabels = document.getElementById("wheelLabels") as unknown as SVGSVGElement;
@@ -202,7 +202,8 @@ export default function RoyelPage() {
       numberText.setAttribute("x", String(centerX));
       numberText.setAttribute("y", String(centerY - labelRadius - 4));
       numberText.setAttribute("class", "wheel-number");
-      numberText.textContent = item.hot ? `🔥${item.number}` : String(item.number);
+      // 👇 ফায়ার সিম্বল সরানো হয়েছে 👇
+      numberText.textContent = String(item.number);
 
       const multiplierText = document.createElementNS(svgNS, "text");
       multiplierText.setAttribute("x", String(centerX));
@@ -307,7 +308,6 @@ export default function RoyelPage() {
         let chipDisplay = "";
         if (amount > 0) {
           const lastChip = chips.length ? chips[chips.length - 1] : selectedChip;
-          // 👇 এখানে bet-total টেক্সট সরিয়ে শুধু mini-chip রাখা হয়েছে 👇
           chipDisplay = `
            <span class="bet-chip-display">
             <span class="mini-chip" style="background-image: url('${getChipImage(lastChip)}');"></span>
@@ -351,7 +351,12 @@ export default function RoyelPage() {
     }
 
     function resetRound(): void {
-      spinning = false; bettingOpen = true; roundPhase = "betting"; roundStartTime = Date.now();
+      spinning = false; bettingOpen = true; roundPhase = "betting"; 
+      
+      // নতুন রাউন্ডের জন্য টাইমার রিসেট
+      roundStartTime = Date.now();
+      if (typeof window !== "undefined") localStorage.setItem(ROUND_KEY, roundStartTime.toString());
+
       renderGrid(); updateBottomBar(); updateCenterTimer(ROUND_COUNTDOWN);
       void fetchBalance();
     }
@@ -429,7 +434,6 @@ export default function RoyelPage() {
         color: colors[numbers.findIndex((n) => n.number === winnerNumber)],
       };
       
-      // 👇 এখানে ২০টি রেজাল্ট সেভ করা হবে 👇
       setRecentResults(prev => [newResult, ...prev].slice(0, 20)); 
       
       lastWinnerNumber = winnerNumber;
@@ -476,9 +480,11 @@ export default function RoyelPage() {
     }, 2500);
 
     applyWheelRotation(0); renderGrid(); updateBottomBar();
-    roundStartTime = Date.now(); roundPhase = "betting"; bettingOpen = true; updateCenterTimer("20");
-
-    timerInterval = setInterval(updateTimer, 100);
+    roundPhase = "betting"; bettingOpen = true; 
+    
+    // পেজ লোড হওয়ার সাথে সাথেই টাইমার আপডেট হবে
+    updateTimer();
+    const timerInterval = setInterval(updateTimer, 100);
 
     const handleUndoEvent = () => handleUndo();
     const handleDoubleEvent = () => handleDouble();
@@ -486,12 +492,12 @@ export default function RoyelPage() {
     document.addEventListener('doubleBet', handleDoubleEvent);
 
     return () => {
-      if (timerInterval) clearInterval(timerInterval);
+      clearInterval(timerInterval);
       wheelLabels.innerHTML = "";
       document.removeEventListener('undoBet', handleUndoEvent);
       document.removeEventListener('doubleBet', handleDoubleEvent);
     };
-  }, [soundOn]); 
+  }, []); // 👈 সাউন্ড টগল করলেও আর useEffect রি-রান হবে না
 
   return (
     <>
@@ -504,7 +510,6 @@ export default function RoyelPage() {
         <div className="round-bar">
           <div className="recent-content">
             <div className="recent-grid">
-              {/* এখানে শুধু সর্বশেষ ৫টি রেজাল্ট টপ বারে দেখাবে */}
               {recentResults.slice(0, 5).map((r, i) => (
                 <div key={i} className="recent-cell" style={{ background: r.color }}>
                   <span>{r.number}</span><small>{r.multiplier}X</small>
@@ -513,8 +518,7 @@ export default function RoyelPage() {
             </div>
             <div className="top-controls">
               
-              {/* 👇 নতুন ঘড়ির আইকন (History) 👇 */}
-              <button className="top-icon-btn" onClick={handleHistoryClick} title="Last 20 Results">
+              <button className="top-icon-btn" onClick={() => setShowRecentDropdown(!showRecentDropdown)}>
                 <svg viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
@@ -534,6 +538,22 @@ export default function RoyelPage() {
             </div>
           </div>
         </div>
+
+        {/* 👇 ঘড়ির আইকনে ক্লিক করলে এই ড্রপডাউন দেখাবে 👇 */}
+        {showRecentDropdown && (
+          <div className="recent-dropdown">
+            <div className="recent-dropdown-inner">
+              <div className="recent-dropdown-title">LAST 20 RESULTS</div>
+              <div className="recent-dropdown-grid">
+                {recentResults.map((r, i) => (
+                  <div key={i} className="recent-cell" style={{ background: r.color }}>
+                    <span>{r.number}</span><small>{r.multiplier}X</small>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="wheel-area">
           <div className="wheel-frame">
@@ -557,9 +577,7 @@ export default function RoyelPage() {
         </section>
 
         <div className="bottom-card">
-          
           <div className="chip-radial-container">
-            
             <div className="chip-controls-row" style={{ display: isChipMenuOpen ? "none" : "flex" }}>
               <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('undoBet'))}>
                 <svg viewBox="0 0 24 24">
@@ -594,7 +612,6 @@ export default function RoyelPage() {
                 ))}
               </div>
             </div>
-
           </div>
 
           <div className="bottom-stats">
