@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { useLanguage } from "@/lib/LanguageContext"; // 👈 গ্লোবাল ভাষা ইমপোর্ট
-import MenuBar from "./Components/MenuBar"; 
+import MenuBar from "../royel/Components/MenuBar";
 import "./royel.css";
 
 const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
