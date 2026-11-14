@@ -66,10 +66,19 @@ const WheelLoader = () => (
 export default function RoyelPage() {
   const [isLoading, setIsLoading] = useState(true);
   
+  // 👇 LocalStorage থেকে ডাটা লোড করা হচ্ছে যাতে রিফ্রেশে মুছে না যায় 👇
   const [recentResults, setRecentResults] = useState<{ number: number; multiplier: number; color: string }[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("wheel_recent_results");
+      if (saved) {
+        try { setRecentResults(JSON.parse(saved)); } catch (e) {}
+      }
+    }
+  }, []);
+
   const [soundOn, setSoundOn] = useState(true);
-  
-  // 👇 নতুন স্টেট: Statistics Drawer 👇
   const [isStatsOpen, setIsStatsOpen] = useState(false);
 
   const [clientSeed, setClientSeed] = useState("");
@@ -113,6 +122,19 @@ export default function RoyelPage() {
     setModal({ open: true, title, content });
   };
 
+  // 👇 Recent Result মোডাল দেখানোর ফাংশন 👇
+  const handleShowRecent = () => {
+    if (!recentResults.length) {
+      openModal(t("RECENT RESULTS", "সাম্প্রতিক রেজাল্ট"), `<p class="modal-text">${t("No results available yet.", "এখনো কোনো রেজাল্ট নেই।")}</p>`);
+      return;
+    }
+    const html = `<div class="history-list">${recentResults.map((r) => `
+      <div class="history-item" style="background:${r.color}">
+        ${r.number}<small>${r.multiplier}X</small>
+      </div>`).join("")}</div>`;
+    openModal(t("RECENT RESULTS", "সাম্প্রতিক রেজাল্ট"), html);
+  };
+
   const handleClientSeedChange = async (newSeed: string) => {
     setClientSeed(newSeed);
     try {
@@ -125,19 +147,15 @@ export default function RoyelPage() {
     }
   };
 
-  // 👇 বিড রোড (Bead Road) জেনারেট করার লজিক 👇
+  // 👇 বিড রোড লজিক 👇
   const buildBeadRoad = () => {
     if (recentResults.length === 0) return [];
-    
-    // recentResults are newest first, we need oldest first for the road
     const history = [...recentResults].reverse();
     const columns: { number: number; color: string; type: string }[][] = [];
-    
     let currentCol: { number: number; color: string; type: string }[] = [];
     let lastType = "";
 
     history.forEach((res, index) => {
-      // রঙের ওপর ভিত্তি করে টাইপ নির্ধারণ (Green নাকি Red)
       const isGreen = res.color === "#214E3A" || res.color === "#28563E" || res.color === "#244A38";
       const type = isGreen ? "Green" : "Red";
 
@@ -489,7 +507,14 @@ export default function RoyelPage() {
         color: colors[numbers.findIndex((n) => n.number === winnerNumber)],
       };
       
-      setRecentResults(prev => [newResult, ...prev].slice(0, 50)); 
+      // 👇 LocalStorage-এ সেভ করা হচ্ছে যাতে রিফ্রেশে না মুছে যায় 👇
+      setRecentResults(prev => {
+        const updated = [newResult, ...prev].slice(0, 50);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("wheel_recent_results", JSON.stringify(updated));
+        }
+        return updated;
+      });
       
       lastWinnerNumber = winnerNumber;
 
@@ -572,11 +597,11 @@ export default function RoyelPage() {
             </div>
             <div className="top-controls">
               
-              <button className="top-icon-btn" onClick={() => setIsStatsOpen(true)}>
+              {/* 👇 ঘড়ির আইকনে ক্লিক করলে সাম্প্রতিক রেজাল্ট দেখাবে 👇 */}
+              <button className="top-icon-btn" onClick={handleShowRecent} title="Recent Results">
                 <svg viewBox="0 0 24 24">
-                  <path d="M18 20V10"></path>
-                  <path d="M12 20V4"></path>
-                  <path d="M6 20v-6"></path>
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
               </button>
 
@@ -590,6 +615,7 @@ export default function RoyelPage() {
                 nonce={nonce}
                 onChangeClientSeed={handleClientSeedChange}
                 onOpenStats={() => setIsStatsOpen(true)}
+                onShowRecent={handleShowRecent}
               />
             </div>
           </div>
@@ -670,7 +696,6 @@ export default function RoyelPage() {
           </div>
         </div>
 
-        {/* 👇 Statistics Drawer (বিড রোড) 👇 */}
         {isStatsOpen && (
           <div className="stats-backdrop" onClick={() => setIsStatsOpen(false)}></div>
         )}
@@ -702,7 +727,6 @@ export default function RoyelPage() {
             </div>
           </div>
 
-          {/* নিচের সামারি বার */}
           <div className="stats-summary-bar">
             <div className="summary-green" style={{ width: `${stats.greenPct}%` }}>
               GREEN {stats.greenPct}%
