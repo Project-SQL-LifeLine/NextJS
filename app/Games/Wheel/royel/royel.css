@@ -13,6 +13,30 @@
 .royel-page button{font-family:inherit;cursor:pointer;border:0}
 .royel-page button:disabled{opacity:.45;cursor:not-allowed}
 
+/* LOADING OVERLAY */
+.loading-overlay {
+ position: fixed;
+ inset: 0;
+ background: #0d241e;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ z-index: 9999;
+ transition: opacity 0.3s ease;
+}
+.loading-overlay.hidden {
+ opacity: 0;
+ pointer-events: none;
+}
+.wheel-loader-svg {
+ width: 60px;
+ height: 60px;
+ animation: spinLoader 1.2s linear infinite;
+}
+@keyframes spinLoader {
+ 100% { transform: rotate(360deg); }
+}
+
 /* RECENT RESULTS */
 .round-bar{
  background:#183f35;
@@ -136,6 +160,9 @@
   0 0 0 7px #a53b36,
   0 5px 25px #000b;
  will-change:transform;
+ /* GPU Acceleration for smooth animation */
+ transform: translateZ(0);
+ backface-visibility: hidden;
 }
 .wheel-label{
  position:absolute;
@@ -148,6 +175,9 @@
  z-index:3;
  overflow:visible;
  will-change:transform;
+ /* GPU Acceleration */
+ transform: translateZ(0);
+ backface-visibility: hidden;
 }
 .wheel-label text{
  text-anchor:middle;
@@ -426,14 +456,14 @@
  padding-bottom:8px;
  border-bottom:1px solid #426b58;
  align-items:center;
- justify-items:center; /* চিপগুলো মাঝে রাখার জন্য */
+ justify-items:center;
 }
 
 /* MAIN CHIPS - PERFECT CIRCLE FIX */
 .chip{
  width:100%;
- max-width:40px;    /* চওড়া আটকে দেওয়া হলো */
- aspect-ratio: 1/1; /* উচ্চতা ও প্রস্থা সমান রাখার জন্য */
+ max-width:40px;
+ aspect-ratio: 1/1;
  border-radius:50%;
  position:relative;
  display:flex;
@@ -441,7 +471,7 @@
  justify-content:center;
  box-shadow:0 2px 4px #0008;
  border:none;
- background-size: contain; /* ইমেজ চ্যাপ্টা হওয়া বন্ধ করবে */
+ background-size: contain;
  background-position: center;
  background-repeat: no-repeat;
  padding:0;
@@ -570,7 +600,7 @@
  .bottom-value{font-size:10px}
  .bottom-label{font-size:7px}
  .chip-row{gap:3px}
- .chip{max-width:34px;} /* ছোট স্ক্রিনে চিপ ছোট হবে */
+ .chip{max-width:34px;}
  .recent-cell{height:27px}
  .top-icon-btn{width:27px;height:29px}
  .mini-chip{width:24px;height:24px;}
