@@ -7,34 +7,33 @@ import "./royel.css";
 // Language helper (Master Rule)
 const t = (en: string, bn: string) => en;
 
-// 👇 এখানে নাম্বারগুলো ছোট থেকে বড় (2x থেকে 500x) সিরিয়ালি সাজানো হয়েছে
-const numbers: { number: number; multiplier: number }[] = [
-  { number: 2,    multiplier: 2    },
-  { number: 3,    multiplier: 3    },
-  { number: 5,    multiplier: 5    },
-  { number: 8,    multiplier: 8    },
-  { number: 10,   multiplier: 10   },
-  { number: 200,  multiplier: 15   },
-  { number: 30,   multiplier: 20   },
-  { number: 500,  multiplier: 25   },
-  { number: 50,   multiplier: 30   },
-  { number: 700,  multiplier: 35   },
-  { number: 70,   multiplier: 40   },
-  { number: 1000, multiplier: 50   },
-  { number: 90,   multiplier: 60   },
-  { number: 300,  multiplier: 70   },
-  { number: 150,  multiplier: 80   },
-  { number: 20,   multiplier: 100  },
-  { number: 40,   multiplier: 150  },
-  { number: 60,   multiplier: 200  },
-  { number: 80,   multiplier: 300  },
-  { number: 100,  multiplier: 500  },
+// 👇 ছোট - বড় - ছোট - বড় প্যাটার্নে সাজানো (সাথে ওয়েট যুক্ত করা হয়েছে)
+const numbers: { number: number; multiplier: number; weight: number }[] = [
+  { number: 2,    multiplier: 2,   weight: 2500 }, // 1st Small
+  { number: 70,   multiplier: 40,  weight: 200  }, // 1st Big
+  { number: 3,    multiplier: 3,   weight: 2000 }, // 2nd Small
+  { number: 1000, multiplier: 50,  weight: 150  }, // 2nd Big
+  { number: 5,    multiplier: 5,   weight: 1000 }, // 3rd Small
+  { number: 90,   multiplier: 60,  weight: 100  }, // 3rd Big
+  { number: 8,    multiplier: 8,   weight: 800  }, // 4th Small
+  { number: 300,  multiplier: 70,  weight: 100  }, // 4th Big
+  { number: 10,   multiplier: 10,  weight: 500  }, // 5th Small
+  { number: 150,  multiplier: 80,  weight: 80   }, // 5th Big
+  { number: 200,  multiplier: 15,  weight: 500  }, // 6th Small
+  { number: 20,   multiplier: 100, weight: 50   }, // 6th Big
+  { number: 30,   multiplier: 20,  weight: 400  }, // 7th Small
+  { number: 40,   multiplier: 150, weight: 30   }, // 7th Big
+  { number: 500,  multiplier: 25,  weight: 300  }, // 8th Small
+  { number: 60,   multiplier: 200, weight: 50   }, // 8th Big
+  { number: 50,   multiplier: 30,  weight: 300  }, // 9th Small
+  { number: 80,   multiplier: 300, weight: 30   }, // 9th Big
+  { number: 700,  multiplier: 35,  weight: 200  }, // 10th Small
+  { number: 100,  multiplier: 500, weight: 10   }, // 10th Big
 ];
 
-// ৭টি রিয়েল ক্যাসিনো চিপ
 const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
 
-// ২০টি সেগমেন্টের জন্য কালার (একটি সবুজ, একটি লাল করে অল্টারনেট)
+// গ্রিড ও হুইলের কালার (অল্টারনেট সবুজ ও লাল)
 const colors: string[] = [
   "#214E3A", "#8B2929", "#28563E", "#7B2929",
   "#244A38", "#922F2F", "#28563E", "#7B2929",
@@ -396,11 +395,11 @@ export default function RoyelPage() {
         }
       } else {
         // ডেমো স্পিন (ইউজার বাজি না ধরলেও হুইল ঘুরবে)
-        const weights = [2500, 2000, 1000, 800, 500, 500, 400, 300, 300, 200, 200, 150, 100, 100, 80, 50, 30, 50, 30, 10];
+        // এখন আর আলাদা অ্যারে লাগবে না, প্রতিটা নাম্বারের নিজের weight আছে
         let rand = Math.random() * 9300;
         let cum = 0;
         for (let i = 0; i < numbers.length; i++) {
-          cum += weights[i];
+          cum += numbers[i].weight;
           if (rand < cum) {
             winnerNumber = numbers[i].number;
             break;
@@ -538,7 +537,7 @@ export default function RoyelPage() {
           <svg className="wheel-label" id="wheelLabels" viewBox="0 0 290 290" aria-hidden="true"></svg>
           <div className="pointer-rotator"></div>
           <div className="wheel-center">
-            <strong className="center-countdown" id="wheelCountdown">20</strong>
+            <strong class="center-countdown" id="wheelCountdown">20</strong>
           </div>
         </div>
       </div>
