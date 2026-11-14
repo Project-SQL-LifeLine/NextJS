@@ -2,10 +2,9 @@
 
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { useLanguage } from "@/lib/LanguageContext"; // 👈 গ্লোবাল ভাষা ইমপোর্ট
 import MenuBar from "./Components/MenuBar"; 
 import "./royel.css";
-
-const t = (en: string, bn: string) => en;
 
 const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
   { number: 2,    multiplier: 2,   weight: 2500 },
@@ -64,6 +63,8 @@ const WheelLoader = () => (
 );
 
 export default function RoyelPage() {
+  const { t } = useLanguage(); // 👈 গ্লোবাল ফাংশন ব্যবহার
+
   const [isLoading, setIsLoading] = useState(true);
   const [recentResults, setRecentResults] = useState<{ number: number; multiplier: number; color: string }[]>([]);
   const [isRecentOpen, setIsRecentOpen] = useState(false);
@@ -87,7 +88,6 @@ export default function RoyelPage() {
   const [selectedChip, setSelectedChip] = useState(10);
   const [isChipMenuOpen, setIsChipMenuOpen] = useState(false);
 
-  // 👇 এখানে isFullScreen স্টেট যুক্ত করা হয়েছে 👇
   const [modal, setModal] = useState({ open: false, title: "", content: "", isFullScreen: false });
 
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -154,7 +154,6 @@ export default function RoyelPage() {
     } catch (e) { /* ignore */ }
   };
 
-  // 👇 openModal ফাংশনে isFullScreen প্যারামিটার রিসিভ করা হচ্ছে 👇
   const openModal = (title: string, content: string, isFullScreen: boolean = false) => {
     setModal({ open: true, title, content, isFullScreen });
   };
@@ -479,7 +478,6 @@ export default function RoyelPage() {
           resetRound(); return;
         }
       } else {
-        // 👇 ডেমো স্পিনে ননস (Nonce) ভিত্তিক ফেজ লজিক 👇
         const currentPhase = nonce % 3;
         let baseWeights = [];
 
@@ -775,38 +773,4 @@ export default function RoyelPage() {
                     return (
                       <div 
                         key={cellIdx} 
-                        className={`bead-cell ${isGreen ? "green" : "red"}`}
-                      >
-                        {cell.number}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="stats-summary-bar">
-            <div className="summary-green" style={{ width: `${stats.greenPct}%` }}>
-              {stats.greenPct}%
-            </div>
-            <div className="summary-red" style={{ width: `${stats.redPct}%` }}>
-              {stats.redPct}%
-            </div>
-          </div>
-        </div>
-
-        {/* 👇 মোডাল আপডেট (is-fullscreen ক্লাস কন্ডিশনালি যুক্ত হবে) 👇 */}
-        <div className={`modal-backdrop ${modal.open ? "open" : ""}`} onClick={() => setModal(prev => ({ ...prev, open: false }))}>
-          <div className={`modal-box ${modal.isFullScreen ? "is-fullscreen" : ""}`} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-head">
-              <h3>{modal.title}</h3>
-              <button className="modal-close" onClick={() => setModal(prev => ({ ...prev, open: false }))}>×</button>
-            </div>
-            <div id="modalContent" dangerouslySetInnerHTML={{ __html: modal.content }}></div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
+                        className={`bead-cell ${
