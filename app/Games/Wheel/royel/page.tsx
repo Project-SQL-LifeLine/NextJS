@@ -31,6 +31,15 @@ const numbers: { number: number; multiplier: number; weight: number; hot?: boole
 
 const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
 
+// 👇 ইমেজ পাথ ফিক্স (GitHub Pages এর NextJS ফোল্ডারের জন্য)
+const getChipImage = (amount: number) => {
+  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    return `/chip/${amount}.png`;
+  }
+  // আপনার GitHub রিপোর নাম "NextJS", তাই বেস পাথ এখানে বসানো হলো
+  return `/NextJS/chip/${amount}.png`;
+};
+
 const colors: string[] = [
   "#214E3A", "#8B2929", "#28563E", "#7B2929",
   "#244A38", "#922F2F", "#28563E", "#7B2929",
@@ -162,13 +171,12 @@ export default function RoyelPage() {
 
     const centerX = 145;
     const centerY = 145;
-    const labelRadius = 92; // সেন্টার থেকে টেক্সটের দূরত্ব
+    const labelRadius = 92;
 
     numbers.forEach((item, index) => {
       const segmentCenter = index * segmentAngle + segmentAngle / 2;
 
       const group = document.createElementNS(svgNS, "g");
-      // পুরো গ্রুপটিকে স্লাইসের কোণ অনুযায়ী ঘোরানো হচ্ছে
       group.setAttribute("transform", `rotate(${segmentCenter} ${centerX} ${centerY})`);
 
       const numberText = document.createElementNS(svgNS, "text");
@@ -192,7 +200,6 @@ export default function RoyelPage() {
       wheelRotation = degrees;
       wheel.style.transform = `translate(-50%,-50%) rotate(${degrees}deg)`;
       wheelLabels.style.transform = `translate(-50%,-50%) rotate(${degrees}deg)`;
-      // আর আলাদা করে টেক্সটকে উল্টো ঘোরানোর দরকার নেই, তারা হুইলের সাথেই ঘুরবে
     }
 
     function renderRecentResults(): void {
@@ -214,7 +221,9 @@ export default function RoyelPage() {
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = "chip" + (selectedChip === amount ? " active" : "");
-        chip.textContent = format(amount);
+        chip.style.backgroundImage = `url('${getChipImage(amount)}')`;
+        chip.setAttribute("aria-label", format(amount));
+        
         chip.addEventListener("click", () => {
           if (!bettingOpen || spinning) return;
           selectedChip = amount;
@@ -259,7 +268,11 @@ export default function RoyelPage() {
         let chipDisplay = "";
         if (amount > 0) {
           const lastChip = chips.length ? chips[chips.length - 1] : selectedChip;
-          chipDisplay = `<span class="bet-chip-display"><span class="bet-total">${money(amount)}</span><span class="mini-chip">${format(lastChip)}</span></span>`;
+          chipDisplay = `
+           <span class="bet-chip-display">
+            <span class="bet-total">${money(amount)}</span>
+            <span class="mini-chip" style="background-image: url('${getChipImage(lastChip)}');"></span>
+           </span>`;
         }
 
         const hotBadge = item.hot ? '<span class="hot-badge">🔥 HOT</span>' : '';
