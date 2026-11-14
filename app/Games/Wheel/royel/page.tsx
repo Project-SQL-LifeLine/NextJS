@@ -7,7 +7,6 @@ import "./royel.css";
 
 const t = (en: string, bn: string) => en;
 
-// 👇 এখানে 80 এবং 100 নাম্বারে hot: true যোগ করা হয়েছে 👇
 const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
   { number: 2,    multiplier: 2,   weight: 2500 },
   { number: 70,   multiplier: 40,  weight: 200  },
@@ -26,9 +25,9 @@ const numbers: { number: number; multiplier: number; weight: number; hot?: boole
   { number: 500,  multiplier: 25,  weight: 300  },
   { number: 60,   multiplier: 200, weight: 50, hot: true },
   { number: 50,   multiplier: 30,  weight: 300  },
-  { number: 80,   multiplier: 300, weight: 30, hot: true }, // 👈 HOT যোগ হলো
+  { number: 80,   multiplier: 300, weight: 30, hot: true }, 
   { number: 700,  multiplier: 35,  weight: 200  },
-  { number: 100,  multiplier: 500, weight: 10, hot: true }, // 👈 HOT যোগ হলো
+  { number: 100,  multiplier: 500, weight: 10, hot: true }, 
 ];
 
 const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
@@ -467,7 +466,6 @@ export default function RoyelPage() {
 
     timerInterval = setInterval(updateTimer, 100);
 
-    // Custom Events for Undo and 2x buttons
     const handleUndoEvent = () => handleUndo();
     const handleDoubleEvent = () => handleDouble();
     document.addEventListener('undoBet', handleUndoEvent);
@@ -539,15 +537,24 @@ export default function RoyelPage() {
         </section>
 
         <div className={`bottom-card ${isChipMenuOpen ? "menu-open" : ""}`}>
+          
+          {/* Dark Curve Background Effect */}
+          <div className={`chip-curve-bg ${isChipMenuOpen ? "open" : ""}`}></div>
+
           <div className="chip-radial-container">
-            
             <div className={`chip-arc ${isChipMenuOpen ? "open" : ""}`}>
               {chipAmounts.map((amount, index) => {
                 const totalChips = chipAmounts.length;
-                const startAngle = -75; 
-                const endAngle = 75;
+                const startAngle = -60; // কম অ্যাঙ্গেল, ছবির মতো ফ্ল্যাট কার্ভ
+                const endAngle = 60;
                 const angleStep = (endAngle - startAngle) / (totalChips - 1);
                 const angle = startAngle + index * angleStep;
+                
+                // ছবির মতো ডার্ক মোড ইফেক্ট (মাঝখানের চিপ brightest, পাশেরগুলো fade)
+                const centerIndex = Math.floor(totalChips / 2);
+                const distanceFromCenter = Math.abs(centerIndex - index);
+                const opacity = 1 - (distanceFromCenter * 0.15);
+                const scale = 1 - (distanceFromCenter * 0.05);
                 
                 return (
                   <button
@@ -555,6 +562,8 @@ export default function RoyelPage() {
                     className={`chip-arc-item ${selectedChip === amount ? "active" : ""}`}
                     style={{
                       "--angle": `${angle}deg`,
+                      "--opacity": opacity,
+                      "--scale": scale,
                       backgroundImage: `url('${getChipImage(amount)}')`
                     }}
                     onClick={() => {
