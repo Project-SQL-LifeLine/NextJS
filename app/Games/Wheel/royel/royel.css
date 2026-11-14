@@ -284,6 +284,31 @@
   0 3px 5px #0008;
 }
 
+/* HOT BADGE AND ANIMATION */
+.number-card.hot {
+ border: 2px solid #ffaa00;
+ animation: hotPulse 1.5s infinite alternate;
+}
+.hot-badge {
+ position: absolute;
+ top: 2px;
+ left: 50%;
+ transform: translateX(-50%);
+ background: #ff3b3b;
+ color: #fff;
+ font-size: 7px;
+ font-weight: 900;
+ padding: 1px 4px;
+ border-radius: 3px;
+ letter-spacing: 0.5px;
+ box-shadow: 0 0 5px #ff3b3b;
+ white-space: nowrap;
+}
+@keyframes hotPulse {
+ from { box-shadow: inset 0 2px 5px #ffffff20, inset 0 -5px 8px #3c1010aa, 0 0 5px #ffaa00; }
+ to { box-shadow: inset 0 2px 5px #ffffff20, inset 0 -5px 8px #3c1010aa, 0 0 15px #ff3b3b; border-color: #ff3b3b; }
+}
+
 /* BET SELECTED - MATCH BASE COLOR */
 .number-card.roulette-red.selected{
  border:3px solid #e45b55;
