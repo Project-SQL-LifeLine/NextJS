@@ -101,7 +101,6 @@
  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
-/* 👇 মেনু ওপেন হলে নিচের কার্ডের ব্যাকগ্রাউন্ড ট্রান্সপারেন্ট হবে 👇 */
 .bottom-card.menu-open {
   background: transparent;
   border-color: transparent;
@@ -112,7 +111,7 @@
 .chip-radial-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.65);
   z-index: 998;
 }
 
@@ -175,8 +174,8 @@
 .chip-arc.open .chip-arc-item {
   pointer-events: auto;
   opacity: 1;
-  /* 👇 এখানে translateY -160px করা হয়েছে যাতে চিপগুলো আরও বড় বৃত্তে ছড়িয়ে যায় 👇 */
-  transform: translate(-50%, 0) rotate(var(--angle)) translateY(-160px) rotate(calc(var(--angle) * -1)) scale(1);
+  /* এখানে translateY -120px করা হয়েছে, যাতে অর্ধবৃত্তটি একদম পারফেক্ট সাইজ হয় */
+  transform: translate(-50%, 0) rotate(var(--angle)) translateY(-120px) rotate(calc(var(--angle) * -1)) scale(1);
 }
 
 .chip-arc-item.active {
@@ -184,7 +183,6 @@
 }
 /* 👆 RADIAL CHIP MENU STYLES END 👆 */
 
-/* 👇 নিচের স্ট্যাটাস হাইড করার ক্লাস 👇 */
 .bottom-stats{
  display:grid;
  grid-template-columns:1fr 1fr 1fr;
@@ -248,7 +246,7 @@
  .chip-main-btn { width: 46px; height: 46px; }
  .chip-arc-item { width: 36px; height: 36px; }
  .chip-arc.open .chip-arc-item {
-   transform: translate(-50%, 0) rotate(var(--angle)) translateY(-125px) rotate(calc(var(--angle) * -1)) scale(1);
+   transform: translate(-50%, 0) rotate(var(--angle)) translateY(-100px) rotate(calc(var(--angle) * -1)) scale(1);
  }
  .chip-arc { bottom: 23px; }
  .chip-radial-container { height: 46px; }
