@@ -126,39 +126,24 @@ export default function MenuBar({
 
       <div className={`mb-panel ${isOpen ? "open" : ""}`}>
         <button className="mb-option" onClick={handleHistory}>
-          <div className="mb-option-left">
-            <span className="mb-icon">◷</span>
-            <span>{t("History", "হিস্ট্রি")}</span>
-          </div>
+          <span>{t("History", "হিস্ট্রি")}</span>
         </button>
         
         <button className="mb-option" onClick={handlePayoutLimit}>
-          <div className="mb-option-left">
-            <span className="mb-icon">💰</span>
-            <span>{t("Payout Limit", "পেআউট লিমিট")}</span>
-          </div>
+          <span>{t("Payout Limit", "পেআউট লিমিট")}</span>
         </button>
         
         <button className="mb-option" onClick={handleFairness}>
-          <div className="mb-option-left">
-            <span className="mb-icon">♧</span>
-            <span>{t("Fairness", "ফেয়ারনেস")}</span>
-          </div>
+          <span>{t("Fairness", "ফেয়ারনেস")}</span>
         </button>
         
         <button className="mb-option" onClick={onToggleSound}>
-          <div className="mb-option-left">
-            <span className="mb-icon">🔊</span>
-            <span>{t("Sound", "সাউন্ড")}</span>
-          </div>
+          <span>{t("Sound", "সাউন্ড")}</span>
           <div className={`mb-switch ${isSoundOn ? "on" : ""}`}></div>
         </button>
         
         <button className="mb-option" onClick={handlePolicy}>
-          <div className="mb-option-left">
-            <span className="mb-icon">⚠️</span>
-            <span>{t("Policy's", "পলিসি")}</span>
-          </div>
+          <span>{t("Policy's", "পলিসি")}</span>
         </button>
       </div>
     </div>
