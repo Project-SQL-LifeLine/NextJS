@@ -1,818 +1,446 @@
-"use client";
-
-import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/lib/supabase/client";
-import { useLanguage } from "@/lib/LanguageContext"; 
-import MenuBar from "../royel/Components/MenuBar";
-import "./royel.css";
-
-// 👇 ছোট থেকে বড় সাইজ অনুযায়ী সাজানো হয়েছে 👇
-const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
-  { number: 2,    multiplier: 2,   weight: 2500 },
-  { number: 3,    multiplier: 3,   weight: 2000 },
-  { number: 5,    multiplier: 5,   weight: 1000 },
-  { number: 8,    multiplier: 8,   weight: 800  },
-  { number: 10,   multiplier: 10,  weight: 500  },
-  { number: 20,   multiplier: 100, weight: 100  },
-  
-  { number: 30,   multiplier: 20,  weight: 300  },
-  { number: 40,   multiplier: 150, weight: 50   },
-  { number: 50,   multiplier: 30,  weight: 200  },
-  { number: 60,   multiplier: 200, weight: 30, hot: true },
-  { number: 70,   multiplier: 40,  weight: 600  },
-  { number: 80,   multiplier: 300, weight: 15, hot: true },
-  
-  { number: 90,   multiplier: 60,  weight: 300  },
-  { number: 100,  multiplier: 500, weight: 5, hot: true },
-  { number: 150,  multiplier: 80,  weight: 150  },
-  { number: 200,  multiplier: 15,  weight: 400  },
-  { number: 300,  multiplier: 70,  weight: 200  },
-  { number: 500,  multiplier: 25,  weight: 200  },
-  
-  { number: 700,  multiplier: 35,  weight: 100  },
-  { number: 1000, multiplier: 50,  weight: 400  }
-];
-
-const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
-
-const getChipImage = (amount: number) => {
-  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
-    return `/chip/${amount}.png`;
-  }
-  return `/NextJS/chip/${amount}.png`;
-};
-
-// 👇 হাই-কন্ট্রাস্ট নীল ও বেগুনি কালার 👇
-const colors: string[] = [
-  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
-  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
-  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
-  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
-  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
-];
-
-const ROUND_COUNTDOWN = 20;
-const BET_LOCK_SECONDS = 5;
-const SPIN_DURATION = 7000;
-
-const WheelLoader = () => (
-  <svg viewBox="0 0 100 100" className="wheel-loader-svg">
-    <circle cx="50" cy="50" r="45" stroke="rgba(255,255,255,0.15)" strokeWidth="5" fill="none" />
-    <circle cx="50" cy="50" r="45" stroke="#ffffff" strokeWidth="5" fill="none" strokeDasharray="60 220" strokeLinecap="round" />
-    <circle cx="50" cy="50" r="28" stroke="rgba(255,255,255,0.4)" strokeWidth="3" fill="none" />
-    {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-      <line key={deg} x1="50" y1="15" x2="50" y2="25" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" transform={`rotate(${deg} 50 50)`} />
-    ))}
-    <circle cx="50" cy="50" r="6" fill="#ffffff" />
-  </svg>
-);
-
-export default function LuckyRoyelPage() {
-  const { t } = useLanguage(); 
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [recentResults, setRecentResults] = useState<{ number: number; multiplier: number; color: string }[]>([]);
-  const [isRecentOpen, setIsRecentOpen] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("lucky_royel_recent_results");
-      if (saved) {
-        try { setRecentResults(JSON.parse(saved)); } catch (e) {}
-      }
-    }
-  }, []);
-
-  const [soundOn, setSoundOn] = useState(true);
-  const [isStatsOpen, setIsStatsOpen] = useState(false);
-
-  const [clientSeed, setClientSeed] = useState("");
-  const [serverSeedHash, setServerSeedHash] = useState("");
-  const [nonce, setNonce] = useState(0);
-  
-  const [selectedChip, setSelectedChip] = useState(10);
-  const [isChipMenuOpen, setIsChipMenuOpen] = useState(false);
-
-  const [modal, setModal] = useState({ open: false, title: "", content: "", isFullScreen: false });
-
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const soundRef = useRef(soundOn);
-
-  useEffect(() => { soundRef.current = soundOn; }, [soundOn]);
-
-  const playSound = (type: "bet" | "win") => {
-    if (!soundRef.current) return;
-    try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-      const ctx = audioCtxRef.current;
-      if (ctx.state === "suspended") ctx.resume();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      
-      if (type === "bet") { osc.frequency.value = 600; gain.gain.value = 0.1; }
-      if (type === "win") { osc.frequency.value = 800; gain.gain.value = 0.2; }
-      
-      osc.start();
-      osc.stop(ctx.currentTime + 0.1);
-    } catch (e) { /* ignore */ }
-  };
-
-  const playSpinSound = (durationMs: number) => {
-    if (!soundRef.current) return;
-    try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-      const ctx = audioCtxRef.current;
-      if (ctx.state === "suspended") ctx.resume();
-
-      const bufferSize = ctx.sampleRate * (durationMs / 1000);
-      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
-
-      const noiseSource = ctx.createBufferSource();
-      noiseSource.buffer = buffer;
-
-      const filter = ctx.createBiquadFilter();
-      filter.type = "bandpass";
-      filter.frequency.setValueAtTime(600, ctx.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + (durationMs / 1000));
-      filter.Q.value = 1.5;
-
-      const gainNode = ctx.createGain();
-      gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (durationMs / 1000));
-
-      noiseSource.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(ctx.destination);
-
-      noiseSource.start();
-      noiseSource.stop(ctx.currentTime + (durationMs / 1000));
-    } catch (e) { /* ignore */ }
-  };
-
-  const openModal = (title: string, content: string, isFullScreen: boolean = false) => {
-    setModal({ open: true, title, content, isFullScreen });
-  };
-
-  const handleClientSeedChange = async (newSeed: string) => {
-    setClientSeed(newSeed);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("profiles").update({ pf_client_seed: newSeed }).eq("id", user.id);
-      }
-    } catch (e) { console.warn(e); }
-  };
-
-  // 👇 নতুন Bead Road লজিক (সর্বোচ্চ ৬টি সারি) 👇
-  const buildBeadRoad = () => {
-    if (recentResults.length === 0) return [];
-    const history = [...recentResults].reverse();
-    const columns: { number: number; color: string; type: string }[][] = [];
-    let currentCol: { number: number; color: string; type: string }[] = [];
-    let lastType = "";
-    const MAX_ROWS = 6; // সর্বোচ্চ ৬টি সারি
-
-    history.forEach((res, index) => {
-      const isGreen = res.color === "#1D4ED8";
-      const type = isGreen ? "Green" : "Red";
-
-      if (index === 0) {
-        currentCol.push({ ...res, type });
-      } else {
-        // যদি একই রঙ হয় এবং কলামের সাইজ ৬ এর কম থাকে
-        if (type === lastType && currentCol.length < MAX_ROWS) {
-          currentCol.push({ ...res, type });
-        } else {
-          // যদি রঙ চেঞ্জ হয় অথবা কলাম ৬টি পূর্ণ হয়ে যায়
-          columns.push(currentCol);
-          currentCol = [{ ...res, type }];
-        }
-      }
-      lastType = type;
-    });
-    
-    if (currentCol.length > 0) columns.push(currentCol);
-    return columns;
-  };
-
-  const calculateStats = () => {
-    const total = recentResults.length;
-    if (total === 0) return { greenPct: 0, redPct: 0 };
-    
-    let greenCount = 0;
-    let redCount = 0;
-
-    recentResults.forEach(r => {
-      const isGreen = r.color === "#1D4ED8";
-      if (isGreen) greenCount++;
-      else redCount++;
-    });
-
-    return {
-      greenPct: ((greenCount / total) * 100).toFixed(1),
-      redPct: ((redCount / total) * 100).toFixed(1)
-    };
-  };
-
-  const stats = calculateStats();
-  const beadRoadColumns = buildBeadRoad();
-
-  useEffect(() => {
-    let balance = 0;
-    let balanceLoaded = false;
-    let bets: Record<number, number> = {};
-    let betChips: Record<number, number[]> = {};
-    let betHistory: { number: number; amount: number }[] = []; 
-    let spinning = false;
-    let wheelRotation = 0;
-    let bettingOpen = true;
-    let roundPhase = "betting";
-    let currentUserId: string | null = null;
-    let lastWinnerNumber: number | null = null;
-
-    const ROUND_KEY = 'lucky_royel_round_start_time';
-    let roundStartTime = typeof window !== "undefined" ? parseInt(localStorage.getItem(ROUND_KEY) || '0') : Date.now();
-    if (!roundStartTime || Date.now() - roundStartTime > (ROUND_COUNTDOWN + 10) * 1000) {
-      roundStartTime = Date.now();
-      if (typeof window !== "undefined") localStorage.setItem(ROUND_KEY, roundStartTime.toString());
-    }
-
-    const wheel = document.getElementById("wheel") as HTMLDivElement;
-    const wheelLabels = document.getElementById("wheelLabels") as unknown as SVGSVGElement;
-    const grid = document.getElementById("numberGrid") as HTMLDivElement;
-    const segmentAngle = 360 / numbers.length;
-    const svgNS = "http://www.w3.org/2000/svg";
-
-    function format(n: number): string { return Number(n).toLocaleString("en-US"); }
-    function money(n: number): string { return "৳" + format(n); }
-    function getTotalBet(): number { return Object.values(bets).reduce((s, a) => s + a, 0); }
-
-    function updateBottomBar(): void {
-      const balanceEl = document.getElementById("bottomBalance") as HTMLElement;
-      balanceEl.textContent = balanceLoaded ? money(balance) : "...";
-      document.getElementById("bottomTotalBet")!.textContent = money(getTotalBet());
-    }
-
-    async function fetchBalance(): Promise<void> {
-      try {
-        const { data: userData } = await supabase.auth.getUser();
-        const user = userData?.user;
-        if (!user) {
-          currentUserId = null; balanceLoaded = true; balance = 0; updateBottomBar(); return;
-        }
-        currentUserId = user.id;
-        
-        const { data: profile, error } = await supabase
-          .from("profiles").select("balance, pf_client_seed, pf_server_seed_hash, game_nonces").eq("id", user.id).single();
-          
-        if (error) { balanceLoaded = true; updateBottomBar(); return; }
-        
-        balance = profile?.balance != null ? Number(profile.balance) : 0;
-        setClientSeed(profile?.pf_client_seed || "");
-        setServerSeedHash(profile?.pf_server_seed_hash || "");
-        setNonce(profile?.game_nonces?.lucky_royel_wheel || 0);
-
-        balanceLoaded = true; updateBottomBar(); renderGrid();
-      } catch (err) {
-        balanceLoaded = true; updateBottomBar();
-      }
-    }
-
-    const gradient = colors.map((color, index) => `${color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`).join(",");
-    wheel.style.background = `conic-gradient(${gradient})`;
-
-    const centerX = 145;
-    const centerY = 145;
-    const labelRadius = 92;
-
-    numbers.forEach((item, index) => {
-      const segmentCenter = index * segmentAngle + segmentAngle / 2;
-
-      const group = document.createElementNS(svgNS, "g");
-      group.setAttribute("transform", `rotate(${segmentCenter} ${centerX} ${centerY})`);
-
-      const numberText = document.createElementNS(svgNS, "text");
-      numberText.setAttribute("x", String(centerX));
-      numberText.setAttribute("y", String(centerY - labelRadius - 4));
-      numberText.setAttribute("class", "wheel-number");
-      numberText.textContent = String(item.number);
-
-      const multiplierText = document.createElementNS(svgNS, "text");
-      multiplierText.setAttribute("x", String(centerX));
-      multiplierText.setAttribute("y", String(centerY - labelRadius + 8));
-      multiplierText.setAttribute("class", "wheel-multiplier");
-      multiplierText.textContent = item.multiplier + "X";
-
-      group.appendChild(numberText);
-      group.appendChild(multiplierText);
-      wheelLabels.appendChild(group);
-    });
-
-    function applyWheelRotation(degrees: number): void {
-      wheelRotation = degrees;
-      wheel.style.transform = `translate(-50%,-50%) rotate(${degrees}deg)`;
-      wheelLabels.style.transform = `translate(-50%,-50%) rotate(${degrees}deg)`;
-    }
-
-    function addBet(number: number): void {
-      if (!bettingOpen || spinning) return;
-      if (!balanceLoaded) return;
-      const amount = selectedChip;
-      if (balance < amount) return; 
-      
-      playSound("bet"); 
-      
-      balance -= amount;
-      bets[number] = (bets[number] || 0) + amount;
-      if (!betChips[number]) betChips[number] = [];
-      betChips[number].push(amount);
-      betHistory.push({ number, amount });
-
-      updateBottomBar();
-      renderGrid();
-    }
-
-    function handleUndo(): void {
-      if (!bettingOpen || spinning) return;
-      if (betHistory.length === 0) return;
-
-      const lastBet = betHistory.pop()!;
-      balance += lastBet.amount;
-      bets[lastBet.number] -= lastBet.amount;
-
-      if (bets[lastBet.number] <= 0) {
-        delete bets[lastBet.number];
-        delete betChips[lastBet.number];
-      } else {
-        if (betChips[lastBet.number]) {
-          betChips[lastBet.number].pop();
-        }
-      }
-
-      playSound("bet");
-      updateBottomBar();
-      renderGrid();
-    }
-
-    function handleDouble(): void {
-      if (!bettingOpen || spinning) return;
-      const totalBet = getTotalBet();
-      if (totalBet === 0) return;
-      
-      if (balance < totalBet) {
-        openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${t("Insufficient balance to double.", "ডাবল করার জন্য পর্যাপ্ত ব্যালেন্স নেই।")}</p>`);
-        return;
-      }
-
-      balance -= totalBet;
-      Object.keys(bets).forEach(k => {
-        const num = Number(k);
-        betHistory.push({ number: num, amount: bets[num] });
-        bets[num] *= 2;
-        if (!betChips[num]) betChips[num] = [];
-        betChips[num].push(bets[num] / 2);
-      });
-
-      playSound("bet");
-      updateBottomBar();
-      renderGrid();
-    }
-
-    function renderGrid(): void {
-      grid.innerHTML = "";
-      numbers.forEach((item, index) => {
-        const amount = bets[item.number] || 0;
-        const chips = betChips[item.number] || [];
-        const isRed = index % 2 === 1;
-        const colorClass = isRed ? "roulette-red" : "roulette-green";
-        const isWinner = lastWinnerNumber === item.number;
-        const hitClass = isWinner ? (isRed ? "hit-red" : "hit-green") : "";
-
-        const card = document.createElement("button");
-        card.type = "button";
-        card.className =
-          "number-card " + colorClass +
-          (amount > 0 ? " selected" : "") +
-          (isWinner ? " " + hitClass : "") +
-          (!bettingOpen ? " locked" : "") +
-          (item.hot ? " hot" : "");
-
-        let chipDisplay = "";
-        if (amount > 0) {
-          const lastChip = chips.length ? chips[chips.length - 1] : selectedChip;
-          chipDisplay = `
-           <span class="bet-chip-display">
-            <span class="mini-chip" style="background-image: url('${getChipImage(lastChip)}');"></span>
-           </span>`;
-        }
-
-        const hotBadge = item.hot ? '<span class="hot-badge">🔥 HOT</span>' : '';
-
-        card.innerHTML = `
-         ${hotBadge}
-         <span class="number">${item.number}</span>
-         <span class="multiplier">${item.multiplier}X</span>
-         ${chipDisplay}`;
-
-        card.addEventListener("click", () => addBet(item.number));
-        grid.appendChild(card);
-      });
-    }
-
-    function updateCenterTimer(value: number | string | null, type: string = ""): void {
-      const timer = document.getElementById("wheelCountdown") as HTMLElement;
-      if (value === null) { timer.className = "center-countdown hidden"; return; }
-      timer.textContent = String(value);
-      timer.className = "center-countdown" + (type ? " " + type : "");
-    }
-
-    function animateWheel(startAngle: number, endAngle: number, duration: number): Promise<void> {
-      return new Promise((resolve) => {
-        wheel.style.transition = `transform ${duration}ms cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
-        wheelLabels.style.transition = `transform ${duration}ms cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
-        void wheel.offsetHeight;
-        wheel.style.transform = `translate(-50%,-50%) rotate(${endAngle}deg)`;
-        wheelLabels.style.transform = `translate(-50%,-50%) rotate(${endAngle}deg)`;
-        setTimeout(() => {
-          wheel.style.transition = 'none';
-          wheelLabels.style.transition = 'none';
-          wheelRotation = endAngle;
-          resolve();
-        }, duration);
-      });
-    }
-
-    function resetRound(): void {
-      spinning = false; bettingOpen = true; roundPhase = "betting"; 
-      
-      roundStartTime = Date.now();
-      if (typeof window !== "undefined") localStorage.setItem(ROUND_KEY, roundStartTime.toString());
-
-      renderGrid(); updateBottomBar(); updateCenterTimer(ROUND_COUNTDOWN);
-      void fetchBalance();
-    }
-
-    async function startAutomaticSpin(): Promise<void> {
-      if (spinning) return;
-      spinning = true; bettingOpen = false; roundPhase = "spinning";
-      renderGrid(); updateCenterTimer(null);
-
-      const totalBet = getTotalBet();
-      let winnerNumber = 0;
-      let rpcData = null;
-
-      if (totalBet > 0) {
-        const payload = Object.keys(bets).map(k => ({ number: Number(k), amount: bets[Number(k)] }));
-        try {
-          const { data, error } = await supabase.rpc('lucky_royel_wheel', { p_bets: payload });
-          if (error) {
-            openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${error.message}</p>`);
-            resetRound(); return;
-          }
-          rpcData = data;
-          winnerNumber = Number(data.winner_number);
-          setNonce(data.nonce);
-        } catch (err: any) {
-          openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${err.message || "Network Error"}</p>`);
-          resetRound(); return;
-        }
-      } else {
-        const currentPhase = nonce % 3;
-        let baseWeights = [];
-
-        if (currentPhase === 0) {
-          baseWeights = numbers.map(n => {
-            const isRed = n.number % 2 !== 0;
-            return { ...n, adjustedWeight: isRed ? 500 : 500 };
-          });
-        } else if (currentPhase === 1) {
-          baseWeights = numbers.map(n => {
-            const isRed = n.number % 2 !== 0;
-            let w = isRed ? 100 : 800;
-            if ([70, 1000, 90].includes(n.number)) w = 300;
-            return { ...n, adjustedWeight: w };
-          });
-        } else {
-          baseWeights = numbers.map(n => {
-            const isRed = n.number % 2 !== 0;
-            let w = isRed ? 400 : 400;
-            if ([70, 1000, 90].includes(n.number)) w = 800;
-            else if ([80, 100, 60, 40].includes(n.number)) w = 50;
-            return { ...n, adjustedWeight: w };
-          });
-        }
-
-        const totalWeight = baseWeights.reduce((sum, n) => sum + n.adjustedWeight, 0);
-        let rand = Math.random() * totalWeight;
-        let cum = 0;
-        for (let i = 0; i < baseWeights.length; i++) {
-          cum += baseWeights[i].adjustedWeight;
-          if (rand < cum) { winnerNumber = baseWeights[i].number; break; }
-        }
-      }
-
-      const winnerIndex = numbers.findIndex(n => n.number === winnerNumber);
-      const segmentCenter = winnerIndex * segmentAngle + segmentAngle / 2;
-      const current = ((wheelRotation % 360) + 360) % 360;
-      const target = (360 - segmentCenter + 360) % 360;
-      const extraSpins = 360 * 8;
-      const distance = (target - current + 360) % 360;
-      const endRotation = wheelRotation + extraSpins + distance;
-
-      playSpinSound(SPIN_DURATION);
-
-      await animateWheel(wheelRotation, endRotation, SPIN_DURATION);
-      finishDraw(winnerNumber, rpcData);
-    }
-
-    function finishDraw(winnerNumber: number, rpcData: any): void {
-      const winLossElement = document.getElementById("winLoss") as HTMLElement;
-      
-      if (rpcData) {
-        const netResult = Number(rpcData.profit);
-        if (netResult > 0) {
-          playSound("win"); 
-          winLossElement.textContent = "+" + money(netResult);
-          winLossElement.className = "bottom-value win";
-        } else if (netResult < 0) {
-          winLossElement.textContent = "-" + money(Math.abs(netResult));
-          winLossElement.className = "bottom-value loss";
-        } else {
-          winLossElement.textContent = money(0);
-          winLossElement.className = "bottom-value neutral";
-        }
-      } else {
-        winLossElement.textContent = "—";
-        winLossElement.className = "bottom-value neutral";
-      }
-
-      const winData = numbers.find(n => n.number === winnerNumber);
-      const newResult = {
-        number: winnerNumber,
-        multiplier: winData ? winData.multiplier : 0,
-        color: colors[numbers.findIndex((n) => n.number === winnerNumber)],
-      };
-      
-      setRecentResults(prev => {
-        const updated = [newResult, ...prev].slice(0, 50);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("lucky_royel_recent_results", JSON.stringify(updated));
-        }
-        return updated;
-      });
-      
-      lastWinnerNumber = winnerNumber;
-
-      bets = {};
-      betChips = {};
-      betHistory = []; 
-      resetRound();
-    }
-
-    function updateTimer(): void {
-      if (roundPhase === "betting") {
-        const elapsed = (Date.now() - roundStartTime) / 1000;
-        const remaining = Math.max(0, ROUND_COUNTDOWN - Math.floor(elapsed));
-        if (remaining > BET_LOCK_SECONDS) {
-          bettingOpen = true; updateCenterTimer(remaining);
-        } else if (remaining > 0) {
-          bettingOpen = false; updateCenterTimer(remaining, "warning");
-          renderGrid();
-        } else {
-          bettingOpen = false; updateCenterTimer(null);
-          startAutomaticSpin();
-        }
-      } else if (roundPhase === "spinning") {
-        updateCenterTimer(null);
-      }
-    }
-
-    let dataLoaded = false;
-    let minTimePassed = false;
-
-    const checkReady = () => {
-      if (dataLoaded && minTimePassed) setIsLoading(false);
-    };
-
-    fetchBalance().then(() => { dataLoaded = true; checkReady(); });
-    setTimeout(() => { minTimePassed = true; checkReady(); }, 2500);
-
-    applyWheelRotation(0); renderGrid(); updateBottomBar();
-    roundPhase = "betting"; bettingOpen = true; 
-    
-    updateTimer();
-    const timerInterval = setInterval(updateTimer, 100);
-
-    const handleUndoEvent = () => handleUndo();
-    const handleDoubleEvent = () => handleDouble();
-    document.addEventListener('undoBet', handleUndoEvent);
-    document.addEventListener('doubleBet', handleDoubleEvent);
-
-    return () => {
-      clearInterval(timerInterval);
-      wheelLabels.innerHTML = "";
-      document.removeEventListener('undoBet', handleUndoEvent);
-      document.removeEventListener('doubleBet', handleDoubleEvent);
-    };
-  }, []); 
-
-  return (
-    <>
-      <div className={`loading-overlay ${isLoading ? "" : "hidden"}`}>
-        <WheelLoader />
-      </div>
-
-      <div className="royel-page" id="royelPage">
-        <div className="round-bar">
-          <div className="recent-content">
-            <div className="recent-grid">
-              {recentResults.slice(0, 5).map((r, i) => (
-                <div key={i} className="recent-cell" style={{ background: r.color }}>
-                  <span>{r.number}</span><small>{r.multiplier}X</small>
-                </div>
-              ))}
-            </div>
-            <div className="top-controls" style={{ position: "relative" }}>
-              
-              <button className="top-icon-btn" onClick={() => setIsRecentOpen(!isRecentOpen)}>
-                <svg viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-              </button>
-
-              <MenuBar
-                recentResults={recentResults}
-                onOpenModal={openModal}
-                isSoundOn={soundOn}
-                onToggleSound={() => setSoundOn(prev => !prev)}
-                clientSeed={clientSeed}
-                serverSeedHash={serverSeedHash}
-                nonce={nonce}
-                onChangeClientSeed={handleClientSeedChange}
-                onOpenStats={() => setIsStatsOpen(true)}
-                onShowRecent={() => setIsRecentOpen(!isRecentOpen)}
-              />
-
-              {isRecentOpen && (
-                <>
-                  <div style={{ position: "fixed", inset: 0, zIndex: 99 }} onClick={() => setIsRecentOpen(false)}></div>
-                  <div className="recent-dropdown-container" style={{ zIndex: 100 }}>
-                    <div className="recent-dropdown-header">
-                      <span>RECENT RESULTS (Last 25)</span>
-                      <button className="recent-dropdown-close" onClick={() => setIsRecentOpen(false)}>×</button>
-                    </div>
-                    <div className="recent-dropdown-grid">
-                      {recentResults.length > 0 ? recentResults.slice(0, 25).map((r, i) => (
-                        <div key={i} className="recent-cell" style={{ background: r.color }}>
-                          <span>{r.number}</span><small>{r.multiplier}X</small>
-                        </div>
-                      )) : <div style={{color: "#a9c4b3", fontSize: "11px", padding: "10px"}}>No results yet.</div>}
-                    </div>
-                  </div>
-                </>
-              )}
-
-            </div>
-          </div>
-        </div>
-
-        <div className="wheel-area">
-          <div className="wheel-frame">
-            <div className="wheel" id="wheel"></div>
-            <svg className="wheel-label" id="wheelLabels" viewBox="0 0 290 290" aria-hidden="true"></svg>
-            <div className="pointer-rotator"></div>
-            <div className="wheel-center">
-              <strong className="center-countdown" id="wheelCountdown">20</strong>
-            </div>
-          </div>
-        </div>
-
-        <div className="wheel-underline"></div>
-
-        <section className="section">
-          <div className="section-head">
-            <h3>{t("SELECT YOUR NUMBERS", "আপনার নাম্বার সিলেক্ট করুন")}</h3>
-            <span>{t("20 NUMBERS", "২০টি নাম্বার")}</span>
-          </div>
-          <div className="number-grid" id="numberGrid"></div>
-        </section>
-
-        <div className="bottom-card">
-          <div className="chip-radial-container">
-            <div className="chip-controls-row" style={{ display: isChipMenuOpen ? "none" : "flex" }}>
-              <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('undoBet'))}>
-                <svg viewBox="0 0 24 24">
-                  <path d="M3 7v6h6"></path>
-                  <path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path>
-                </svg>
-              </button>
-
-              <button 
-                className="chip-main-btn"
-                style={{ backgroundImage: `url('${getChipImage(selectedChip)}')` }}
-                onClick={() => setIsChipMenuOpen(true)}
-              ></button>
-
-              <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('doubleBet'))}>
-                2X
-              </button>
-            </div>
-
-            <div className={`chip-serial-overlay ${isChipMenuOpen ? "open" : ""}`}>
-              <div className="chip-serial-scroll">
-                {chipAmounts.map((amount) => (
-                  <button
-                    key={amount}
-                    className={`chip-serial-item ${selectedChip === amount ? "active" : ""}`}
-                    style={{ backgroundImage: `url('${getChipImage(amount)}')` }}
-                    onClick={() => {
-                      setSelectedChip(amount);
-                      setIsChipMenuOpen(false);
-                    }}
-                  ></button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="bottom-stats">
-            <div className="bottom-item">
-              <span className="bottom-label">{t("BALANCE", "ব্যালেন্স")}</span>
-              <span className="bottom-value bottom-money" id="bottomBalance">...</span>
-            </div>
-            <div className="bottom-item center">
-              <span className="bottom-label">{t("TOTAL BET", "মোট বাজি")}</span>
-              <span className="bottom-value bottom-money" id="bottomTotalBet">৳0</span>
-            </div>
-            <div className="bottom-item right">
-              <span className="bottom-label">{t("WIN / LOSS", "লাভ / লস")}</span>
-              <span className="bottom-value neutral" id="winLoss">—</span>
-            </div>
-          </div>
-        </div>
-
-        {isStatsOpen && (
-          <div className="stats-backdrop" onClick={() => setIsStatsOpen(false)}></div>
-        )}
-        <div className={`stats-drawer ${isStatsOpen ? "open" : ""}`}>
-          <div className="stats-handle" onClick={() => setIsStatsOpen(false)}></div>
-          
-          <div className="stats-header">
-            <h3>STATISTICS</h3>
-            <span>Last {recentResults.length} Results</span>
-          </div>
-
-          <div className="bead-road-wrapper">
-            <div className="bead-road-grid">
-              {beadRoadColumns.map((col, colIdx) => (
-                <div key={colIdx} className="bead-column">
-                  {col.map((cell, cellIdx) => {
-                    const isGreen = cell.type === "Green";
-                    return (
-                      <div 
-                        key={cellIdx} 
-                        className={`bead-cell ${isGreen ? "green" : "red"}`}
-                      >
-                        {cell.number}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="stats-summary-bar">
-            <div className="summary-green" style={{ width: `${stats.greenPct}%` }}>
-              {stats.greenPct}%
-            </div>
-            <div className="summary-red" style={{ width: `${stats.redPct}%` }}>
-              {stats.redPct}%
-            </div>
-          </div>
-        </div>
-
-        <div className={`modal-backdrop ${modal.open ? "open" : ""}`} onClick={() => setModal(prev => ({ ...prev, open: false }))}>
-          <div className={`modal-box ${modal.isFullScreen ? "is-fullscreen" : ""}`} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-head">
-              <h3>{modal.title}</h3>
-              <button className="modal-close" onClick={() => setModal(prev => ({ ...prev, open: false }))}>×</button>
-            </div>
-            <div id="modalContent" dangerouslySetInnerHTML={{ __html: modal.content }}></div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+.royel-page *{box-sizing:border-box;margin:0;padding:0}
+
+.royel-page{
+ box-sizing:border-box;
+ background:#0B132B; /* ডিপ নেভি ব্লু ব্যাকগ্রাউন্ড */
+ color:#fff;
+ font-family:Arial,sans-serif;
+ max-width:480px;
+ margin:0 auto;
+ min-height:100vh;
+ padding-bottom:140px; 
+ overflow-x: hidden;
+ touch-action: pan-y;
+ 
+ --menu-bg: #1C2541;
+ --menu-btn-bg: #0B132B;
+ --menu-border: #ffffff33;
+ --menu-text: #ffffff;
+ --menu-gold: #F5C451;
+ --menu-hover: #2A3B68;
+ --menu-line: #ffffff11;
+}
+.royel-page button{font-family:inherit;cursor:pointer;border:0}
+.royel-page button:disabled{opacity:.45;cursor:not-allowed}
+
+/* LOADING OVERLAY */
+.loading-overlay { position: fixed; inset: 0; background: #0B132B; display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.3s ease; }
+.loading-overlay.hidden { opacity: 0; pointer-events: none; }
+.wheel-loader-svg { width: 60px; height: 60px; animation: spinLoader 1.2s linear infinite; }
+@keyframes spinLoader { 100% { transform: rotate(360deg); } }
+
+/* RECENT RESULTS TOP BAR */
+.round-bar{ background:#1C2541; padding:7px 9px; border-bottom:1px solid #3A506B; position:relative; z-index:20; }
+.recent-content{ display:flex; align-items:center; justify-content: space-between; gap:7px; }
+.recent-grid{ flex:1; min-width:0; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; }
+.recent-cell{ min-width:0; height:30px; border-radius:4px; border:1px solid #fff; display:flex; justify-content:center; align-items:center; flex-direction:column; font-size:11px; font-weight:900; color:#fff; }
+.recent-cell small{ font-size:7px; color:#fff; opacity:.9; }
+
+.top-controls{display:flex;gap:5px; align-items:center;}
+
+.top-icon-btn{
+ width: 34px; height: 34px;
+ display: flex; align-items: center; justify-content: center;
+ background: #0B132B; border: 1px solid #ffffff33; border-radius: 6px;
+ color: #fff; cursor: pointer; transition: all 0.3s ease; padding: 0;
+}
+.top-icon-btn:hover { background: rgba(255,255,255,0.1); }
+.top-icon-btn svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Recent Dropdown */
+.recent-dropdown-container {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: #1C2541;
+  border: 1px solid #3A506B;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+  padding: 12px;
+  animation: dropDownFade 0.2s ease;
+}
+@keyframes dropDownFade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.recent-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 6px;
+}
+.recent-dropdown-header span {
+  font-size: 11px;
+  font-weight: 900;
+  color: #F5C451;
+}
+.recent-dropdown-close {
+  background: transparent;
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.recent-dropdown-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+/* 👇 WHEEL (Deep Blue Frame) 👇 */
+.wheel-area{ display:flex; justify-content:center; align-items:center; padding:10px 0 15px; }
+.wheel-frame{ width:310px; height:310px; position:relative; display:flex; align-items:center; justify-content:center; }
+.wheel{ 
+  width:290px; height:290px; border-radius:50%; 
+  border: 8px solid #1C2541; /* ডিপ ব্লু বর্ডার */
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); 
+  overflow:hidden; 
+  box-shadow: 
+    0 0 0 4px #0B132B,
+    0 0 0 6px #3A506B,
+    0 8px 25px rgba(0,0,0,0.8),
+    inset 0 0 20px rgba(0,0,0,0.9); 
+  will-change:transform; transform: translateZ(0); backface-visibility: hidden; 
+}
+.wheel-label{ position:absolute; top:50%; left:50%; width:290px; height:290px; transform:translate(-50%,-50%); pointer-events:none; z-index:3; overflow:visible; will-change:transform; transform: translateZ(0); backface-visibility: hidden; }
+.wheel-label text{ text-anchor:middle; dominant-baseline:middle; font-family:Arial,sans-serif; font-weight:900; paint-order:stroke; stroke:#0B132B; stroke-width:2px; stroke-linejoin:round; }
+.wheel-label .wheel-number{fill:#fff;font-size:11px}
+.wheel-label .wheel-multiplier{fill:#F5C451;font-size:9px}
+
+.pointer-rotator{ position:absolute; inset:0; width:310px; height:310px; z-index:5; pointer-events:none; }
+.pointer-rotator::before{ 
+  content:""; position:absolute; top:0; left:50%; transform:translateX(-50%); 
+  width:0;height:0; 
+  border-left:12px solid transparent; border-right:12px solid transparent; border-top:28px solid #F5C451; /* গোল্ডেন পয়েন্টার */
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8)); 
+}
+.wheel-center{ 
+  position:absolute; z-index:6; width:60px; height:60px; border-radius:50%; 
+  background:radial-gradient(circle at 35% 30%,#3A506B,#1C2541 65%,#0B132B); 
+  border:3px solid #3A506B; 
+  display:flex; align-items:center; justify-content:center; color:#fff; 
+  box-shadow: inset 0 2px 5px rgba(255,255,255,0.2), 0 4px 10px rgba(0,0,0,0.8); 
+}
+.center-countdown{ font-size:22px; font-weight:900; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 2px 3px #000; color: #F5C451; }
+.center-countdown.warning{color:#ff4d4d}
+.center-countdown.hidden{display:none}
+
+/* GOLD LINE */
+.wheel-underline{ width:76%; max-width:300px; height:1px; margin:0 auto 10px; background:linear-gradient(90deg,transparent,#3A506B 50%,transparent); opacity: 0.5; }
+
+/* 👇 NUMBER GRID (5 Columns) 👇 */
+.section{padding:0 10px;margin-bottom:8px}
+.section-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.section-head h3{font-size:11px; color: #A6B6BF;}
+.section-head span{font-size:9px;color:#A6B6BF}
+
+.number-grid{ 
+  display:grid; 
+  grid-template-columns:repeat(5,minmax(0,1fr)); /* ৫ কলাম */
+  grid-auto-rows: 72px; /* সাইজ অ্যাডজাস্ট করা হয়েছে */
+  gap:5px; 
+}
+
+.number-card{ 
+  min-width:0; width:100%; height: 72px; min-height:0; border-radius:8px; color:#fff; 
+  padding:3px 1px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; 
+  position:relative; overflow:hidden; border:2px solid transparent; 
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), inset 0 -4px 7px rgba(0,0,0,0.3), 0 3px 5px rgba(0,0,0,0.5); 
+  transition:border-color .2s,box-shadow .2s; 
+}
+
+/* Blue Cards */
+.number-card.roulette-green{ 
+  background:linear-gradient(145deg, #1D4ED8, #1E3A8A); /* Vibrant Blue */
+  border-color:#3B82F6; 
+}
+/* Purple Cards */
+.number-card.roulette-red{ 
+  background:linear-gradient(145deg, #7E22CE, #4C1D95); /* Vibrant Purple */
+  border-color:#A855F7; 
+}
+
+/* HOT BADGE */
+.number-card.hot { 
+  border: 2px solid #F59E0B; /* Amber Gold */
+  animation: hotPulse 1.5s infinite alternate; 
+}
+.hot-badge { 
+  position: absolute; top: 1px; left: 50%; transform: translateX(-50%); 
+  background: #F59E0B; color: #000; font-size: 6px; font-weight: 900; 
+  padding: 1px 3px; border-radius: 2px; letter-spacing: 0.5px; 
+  box-shadow: 0 0 3px #F59E0B; white-space: nowrap; 
+}
+@keyframes hotPulse { 
+  from { box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 0 5px #F59E0B; } 
+  to { box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 0 15px #F59E0B; border-color: #FBBF24; } 
+}
+
+/* BET SELECTED */
+.number-card.roulette-green.selected{ 
+  border:2px solid #60A5FA; 
+  box-shadow: 0 0 15px rgba(96, 165, 250, 0.4); 
+}
+.number-card.roulette-red.selected{ 
+  border:2px solid #A78BFA; 
+  box-shadow: 0 0 15px rgba(167, 139, 250, 0.4); 
+}
+
+/* WINNING HIT */
+.number-card.hit-red{ 
+  border:2px solid #A78BFA !important; 
+  box-shadow: 0 0 20px rgba(167, 139, 250, 0.8), inset 0 0 15px rgba(167, 139, 250, 0.5) !important; 
+  animation:purpleHitPulse 1.1s ease-in-out infinite alternate; z-index:2; 
+}
+.number-card.hit-green{ 
+  border:2px solid #60A5FA !important; 
+  box-shadow: 0 0 20px rgba(96, 165, 250, 0.8), inset 0 0 15px rgba(96, 165, 250, 0.5) !important; 
+  animation:blueHitPulse 1.1s ease-in-out infinite alternate; z-index:2; 
+}
+@keyframes purpleHitPulse{ from{filter:brightness(1)} to{filter:brightness(1.3)} }
+@keyframes blueHitPulse{ from{filter:brightness(1)} to{filter:brightness(1.3)} }
+
+.number-card .number{ font-size:14px; font-weight:900; text-shadow:0 2px 3px rgba(0,0,0,0.8); }
+.number-card .multiplier{ font-size:8px; color:#F5C451; font-weight:bold; text-shadow:0 1px 3px rgba(0,0,0,0.8); }
+
+.bet-chip-display{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; margin-top:1px; }
+.mini-chip{ width:18px; height:18px; flex-shrink:0; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,0.6); background-size: contain; background-position: center; background-repeat: no-repeat; }
+.number-card.locked{opacity:.65}
+
+/* COMBINED BOTTOM CARD */
+.bottom-card{
+ position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+ width:100%; max-width:480px; background:#1C2541; border-top:1px solid #3A506B; box-shadow:0 -5px 18px rgba(0,0,0,0.5); z-index:999; padding:10px 10px 12px;
+ display: flex; flex-direction: column; align-items: center;
+}
+
+.chip-radial-container {
+  position: relative; width: 100%; height: 56px; margin-bottom: 8px;
+  display: flex; justify-content: center; align-items: center; z-index: 1000;
+}
+.chip-controls-row { display: flex; align-items: center; justify-content: center; gap: 20px; position: relative; z-index: 15; }
+
+/* 👇 চিপ সাইজ ৩০% ছোট করা হয়েছে 👇 */
+.chip-action-btn {
+  width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, 0.05);
+  border: 2px solid #3A506B; display: flex; justify-content: center; align-items: center;
+  cursor: pointer; color: #fff; font-weight: 900; font-size: 12px; transition: transform 0.2s, background 0.2s; box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+}
+.chip-action-btn:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.15); }
+.chip-action-btn svg { width: 14px; height: 14px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.chip-main-btn {
+  width: 42px; height: 42px; border-radius: 50%; background-size: contain; background-position: center; background-repeat: no-repeat;
+  border: none; cursor: pointer; pointer-events: auto; 
+  box-shadow: 0 3px 8px rgba(0,0,0,0.6), 0 0 0 3px #3A506B; 
+  transition: transform 0.2s; position: relative;
+}
+.chip-main-btn:active { transform: scale(0.95); }
+
+.chip-serial-overlay {
+  position: absolute; top: 50%; left: 0; width: 100%; transform: translateY(-50%);
+  display: flex; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 5;
+}
+.chip-serial-overlay.open { opacity: 1; pointer-events: auto; }
+.chip-serial-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 10px; scrollbar-width: none; -ms-overflow-style: none; }
+.chip-serial-scroll::-webkit-scrollbar { display: none; }
+
+.chip-serial-item {
+  width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background-size: contain; background-position: center; background-repeat: no-repeat;
+  border: none; cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.4); transition: transform 0.2s, box-shadow 0.2s;
+}
+.chip-serial-item.active { 
+  box-shadow: 0 0 0 2px #F5C451, 0 0 10px #F5C451; 
+  transform: scale(1.1); 
+  z-index: 2; 
+}
+
+.bottom-stats{ display:grid; grid-template-columns:1fr 1fr 1fr; align-items:center; width: 100%; padding-top:8px; border-top: 1px solid #3A506B; }
+.bottom-item{ min-width:0; display:flex; flex-direction:column; gap:4px; }
+.bottom-item.center{align-items:center;text-align:center}
+.bottom-item.right{align-items:flex-end;text-align:right}
+.bottom-label{ font-size:8px; color:#A6B6BF; font-weight:bold; letter-spacing:.3px; }
+.bottom-value{ font-size:12px; font-weight:900; color:#fff; white-space:nowrap; }
+.bottom-value.win{color:#35e59a}
+.bottom-value.loss{color:#ff6868}
+.bottom-value.neutral{color:#F5C451}
+.bottom-money{color:#F5C451}
+
+/* STATISTICS DRAWER */
+.stats-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1998; animation: fadeIn 0.3s ease; }
+.stats-drawer {
+  position: fixed; bottom: 0; left: 50%; transform: translate(-50%, 100%);
+  width: 100%; max-width: 480px; height: 60vh; background: #1C2541; border-top-left-radius: 16px; border-top-right-radius: 16px;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.7); z-index: 1999; display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid rgba(255,255,255,0.1);
+}
+.stats-drawer.open { transform: translate(-50%, 0); }
+.stats-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; margin: 10px auto; cursor: pointer; }
+.stats-header { display: flex; justify-content: space-between; align-items: center; padding: 0 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.stats-header h3 { font-size: 13px; color: #F5C451; letter-spacing: 1px; }
+.stats-header span { font-size: 10px; color: #A6B6BF; }
+
+.bead-road-wrapper { flex: 1; overflow: auto; padding: 15px; background: rgba(0,0,0,0.2); scrollbar-width: thin; scrollbar-color: #3A506B transparent; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.bead-road-grid { display: flex; gap: 4px; min-width: max-content; }
+.bead-column { display: flex; flex-direction: column; gap: 4px; }
+.bead-cell { width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 900; color: #fff; box-shadow: inset 0 1px 3px rgba(255,255,255,0.2), 0 1px 2px rgba(0,0,0,0.5); }
+.bead-cell.green { background: #1D4ED8; border: 1px solid #3B82F6; }
+.bead-cell.red { background: #7E22CE; border: 1px solid #A855F7; }
+
+.stats-summary-bar { display: flex; height: 36px; border-top: 1px solid rgba(255,255,255,0.1); background: #0B132B; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; overflow: hidden; }
+.summary-green { background: #1D4ED8; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: 900; transition: width 0.5s ease; border-right: 1px solid #0B132B; }
+.summary-red { background: #7E22CE; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: 900; transition: width 0.5s ease; }
+
+/* INFO MODAL */
+.modal-backdrop{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; padding:20px; }
+.modal-backdrop.open{display:flex}
+.modal-box{ width:100%; max-width:360px; max-height:75vh; overflow:auto; background:#1C2541; border:1px solid #3A506B; border-radius:10px; padding:14px; box-shadow:0 8px 30px rgba(0,0,0,0.8); }
+.modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.modal-head h3{font-size:13px;color:#F5C451}
+.modal-close{ background:#0B132B; border:1px solid #3A506B; color:#fff; width:27px;height:27px; border-radius:5px; font-size:17px; cursor:pointer; }
+.history-list{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
+.history-item{ border:1px solid #3A506B; border-radius:5px; text-align:center; padding:7px 2px; font-size:12px; font-weight:900; }
+.history-item small{ display:block; font-size:8px; margin-top:2px; }
+.modal-text{ color:#A6B6BF; font-size:11px; line-height:1.7; }
+.modal-text strong{color:#F5C451}
+
+/* 👇 History Full Screen Fix 👇 */
+.modal-box.is-fullscreen {
+  max-width: 100vw !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  border-radius: 0 !important;
+  border: none !important;
+  padding: 20px 15px 40px 15px !important;
+  background: #0B132B !important;
+  overflow-y: auto !important;
+  display: flex;
+  flex-direction: column;
+  margin: 0 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 2001 !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+
+.modal-box.is-fullscreen .modal-head {
+  border-bottom: 1px solid #3A506B;
+  padding-bottom: 12px;
+  margin-bottom: 15px;
+  flex-shrink: 0;
+}
+
+.history-full-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.history-full-item {
+  background: #1C2541;
+  border: 1px solid #3A506B;
+  border-radius: 10px;
+  padding: 12px;
+  width: 100%;
+}
+
+.hfi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #3A506B;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.hfi-id {
+  font-size: 11px;
+  color: #A6B6BF;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  background: #0B132B;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.hfi-id:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hfi-profit {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.hfi-details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.hfi-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hfi-label {
+  font-size: 9px;
+  color: #A6B6BF;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hfi-val {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.hfi-bets {
+  padding-top: 5px;
+  width: 100%;
+}
+
+.hfi-bets .bet-tag {
+  background: rgba(255,255,255,0.05);
+  padding: 5px 8px;
+  border-radius: 6px;
+  margin: 3px;
+  display: inline-block;
+  font-size: 11px;
+  border: 1px solid #3A506B;
+}
+
+/* SMALL SCREEN */
+@media(max-width:350px){
+ .wheel-frame{transform:none;}
+ .number-grid{gap:4px;grid-auto-rows:64px}
+ .number-card{height:64px}
+ .number-card .number{font-size:12px}
+ .number-card .multiplier{font-size:7px}
+ .wheel-label .wheel-number{font-size:9px}
+ .wheel-label .wheel-multiplier{font-size:7px}
+ .bottom-card{padding-left:6px;padding-right:6px}
+ .bottom-value{font-size:10px}
+ .bottom-label{font-size:7px}
+ .recent-cell{height:27px}
+ .mini-chip{width:16px;height:16px;}
+ 
+ .chip-main-btn { width: 38px; height: 38px; }
+ .chip-action-btn { width: 26px; height: 26px; font-size: 10px; }
+ .chip-action-btn svg { width: 12px; height: 12px; }
+ .chip-controls-row { gap: 15px; }
+ .chip-serial-item { width: 28px; height: 28px; }
+ .chip-serial-scroll { gap: 6px; }
 }
