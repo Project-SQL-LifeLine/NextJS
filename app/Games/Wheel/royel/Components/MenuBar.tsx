@@ -9,7 +9,6 @@ const t = (en: string, bn: string) => en;
 
 interface MenuBarProps {
   recentResults: any[];
-  // 👇 এখানে isFullScreen অপশনাল প্যারামিটার যোগ করা হলো 👇
   onOpenModal: (title: string, content: string, isFullScreen?: boolean) => void; 
   isSoundOn: boolean;
   onToggleSound: () => void;
@@ -34,7 +33,6 @@ export default function MenuBar({
   onShowRecent,
 }: MenuBarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [loadingHistory, setLoadingHistory] = useState(false);
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -83,92 +81,124 @@ export default function MenuBar({
     };
   }, [onChangeClientSeed]);
 
-  const handleHistory = async () => {
-    setIsOpen(false);
-    setLoadingHistory(true);
-    
-    // 👇 ৩ নম্বর প্যারামিটার (true) পাঠানো হচ্ছে, যাতে মোডাল ফুল-স্ক্রিন হয় 👇
-    onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">${t("Loading...", "লোড হচ্ছে...")}</p>`, true);
+  const generateHistoryHTML = (data: any[], currentLimit: number) => {
+    if (data.length === 0) {
+      return `<p class="modal-text" style="text-align:center;">No history found.</p>`;
+    }
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        onOpenModal("BETTING HISTORY", `<p class="modal-text">Please login to view history.</p>`, true);
-        return;
-      }
+    const itemsHtml = data.map(row => {
+      const isWin = row.profit > 0;
+      const isLoss = row.profit < 0;
+      const profitColor = isWin ? '#35e59a' : (isLoss ? '#ff6868' : '#F5C451');
+      const profitText = isWin ? `+৳${row.profit}` : (isLoss ? `-৳${Math.abs(row.profit)}` : '৳0');
+      
+      const winNum = row.game_data?.winner_number || '—';
+      const winMult = row.game_data?.winner_multiplier || '—';
+      const betsData = row.game_data?.bets || [];
+      
+      const betsHtml = betsData.map((b:any) => `<span class="bet-tag">${b.number} (৳${b.amount})</span>`).join("");
+      const betId = row.bet_id || 'N/A';
 
-      const { data, error } = await supabase
-        .from('original_bets_history')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('game_name', 'wheel')
-        .order('created_at', { ascending: false })
-        .limit(30);
-
-      if (error) throw error;
-
-      if (!data || data.length === 0) {
-        onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">No history found.</p>`, true);
-        return;
-      }
-
-      const html = data.map(row => {
-        const isWin = row.profit > 0;
-        const isLoss = row.profit < 0;
-        const profitColor = isWin ? '#35e59a' : (isLoss ? '#ff6868' : '#F5C451');
-        const profitText = isWin ? `+৳${row.profit}` : (isLoss ? `-৳${Math.abs(row.profit)}` : '৳0');
-        
-        const winNum = row.game_data?.winner_number || '—';
-        const winMult = row.game_data?.winner_multiplier || '—';
-        const betsData = row.game_data?.bets || [];
-        
-        const betsHtml = betsData.map((b:any) => `<span class="bet-tag">${b.number} (৳${b.amount})</span>`).join("");
-
-        const betId = row.bet_id || 'N/A';
-
-        return `
-          <div class="history-full-item">
-            <div class="hfi-header">
-              <div class="hfi-id" onclick="window.copyBetId('${betId}')" title="Copy ID">
-                <span>ID: ${betId}</span>
-                <span id="copy-${betId}" style="margin-left:5px; cursor:pointer;">📋</span>
-              </div>
-              <div class="hfi-profit" style="color:${profitColor}">
-                ${profitText}
-              </div>
+      return `
+        <div class="history-full-item">
+          <div class="hfi-header">
+            <div class="hfi-id" onclick="window.copyBetId('${betId}')" title="Copy ID">
+              <span>ID: ${betId}</span>
+              <span id="copy-${betId}" style="margin-left:5px; cursor:pointer;">📋</span>
             </div>
-            
-            <div class="hfi-details">
-              <div class="hfi-col">
-                <span class="hfi-label">Winner</span>
-                <span class="hfi-val" style="color:#FFD76A;">${winNum} (${winMult}X)</span>
-              </div>
-              <div class="hfi-col">
-                <span class="hfi-label">Total Bet</span>
-                <span class="hfi-val">৳${row.bet_amount}</span>
-              </div>
-              <div class="hfi-col">
-                <span class="hfi-label">Balance After</span>
-                <span class="hfi-val">৳${Number(row.balance_after).toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div class="hfi-bets">
-              <span class="hfi-label" style="margin-bottom:4px; display:block;">Your Bets:</span>
-              <div style="display: flex; flex-wrap: wrap;">${betsHtml}</div>
+            <div class="hfi-profit" style="color:${profitColor}">
+              ${profitText}
             </div>
           </div>
-        `;
-      }).join("");
+          
+          <div class="hfi-details">
+            <div class="hfi-col">
+              <span class="hfi-label">Winner</span>
+              <span class="hfi-val" style="color:#FFD76A;">${winNum} (${winMult}X)</span>
+            </div>
+            <div class="hfi-col">
+              <span class="hfi-label">Total Bet</span>
+              <span class="hfi-val">৳${row.bet_amount}</span>
+            </div>
+            <div class="hfi-col">
+              <span class="hfi-label">Balance After</span>
+              <span class="hfi-val">৳${Number(row.balance_after).toFixed(2)}</span>
+            </div>
+          </div>
 
-      onOpenModal("BETTING HISTORY", `<div class="history-full-list">${html}</div>`, true);
-      
-    } catch (err) {
-      console.error(err);
-      onOpenModal("ERROR", `<p class="modal-text" style="color:#ff4d4d">Failed to load history.</p>`, true);
-    } finally {
-      setLoadingHistory(false);
+          <div class="hfi-bets">
+            <span class="hfi-label" style="margin-bottom:4px; display:block;">Your Bets:</span>
+            <div style="display: flex; flex-wrap: wrap;">${betsHtml}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    let buttonsHtml = "";
+    if (currentLimit > 10) {
+      buttonsHtml += `<button id="history-less-btn" class="history-btn">Show Less</button>`;
     }
+    if (data.length >= currentLimit) {
+      buttonsHtml += `<button id="history-more-btn" class="history-btn primary">Load More</button>`;
+    }
+
+    return `
+      <div class="history-full-list" style="max-height: calc(100vh - 120px); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;">${itemsHtml}</div>
+      <div class="history-actions">${buttonsHtml}</div>
+    `;
+  };
+
+  const handleHistory = async () => {
+    setIsOpen(false);
+    onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">${t("Loading...", "লোড হচ্ছে...")}</p>`, true);
+
+    const loadHistory = async (limit: number) => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+          .from('original_bets_history')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('game_name', 'wheel')
+          .order('created_at', { ascending: false })
+          .limit(limit + 1);
+
+        if (error) throw error;
+
+        const hasMore = data.length > limit;
+        const displayData = hasMore ? data.slice(0, limit) : data;
+
+        const html = generateHistoryHTML(displayData, limit);
+        onOpenModal("BETTING HISTORY", html, true);
+
+        // Attach event listeners for Load More / Show Less
+        setTimeout(() => {
+          const moreBtn = document.getElementById('history-more-btn');
+          if (moreBtn) {
+            moreBtn.onclick = () => {
+              onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">${t("Loading...", "লোড হচ্ছে...")}</p>`, true);
+              loadHistory(limit + 10);
+            };
+          }
+
+          const lessBtn = document.getElementById('history-less-btn');
+          if (lessBtn) {
+            lessBtn.onclick = () => {
+              onOpenModal("BETTING HISTORY", `<p class="modal-text" style="text-align:center;">${t("Loading...", "লোড হচ্ছে...")}</p>`, true);
+              loadHistory(10);
+            };
+          }
+        }, 50);
+
+      } catch (err) {
+        console.error(err);
+        onOpenModal("ERROR", `<p class="modal-text" style="color:#ff4d4d">Failed to load history.</p>`, true);
+      }
+    };
+
+    await loadHistory(10); // Start with 10
   };
 
   const handlePayoutLimit = () => {
