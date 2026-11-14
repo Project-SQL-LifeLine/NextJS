@@ -1,0 +1,104 @@
+/* 
+  এই CSS-এ কালারগুলো var(--menu-...) দিয়ে সেট করা হয়েছে।
+  ফলে যে গেমে এই মেনু বসবে, সে গেমের CSS-এ শুধু ভেরিয়েবলগুলো 
+  ডিফাইন করে দিলেই মেনু ওই গেমের কালার ধারণ করবে।
+*/
+
+.mb-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 100;
+}
+
+.mb-toggle-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--menu-btn-bg, #0d241e);
+  border: 1px solid var(--menu-border, #fff);
+  border-radius: 5px;
+  color: var(--menu-text, #fff);
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 0;
+}
+
+.mb-toggle-btn.active {
+  background: #1F51FF;
+}
+
+.mb-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--menu-text, #fff);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mb-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  width: 190px;
+  padding: 7px;
+  background: var(--menu-bg, #183f35);
+  border: 1px solid var(--menu-border, #fff);
+  border-radius: 7px;
+  box-shadow: 0 5px 18px #0009;
+  z-index: 100;
+}
+
+.mb-panel.open {
+  display: block;
+}
+
+.mb-title {
+  color: var(--menu-gold, #F5C451);
+  font-size: 10px;
+  padding: 5px 8px 7px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mb-option {
+  width: 100%;
+  padding: 10px 8px;
+  text-align: left;
+  color: var(--menu-text, #fff);
+  background: transparent;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  border: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mb-option:active {
+  background: var(--menu-hover, #285b48);
+}
+
+.mb-option + .mb-option {
+  border-top: 1px solid var(--menu-line, #ffffff22);
+}
+
+.mb-option span.badge {
+  font-size: 9px;
+  background: #1F51FF;
+  padding: 2px 6px;
+  border-radius: 10px;
+  color: #fff;
+}
+.mb-option span.badge.on {
+  background: #35e59a;
+  color: #000;
+}
