@@ -430,7 +430,7 @@ export default function RoyelPage() {
 
       <div className="royel-page" id="royelPage">
         
-        {/* Backdrop for Chip Menu */}
+        {/* 👇 Backdrop এখানে সরানো হয়েছে, যাতে পুরো স্ক্রিন ঢাকা পড়ে */}
         {isChipMenuOpen && (
           <div className="chip-radial-backdrop" onClick={() => setIsChipMenuOpen(false)}></div>
         )}
@@ -482,13 +482,13 @@ export default function RoyelPage() {
 
         <div className="bottom-card">
           <div className={`chip-radial-container ${isChipMenuOpen ? "open" : ""}`}>
-            
+            {/* ব্যাকড্রপ এখান থেকে সরানো হয়েছে */}
+
             <div className="chip-arc">
               {chipAmounts.map((amount, index) => {
                 const totalChips = chipAmounts.length;
-                // -70 থেকে +70 ডিগ্রি (মোট ১৪০ ডিগ্রি আর্ক)
-                const startAngle = -70; 
-                const endAngle = 70;
+                const startAngle = -75; 
+                const endAngle = 75;
                 const angleStep = (endAngle - startAngle) / (totalChips - 1);
                 const angle = startAngle + index * angleStep;
                 
