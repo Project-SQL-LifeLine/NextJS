@@ -796,4 +796,17 @@ export default function RoyelPage() {
           </div>
         </div>
 
-        {/* 👇 মো
+        {/* 👇 মোডাল আপডেট (is-fullscreen ক্লাস কন্ডিশনালি যুক্ত হবে) 👇 */}
+        <div className={`modal-backdrop ${modal.open ? "open" : ""}`} onClick={() => setModal(prev => ({ ...prev, open: false }))}>
+          <div className={`modal-box ${modal.isFullScreen ? "is-fullscreen" : ""}`} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <h3>{modal.title}</h3>
+              <button className="modal-close" onClick={() => setModal(prev => ({ ...prev, open: false }))}>×</button>
+            </div>
+            <div id="modalContent" dangerouslySetInnerHTML={{ __html: modal.content }}></div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
