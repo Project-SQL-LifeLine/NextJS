@@ -115,7 +115,6 @@ export default function RoyelPage() {
     } catch (e) { /* ignore */ }
   };
 
-  // 👇 হুইল ঘোরার সময় সাউন্ড (Web Audio API) 👇
   const playSpinSound = (durationMs: number) => {
     if (!soundRef.current) return;
     try {
@@ -125,7 +124,6 @@ export default function RoyelPage() {
       const ctx = audioCtxRef.current;
       if (ctx.state === "suspended") ctx.resume();
 
-      // White Noise Buffer তৈরি (ঘর্ষণ বা হুইশ সাউন্ডের জন্য)
       const bufferSize = ctx.sampleRate * (durationMs / 1000);
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -139,13 +137,11 @@ export default function RoyelPage() {
       const filter = ctx.createBiquadFilter();
       filter.type = "bandpass";
       filter.frequency.setValueAtTime(600, ctx.currentTime);
-      // ফ্রিকোয়েন্সি ধীরে ধীরে কমবে (হুইল থামার অনুভূতি দিতে)
       filter.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + (durationMs / 1000));
       filter.Q.value = 1.5;
 
       const gainNode = ctx.createGain();
       gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
-      // সাউন্ড ধীরে ধীরে ফেইড আউট হবে
       gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (durationMs / 1000));
 
       noiseSource.connect(filter);
@@ -481,25 +477,34 @@ export default function RoyelPage() {
           resetRound(); return;
         }
       } else {
-        // ডেমো স্পিনে ডাইনামিক ওয়েট লজিক
-        let recentGreens = 0;
-        let recentReds = 0;
-        
-        recentResults.slice(0, 20).forEach(r => {
-          const isGreen = r.color === "#214E3A" || r.color === "#28563E" || r.color === "#244A38";
-          if (isGreen) recentGreens++; else recentReds++;
-        });
+        // 👇 ডেমো স্পিনে ননস (Nonce) ভিত্তিক ফেজ লজিক 👇
+        const currentPhase = nonce % 3;
+        let baseWeights = [];
 
-        const baseWeights = numbers.map(n => {
-          const isRed = n.number % 2 !== 0;
-          let w = n.weight;
-          if (recentGreens >= 14) {
-            w = isRed ? w * 1.5 : w * 0.8;
-          } else if (recentReds >= 8) {
-            w = isRed ? w * 0.7 : w * 1.2;
-          }
-          return { ...n, adjustedWeight: w };
-        });
+        if (currentPhase === 0) {
+          // Balanced (50% Green, 50% Red)
+          baseWeights = numbers.map(n => {
+            const isRed = n.number % 2 !== 0;
+            return { ...n, adjustedWeight: isRed ? 500 : 500 };
+          });
+        } else if (currentPhase === 1) {
+          // Green Heavy (70% Green, 30% Red)
+          baseWeights = numbers.map(n => {
+            const isRed = n.number % 2 !== 0;
+            let w = isRed ? 100 : 800;
+            if ([70, 1000, 90].includes(n.number)) w = 300; // লো মাল্টিপ্লায়ার রেড
+            return { ...n, adjustedWeight: w };
+          });
+        } else {
+          // Red Heavy (40% Green, 60% Red)
+          baseWeights = numbers.map(n => {
+            const isRed = n.number % 2 !== 0;
+            let w = isRed ? 400 : 400;
+            if ([70, 1000, 90].includes(n.number)) w = 800; // লো মাল্টিপ্লায়ার রেড বেশি
+            else if ([80, 100, 60, 40].includes(n.number)) w = 50; // হাই মাল্টিপ্লায়ার রেড কম
+            return { ...n, adjustedWeight: w };
+          });
+        }
 
         const totalWeight = baseWeights.reduce((sum, n) => sum + n.adjustedWeight, 0);
         let rand = Math.random() * totalWeight;
@@ -518,7 +523,6 @@ export default function RoyelPage() {
       const distance = (target - current + 360) % 360;
       const endRotation = wheelRotation + extraSpins + distance;
 
-      // 👇 হুইল ঘোরার সাউন্ড প্লে করা হচ্ছে 👇
       playSpinSound(SPIN_DURATION);
 
       await animateWheel(wheelRotation, endRotation, SPIN_DURATION);
@@ -654,7 +658,6 @@ export default function RoyelPage() {
                 onShowRecent={() => setIsRecentOpen(!isRecentOpen)}
               />
 
-              {/* 👇 Recent Result ড্রপডাউন (সর্বোচ্চ ২৫টি রেজাল্ট) 👇 */}
               {isRecentOpen && (
                 <>
                   <div style={{ position: "fixed", inset: 0, zIndex: 99 }} onClick={() => setIsRecentOpen(false)}></div>
@@ -795,15 +798,4 @@ export default function RoyelPage() {
         </div>
 
         <div className={`modal-backdrop ${modal.open ? "open" : ""}`} onClick={() => setModal(prev => ({ ...prev, open: false }))}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-head">
-              <h3>{modal.title}</h3>
-              <button className="modal-close" onClick={() => setModal(prev => ({ ...prev, open: false }))}>×</button>
-            </div>
-            <div id="modalContent" dangerouslySetInnerHTML={{ __html: modal.content }}></div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
+          <div className="modal-box" onClick
