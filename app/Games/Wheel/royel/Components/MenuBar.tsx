@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import "./MenuBar.css";
 
-const t = (en: string, bn: string) => en; // আপনি চাইলে বাংলা অনুবাদও দিতে পারেন
+const t = (en: string, bn: string) => en;
 
 interface MenuBarProps {
   recentResults: any[];
@@ -130,24 +130,39 @@ export default function MenuBar({
         <div className="mb-title">LUCKY ROYALE</div>
         
         <button className="mb-option" onClick={handleHistory}>
-          <span>◷ &nbsp; {t("History", "হিস্ট্রি")}</span>
+          <div className="mb-option-left">
+            <span className="mb-icon">◷</span>
+            <span>{t("History", "হিস্ট্রি")}</span>
+          </div>
         </button>
         
         <button className="mb-option" onClick={handlePayoutLimit}>
-          <span>💰 &nbsp; {t("Payout Limit", "পেআউট লিমিট")}</span>
+          <div className="mb-option-left">
+            <span className="mb-icon">💰</span>
+            <span>{t("Payout Limit", "পেআউট লিমিট")}</span>
+          </div>
         </button>
         
         <button className="mb-option" onClick={handleFairness}>
-          <span>♧ &nbsp; {t("Fairness", "ফেয়ারনেস")}</span>
+          <div className="mb-option-left">
+            <span className="mb-icon">♧</span>
+            <span>{t("Fairness", "ফেয়ারনেস")}</span>
+          </div>
         </button>
         
         <button className="mb-option" onClick={onToggleSound}>
-          <span>🔊 &nbsp; {t("Sound", "সাউন্ড")}</span>
-          <span className={`badge ${isSoundOn ? "on" : ""}`}>{isSoundOn ? "ON" : "OFF"}</span>
+          <div className="mb-option-left">
+            <span className="mb-icon">🔊</span>
+            <span>{t("Sound", "সাউন্ড")}</span>
+          </div>
+          <div className={`mb-switch ${isSoundOn ? "on" : ""}`}></div>
         </button>
         
         <button className="mb-option" onClick={handlePolicy}>
-          <span>⚠️ &nbsp; {t("Policy's", "পলিসি")}</span>
+          <div className="mb-option-left">
+            <span className="mb-icon">⚠️</span>
+            <span>{t("Policy's", "পলিসি")}</span>
+          </div>
         </button>
       </div>
     </div>
