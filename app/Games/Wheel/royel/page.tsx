@@ -538,50 +538,18 @@ export default function RoyelPage() {
 
         <div className={`bottom-card ${isChipMenuOpen ? "menu-open" : ""}`}>
           
-          {/* Dark Curve Background Effect */}
-          <div className={`chip-curve-bg ${isChipMenuOpen ? "open" : ""}`}></div>
-
           <div className="chip-radial-container">
-            <div className={`chip-arc ${isChipMenuOpen ? "open" : ""}`}>
-              {chipAmounts.map((amount, index) => {
-                const totalChips = chipAmounts.length;
-                const startAngle = -60; // কম অ্যাঙ্গেল, ছবির মতো ফ্ল্যাট কার্ভ
-                const endAngle = 60;
-                const angleStep = (endAngle - startAngle) / (totalChips - 1);
-                const angle = startAngle + index * angleStep;
-                
-                // ছবির মতো ডার্ক মোড ইফেক্ট (মাঝখানের চিপ brightest, পাশেরগুলো fade)
-                const centerIndex = Math.floor(totalChips / 2);
-                const distanceFromCenter = Math.abs(centerIndex - index);
-                const opacity = 1 - (distanceFromCenter * 0.15);
-                const scale = 1 - (distanceFromCenter * 0.05);
-                
-                return (
-                  <button
-                    key={amount}
-                    className={`chip-arc-item ${selectedChip === amount ? "active" : ""}`}
-                    style={{
-                      "--angle": `${angle}deg`,
-                      "--opacity": opacity,
-                      "--scale": scale,
-                      backgroundImage: `url('${getChipImage(amount)}')`
-                    }}
-                    onClick={() => {
-                      setSelectedChip(amount);
-                      setIsChipMenuOpen(false);
-                    }}
-                  ></button>
-                );
-              })}
-            </div>
-
+            
+            {/* ১. মূল চিপ ও অ্যাকশন বাটন */}
             <div className="chip-controls-row">
-              <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('undoBet'))}>
-                <svg viewBox="0 0 24 24">
-                  <path d="M3 7v6h6"></path>
-                  <path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path>
-                </svg>
-              </button>
+              {!isChipMenuOpen && (
+                <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('undoBet'))}>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M3 7v6h6"></path>
+                    <path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path>
+                  </svg>
+                </button>
+              )}
 
               <button 
                 className="chip-main-btn"
@@ -589,9 +557,28 @@ export default function RoyelPage() {
                 onClick={() => setIsChipMenuOpen(!isChipMenuOpen)}
               ></button>
 
-              <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('doubleBet'))}>
-                2X
-              </button>
+              {!isChipMenuOpen && (
+                <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('doubleBet'))}>
+                  2X
+                </button>
+              )}
+            </div>
+
+            {/* ২. সিরিয়াল চিপ লিস্ট (মেনু ওপেন হলে দেখাবে) */}
+            <div className={`chip-serial-overlay ${isChipMenuOpen ? "open" : ""}`}>
+              <div className="chip-serial-scroll">
+                {chipAmounts.map((amount) => (
+                  <button
+                    key={amount}
+                    className={`chip-serial-item ${selectedChip === amount ? "active" : ""}`}
+                    style={{ backgroundImage: `url('${getChipImage(amount)}')` }}
+                    onClick={() => {
+                      setSelectedChip(amount);
+                      setIsChipMenuOpen(false);
+                    }}
+                  ></button>
+                ))}
+              </div>
             </div>
 
           </div>
