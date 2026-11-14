@@ -7,6 +7,7 @@ import "./royel.css";
 // Language helper (Master Rule)
 const t = (en: string, bn: string) => en;
 
+// 👇 এখানে নাম্বারগুলো ছোট থেকে বড় (2x থেকে 500x) সিরিয়ালি সাজানো হয়েছে
 const numbers: { number: number; multiplier: number }[] = [
   { number: 2,    multiplier: 2    },
   { number: 3,    multiplier: 3    },
@@ -30,9 +31,10 @@ const numbers: { number: number; multiplier: number }[] = [
   { number: 100,  multiplier: 500  },
 ];
 
-// ৭টি চিপ
+// ৭টি রিয়েল ক্যাসিনো চিপ
 const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
 
+// ২০টি সেগমেন্টের জন্য কালার (একটি সবুজ, একটি লাল করে অল্টারনেট)
 const colors: string[] = [
   "#214E3A", "#8B2929", "#28563E", "#7B2929",
   "#244A38", "#922F2F", "#28563E", "#7B2929",
@@ -78,7 +80,6 @@ export default function RoyelPage() {
     function getTotalBet(): number {
       return Object.values(bets).reduce((s, a) => s + a, 0);
     }
-    function setStatus(): void {}
 
     function updateBottomBar(): void {
       const balanceEl = document.getElementById("bottomBalance") as HTMLElement;
@@ -273,7 +274,7 @@ export default function RoyelPage() {
       if (!bettingOpen || spinning) return;
       if (!balanceLoaded) return;
       const amount = selectedChip;
-      if (balance < amount) return; // পরবর্তীতে RPC চেক করবে
+      if (balance < amount) return; 
       balance -= amount;
       bets[number] = (bets[number] || 0) + amount;
       if (!betChips[number]) betChips[number] = [];
@@ -373,7 +374,6 @@ export default function RoyelPage() {
       let rpcData = null;
 
       if (totalBet > 0) {
-        // RPC তে পাঠানোর জন্য পে-লোড তৈরি
         const payload = Object.keys(bets).map(k => ({
           number: Number(k),
           amount: bets[Number(k)]
@@ -395,7 +395,7 @@ export default function RoyelPage() {
           return;
         }
       } else {
-        // যদি ইউজার কোনো বাজি না ধরে, তবুও ডেমো স্পিন হবে
+        // ডেমো স্পিন (ইউজার বাজি না ধরলেও হুইল ঘুরবে)
         const weights = [2500, 2000, 1000, 800, 500, 500, 400, 300, 300, 200, 200, 150, 100, 100, 80, 50, 30, 50, 30, 10];
         let rand = Math.random() * 9300;
         let cum = 0;
@@ -408,7 +408,6 @@ export default function RoyelPage() {
         }
       }
 
-      // হুইল ঘুরানোর টার্গেট
       const winnerIndex = numbers.findIndex(n => n.number === winnerNumber);
       const segmentCenter = winnerIndex * segmentAngle + segmentAngle / 2;
       const current = ((wheelRotation % 360) + 360) % 360;
@@ -426,7 +425,6 @@ export default function RoyelPage() {
       const winLossElement = document.getElementById("winLoss") as HTMLElement;
       
       if (rpcData) {
-        // RPC থেকে আসা ডাটা দেখানো
         const netResult = Number(rpcData.profit);
         if (netResult > 0) {
           winLossElement.textContent = "+" + money(netResult);
@@ -464,7 +462,7 @@ export default function RoyelPage() {
       updateBottomBar();
       updateCenterTimer(ROUND_COUNTDOWN);
 
-      void fetchBalance(); // DB থেকে নতুন ব্যালেন্স সিঙ্ক
+      void fetchBalance(); 
     }
 
     function updateTimer(): void {
