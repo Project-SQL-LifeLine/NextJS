@@ -98,23 +98,9 @@
  display: flex;
  flex-direction: column;
  align-items: center;
- transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
-.bottom-card.menu-open {
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
-}
-
-/* 👇 RADIAL CHIP MENU STYLES 👇 */
-.chip-radial-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6); /* ডার্ক ব্যাকগ্রাউন্ড */
-  z-index: 998;
-}
-
+/* 👇 চিপ কন্ট্রোল সেকশন 👇 */
 .chip-radial-container {
   position: relative;
   width: 100%;
@@ -133,7 +119,6 @@
   gap: 25px;
   position: relative;
   z-index: 15;
-  transition: all 0.3s ease;
 }
 
 .chip-action-btn {
@@ -171,7 +156,7 @@
 }
 .chip-main-btn:active { transform: scale(0.95); }
 
-/* 👇 সিরিয়াল চিপ ওভারলে 👇 */
+/* সিরিয়াল চিপ লিস্ট */
 .chip-serial-overlay {
   position: absolute;
   top: 50%;
@@ -196,12 +181,10 @@
   gap: 10px;
   overflow-x: auto;
   padding: 10px;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-.chip-serial-scroll::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
-}
+.chip-serial-scroll::-webkit-scrollbar { display: none; }
 
 .chip-serial-item {
   width: 46px;
@@ -222,7 +205,7 @@
   transform: scale(1.1);
   z-index: 2;
 }
-/* 👆 RADIAL CHIP MENU STYLES END 👆 */
+/* 👆 চিপ কন্ট্রোল সেকশন শেষ 👆 */
 
 .bottom-stats{
  display:grid;
@@ -231,13 +214,6 @@
  width: 100%;
  padding-top:8px;
  border-top: 1px solid #426b58;
- transition: opacity 0.3s ease, visibility 0.3s;
-}
-
-.bottom-stats.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
 }
 
 .bottom-item{ min-width:0; display:flex; flex-direction:column; gap:4px; }
