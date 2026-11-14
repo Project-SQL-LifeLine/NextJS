@@ -486,9 +486,9 @@ export default function RoyelPage() {
             <div className="chip-arc">
               {chipAmounts.map((amount, index) => {
                 const totalChips = chipAmounts.length;
-                // -75 থেকে +75 ডিগ্রি পর্যন্ত অর্ধবৃত্ত (মোট ১৫০ ডিগ্রি)
-                const startAngle = -75; 
-                const endAngle = 75;
+                // -70 থেকে +70 ডিগ্রি (মোট ১৪০ ডিগ্রি আর্ক)
+                const startAngle = -70; 
+                const endAngle = 70;
                 const angleStep = (endAngle - startAngle) / (totalChips - 1);
                 const angle = startAngle + index * angleStep;
                 
