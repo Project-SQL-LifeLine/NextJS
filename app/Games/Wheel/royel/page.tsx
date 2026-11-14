@@ -87,7 +87,8 @@ export default function RoyelPage() {
   const [selectedChip, setSelectedChip] = useState(10);
   const [isChipMenuOpen, setIsChipMenuOpen] = useState(false);
 
-  const [modal, setModal] = useState({ open: false, title: "", content: "" });
+  // 👇 মোডাল স্টেটে isFullScreen যোগ করা হলো 👇
+  const [modal, setModal] = useState({ open: false, title: "", content: "", isFullScreen: false });
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const soundRef = useRef(soundOn);
@@ -153,8 +154,9 @@ export default function RoyelPage() {
     } catch (e) { /* ignore */ }
   };
 
-  const openModal = (title: string, content: string) => {
-    setModal({ open: true, title, content });
+  // 👇 openModal আপডেট (isFullScreen প্যারামিটার যোগ) 👇
+  const openModal = (title: string, content: string, isFullScreen: boolean = false) => {
+    setModal({ open: true, title, content, isFullScreen });
   };
 
   const handleClientSeedChange = async (newSeed: string) => {
@@ -482,26 +484,23 @@ export default function RoyelPage() {
         let baseWeights = [];
 
         if (currentPhase === 0) {
-          // Balanced (50% Green, 50% Red)
           baseWeights = numbers.map(n => {
             const isRed = n.number % 2 !== 0;
             return { ...n, adjustedWeight: isRed ? 500 : 500 };
           });
         } else if (currentPhase === 1) {
-          // Green Heavy (70% Green, 30% Red)
           baseWeights = numbers.map(n => {
             const isRed = n.number % 2 !== 0;
             let w = isRed ? 100 : 800;
-            if ([70, 1000, 90].includes(n.number)) w = 300; // লো মাল্টিপ্লায়ার রেড
+            if ([70, 1000, 90].includes(n.number)) w = 300;
             return { ...n, adjustedWeight: w };
           });
         } else {
-          // Red Heavy (40% Green, 60% Red)
           baseWeights = numbers.map(n => {
             const isRed = n.number % 2 !== 0;
             let w = isRed ? 400 : 400;
-            if ([70, 1000, 90].includes(n.number)) w = 800; // লো মাল্টিপ্লায়ার রেড বেশি
-            else if ([80, 100, 60, 40].includes(n.number)) w = 50; // হাই মাল্টিপ্লায়ার রেড কম
+            if ([70, 1000, 90].includes(n.number)) w = 800;
+            else if ([80, 100, 60, 40].includes(n.number)) w = 50;
             return { ...n, adjustedWeight: w };
           });
         }
@@ -797,16 +796,4 @@ export default function RoyelPage() {
           </div>
         </div>
 
-        <div className={`modal-backdrop ${modal.open ? "open" : ""}`} onClick={() => setModal(prev => ({ ...prev, open: false }))}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-head">
-              <h3>{modal.title}</h3>
-              <button className="modal-close" onClick={() => setModal(prev => ({ ...prev, open: false }))}>×</button>
-            </div>
-            <div id="modalContent" dangerouslySetInnerHTML={{ __html: modal.content }}></div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
+        {/* 👇 মো
