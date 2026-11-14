@@ -7,7 +7,6 @@ import "./royel.css";
 
 const t = (en: string, bn: string) => en;
 
-// 👇 ব্যালেন্সড ওয়েট (ডাইনামিক লজিকের জন্য বেস) 👇
 const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
   { number: 2,    multiplier: 2,   weight: 2500 },
   { number: 70,   multiplier: 40,  weight: 600  },
@@ -116,6 +115,48 @@ export default function RoyelPage() {
     } catch (e) { /* ignore */ }
   };
 
+  // 👇 হুইল ঘোরার সময় সাউন্ড (Web Audio API) 👇
+  const playSpinSound = (durationMs: number) => {
+    if (!soundRef.current) return;
+    try {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx.state === "suspended") ctx.resume();
+
+      // White Noise Buffer তৈরি (ঘর্ষণ বা হুইশ সাউন্ডের জন্য)
+      const bufferSize = ctx.sampleRate * (durationMs / 1000);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const noiseSource = ctx.createBufferSource();
+      noiseSource.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(600, ctx.currentTime);
+      // ফ্রিকোয়েন্সি ধীরে ধীরে কমবে (হুইল থামার অনুভূতি দিতে)
+      filter.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + (durationMs / 1000));
+      filter.Q.value = 1.5;
+
+      const gainNode = ctx.createGain();
+      gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
+      // সাউন্ড ধীরে ধীরে ফেইড আউট হবে
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (durationMs / 1000));
+
+      noiseSource.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      noiseSource.start();
+      noiseSource.stop(ctx.currentTime + (durationMs / 1000));
+    } catch (e) { /* ignore */ }
+  };
+
   const openModal = (title: string, content: string) => {
     setModal({ open: true, title, content });
   };
@@ -130,7 +171,6 @@ export default function RoyelPage() {
     } catch (e) { console.warn(e); }
   };
 
-  // 👇 বিড রোড (Bead Road) জেনারেট করার লজিক 👇
   const buildBeadRoad = () => {
     if (recentResults.length === 0) return [];
     const history = [...recentResults].reverse();
@@ -254,7 +294,6 @@ export default function RoyelPage() {
 
       const group = document.createElementNS(svgNS, "g");
       group.setAttribute("transform", `rotate(${segmentCenter} ${centerX} ${centerY})`);
-      group.setAttribute("data-num", String(item.number));
 
       const numberText = document.createElementNS(svgNS, "text");
       numberText.setAttribute("x", String(centerX));
@@ -422,8 +461,6 @@ export default function RoyelPage() {
       spinning = true; bettingOpen = false; roundPhase = "spinning";
       renderGrid(); updateCenterTimer(null);
 
-      wheelLabels.querySelectorAll('g').forEach(g => g.classList.remove('winner-highlight'));
-
       const totalBet = getTotalBet();
       let winnerNumber = 0;
       let rpcData = null;
@@ -444,7 +481,7 @@ export default function RoyelPage() {
           resetRound(); return;
         }
       } else {
-        // 👇 ডেমো স্পিনে ডাইনামিক ওয়েট লজিক 👇
+        // ডেমো স্পিনে ডাইনামিক ওয়েট লজিক
         let recentGreens = 0;
         let recentReds = 0;
         
@@ -454,7 +491,7 @@ export default function RoyelPage() {
         });
 
         const baseWeights = numbers.map(n => {
-          const isRed = n.number % 2 !== 0; // গ্রিডের রঙের সাথে মিল রেখে
+          const isRed = n.number % 2 !== 0;
           let w = n.weight;
           if (recentGreens >= 14) {
             w = isRed ? w * 1.5 : w * 0.8;
@@ -480,6 +517,9 @@ export default function RoyelPage() {
       const extraSpins = 360 * 8;
       const distance = (target - current + 360) % 360;
       const endRotation = wheelRotation + extraSpins + distance;
+
+      // 👇 হুইল ঘোরার সাউন্ড প্লে করা হচ্ছে 👇
+      playSpinSound(SPIN_DURATION);
 
       await animateWheel(wheelRotation, endRotation, SPIN_DURATION);
       finishDraw(winnerNumber, rpcData);
@@ -522,12 +562,6 @@ export default function RoyelPage() {
       });
       
       lastWinnerNumber = winnerNumber;
-
-      // হুইল হাইলাইট
-      const winningGroup = wheelLabels.querySelector(`[data-num="${winnerNumber}"]`);
-      if (winningGroup) {
-        winningGroup.classList.add('winner-highlight');
-      }
 
       bets = {};
       betChips = {};
@@ -620,16 +654,17 @@ export default function RoyelPage() {
                 onShowRecent={() => setIsRecentOpen(!isRecentOpen)}
               />
 
+              {/* 👇 Recent Result ড্রপডাউন (সর্বোচ্চ ২৫টি রেজাল্ট) 👇 */}
               {isRecentOpen && (
                 <>
                   <div style={{ position: "fixed", inset: 0, zIndex: 99 }} onClick={() => setIsRecentOpen(false)}></div>
                   <div className="recent-dropdown-container" style={{ zIndex: 100 }}>
                     <div className="recent-dropdown-header">
-                      <span>RECENT RESULTS</span>
+                      <span>RECENT RESULTS (Last 25)</span>
                       <button className="recent-dropdown-close" onClick={() => setIsRecentOpen(false)}>×</button>
                     </div>
                     <div className="recent-dropdown-grid">
-                      {recentResults.length > 0 ? recentResults.map((r, i) => (
+                      {recentResults.length > 0 ? recentResults.slice(0, 25).map((r, i) => (
                         <div key={i} className="recent-cell" style={{ background: r.color }}>
                           <span>{r.number}</span><small>{r.multiplier}X</small>
                         </div>
