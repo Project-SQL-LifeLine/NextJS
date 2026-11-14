@@ -65,9 +65,10 @@ const WheelLoader = () => (
 
 export default function RoyelPage() {
   const [isLoading, setIsLoading] = useState(true);
-  
-  // 👇 LocalStorage থেকে ডাটা লোড করা হচ্ছে যাতে রিফ্রেশে মুছে না যায় 👇
   const [recentResults, setRecentResults] = useState<{ number: number; multiplier: number; color: string }[]>([]);
+  
+  // 👇 Recent Result ড্রপডাউনের স্টেট 👇
+  const [isRecentOpen, setIsRecentOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -122,19 +123,6 @@ export default function RoyelPage() {
     setModal({ open: true, title, content });
   };
 
-  // 👇 Recent Result মোডাল দেখানোর ফাংশন 👇
-  const handleShowRecent = () => {
-    if (!recentResults.length) {
-      openModal(t("RECENT RESULTS", "সাম্প্রতিক রেজাল্ট"), `<p class="modal-text">${t("No results available yet.", "এখনো কোনো রেজাল্ট নেই।")}</p>`);
-      return;
-    }
-    const html = `<div class="history-list">${recentResults.map((r) => `
-      <div class="history-item" style="background:${r.color}">
-        ${r.number}<small>${r.multiplier}X</small>
-      </div>`).join("")}</div>`;
-    openModal(t("RECENT RESULTS", "সাম্প্রতিক রেজাল্ট"), html);
-  };
-
   const handleClientSeedChange = async (newSeed: string) => {
     setClientSeed(newSeed);
     try {
@@ -147,7 +135,6 @@ export default function RoyelPage() {
     }
   };
 
-  // 👇 বিড রোড লজিক 👇
   const buildBeadRoad = () => {
     if (recentResults.length === 0) return [];
     const history = [...recentResults].reverse();
@@ -176,7 +163,6 @@ export default function RoyelPage() {
     return columns;
   };
 
-  // 👇 সামারি (%) ক্যালকুলেশন 👇
   const calculateStats = () => {
     const total = recentResults.length;
     if (total === 0) return { greenPct: 0, redPct: 0 };
@@ -272,6 +258,8 @@ export default function RoyelPage() {
 
       const group = document.createElementNS(svgNS, "g");
       group.setAttribute("transform", `rotate(${segmentCenter} ${centerX} ${centerY})`);
+      // 👇 হাইলাইট করার জন্য ডাটা অ্যাট্রিবিউট 👇
+      group.setAttribute("data-num", String(item.number));
 
       const numberText = document.createElementNS(svgNS, "text");
       numberText.setAttribute("x", String(centerX));
@@ -439,6 +427,9 @@ export default function RoyelPage() {
       spinning = true; bettingOpen = false; roundPhase = "spinning";
       renderGrid(); updateCenterTimer(null);
 
+      // 👇 নতুন রাউন্ড শুরু হলে আগের হাইলাইট সরিয়ে নেওয়া হবে 👇
+      wheelLabels.querySelectorAll('g').forEach(g => g.classList.remove('winner-highlight'));
+
       const totalBet = getTotalBet();
       let winnerNumber = 0;
       let rpcData = null;
@@ -507,7 +498,6 @@ export default function RoyelPage() {
         color: colors[numbers.findIndex((n) => n.number === winnerNumber)],
       };
       
-      // 👇 LocalStorage-এ সেভ করা হচ্ছে যাতে রিফ্রেশে না মুছে যায় 👇
       setRecentResults(prev => {
         const updated = [newResult, ...prev].slice(0, 50);
         if (typeof window !== "undefined") {
@@ -517,6 +507,12 @@ export default function RoyelPage() {
       });
       
       lastWinnerNumber = winnerNumber;
+
+      // 👇 হুইলে বিজয়ী নাম্বারটি গ্লোয়িং হাইলাইট করা হলো 👇
+      const winningGroup = wheelLabels.querySelector(`[data-num="${winnerNumber}"]`);
+      if (winningGroup) {
+        winningGroup.classList.add('winner-highlight');
+      }
 
       bets = {};
       betChips = {};
@@ -595,10 +591,10 @@ export default function RoyelPage() {
                 </div>
               ))}
             </div>
-            <div className="top-controls">
+            <div className="top-controls" style={{ position: "relative" }}>
               
-              {/* 👇 ঘড়ির আইকনে ক্লিক করলে সাম্প্রতিক রেজাল্ট দেখাবে 👇 */}
-              <button className="top-icon-btn" onClick={handleShowRecent} title="Recent Results">
+              {/* 👇 ঘড়ির আইকনে ক্লিক করলে ড্রপডাউন ওপেন হবে 👇 */}
+              <button className="top-icon-btn" onClick={() => setIsRecentOpen(!isRecentOpen)}>
                 <svg viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
@@ -615,8 +611,29 @@ export default function RoyelPage() {
                 nonce={nonce}
                 onChangeClientSeed={handleClientSeedChange}
                 onOpenStats={() => setIsStatsOpen(true)}
-                onShowRecent={handleShowRecent}
+                onShowRecent={() => setIsRecentOpen(!isRecentOpen)}
               />
+
+              {/* 👇 ড্রপডাউন কন্টেইনার 👇 */}
+              {isRecentOpen && (
+                <>
+                  <div style={{ position: "fixed", inset: 0, zIndex: 99 }} onClick={() => setIsRecentOpen(false)}></div>
+                  <div className="recent-dropdown-container" style={{ zIndex: 100 }}>
+                    <div className="recent-dropdown-header">
+                      <span>RECENT RESULTS</span>
+                      <button className="recent-dropdown-close" onClick={() => setIsRecentOpen(false)}>×</button>
+                    </div>
+                    <div className="recent-dropdown-grid">
+                      {recentResults.length > 0 ? recentResults.map((r, i) => (
+                        <div key={i} className="recent-cell" style={{ background: r.color }}>
+                          <span>{r.number}</span><small>{r.multiplier}X</small>
+                        </div>
+                      )) : <div style={{color: "#a9c4b3", fontSize: "11px", padding: "10px"}}>No results yet.</div>}
+                    </div>
+                  </div>
+                </>
+              )}
+
             </div>
           </div>
         </div>
@@ -729,10 +746,10 @@ export default function RoyelPage() {
 
           <div className="stats-summary-bar">
             <div className="summary-green" style={{ width: `${stats.greenPct}%` }}>
-              GREEN {stats.greenPct}%
+              {stats.greenPct}%
             </div>
             <div className="summary-red" style={{ width: `${stats.redPct}%` }}>
-              RED {stats.redPct}%
+              {stats.redPct}%
             </div>
           </div>
         </div>
