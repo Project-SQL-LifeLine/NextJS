@@ -6,7 +6,6 @@ import { useLanguage } from "@/lib/LanguageContext";
 import MenuBar from "../royel/Components/MenuBar";
 import "./royel.css";
 
-// 👇 ছোট থেকে বড় সাইজ অনুযায়ী সাজানো হয়েছে 👇
 const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
   { number: 2,    multiplier: 2,   weight: 2500 },
   { number: 3,    multiplier: 3,   weight: 2000 },
@@ -66,7 +65,7 @@ const WheelLoader = () => (
   </svg>
 );
 
-export default function RoyelPage() {
+export default function LuckyRoyelPage() {
   const { t } = useLanguage(); 
 
   const [isLoading, setIsLoading] = useState(true);
@@ -75,7 +74,7 @@ export default function RoyelPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("wheel_recent_results");
+      const saved = localStorage.getItem("lucky_royel_recent_results");
       if (saved) {
         try { setRecentResults(JSON.parse(saved)); } catch (e) {}
       }
@@ -235,7 +234,7 @@ export default function RoyelPage() {
     let currentUserId: string | null = null;
     let lastWinnerNumber: number | null = null;
 
-    const ROUND_KEY = 'wheel_round_start_time';
+    const ROUND_KEY = 'lucky_royel_round_start_time';
     let roundStartTime = typeof window !== "undefined" ? parseInt(localStorage.getItem(ROUND_KEY) || '0') : Date.now();
     if (!roundStartTime || Date.now() - roundStartTime > (ROUND_COUNTDOWN + 10) * 1000) {
       roundStartTime = Date.now();
@@ -275,7 +274,7 @@ export default function RoyelPage() {
         balance = profile?.balance != null ? Number(profile.balance) : 0;
         setClientSeed(profile?.pf_client_seed || "");
         setServerSeedHash(profile?.pf_server_seed_hash || "");
-        setNonce(profile?.game_nonces?.wheel || 0);
+        setNonce(profile?.game_nonces?.lucky_royel_wheel || 0);
 
         balanceLoaded = true; updateBottomBar(); renderGrid();
       } catch (err) {
@@ -469,7 +468,7 @@ export default function RoyelPage() {
       if (totalBet > 0) {
         const payload = Object.keys(bets).map(k => ({ number: Number(k), amount: bets[Number(k)] }));
         try {
-          const { data, error } = await supabase.rpc('play_wheel', { p_bets: payload });
+          const { data, error } = await supabase.rpc('lucky_royel_wheel', { p_bets: payload });
           if (error) {
             openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${error.message}</p>`);
             resetRound(); return;
@@ -561,7 +560,7 @@ export default function RoyelPage() {
       setRecentResults(prev => {
         const updated = [newResult, ...prev].slice(0, 50);
         if (typeof window !== "undefined") {
-          localStorage.setItem("wheel_recent_results", JSON.stringify(updated));
+          localStorage.setItem("lucky_royel_recent_results", JSON.stringify(updated));
         }
         return updated;
       });
