@@ -104,6 +104,19 @@ export default function RoyelPage() {
     setModal({ open: true, title, content });
   };
 
+  // 👇 নতুন ঘড়ির আইকনে ক্লিক করলে ২০টি রেজাল্ট দেখাবে 👇
+  const handleHistoryClick = () => {
+    if (!recentResults.length) {
+      openModal(t("HISTORY", "হিস্ট্রি"), `<p class="modal-text">${t("No results available yet.", "এখনো কোনো রেজাল্ট নেই।")}</p>`);
+      return;
+    }
+    const html = `<div class="history-list">${recentResults.map((r) => `
+      <div class="history-item" style="background:${r.color}">
+        ${r.number}<small>${r.multiplier}X</small>
+      </div>`).join("")}</div>`;
+    openModal(t("LAST 20 RESULTS", "সর্বশেষ ২০টি রেজাল্ট"), html);
+  };
+
   const handleClientSeedChange = async (newSeed: string) => {
     setClientSeed(newSeed);
     try {
@@ -294,9 +307,9 @@ export default function RoyelPage() {
         let chipDisplay = "";
         if (amount > 0) {
           const lastChip = chips.length ? chips[chips.length - 1] : selectedChip;
+          // 👇 এখানে bet-total টেক্সট সরিয়ে শুধু mini-chip রাখা হয়েছে 👇
           chipDisplay = `
            <span class="bet-chip-display">
-            <span class="bet-total">${money(amount)}</span>
             <span class="mini-chip" style="background-image: url('${getChipImage(lastChip)}');"></span>
            </span>`;
         }
@@ -416,7 +429,8 @@ export default function RoyelPage() {
         color: colors[numbers.findIndex((n) => n.number === winnerNumber)],
       };
       
-      setRecentResults(prev => [newResult, ...prev].slice(0, 5)); 
+      // 👇 এখানে ২০টি রেজাল্ট সেভ করা হবে 👇
+      setRecentResults(prev => [newResult, ...prev].slice(0, 20)); 
       
       lastWinnerNumber = winnerNumber;
 
@@ -487,18 +501,26 @@ export default function RoyelPage() {
 
       <div className="royel-page" id="royelPage">
         
-        {/* 👇 ড্রাক মোড বা ব্যাকড্রপ সম্পূর্ণ বাদ দেওয়া হয়েছে 👇 */}
-
         <div className="round-bar">
           <div className="recent-content">
             <div className="recent-grid">
-              {recentResults.map((r, i) => (
+              {/* এখানে শুধু সর্বশেষ ৫টি রেজাল্ট টপ বারে দেখাবে */}
+              {recentResults.slice(0, 5).map((r, i) => (
                 <div key={i} className="recent-cell" style={{ background: r.color }}>
                   <span>{r.number}</span><small>{r.multiplier}X</small>
                 </div>
               ))}
             </div>
             <div className="top-controls">
+              
+              {/* 👇 নতুন ঘড়ির আইকন (History) 👇 */}
+              <button className="top-icon-btn" onClick={handleHistoryClick} title="Last 20 Results">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </button>
+
               <MenuBar
                 recentResults={recentResults}
                 onOpenModal={openModal}
@@ -538,7 +560,6 @@ export default function RoyelPage() {
           
           <div className="chip-radial-container">
             
-            {/* মূল চিপ এবং বাটন (Undo ও 2X) */}
             <div className="chip-controls-row" style={{ display: isChipMenuOpen ? "none" : "flex" }}>
               <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('undoBet'))}>
                 <svg viewBox="0 0 24 24">
@@ -558,7 +579,6 @@ export default function RoyelPage() {
               </button>
             </div>
 
-            {/* সিরিয়াল চিপ লিস্ট (মেইন চিপে ক্লিক করলে এখানে দেখাবে) */}
             <div className={`chip-serial-overlay ${isChipMenuOpen ? "open" : ""}`}>
               <div className="chip-serial-scroll">
                 {chipAmounts.map((amount) => (
@@ -577,7 +597,6 @@ export default function RoyelPage() {
 
           </div>
 
-          {/* Bottom Stats (এখন সবসময় দেখা যাবে) */}
           <div className="bottom-stats">
             <div className="bottom-item">
               <span className="bottom-label">{t("BALANCE", "ব্যালেন্স")}</span>
