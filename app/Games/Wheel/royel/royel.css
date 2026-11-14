@@ -8,7 +8,8 @@
  max-width:480px;
  margin:0 auto;
  min-height:100vh;
- padding-bottom:125px;
+ /* নিচের রেডিয়াল চিপ মেনুর জন্য জায়গা বাড়ানো হলো */
+ padding-bottom:140px; 
  
  /* MenuBar CSS Variables (Dynamic Colors) */
  --menu-bg: #183f35;
@@ -391,46 +392,94 @@
  border-top:1px solid #52745e;
  box-shadow:0 -5px 18px #0006;
  z-index:999;
- padding:7px 10px 9px;
-}
-.chip-row{
- display:grid;
- grid-template-columns:repeat(7,minmax(0,1fr));
- gap:5px;
- padding-bottom:8px;
- border-bottom:1px solid #426b58;
- align-items:center;
- justify-items:center;
+ padding:10px 10px 12px;
 }
 
-.chip{
- width:100%;
- max-width:40px;
- aspect-ratio: 1/1;
- border-radius:50%;
- position:relative;
- display:flex;
- align-items:center;
- justify-content:center;
- box-shadow:0 2px 4px #0008;
- border:none;
- background-size: contain;
- background-position: center;
- background-repeat: no-repeat;
- padding:0;
- transition:transform .2s;
+/* 👇 RADIAL CHIP MENU STYLES 👇 */
+.chip-radial-container {
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 260px;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 1000;
 }
 
-.chip.active{
- transform:translateY(-3px);
- box-shadow: 0 0 0 2px #fff, 0 0 12px #F5C451;
+.chip-radial-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px);
+  z-index: -1;
+  pointer-events: auto;
+  display: none;
 }
+
+.chip-main-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: none;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6), 0 0 0 3px #fff;
+  transition: transform 0.2s;
+  z-index: 10;
+}
+.chip-main-btn:active {
+  transform: scale(0.95);
+}
+
+.chip-arc {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+.chip-arc-item {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: none;
+  cursor: pointer;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 0) scale(0.5);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.chip-arc.open .chip-arc-item {
+  pointer-events: auto;
+  opacity: 1;
+  transform: translate(-50%, 0) rotate(var(--angle)) translateY(-110px) rotate(calc(var(--angle) * -1)) scale(1);
+}
+
+.chip-arc-item.active {
+  box-shadow: 0 0 0 3px #F5C451, 0 0 15px #F5C451;
+}
+/* 👆 RADIAL CHIP MENU STYLES END 👆 */
 
 .bottom-stats{
  display:grid;
  grid-template-columns:1fr 1fr 1fr;
  align-items:center;
  padding-top:8px;
+ margin-top: 5px;
+ border-top: 1px solid #426b58;
 }
 .bottom-item{
  min-width:0;
@@ -538,9 +587,16 @@
  .bottom-card{padding-left:6px;padding-right:6px}
  .bottom-value{font-size:10px}
  .bottom-label{font-size:7px}
- .chip-row{gap:3px}
- .chip{max-width:34px;}
  .recent-cell{height:27px}
  .mini-chip{width:24px;height:24px;}
  .bet-total{font-size:9px}
+ 
+ /* ছোট স্ক্রিনের জন্য রেডিয়াল চিপ অ্যাডজাস্টমেন্ট */
+ .chip-main-btn { width: 46px; height: 46px; }
+ .chip-arc-item { width: 36px; height: 36px; }
+ .chip-arc.open .chip-arc-item {
+   transform: translate(-50%, 0) rotate(var(--angle)) translateY(-85px) rotate(calc(var(--angle) * -1)) scale(1);
+ }
+ .chip-arc { bottom: 23px; }
+ .chip-radial-container { bottom: 60px; }
 }
