@@ -4,6 +4,9 @@ import { useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import "./royel.css";
 
+// Language helper (Master Rule)
+const t = (en: string, bn: string) => en;
+
 const numbers: { number: number; multiplier: number }[] = [
   { number: 2,    multiplier: 2    },
   { number: 3,    multiplier: 3    },
@@ -27,7 +30,8 @@ const numbers: { number: number; multiplier: number }[] = [
   { number: 100,  multiplier: 500  },
 ];
 
-const chipAmounts: number[] = [10, 50, 200, 500, 700, 1000];
+// ৭টি চিপ
+const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
 
 const colors: string[] = [
   "#214E3A", "#8B2929", "#28563E", "#7B2929",
@@ -154,7 +158,7 @@ export default function RoyelPage() {
 
     document.getElementById("historyBtn")!.addEventListener("click", () => {
       if (!recentResults.length) {
-        openModal("HISTORY", '<p class="modal-text">No results available yet.</p>');
+        openModal(t("HISTORY", "হিস্ট্রি"), `<p class="modal-text">${t("No results available yet.", "এখনো কোনো রেজাল্ট নেই।")}</p>`);
         return;
       }
       const html = `
@@ -164,27 +168,25 @@ export default function RoyelPage() {
            ${r.number}<small>${r.multiplier}X</small>
           </div>`).join("")}
         </div>`;
-      openModal("RESULT HISTORY", html);
+      openModal(t("RESULT HISTORY", "রেজাল্ট হিস্ট্রি"), html);
     });
 
     document.getElementById("layoutBtn")!.addEventListener("click", () => {
       const compact = (document.getElementById("royelPage") as HTMLDivElement).classList.toggle("compact");
       openModal(
-        "LAYOUT",
-        `<p class="modal-text">Layout mode: <strong>${compact ? "Compact" : "Normal"}</strong></p>`
+        t("LAYOUT", "লেআউট"),
+        `<p class="modal-text">${t("Layout mode", "লেআউট মোড")}: <strong>${compact ? t("Compact", "কমপ্যাক্ট") : t("Normal", "নরমাল")}</strong></p>`
       );
     });
 
     document.getElementById("fairnessBtn")!.addEventListener("click", () => {
       openModal(
-        "LIMIT FAIRNESS",
+        t("FAIRNESS", "ফেয়ারনেস"),
         `<div class="modal-text">
-         <strong>Game Information</strong><br>
-         20 segments weighted random. RTP ~71%.<br><br>
-         <strong>Provably Fair</strong><br>
-         HMAC-SHA256(client_seed:nonce, server_seed).<br><br>
-         <strong>Important</strong><br>
-         Bet cap applies to 200x segment.
+         <strong>${t("Game Information", "গেমের তথ্য")}</strong><br>
+         ${t("20 segments weighted random. House edge is maintained.", "২০টি সেগমেন্ট ওয়েটেড র‍্যান্ডম। হাউজ এজ নিশ্চিত করা হয়েছে।")}<br><br>
+         <strong>${t("Provably Fair", "প্রমাণযোগ্য ফেয়ার")}</strong><br>
+         HMAC-SHA256(client_seed:nonce, server_seed).
         </div>`
       );
     });
@@ -271,7 +273,7 @@ export default function RoyelPage() {
       if (!bettingOpen || spinning) return;
       if (!balanceLoaded) return;
       const amount = selectedChip;
-      if (balance < amount) return;
+      if (balance < amount) return; // পরবর্তীতে RPC চেক করবে
       balance -= amount;
       bets[number] = (bets[number] || 0) + amount;
       if (!betChips[number]) betChips[number] = [];
@@ -344,18 +346,70 @@ export default function RoyelPage() {
       });
     }
 
+    function resetRound(): void {
+      spinning = false;
+      bettingOpen = true;
+      roundPhase = "betting";
+      roundStartTime = Date.now();
+      renderGrid();
+      renderChips();
+      updateBottomBar();
+      updateCenterTimer(ROUND_COUNTDOWN);
+      void fetchBalance();
+    }
+
     async function startAutomaticSpin(): Promise<void> {
       if (spinning) return;
       spinning = true;
       bettingOpen = false;
       roundPhase = "spinning";
+
       renderGrid();
       updateCenterTimer(null);
       renderChips();
 
-      const winnerIndex = Math.floor(Math.random() * numbers.length);
-      const winner = numbers[winnerIndex];
+      const totalBet = getTotalBet();
+      let winnerNumber = 0;
+      let rpcData = null;
 
+      if (totalBet > 0) {
+        // RPC তে পাঠানোর জন্য পে-লোড তৈরি
+        const payload = Object.keys(bets).map(k => ({
+          number: Number(k),
+          amount: bets[Number(k)]
+        }));
+
+        try {
+          const { data, error } = await supabase.rpc('play_wheel', { p_bets: payload });
+          
+          if (error) {
+            openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${error.message}</p>`);
+            resetRound();
+            return;
+          }
+          rpcData = data;
+          winnerNumber = Number(data.winner_number);
+        } catch (err: any) {
+          openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${err.message || "Network Error"}</p>`);
+          resetRound();
+          return;
+        }
+      } else {
+        // যদি ইউজার কোনো বাজি না ধরে, তবুও ডেমো স্পিন হবে
+        const weights = [2500, 2000, 1000, 800, 500, 500, 400, 300, 300, 200, 200, 150, 100, 100, 80, 50, 30, 50, 30, 10];
+        let rand = Math.random() * 9300;
+        let cum = 0;
+        for (let i = 0; i < numbers.length; i++) {
+          cum += weights[i];
+          if (rand < cum) {
+            winnerNumber = numbers[i].number;
+            break;
+          }
+        }
+      }
+
+      // হুইল ঘুরানোর টার্গেট
+      const winnerIndex = numbers.findIndex(n => n.number === winnerNumber);
       const segmentCenter = winnerIndex * segmentAngle + segmentAngle / 2;
       const current = ((wheelRotation % 360) + 360) % 360;
       const target = (360 - segmentCenter + 360) % 360;
@@ -364,35 +418,38 @@ export default function RoyelPage() {
       const endRotation = wheelRotation + extraSpins + distance;
 
       await animateWheel(wheelRotation, endRotation, SPIN_DURATION);
-      finishDraw(winner);
+      
+      finishDraw(winnerNumber, rpcData);
     }
 
-    function finishDraw(winner: { number: number; multiplier: number }): void {
-      const totalBet = getTotalBet();
-      const winningBet = bets[winner.number] || 0;
-      const payout = winningBet * winner.multiplier;
-      const netResult = payout - totalBet;
-
-      if (winningBet > 0) balance += payout;
-
+    function finishDraw(winnerNumber: number, rpcData: any): void {
       const winLossElement = document.getElementById("winLoss") as HTMLElement;
-      if (netResult > 0) {
-        winLossElement.textContent = "+" + money(netResult);
-        winLossElement.className = "bottom-value win";
-      } else if (netResult < 0) {
-        winLossElement.textContent = "-" + money(Math.abs(netResult));
-        winLossElement.className = "bottom-value loss";
+      
+      if (rpcData) {
+        // RPC থেকে আসা ডাটা দেখানো
+        const netResult = Number(rpcData.profit);
+        if (netResult > 0) {
+          winLossElement.textContent = "+" + money(netResult);
+          winLossElement.className = "bottom-value win";
+        } else if (netResult < 0) {
+          winLossElement.textContent = "-" + money(Math.abs(netResult));
+          winLossElement.className = "bottom-value loss";
+        } else {
+          winLossElement.textContent = money(0);
+          winLossElement.className = "bottom-value neutral";
+        }
       } else {
-        winLossElement.textContent = money(0);
+        winLossElement.textContent = "—";
         winLossElement.className = "bottom-value neutral";
       }
 
+      const winData = numbers.find(n => n.number === winnerNumber);
       recentResults.unshift({
-        number: winner.number,
-        multiplier: winner.multiplier,
-        color: colors[numbers.findIndex((n) => n.number === winner.number)],
+        number: winnerNumber,
+        multiplier: winData ? winData.multiplier : 0,
+        color: colors[numbers.findIndex((n) => n.number === winnerNumber)],
       });
-      lastWinnerNumber = winner.number;
+      lastWinnerNumber = winnerNumber;
       renderRecentResults();
 
       bets = {};
@@ -407,7 +464,7 @@ export default function RoyelPage() {
       updateBottomBar();
       updateCenterTimer(ROUND_COUNTDOWN);
 
-      void fetchBalance();
+      void fetchBalance(); // DB থেকে নতুন ব্যালেন্স সিঙ্ক
     }
 
     function updateTimer(): void {
@@ -471,9 +528,9 @@ export default function RoyelPage() {
         </div>
         <div className="menu-panel" id="menuPanel">
           <div className="menu-title">LUCKY ROYALE</div>
-          <button className="menu-option" id="historyBtn">◷ &nbsp; History</button>
-          <button className="menu-option" id="layoutBtn">▦ &nbsp; Layout</button>
-          <button className="menu-option" id="fairnessBtn">♧ &nbsp; Limit Fairness</button>
+          <button className="menu-option" id="historyBtn">◷ &nbsp; {t("History", "হিস্ট্রি")}</button>
+          <button className="menu-option" id="layoutBtn">▦ &nbsp; {t("Layout", "লেআউট")}</button>
+          <button className="menu-option" id="fairnessBtn">♧ &nbsp; {t("Limit Fairness", "ফেয়ারনেস")}</button>
         </div>
       </div>
 
@@ -492,8 +549,8 @@ export default function RoyelPage() {
 
       <section className="section">
         <div className="section-head">
-          <h3>SELECT YOUR NUMBERS</h3>
-          <span>20 NUMBERS</span>
+          <h3>{t("SELECT YOUR NUMBERS", "আপনার নাম্বার সিলেক্ট করুন")}</h3>
+          <span>{t("20 NUMBERS", "২০টি নাম্বার")}</span>
         </div>
         <div className="number-grid" id="numberGrid"></div>
       </section>
@@ -502,15 +559,15 @@ export default function RoyelPage() {
         <div className="chip-row" id="chipRow"></div>
         <div className="bottom-stats">
           <div className="bottom-item">
-            <span className="bottom-label">BALANCE</span>
+            <span className="bottom-label">{t("BALANCE", "ব্যালেন্স")}</span>
             <span className="bottom-value bottom-money" id="bottomBalance">...</span>
           </div>
           <div className="bottom-item center">
-            <span className="bottom-label">TOTAL BET</span>
+            <span className="bottom-label">{t("TOTAL BET", "মোট বাজি")}</span>
             <span className="bottom-value bottom-money" id="bottomTotalBet">৳0</span>
           </div>
           <div className="bottom-item right">
-            <span className="bottom-label">WIN / LOSS</span>
+            <span className="bottom-label">{t("WIN / LOSS", "লাভ / লস")}</span>
             <span className="bottom-value neutral" id="winLoss">—</span>
           </div>
         </div>
@@ -519,7 +576,7 @@ export default function RoyelPage() {
       <div className="modal-backdrop" id="modalBackdrop">
         <div className="modal-box">
           <div className="modal-head">
-            <h3 id="modalTitle">HISTORY</h3>
+            <h3 id="modalTitle">{t("HISTORY", "হিস্ট্রি")}</h3>
             <button className="modal-close" id="modalClose">×</button>
           </div>
           <div id="modalContent"></div>
