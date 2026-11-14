@@ -1,9 +1,3 @@
-/* 👇 UI নড়াচড়া বন্ধ করার জন্য বডি এবং গেম পেজ ফিক্স 👇 */
-html, body {
-  overflow-x: hidden;
-  max-width: 100vw;
-}
-
 .royel-page *{box-sizing:border-box;margin:0;padding:0}
 
 .royel-page{
@@ -154,7 +148,6 @@ html, body {
 }
 .chip-controls-row { display: flex; align-items: center; justify-content: center; gap: 25px; position: relative; z-index: 15; }
 
-/* 👇 বাটনগুলোর বর্ডার কালার #183f35 করা হয়েছে 👇 */
 .chip-action-btn {
   width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 255, 255, 0.1);
   border: 2px solid #183f35; display: flex; justify-content: center; align-items: center;
@@ -179,7 +172,6 @@ html, body {
 .chip-serial-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px; scrollbar-width: none; -ms-overflow-style: none; }
 .chip-serial-scroll::-webkit-scrollbar { display: none; }
 
-/* 👇 এখানে সিলেক্টেড চিপের গোল্ডেন বর্ডার #183f35 করা হয়েছে 👇 */
 .chip-serial-item {
   width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; background-size: contain; background-position: center; background-repeat: no-repeat;
   border: none; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.4); transition: transform 0.2s, box-shadow 0.2s;
@@ -266,7 +258,7 @@ html, body {
  .chip-serial-scroll { gap: 8px; }
 }
 
-/* 👇 History Full Screen Fix (নতুন যুক্ত করা হলো) 👇 */
+/* 👇 History Full Screen Fix 👇 */
 .modal-box.is-fullscreen {
   max-width: 100% !important;
   width: 100% !important;
