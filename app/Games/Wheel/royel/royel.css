@@ -126,9 +126,51 @@
   z-index: 1000;
 }
 
+/* 👇 নতুন কন্ট্রোল রো (Undo, Chip, 2x) 👇 */
+.chip-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px; /* বাটনগুলোর মাঝখানে গ্যাপ */
+  position: relative;
+  z-index: 15;
+}
+
+.chip-action-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid #fff; /* সাদা বর্ডার */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: #fff; /* সাদা টেক্সট (2X) */
+  font-weight: 900;
+  font-size: 15px;
+  transition: transform 0.2s, background 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.chip-action-btn:active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.chip-action-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .chip-main-btn {
-  width: 56px;
-  height: 56px;
+  width: 60px; /* মেইন বাটন একটু বড় করা হলো */
+  height: 60px;
   border-radius: 50%;
   background-size: contain;
   background-position: center;
@@ -138,17 +180,16 @@
   pointer-events: auto;
   box-shadow: 0 4px 10px rgba(0,0,0,0.6), 0 0 0 3px #fff;
   transition: transform 0.2s;
-  z-index: 10;
-  position: absolute;
-  bottom: 0;
+  position: relative; /* absolute থেকে relative করা হলো */
 }
+
 .chip-main-btn:active {
   transform: scale(0.95);
 }
 
 .chip-arc {
   position: absolute;
-  bottom: 28px; 
+  bottom: 30px; /* মেইন বাটনের ঠিক মাঝখানে */
   left: 50%;
   width: 0;
   height: 0;
@@ -174,7 +215,6 @@
 .chip-arc.open .chip-arc-item {
   pointer-events: auto;
   opacity: 1;
-  /* এখানে translateY -120px করা হয়েছে, যাতে অর্ধবৃত্তটি একদম পারফেক্ট সাইজ হয় */
   transform: translate(-50%, 0) rotate(var(--angle)) translateY(-120px) rotate(calc(var(--angle) * -1)) scale(1);
 }
 
@@ -243,11 +283,15 @@
  .mini-chip{width:24px;height:24px;}
  .bet-total{font-size:9px}
  
- .chip-main-btn { width: 46px; height: 46px; }
+ .chip-main-btn { width: 50px; height: 50px; }
+ .chip-action-btn { width: 36px; height: 36px; font-size: 13px; }
+ .chip-action-btn svg { width: 16px; height: 16px; }
+ .chip-controls-row { gap: 15px; }
+ 
  .chip-arc-item { width: 36px; height: 36px; }
  .chip-arc.open .chip-arc-item {
    transform: translate(-50%, 0) rotate(var(--angle)) translateY(-100px) rotate(calc(var(--angle) * -1)) scale(1);
  }
- .chip-arc { bottom: 23px; }
- .chip-radial-container { height: 46px; }
+ .chip-arc { bottom: 25px; }
+ .chip-radial-container { height: 50px; }
 }
