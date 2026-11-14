@@ -68,8 +68,10 @@ export default function RoyelPage() {
   
   const [recentResults, setRecentResults] = useState<{ number: number; multiplier: number; color: string }[]>([]);
   const [soundOn, setSoundOn] = useState(true);
-  const [showRecentDropdown, setShowRecentDropdown] = useState(false);
   
+  // 👇 নতুন স্টেট: Statistics Drawer 👇
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
+
   const [clientSeed, setClientSeed] = useState("");
   const [serverSeedHash, setServerSeedHash] = useState("");
   const [nonce, setNonce] = useState(0);
@@ -80,7 +82,7 @@ export default function RoyelPage() {
   const [modal, setModal] = useState({ open: false, title: "", content: "" });
 
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const soundRef = useRef(soundOn); // 👈 সাউন্ড ট্র্যাক করার জন্য রেফ
+  const soundRef = useRef(soundOn);
 
   useEffect(() => {
     soundRef.current = soundOn;
@@ -123,6 +125,62 @@ export default function RoyelPage() {
     }
   };
 
+  // 👇 বিড রোড (Bead Road) জেনারেট করার লজিক 👇
+  const buildBeadRoad = () => {
+    if (recentResults.length === 0) return [];
+    
+    // recentResults are newest first, we need oldest first for the road
+    const history = [...recentResults].reverse();
+    const columns: { number: number; color: string; type: string }[][] = [];
+    
+    let currentCol: { number: number; color: string; type: string }[] = [];
+    let lastType = "";
+
+    history.forEach((res, index) => {
+      // রঙের ওপর ভিত্তি করে টাইপ নির্ধারণ (Green নাকি Red)
+      const isGreen = res.color === "#214E3A" || res.color === "#28563E" || res.color === "#244A38";
+      const type = isGreen ? "Green" : "Red";
+
+      if (index === 0) {
+        currentCol.push({ ...res, type });
+      } else {
+        if (type === lastType) {
+          currentCol.push({ ...res, type });
+        } else {
+          columns.push(currentCol);
+          currentCol = [{ ...res, type }];
+        }
+      }
+      lastType = type;
+    });
+    
+    if (currentCol.length > 0) columns.push(currentCol);
+    return columns;
+  };
+
+  // 👇 সামারি (%) ক্যালকুলেশন 👇
+  const calculateStats = () => {
+    const total = recentResults.length;
+    if (total === 0) return { greenPct: 0, redPct: 0 };
+    
+    let greenCount = 0;
+    let redCount = 0;
+
+    recentResults.forEach(r => {
+      const isGreen = r.color === "#214E3A" || r.color === "#28563E" || r.color === "#244A38";
+      if (isGreen) greenCount++;
+      else redCount++;
+    });
+
+    return {
+      greenPct: ((greenCount / total) * 100).toFixed(1),
+      redPct: ((redCount / total) * 100).toFixed(1)
+    };
+  };
+
+  const stats = calculateStats();
+  const beadRoadColumns = buildBeadRoad();
+
   useEffect(() => {
     let balance = 0;
     let balanceLoaded = false;
@@ -136,7 +194,6 @@ export default function RoyelPage() {
     let currentUserId: string | null = null;
     let lastWinnerNumber: number | null = null;
 
-    // 👇 পেজ রিলোড হলেও টাইমার ধরে রাখার লজিক 👇
     const ROUND_KEY = 'wheel_round_start_time';
     let roundStartTime = typeof window !== "undefined" ? parseInt(localStorage.getItem(ROUND_KEY) || '0') : Date.now();
     if (!roundStartTime || Date.now() - roundStartTime > (ROUND_COUNTDOWN + 10) * 1000) {
@@ -202,7 +259,6 @@ export default function RoyelPage() {
       numberText.setAttribute("x", String(centerX));
       numberText.setAttribute("y", String(centerY - labelRadius - 4));
       numberText.setAttribute("class", "wheel-number");
-      // 👇 ফায়ার সিম্বল সরানো হয়েছে 👇
       numberText.textContent = String(item.number);
 
       const multiplierText = document.createElementNS(svgNS, "text");
@@ -353,7 +409,6 @@ export default function RoyelPage() {
     function resetRound(): void {
       spinning = false; bettingOpen = true; roundPhase = "betting"; 
       
-      // নতুন রাউন্ডের জন্য টাইমার রিসেট
       roundStartTime = Date.now();
       if (typeof window !== "undefined") localStorage.setItem(ROUND_KEY, roundStartTime.toString());
 
@@ -434,7 +489,7 @@ export default function RoyelPage() {
         color: colors[numbers.findIndex((n) => n.number === winnerNumber)],
       };
       
-      setRecentResults(prev => [newResult, ...prev].slice(0, 20)); 
+      setRecentResults(prev => [newResult, ...prev].slice(0, 50)); 
       
       lastWinnerNumber = winnerNumber;
 
@@ -482,7 +537,6 @@ export default function RoyelPage() {
     applyWheelRotation(0); renderGrid(); updateBottomBar();
     roundPhase = "betting"; bettingOpen = true; 
     
-    // পেজ লোড হওয়ার সাথে সাথেই টাইমার আপডেট হবে
     updateTimer();
     const timerInterval = setInterval(updateTimer, 100);
 
@@ -497,7 +551,7 @@ export default function RoyelPage() {
       document.removeEventListener('undoBet', handleUndoEvent);
       document.removeEventListener('doubleBet', handleDoubleEvent);
     };
-  }, []); // 👈 সাউন্ড টগল করলেও আর useEffect রি-রান হবে না
+  }, []); 
 
   return (
     <>
@@ -518,10 +572,11 @@ export default function RoyelPage() {
             </div>
             <div className="top-controls">
               
-              <button className="top-icon-btn" onClick={() => setShowRecentDropdown(!showRecentDropdown)}>
+              <button className="top-icon-btn" onClick={() => setIsStatsOpen(true)}>
                 <svg viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
+                  <path d="M18 20V10"></path>
+                  <path d="M12 20V4"></path>
+                  <path d="M6 20v-6"></path>
                 </svg>
               </button>
 
@@ -534,26 +589,11 @@ export default function RoyelPage() {
                 serverSeedHash={serverSeedHash}
                 nonce={nonce}
                 onChangeClientSeed={handleClientSeedChange}
+                onOpenStats={() => setIsStatsOpen(true)}
               />
             </div>
           </div>
         </div>
-
-        {/* 👇 ঘড়ির আইকনে ক্লিক করলে এই ড্রপডাউন দেখাবে 👇 */}
-        {showRecentDropdown && (
-          <div className="recent-dropdown">
-            <div className="recent-dropdown-inner">
-              <div className="recent-dropdown-title">LAST 20 RESULTS</div>
-              <div className="recent-dropdown-grid">
-                {recentResults.map((r, i) => (
-                  <div key={i} className="recent-cell" style={{ background: r.color }}>
-                    <span>{r.number}</span><small>{r.multiplier}X</small>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="wheel-area">
           <div className="wheel-frame">
@@ -626,6 +666,49 @@ export default function RoyelPage() {
             <div className="bottom-item right">
               <span className="bottom-label">{t("WIN / LOSS", "লাভ / লস")}</span>
               <span className="bottom-value neutral" id="winLoss">—</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 👇 Statistics Drawer (বিড রোড) 👇 */}
+        {isStatsOpen && (
+          <div className="stats-backdrop" onClick={() => setIsStatsOpen(false)}></div>
+        )}
+        <div className={`stats-drawer ${isStatsOpen ? "open" : ""}`}>
+          <div className="stats-handle" onClick={() => setIsStatsOpen(false)}></div>
+          
+          <div className="stats-header">
+            <h3>STATISTICS</h3>
+            <span>Last {recentResults.length} Results</span>
+          </div>
+
+          <div className="bead-road-wrapper">
+            <div className="bead-road-grid">
+              {beadRoadColumns.map((col, colIdx) => (
+                <div key={colIdx} className="bead-column">
+                  {col.map((cell, cellIdx) => {
+                    const isGreen = cell.type === "Green";
+                    return (
+                      <div 
+                        key={cellIdx} 
+                        className={`bead-cell ${isGreen ? "green" : "red"}`}
+                      >
+                        {cell.number}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* নিচের সামারি বার */}
+          <div className="stats-summary-bar">
+            <div className="summary-green" style={{ width: `${stats.greenPct}%` }}>
+              GREEN {stats.greenPct}%
+            </div>
+            <div className="summary-red" style={{ width: `${stats.redPct}%` }}>
+              RED {stats.redPct}%
             </div>
           </div>
         </div>
