@@ -87,7 +87,7 @@ export default function RoyelPage() {
   const [selectedChip, setSelectedChip] = useState(10);
   const [isChipMenuOpen, setIsChipMenuOpen] = useState(false);
 
-  // 👇 মোডাল স্টেটে isFullScreen যোগ করা হলো 👇
+  // 👇 এখানে isFullScreen স্টেট যুক্ত করা হয়েছে 👇
   const [modal, setModal] = useState({ open: false, title: "", content: "", isFullScreen: false });
 
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -154,7 +154,7 @@ export default function RoyelPage() {
     } catch (e) { /* ignore */ }
   };
 
-  // 👇 openModal আপডেট (isFullScreen প্যারামিটার যোগ) 👇
+  // 👇 openModal ফাংশনে isFullScreen প্যারামিটার রিসিভ করা হচ্ছে 👇
   const openModal = (title: string, content: string, isFullScreen: boolean = false) => {
     setModal({ open: true, title, content, isFullScreen });
   };
