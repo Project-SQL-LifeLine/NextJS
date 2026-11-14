@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
-import MenuBar from "../Components/MenuBar";
+import MenuBar from "./Components/MenuBar";
 import "./royel.css";
 
 const t = (en: string, bn: string) => en;
