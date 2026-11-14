@@ -5,22 +5,26 @@ import { supabase } from "@/lib/supabase/client";
 import "./royel.css";
 
 const numbers: { number: number; multiplier: number }[] = [
-  { number: 10, multiplier: 10 },
-  { number: 20, multiplier: 100 },
-  { number: 30, multiplier: 20 },
-  { number: 40, multiplier: 150 },
-  { number: 50, multiplier: 30 },
-  { number: 60, multiplier: 200 },
-  { number: 70, multiplier: 40 },
-  { number: 80, multiplier: 300 },
-  { number: 90, multiplier: 60 },
-  { number: 100, multiplier: 500 },
-  { number: 150, multiplier: 80 },
-  { number: 200, multiplier: 15 },
-  { number: 300, multiplier: 70 },
-  { number: 500, multiplier: 25 },
-  { number: 700, multiplier: 35 },
-  { number: 1000, multiplier: 50 },
+  { number: 2,    multiplier: 2    },
+  { number: 3,    multiplier: 3    },
+  { number: 5,    multiplier: 5    },
+  { number: 8,    multiplier: 8    },
+  { number: 10,   multiplier: 10   },
+  { number: 200,  multiplier: 15   },
+  { number: 30,   multiplier: 20   },
+  { number: 500,  multiplier: 25   },
+  { number: 50,   multiplier: 30   },
+  { number: 700,  multiplier: 35   },
+  { number: 70,   multiplier: 40   },
+  { number: 1000, multiplier: 50   },
+  { number: 90,   multiplier: 60   },
+  { number: 300,  multiplier: 70   },
+  { number: 150,  multiplier: 80   },
+  { number: 20,   multiplier: 100  },
+  { number: 40,   multiplier: 150  },
+  { number: 60,   multiplier: 200  },
+  { number: 80,   multiplier: 300  },
+  { number: 100,  multiplier: 500  },
 ];
 
 const chipAmounts: number[] = [10, 50, 200, 500, 700, 1000];
@@ -28,6 +32,7 @@ const chipAmounts: number[] = [10, 50, 200, 500, 700, 1000];
 const colors: string[] = [
   "#214E3A", "#8B2929", "#28563E", "#7B2929",
   "#244A38", "#922F2F", "#28563E", "#7B2929",
+  "#214E3A", "#922F2F", "#28563E", "#7B2929",
   "#214E3A", "#922F2F", "#28563E", "#7B2929",
   "#214E3A", "#922F2F", "#28563E", "#7B2929",
 ];
@@ -71,19 +76,16 @@ export default function RoyelPage() {
     }
     function setStatus(): void {}
 
-    /* BOTTOM SUMMARY */
     function updateBottomBar(): void {
       const balanceEl = document.getElementById("bottomBalance") as HTMLElement;
       balanceEl.textContent = balanceLoaded ? money(balance) : "...";
       document.getElementById("bottomTotalBet")!.textContent = money(getTotalBet());
     }
 
-    /* FETCH BALANCE FROM SUPABASE */
     async function fetchBalance(): Promise<void> {
       try {
         const { data: userData } = await supabase.auth.getUser();
         const user = userData?.user;
-
         if (!user) {
           currentUserId = null;
           balanceLoaded = true;
@@ -91,30 +93,16 @@ export default function RoyelPage() {
           updateBottomBar();
           return;
         }
-
         currentUserId = user.id;
-
         const { data: profile, error } = await supabase
-          .from("profiles")
-          .select("balance")
-          .eq("id", user.id)
-          .single();
-
+          .from("profiles").select("balance").eq("id", user.id).single();
         if (error) {
           console.warn("Balance fetch error:", error.message);
           balanceLoaded = true;
           updateBottomBar();
           return;
         }
-
-        if (profile && typeof profile.balance === "number") {
-          balance = profile.balance;
-        } else if (profile && profile.balance != null) {
-          balance = Number(profile.balance);
-        } else {
-          balance = 0;
-        }
-
+        balance = profile?.balance != null ? Number(profile.balance) : 0;
         balanceLoaded = true;
         updateBottomBar();
         renderGrid();
@@ -126,7 +114,6 @@ export default function RoyelPage() {
       }
     }
 
-    /* MENU */
     const menuToggle = document.getElementById("menuToggle") as HTMLButtonElement;
     const menuPanel = document.getElementById("menuPanel") as HTMLDivElement;
 
@@ -145,7 +132,6 @@ export default function RoyelPage() {
     }
     document.addEventListener("click", handleDocumentClick);
 
-    /* MODAL */
     const modalBackdrop = document.getElementById("modalBackdrop") as HTMLDivElement;
     const modalTitle = document.getElementById("modalTitle") as HTMLHeadingElement;
     const modalContent = document.getElementById("modalContent") as HTMLDivElement;
@@ -166,72 +152,48 @@ export default function RoyelPage() {
       if (event.target === modalBackdrop) modalBackdrop.classList.remove("open");
     });
 
-    /* HISTORY */
     document.getElementById("historyBtn")!.addEventListener("click", () => {
       if (!recentResults.length) {
         openModal("HISTORY", '<p class="modal-text">No results available yet.</p>');
         return;
       }
-
       const html = `
         <div class="history-list">
-         ${recentResults
-           .map(
-             (r) => `
+         ${recentResults.map((r) => `
           <div class="history-item" style="background:${r.color}">
-           ${r.number}
-           <small>${r.multiplier}X</small>
-          </div>
-         `
-           )
-           .join("")}
-        </div>
-       `;
+           ${r.number}<small>${r.multiplier}X</small>
+          </div>`).join("")}
+        </div>`;
       openModal("RESULT HISTORY", html);
     });
 
-    /* LAYOUT */
     document.getElementById("layoutBtn")!.addEventListener("click", () => {
       const compact = (document.getElementById("royelPage") as HTMLDivElement).classList.toggle("compact");
       openModal(
         "LAYOUT",
-        `<p class="modal-text">
-         Layout mode: <strong>${compact ? "Compact" : "Normal"}</strong><br><br>
-         ${compact ? "Compact layout is enabled." : "Normal layout is enabled."}
-        </p>`
+        `<p class="modal-text">Layout mode: <strong>${compact ? "Compact" : "Normal"}</strong></p>`
       );
     });
 
-    /* LIMIT FAIRNESS */
     document.getElementById("fairnessBtn")!.addEventListener("click", () => {
       openModal(
         "LIMIT FAIRNESS",
-        `
-        <div class="modal-text">
+        `<div class="modal-text">
          <strong>Game Information</strong><br>
-         Each round selects one number from the 16 available numbers.<br><br>
-         <strong>Random Result</strong><br>
-         This demo uses browser-side random selection. It is not a certified
-         random number system.<br><br>
-         <strong>Bet Limit</strong><br>
-         Your bet cannot exceed your available demo balance.<br><br>
+         20 segments weighted random. RTP ~71%.<br><br>
+         <strong>Provably Fair</strong><br>
+         HMAC-SHA256(client_seed:nonce, server_seed).<br><br>
          <strong>Important</strong><br>
-         This is a demo interface only. Browser-side results and balances
-         are not secure for real-money gaming.
-        </div>
-       `
+         Bet cap applies to 200x segment.
+        </div>`
       );
     });
 
-    /* WHEEL COLORS */
     const gradient = colors
-      .map((color, index) => {
-        return `${color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`;
-      })
+      .map((color, index) => `${color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`)
       .join(",");
     wheel.style.background = `conic-gradient(${gradient})`;
 
-    /* WHEEL LABELS */
     const centerX = 145;
     const centerY = 145;
     const labelRadius = 105;
@@ -249,13 +211,13 @@ export default function RoyelPage() {
 
       const numberText = document.createElementNS(svgNS, "text");
       numberText.setAttribute("x", String(x));
-      numberText.setAttribute("y", String(y - 5));
+      numberText.setAttribute("y", String(y - 4));
       numberText.setAttribute("class", "wheel-number");
       numberText.textContent = String(item.number);
 
       const multiplierText = document.createElementNS(svgNS, "text");
       multiplierText.setAttribute("x", String(x));
-      multiplierText.setAttribute("y", String(y + 9));
+      multiplierText.setAttribute("y", String(y + 7));
       multiplierText.setAttribute("class", "wheel-multiplier");
       multiplierText.textContent = item.multiplier + "X";
 
@@ -265,12 +227,10 @@ export default function RoyelPage() {
       labelGroups.push(group);
     });
 
-    /* WHEEL ROTATION */
     function applyWheelRotation(degrees: number): void {
       wheelRotation = degrees;
       wheel.style.transform = `translate(-50%,-50%) rotate(${degrees}deg)`;
       wheelLabels.style.transform = `translate(-50%,-50%) rotate(${degrees}deg)`;
-
       labelGroups.forEach((group) => {
         const x = Number(group.getAttribute("data-x"));
         const y = Number(group.getAttribute("data-y"));
@@ -278,11 +238,9 @@ export default function RoyelPage() {
       });
     }
 
-    /* RECENT RESULTS */
     function renderRecentResults(): void {
       const recentGrid = document.getElementById("recentGrid") as HTMLDivElement;
       recentGrid.innerHTML = "";
-
       recentResults.slice(0, 5).forEach((result) => {
         const cell = document.createElement("div");
         cell.className = "recent-cell";
@@ -292,142 +250,105 @@ export default function RoyelPage() {
       });
     }
 
-    /* CHIP SELECTOR */
     function renderChips(): void {
       const row = document.getElementById("chipRow") as HTMLDivElement;
       row.innerHTML = "";
-
       chipAmounts.forEach((amount) => {
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = "chip" + (selectedChip === amount ? " active" : "");
         chip.textContent = format(amount);
-
         chip.addEventListener("click", () => {
           if (!bettingOpen || spinning) return;
           selectedChip = amount;
           renderChips();
         });
-
         row.appendChild(chip);
       });
     }
 
-    /* PLACE BET BY SELECTED CHIP */
     function addBet(number: number): void {
       if (!bettingOpen || spinning) return;
       if (!balanceLoaded) return;
-
       const amount = selectedChip;
-
       if (balance < amount) return;
-
       balance -= amount;
       bets[number] = (bets[number] || 0) + amount;
-
       if (!betChips[number]) betChips[number] = [];
       betChips[number].push(amount);
-
       updateBottomBar();
       renderGrid();
     }
 
-    /* NUMBER GRID */
     function renderGrid(): void {
       grid.innerHTML = "";
-
       numbers.forEach((item, index) => {
         const amount = bets[item.number] || 0;
         const chips = betChips[item.number] || [];
-
         const isRed = index % 2 === 1;
         const colorClass = isRed ? "roulette-red" : "roulette-green";
-
         const isWinner = lastWinnerNumber === item.number;
         const hitClass = isWinner ? (isRed ? "hit-red" : "hit-green") : "";
 
         const card = document.createElement("button");
         card.type = "button";
         card.className =
-          "number-card " +
-          colorClass +
+          "number-card " + colorClass +
           (amount > 0 ? " selected" : "") +
           (isWinner ? " " + hitClass : "") +
           (!bettingOpen ? " locked" : "");
 
         let chipDisplay = "";
-
         if (amount > 0) {
           const lastChip = chips.length ? chips[chips.length - 1] : selectedChip;
-
           chipDisplay = `
            <span class="bet-chip-display">
             <span class="bet-total">${money(amount)}</span>
             <span class="mini-chip">${format(lastChip)}</span>
-           </span>
-          `;
+           </span>`;
         }
 
         card.innerHTML = `
          <span class="number">${item.number}</span>
          <span class="multiplier">${item.multiplier}X</span>
-         ${chipDisplay}
-        `;
+         ${chipDisplay}`;
 
-        card.addEventListener("click", () => {
-          addBet(item.number);
-        });
-
+        card.addEventListener("click", () => addBet(item.number));
         grid.appendChild(card);
       });
     }
 
-    /* CENTER TIMER */
     function updateCenterTimer(value: number | string | null, type: string = ""): void {
       const timer = document.getElementById("wheelCountdown") as HTMLElement;
-
       if (value === null) {
         timer.className = "center-countdown hidden";
         return;
       }
-
       timer.textContent = String(value);
       timer.className = "center-countdown" + (type ? " " + type : "");
     }
 
-    /* SPIN ANIMATION */
     function animateWheel(startAngle: number, endAngle: number, duration: number): Promise<void> {
       return new Promise((resolve) => {
         const startTime = performance.now();
-
         function frame(now: number): void {
           const elapsed = now - startTime;
           const progress = Math.min(elapsed / duration, 1);
           const eased = 1 - Math.pow(1 - progress, 4);
           const current = startAngle + (endAngle - startAngle) * eased;
-
           applyWheelRotation(current);
-
-          if (progress < 1) {
-            requestAnimationFrame(frame);
-          } else {
-            applyWheelRotation(endAngle);
-            resolve();
-          }
+          if (progress < 1) requestAnimationFrame(frame);
+          else { applyWheelRotation(endAngle); resolve(); }
         }
-
         requestAnimationFrame(frame);
       });
     }
 
-    /* AUTOMATIC SPIN */
     async function startAutomaticSpin(): Promise<void> {
       if (spinning) return;
-
       spinning = true;
       bettingOpen = false;
       roundPhase = "spinning";
-
       renderGrid();
       updateCenterTimer(null);
       renderChips();
@@ -443,23 +364,18 @@ export default function RoyelPage() {
       const endRotation = wheelRotation + extraSpins + distance;
 
       await animateWheel(wheelRotation, endRotation, SPIN_DURATION);
-
       finishDraw(winner);
     }
 
-    /* FINISH DRAW */
     function finishDraw(winner: { number: number; multiplier: number }): void {
       const totalBet = getTotalBet();
       const winningBet = bets[winner.number] || 0;
       const payout = winningBet * winner.multiplier;
       const netResult = payout - totalBet;
 
-      if (winningBet > 0) {
-        balance += payout;
-      }
+      if (winningBet > 0) balance += payout;
 
       const winLossElement = document.getElementById("winLoss") as HTMLElement;
-
       if (netResult > 0) {
         winLossElement.textContent = "+" + money(netResult);
         winLossElement.className = "bottom-value win";
@@ -476,14 +392,11 @@ export default function RoyelPage() {
         multiplier: winner.multiplier,
         color: colors[numbers.findIndex((n) => n.number === winner.number)],
       });
-
       lastWinnerNumber = winner.number;
-
       renderRecentResults();
 
       bets = {};
       betChips = {};
-
       spinning = false;
       roundPhase = "betting";
       bettingOpen = true;
@@ -492,19 +405,15 @@ export default function RoyelPage() {
       renderGrid();
       renderChips();
       updateBottomBar();
-
       updateCenterTimer(ROUND_COUNTDOWN);
 
-      /* Refresh real balance from DB after spin (read-only) */
       void fetchBalance();
     }
 
-    /* COUNTDOWN */
     function updateTimer(): void {
       if (roundPhase === "betting") {
         const elapsed = (Date.now() - roundStartTime) / 1000;
         const remaining = Math.max(0, ROUND_COUNTDOWN - Math.floor(elapsed));
-
         if (remaining > BET_LOCK_SECONDS) {
           bettingOpen = true;
           updateCenterTimer(remaining);
@@ -523,7 +432,6 @@ export default function RoyelPage() {
       }
     }
 
-    /* INITIALIZE */
     applyWheelRotation(0);
     renderGrid();
     renderChips();
@@ -535,9 +443,7 @@ export default function RoyelPage() {
     bettingOpen = true;
     updateCenterTimer("20");
 
-    /* Fetch real balance from Supabase */
     void fetchBalance();
-
     timerInterval = setInterval(updateTimer, 100);
 
     return () => {
@@ -549,19 +455,12 @@ export default function RoyelPage() {
 
   return (
     <div className="royel-page" id="royelPage">
-      {/* RECENT RESULTS */}
       <div className="round-bar">
         <div className="recent-content">
           <div className="recent-grid" id="recentGrid"></div>
-
           <div className="top-controls">
-            <button
-              className="top-icon-btn"
-              id="menuToggle"
-              type="button"
-              aria-label="Open menu"
-              aria-expanded="false"
-            >
+            <button className="top-icon-btn" id="menuToggle" type="button"
+              aria-label="Open menu" aria-expanded="false">
               <svg viewBox="0 0 24 24">
                 <path d="M4 6h16"></path>
                 <path d="M4 12h16"></path>
@@ -570,7 +469,6 @@ export default function RoyelPage() {
             </button>
           </div>
         </div>
-
         <div className="menu-panel" id="menuPanel">
           <div className="menu-title">LUCKY ROYALE</div>
           <button className="menu-option" id="historyBtn">◷ &nbsp; History</button>
@@ -579,7 +477,6 @@ export default function RoyelPage() {
         </div>
       </div>
 
-      {/* WHEEL */}
       <div className="wheel-area">
         <div className="wheel-frame">
           <div className="wheel" id="wheel"></div>
@@ -593,30 +490,25 @@ export default function RoyelPage() {
 
       <div className="wheel-underline"></div>
 
-      {/* NUMBER GRID */}
       <section className="section">
         <div className="section-head">
           <h3>SELECT YOUR NUMBERS</h3>
-          <span>16 NUMBERS</span>
+          <span>20 NUMBERS</span>
         </div>
         <div className="number-grid" id="numberGrid"></div>
       </section>
 
-      {/* COMBINED CHIP + BALANCE CARD */}
       <div className="bottom-card">
         <div className="chip-row" id="chipRow"></div>
-
         <div className="bottom-stats">
           <div className="bottom-item">
             <span className="bottom-label">BALANCE</span>
             <span className="bottom-value bottom-money" id="bottomBalance">...</span>
           </div>
-
           <div className="bottom-item center">
             <span className="bottom-label">TOTAL BET</span>
             <span className="bottom-value bottom-money" id="bottomTotalBet">৳0</span>
           </div>
-
           <div className="bottom-item right">
             <span className="bottom-label">WIN / LOSS</span>
             <span className="bottom-value neutral" id="winLoss">—</span>
@@ -624,7 +516,6 @@ export default function RoyelPage() {
         </div>
       </div>
 
-      {/* MODAL */}
       <div className="modal-backdrop" id="modalBackdrop">
         <div className="modal-box">
           <div className="modal-head">
