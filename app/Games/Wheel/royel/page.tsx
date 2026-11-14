@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
+import MenuBar from "../Components/MenuBar";
 import "./royel.css";
 
 const t = (en: string, bn: string) => en;
@@ -50,7 +51,6 @@ const ROUND_COUNTDOWN = 20;
 const BET_LOCK_SECONDS = 5;
 const SPIN_DURATION = 7000;
 
-// 👇 ওয়েল-বেসড সাদা SVG লোডার
 const WheelLoader = () => (
   <svg viewBox="0 0 100 100" className="wheel-loader-svg">
     <circle cx="50" cy="50" r="45" stroke="rgba(255,255,255,0.15)" strokeWidth="5" fill="none" />
@@ -65,6 +65,57 @@ const WheelLoader = () => (
 
 export default function RoyelPage() {
   const [isLoading, setIsLoading] = useState(true);
+  
+  // React States for UI Reactivity
+  const [recentResults, setRecentResults] = useState<{ number: number; multiplier: number; color: string }[]>([]);
+  const [soundOn, setSoundOn] = useState(true);
+  const [clientSeed, setClientSeed] = useState("");
+  const [serverSeedHash, setServerSeedHash] = useState("");
+  const [nonce, setNonce] = useState(0);
+  
+  // Modal State
+  const [modal, setModal] = useState({ open: false, title: "", content: "" });
+
+  // Ref for audio context
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  // Audio Play Function (No NPM needed)
+  const playSound = (type: "bet" | "win") => {
+    if (!soundOn) return;
+    try {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx.state === "suspended") ctx.resume();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      if (type === "bet") { osc.frequency.value = 600; gain.gain.value = 0.1; }
+      if (type === "win") { osc.frequency.value = 800; gain.gain.value = 0.2; }
+      
+      osc.start();
+      osc.stop(ctx.currentTime + 0.1);
+    } catch (e) { /* ignore audio errors */ }
+  };
+
+  const openModal = (title: string, content: string) => {
+    setModal({ open: true, title, content });
+  };
+
+  const handleClientSeedChange = async (newSeed: string) => {
+    setClientSeed(newSeed);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("profiles").update({ pf_client_seed: newSeed }).eq("id", user.id);
+      }
+    } catch (e) {
+      console.warn("Failed to save client seed to DB", e);
+    }
+  };
 
   useEffect(() => {
     let balance = 0;
@@ -77,7 +128,6 @@ export default function RoyelPage() {
     let bettingOpen = true;
     let roundPhase = "betting";
     let roundStartTime = Date.now();
-    let recentResults: { number: number; multiplier: number; color: string }[] = [];
     let timerInterval: ReturnType<typeof setInterval> | null = null;
     let currentUserId: string | null = null;
     let lastWinnerNumber: number | null = null;
@@ -88,15 +138,9 @@ export default function RoyelPage() {
     const segmentAngle = 360 / numbers.length;
     const svgNS = "http://www.w3.org/2000/svg";
 
-    function format(n: number): string {
-      return Number(n).toLocaleString("en-US");
-    }
-    function money(n: number): string {
-      return "৳" + format(n);
-    }
-    function getTotalBet(): number {
-      return Object.values(bets).reduce((s, a) => s + a, 0);
-    }
+    function format(n: number): string { return Number(n).toLocaleString("en-US"); }
+    function money(n: number): string { return "৳" + format(n); }
+    function getTotalBet(): number { return Object.values(bets).reduce((s, a) => s + a, 0); }
 
     function updateBottomBar(): void {
       const balanceEl = document.getElementById("bottomBalance") as HTMLElement;
@@ -112,72 +156,25 @@ export default function RoyelPage() {
           currentUserId = null; balanceLoaded = true; balance = 0; updateBottomBar(); return;
         }
         currentUserId = user.id;
+        
+        // Fetching Balance, Seed Info
         const { data: profile, error } = await supabase
-          .from("profiles").select("balance").eq("id", user.id).single();
+          .from("profiles").select("balance, pf_client_seed, pf_server_seed_hash, game_nonces").eq("id", user.id).single();
+          
         if (error) { balanceLoaded = true; updateBottomBar(); return; }
+        
         balance = profile?.balance != null ? Number(profile.balance) : 0;
+        setClientSeed(profile?.pf_client_seed || "");
+        setServerSeedHash(profile?.pf_server_seed_hash || "");
+        setNonce(profile?.game_nonces?.wheel || 0);
+
         balanceLoaded = true; updateBottomBar(); renderGrid(); renderChips();
       } catch (err) {
         balanceLoaded = true; updateBottomBar();
       }
     }
 
-    const menuToggle = document.getElementById("menuToggle") as HTMLButtonElement;
-    const menuPanel = document.getElementById("menuPanel") as HTMLDivElement;
-
-    menuToggle.addEventListener("click", () => {
-      const open = menuPanel.classList.toggle("open");
-      menuToggle.classList.toggle("active", open);
-      menuToggle.setAttribute("aria-expanded", String(open));
-    });
-
-    function handleDocumentClick(event: MouseEvent): void {
-      if (!menuPanel.contains(event.target as Node) && !menuToggle.contains(event.target as Node)) {
-        menuPanel.classList.remove("open");
-        menuToggle.classList.remove("active");
-        menuToggle.setAttribute("aria-expanded", "false");
-      }
-    }
-    document.addEventListener("click", handleDocumentClick);
-
-    const modalBackdrop = document.getElementById("modalBackdrop") as HTMLDivElement;
-    const modalTitle = document.getElementById("modalTitle") as HTMLHeadingElement;
-    const modalContent = document.getElementById("modalContent") as HTMLDivElement;
-
-    function openModal(title: string, content: string): void {
-      modalTitle.textContent = title;
-      modalContent.innerHTML = content;
-      modalBackdrop.classList.add("open");
-      menuPanel.classList.remove("open"); menuToggle.classList.remove("active");
-    }
-
-    document.getElementById("modalClose")!.addEventListener("click", () => modalBackdrop.classList.remove("open"));
-    modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) modalBackdrop.classList.remove("open"); });
-
-    document.getElementById("historyBtn")!.addEventListener("click", () => {
-      if (!recentResults.length) {
-        openModal(t("HISTORY", "হিস্ট্রি"), `<p class="modal-text">${t("No results available yet.", "এখনো কোনো রেজাল্ট নেই।")}</p>`);
-        return;
-      }
-      const html = `<div class="history-list">${recentResults.map((r) => `
-        <div class="history-item" style="background:${r.color}">${r.number}<small>${r.multiplier}X</small></div>
-      `).join("")}</div>`;
-      openModal(t("RESULT HISTORY", "রেজাল্ট হিস্ট্রি"), html);
-    });
-
-    document.getElementById("layoutBtn")!.addEventListener("click", () => {
-      const compact = (document.getElementById("royelPage") as HTMLDivElement).classList.toggle("compact");
-      openModal(t("LAYOUT", "লেআউট"), `<p class="modal-text">${t("Layout mode", "লেআউট মোড")}: <strong>${compact ? t("Compact", "কমপ্যাক্ট") : t("Normal", "নরমাল")}</strong></p>`);
-    });
-
-    document.getElementById("fairnessBtn")!.addEventListener("click", () => {
-      openModal(t("FAIRNESS", "ফেয়ারনেস"), `<div class="modal-text">
-         <strong>${t("Game Information", "গেমের তথ্য")}</strong><br>
-         ${t("20 segments weighted random. House edge is maintained.", "২০টি সেগমেন্ট ওয়েটেড র‍্যান্ডম। হাউজ এজ নিশ্চিত করা হয়েছে।")}<br><br>
-         <strong>${t("Provably Fair", "প্রমাণযোগ্য ফেয়ার")}</strong><br>
-         HMAC-SHA256(client_seed:nonce, server_seed).
-        </div>`);
-    });
+    // Removed menu event listeners (Now handled by MenuBar Component)
 
     const gradient = colors.map((color, index) => `${color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`).join(",");
     wheel.style.background = `conic-gradient(${gradient})`;
@@ -216,15 +213,7 @@ export default function RoyelPage() {
     }
 
     function renderRecentResults(): void {
-      const recentGrid = document.getElementById("recentGrid") as HTMLDivElement;
-      recentGrid.innerHTML = "";
-      recentResults.slice(0, 5).forEach((result) => {
-        const cell = document.createElement("div");
-        cell.className = "recent-cell";
-        cell.style.background = result.color;
-        cell.innerHTML = `<span>${result.number}</span><small>${result.multiplier}X</small>`;
-        recentGrid.appendChild(cell);
-      });
+      // React State updates automatically render the Recent Grid in JSX
     }
 
     function renderChips(): void {
@@ -251,6 +240,9 @@ export default function RoyelPage() {
       if (!balanceLoaded) return;
       const amount = selectedChip;
       if (balance < amount) return; 
+      
+      playSound("bet"); // 🔊 Play sound
+      
       balance -= amount;
       bets[number] = (bets[number] || 0) + amount;
       if (!betChips[number]) betChips[number] = [];
@@ -308,21 +300,13 @@ export default function RoyelPage() {
       timer.className = "center-countdown" + (type ? " " + type : "");
     }
 
-    // 👇 CSS Transition ব্যবহার করে ১০০% স্মুথ অ্যানিমেশন (ল্যাগ ফিক্স)
     function animateWheel(startAngle: number, endAngle: number, duration: number): Promise<void> {
       return new Promise((resolve) => {
-        // ট্রানজিশন সেট করা হলো (ease-out কুইন্ট)
         wheel.style.transition = `transform ${duration}ms cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
         wheelLabels.style.transition = `transform ${duration}ms cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
-
-        // ব্রাউজারকে রি-ফ্লো করতে বাধ্য করা
         void wheel.offsetHeight;
-
-        // ফাইনাল পজিশনে পাঠানো
         wheel.style.transform = `translate(-50%,-50%) rotate(${endAngle}deg)`;
         wheelLabels.style.transform = `translate(-50%,-50%) rotate(${endAngle}deg)`;
-
-        // duration শেষ হওয়ার পর রিজলভ করা
         setTimeout(() => {
           wheel.style.transition = 'none';
           wheelLabels.style.transition = 'none';
@@ -335,7 +319,7 @@ export default function RoyelPage() {
     function resetRound(): void {
       spinning = false; bettingOpen = true; roundPhase = "betting"; roundStartTime = Date.now();
       renderGrid(); renderChips(); updateBottomBar(); updateCenterTimer(ROUND_COUNTDOWN);
-      void fetchBalance();
+      void fetchBalance(); // Sync DB balance after round
     }
 
     async function startAutomaticSpin(): Promise<void> {
@@ -357,6 +341,7 @@ export default function RoyelPage() {
           }
           rpcData = data;
           winnerNumber = Number(data.winner_number);
+          setNonce(data.nonce); // Update nonce locally
         } catch (err: any) {
           openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${err.message || "Network Error"}</p>`);
           resetRound(); return;
@@ -388,6 +373,7 @@ export default function RoyelPage() {
       if (rpcData) {
         const netResult = Number(rpcData.profit);
         if (netResult > 0) {
+          playSound("win"); // 🔊 Win Sound
           winLossElement.textContent = "+" + money(netResult);
           winLossElement.className = "bottom-value win";
         } else if (netResult < 0) {
@@ -403,13 +389,16 @@ export default function RoyelPage() {
       }
 
       const winData = numbers.find(n => n.number === winnerNumber);
-      recentResults.unshift({
+      const newResult = {
         number: winnerNumber,
         multiplier: winData ? winData.multiplier : 0,
         color: colors[numbers.findIndex((n) => n.number === winnerNumber)],
-      });
+      };
+      
+      // Update React State for Recent Results
+      setRecentResults(prev => [newResult, ...prev].slice(0, 5)); 
+      
       lastWinnerNumber = winnerNumber;
-      renderRecentResults();
 
       bets = {};
       betChips = {};
@@ -434,7 +423,6 @@ export default function RoyelPage() {
       }
     }
 
-    // 👇 লোডিং ম্যানেজমেন্ট (কমপক্ষে ২.৫ সেকেন্ড)
     const startTime = Date.now();
     let dataLoaded = false;
     let minTimePassed = false;
@@ -455,21 +443,19 @@ export default function RoyelPage() {
       checkReady();
     }, 2500);
 
-    applyWheelRotation(0); renderGrid(); renderChips(); renderRecentResults(); updateBottomBar();
+    applyWheelRotation(0); renderGrid(); renderChips(); updateBottomBar();
     roundStartTime = Date.now(); roundPhase = "betting"; bettingOpen = true; updateCenterTimer("20");
 
     timerInterval = setInterval(updateTimer, 100);
 
     return () => {
       if (timerInterval) clearInterval(timerInterval);
-      document.removeEventListener("click", handleDocumentClick);
       wheelLabels.innerHTML = "";
     };
-  }, []);
+  }, [soundOn]); // Re-bind sound state if it changes inside useEffect
 
   return (
     <>
-      {/* ওয়েল-বেসড লোডিং স্ক্রিন */}
       <div className={`loading-overlay ${isLoading ? "" : "hidden"}`}>
         <WheelLoader />
       </div>
@@ -477,18 +463,26 @@ export default function RoyelPage() {
       <div className="royel-page" id="royelPage">
         <div className="round-bar">
           <div className="recent-content">
-            <div className="recent-grid" id="recentGrid"></div>
-            <div className="top-controls">
-              <button className="top-icon-btn" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false">
-                <svg viewBox="0 0 24 24"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
-              </button>
+            <div className="recent-grid">
+              {recentResults.map((r, i) => (
+                <div key={i} className="recent-cell" style={{ background: r.color }}>
+                  <span>{r.number}</span><small>{r.multiplier}X</small>
+                </div>
+              ))}
             </div>
-          </div>
-          <div className="menu-panel" id="menuPanel">
-            <div className="menu-title">LUCKY ROYALE</div>
-            <button className="menu-option" id="historyBtn">◷ &nbsp; {t("History", "হিস্ট্রি")}</button>
-            <button className="menu-option" id="layoutBtn">▦ &nbsp; {t("Layout", "লেআউট")}</button>
-            <button className="menu-option" id="fairnessBtn">♧ &nbsp; {t("Limit Fairness", "ফেয়ারনেস")}</button>
+            <div className="top-controls">
+              {/* Menu Component Attached Here */}
+              <MenuBar
+                recentResults={recentResults}
+                onOpenModal={openModal}
+                isSoundOn={soundOn}
+                onToggleSound={() => setSoundOn(prev => !prev)}
+                clientSeed={clientSeed}
+                serverSeedHash={serverSeedHash}
+                nonce={nonce}
+                onChangeClientSeed={handleClientSeedChange}
+              />
+            </div>
           </div>
         </div>
 
@@ -531,13 +525,14 @@ export default function RoyelPage() {
           </div>
         </div>
 
-        <div className="modal-backdrop" id="modalBackdrop">
-          <div className="modal-box">
+        {/* React Controlled Modal */}
+        <div className={`modal-backdrop ${modal.open ? "open" : ""}`} onClick={() => setModal(prev => ({ ...prev, open: false }))}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-head">
-              <h3 id="modalTitle">{t("HISTORY", "হিস্ট্রি")}</h3>
-              <button className="modal-close" id="modalClose">×</button>
+              <h3>{modal.title}</h3>
+              <button className="modal-close" onClick={() => setModal(prev => ({ ...prev, open: false }))}>×</button>
             </div>
-            <div id="modalContent"></div>
+            <div id="modalContent" dangerouslySetInnerHTML={{ __html: modal.content }}></div>
           </div>
         </div>
       </div>
