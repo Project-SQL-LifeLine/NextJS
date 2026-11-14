@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
-import MenuBar from "./Components/MenuBar";
+import MenuBar from "../Components/MenuBar";
 import "./royel.css";
 
 const t = (en: string, bn: string) => en;
@@ -66,20 +66,20 @@ const WheelLoader = () => (
 export default function RoyelPage() {
   const [isLoading, setIsLoading] = useState(true);
   
-  // React States for UI Reactivity
   const [recentResults, setRecentResults] = useState<{ number: number; multiplier: number; color: string }[]>([]);
   const [soundOn, setSoundOn] = useState(true);
   const [clientSeed, setClientSeed] = useState("");
   const [serverSeedHash, setServerSeedHash] = useState("");
   const [nonce, setNonce] = useState(0);
   
-  // Modal State
+  // 👇 নতুন চিপ মেনুর জন্য State
+  const [selectedChip, setSelectedChip] = useState(10);
+  const [isChipMenuOpen, setIsChipMenuOpen] = useState(false);
+
   const [modal, setModal] = useState({ open: false, title: "", content: "" });
 
-  // Ref for audio context
   const audioCtxRef = useRef<AudioContext | null>(null);
 
-  // Audio Play Function (No NPM needed)
   const playSound = (type: "bet" | "win") => {
     if (!soundOn) return;
     try {
@@ -98,7 +98,7 @@ export default function RoyelPage() {
       
       osc.start();
       osc.stop(ctx.currentTime + 0.1);
-    } catch (e) { /* ignore audio errors */ }
+    } catch (e) { /* ignore */ }
   };
 
   const openModal = (title: string, content: string) => {
@@ -122,7 +122,6 @@ export default function RoyelPage() {
     let balanceLoaded = false;
     let bets: Record<number, number> = {};
     let betChips: Record<number, number[]> = {};
-    let selectedChip = 10;
     let spinning = false;
     let wheelRotation = 0;
     let bettingOpen = true;
@@ -157,7 +156,6 @@ export default function RoyelPage() {
         }
         currentUserId = user.id;
         
-        // Fetching Balance, Seed Info
         const { data: profile, error } = await supabase
           .from("profiles").select("balance, pf_client_seed, pf_server_seed_hash, game_nonces").eq("id", user.id).single();
           
@@ -168,13 +166,11 @@ export default function RoyelPage() {
         setServerSeedHash(profile?.pf_server_seed_hash || "");
         setNonce(profile?.game_nonces?.wheel || 0);
 
-        balanceLoaded = true; updateBottomBar(); renderGrid(); renderChips();
+        balanceLoaded = true; updateBottomBar(); renderGrid();
       } catch (err) {
         balanceLoaded = true; updateBottomBar();
       }
     }
-
-    // Removed menu event listeners (Now handled by MenuBar Component)
 
     const gradient = colors.map((color, index) => `${color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`).join(",");
     wheel.style.background = `conic-gradient(${gradient})`;
@@ -212,36 +208,13 @@ export default function RoyelPage() {
       wheelLabels.style.transform = `translate(-50%,-50%) rotate(${degrees}deg)`;
     }
 
-    function renderRecentResults(): void {
-      // React State updates automatically render the Recent Grid in JSX
-    }
-
-    function renderChips(): void {
-      const row = document.getElementById("chipRow") as HTMLDivElement;
-      row.innerHTML = "";
-      chipAmounts.forEach((amount) => {
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "chip" + (selectedChip === amount ? " active" : "");
-        chip.style.backgroundImage = `url('${getChipImage(amount)}')`;
-        chip.setAttribute("aria-label", format(amount));
-        
-        chip.addEventListener("click", () => {
-          if (!bettingOpen || spinning) return;
-          selectedChip = amount;
-          renderChips();
-        });
-        row.appendChild(chip);
-      });
-    }
-
     function addBet(number: number): void {
       if (!bettingOpen || spinning) return;
       if (!balanceLoaded) return;
       const amount = selectedChip;
       if (balance < amount) return; 
       
-      playSound("bet"); // 🔊 Play sound
+      playSound("bet"); 
       
       balance -= amount;
       bets[number] = (bets[number] || 0) + amount;
@@ -318,14 +291,14 @@ export default function RoyelPage() {
 
     function resetRound(): void {
       spinning = false; bettingOpen = true; roundPhase = "betting"; roundStartTime = Date.now();
-      renderGrid(); renderChips(); updateBottomBar(); updateCenterTimer(ROUND_COUNTDOWN);
-      void fetchBalance(); // Sync DB balance after round
+      renderGrid(); updateBottomBar(); updateCenterTimer(ROUND_COUNTDOWN);
+      void fetchBalance();
     }
 
     async function startAutomaticSpin(): Promise<void> {
       if (spinning) return;
       spinning = true; bettingOpen = false; roundPhase = "spinning";
-      renderGrid(); updateCenterTimer(null); renderChips();
+      renderGrid(); updateCenterTimer(null);
 
       const totalBet = getTotalBet();
       let winnerNumber = 0;
@@ -341,7 +314,7 @@ export default function RoyelPage() {
           }
           rpcData = data;
           winnerNumber = Number(data.winner_number);
-          setNonce(data.nonce); // Update nonce locally
+          setNonce(data.nonce);
         } catch (err: any) {
           openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${err.message || "Network Error"}</p>`);
           resetRound(); return;
@@ -373,7 +346,7 @@ export default function RoyelPage() {
       if (rpcData) {
         const netResult = Number(rpcData.profit);
         if (netResult > 0) {
-          playSound("win"); // 🔊 Win Sound
+          playSound("win"); 
           winLossElement.textContent = "+" + money(netResult);
           winLossElement.className = "bottom-value win";
         } else if (netResult < 0) {
@@ -395,7 +368,6 @@ export default function RoyelPage() {
         color: colors[numbers.findIndex((n) => n.number === winnerNumber)],
       };
       
-      // Update React State for Recent Results
       setRecentResults(prev => [newResult, ...prev].slice(0, 5)); 
       
       lastWinnerNumber = winnerNumber;
@@ -413,7 +385,7 @@ export default function RoyelPage() {
           bettingOpen = true; updateCenterTimer(remaining);
         } else if (remaining > 0) {
           bettingOpen = false; updateCenterTimer(remaining, "warning");
-          renderGrid(); renderChips();
+          renderGrid();
         } else {
           bettingOpen = false; updateCenterTimer(null);
           startAutomaticSpin();
@@ -423,14 +395,11 @@ export default function RoyelPage() {
       }
     }
 
-    const startTime = Date.now();
     let dataLoaded = false;
     let minTimePassed = false;
 
     const checkReady = () => {
-      if (dataLoaded && minTimePassed) {
-        setIsLoading(false);
-      }
+      if (dataLoaded && minTimePassed) setIsLoading(false);
     };
 
     fetchBalance().then(() => {
@@ -443,7 +412,7 @@ export default function RoyelPage() {
       checkReady();
     }, 2500);
 
-    applyWheelRotation(0); renderGrid(); renderChips(); updateBottomBar();
+    applyWheelRotation(0); renderGrid(); updateBottomBar();
     roundStartTime = Date.now(); roundPhase = "betting"; bettingOpen = true; updateCenterTimer("20");
 
     timerInterval = setInterval(updateTimer, 100);
@@ -452,7 +421,9 @@ export default function RoyelPage() {
       if (timerInterval) clearInterval(timerInterval);
       wheelLabels.innerHTML = "";
     };
-  }, [soundOn]); // Re-bind sound state if it changes inside useEffect
+  }, [soundOn]); // Remove selectedChip from here, handle in separate effect if needed
+
+  // সিলেক্টেড চিপ চেঞ্জ হলে গ্লোবাল ফাংশনে আপডেট পাঠানোর প্রয়োজন নেই, React State নিজেই হ্যান্ডেল করছে
 
   return (
     <>
@@ -461,6 +432,7 @@ export default function RoyelPage() {
       </div>
 
       <div className="royel-page" id="royelPage">
+        {/* Top Bar */}
         <div className="round-bar">
           <div className="recent-content">
             <div className="recent-grid">
@@ -471,7 +443,6 @@ export default function RoyelPage() {
               ))}
             </div>
             <div className="top-controls">
-              {/* Menu Component Attached Here */}
               <MenuBar
                 recentResults={recentResults}
                 onOpenModal={openModal}
@@ -486,6 +457,7 @@ export default function RoyelPage() {
           </div>
         </div>
 
+        {/* Wheel Area */}
         <div className="wheel-area">
           <div className="wheel-frame">
             <div className="wheel" id="wheel"></div>
@@ -499,6 +471,7 @@ export default function RoyelPage() {
 
         <div className="wheel-underline"></div>
 
+        {/* Number Grid */}
         <section className="section">
           <div className="section-head">
             <h3>{t("SELECT YOUR NUMBERS", "আপনার নাম্বার সিলেক্ট করুন")}</h3>
@@ -507,8 +480,51 @@ export default function RoyelPage() {
           <div className="number-grid" id="numberGrid"></div>
         </section>
 
+        {/* Bottom Card */}
         <div className="bottom-card">
-          <div className="chip-row" id="chipRow"></div>
+          
+          {/* 👇 নতুন রেডিয়াল চিপ মেনু 👇 */}
+          <div className="chip-radial-container">
+            <div 
+              className="chip-radial-backdrop" 
+              onClick={() => setIsChipMenuOpen(false)}
+              style={{ display: isChipMenuOpen ? "block" : "none" }}
+            ></div>
+
+            <div className={`chip-arc ${isChipMenuOpen ? "open" : ""}`}>
+              {chipAmounts.map((amount, index) => {
+                // ৭টি চিপের জন্য অর্ধবৃত্তের কোণ হিসাব (-80 থেকে +80 ডিগ্রি)
+                const totalChips = chipAmounts.length;
+                const startAngle = -80;
+                const endAngle = 80;
+                const angleStep = (endAngle - startAngle) / (totalChips - 1);
+                const angle = startAngle + index * angleStep;
+                
+                return (
+                  <button
+                    key={amount}
+                    className={`chip-arc-item ${selectedChip === amount ? "active" : ""}`}
+                    style={{
+                      "--angle": `${angle}deg`,
+                      backgroundImage: `url('${getChipImage(amount)}')`
+                    }}
+                    onClick={() => {
+                      setSelectedChip(amount);
+                      setIsChipMenuOpen(false);
+                    }}
+                  ></button>
+                );
+              })}
+            </div>
+
+            {/* মেইন সিলেক্টেড চিপ বাটন */}
+            <button 
+              className="chip-main-btn"
+              style={{ backgroundImage: `url('${getChipImage(selectedChip)}')` }}
+              onClick={() => setIsChipMenuOpen(!isChipMenuOpen)}
+            ></button>
+          </div>
+
           <div className="bottom-stats">
             <div className="bottom-item">
               <span className="bottom-label">{t("BALANCE", "ব্যালেন্স")}</span>
@@ -525,7 +541,7 @@ export default function RoyelPage() {
           </div>
         </div>
 
-        {/* React Controlled Modal */}
+        {/* Modal */}
         <div className={`modal-backdrop ${modal.open ? "open" : ""}`} onClick={() => setModal(prev => ({ ...prev, open: false }))}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-head">
