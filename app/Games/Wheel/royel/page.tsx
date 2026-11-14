@@ -430,7 +430,7 @@ export default function RoyelPage() {
 
       <div className="royel-page" id="royelPage">
         
-        {/* Backdrop for Chip Menu (Moved outside bottom-card to cover full screen) */}
+        {/* Backdrop for Chip Menu */}
         {isChipMenuOpen && (
           <div className="chip-radial-backdrop" onClick={() => setIsChipMenuOpen(false)}></div>
         )}
@@ -481,12 +481,14 @@ export default function RoyelPage() {
         </section>
 
         <div className="bottom-card">
-          <div className="chip-radial-container">
-            <div className={`chip-arc ${isChipMenuOpen ? "open" : ""}`}>
+          <div className={`chip-radial-container ${isChipMenuOpen ? "open" : ""}`}>
+            
+            <div className="chip-arc">
               {chipAmounts.map((amount, index) => {
                 const totalChips = chipAmounts.length;
-                const startAngle = -70; // অর্ধবৃত্তের কভারেজ বাড়ানো হলো
-                const endAngle = 70;
+                // -75 থেকে +75 ডিগ্রি পর্যন্ত অর্ধবৃত্ত (মোট ১৫০ ডিগ্রি)
+                const startAngle = -75; 
+                const endAngle = 75;
                 const angleStep = (endAngle - startAngle) / (totalChips - 1);
                 const angle = startAngle + index * angleStep;
                 
