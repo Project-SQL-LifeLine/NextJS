@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
-import MenuBar from "./Components/MenuBar";
+import MenuBar from "./Components/MenuBar"; 
 import "./royel.css";
 
 const t = (en: string, bn: string) => en;
@@ -72,7 +72,6 @@ export default function RoyelPage() {
   const [serverSeedHash, setServerSeedHash] = useState("");
   const [nonce, setNonce] = useState(0);
   
-  // 👇 নতুন চিপ মেনুর জন্য State
   const [selectedChip, setSelectedChip] = useState(10);
   const [isChipMenuOpen, setIsChipMenuOpen] = useState(false);
 
@@ -421,9 +420,7 @@ export default function RoyelPage() {
       if (timerInterval) clearInterval(timerInterval);
       wheelLabels.innerHTML = "";
     };
-  }, [soundOn]); // Remove selectedChip from here, handle in separate effect if needed
-
-  // সিলেক্টেড চিপ চেঞ্জ হলে গ্লোবাল ফাংশনে আপডেট পাঠানোর প্রয়োজন নেই, React State নিজেই হ্যান্ডেল করছে
+  }, [soundOn]); 
 
   return (
     <>
@@ -432,7 +429,12 @@ export default function RoyelPage() {
       </div>
 
       <div className="royel-page" id="royelPage">
-        {/* Top Bar */}
+        
+        {/* Backdrop for Chip Menu (Moved outside bottom-card to cover full screen) */}
+        {isChipMenuOpen && (
+          <div className="chip-radial-backdrop" onClick={() => setIsChipMenuOpen(false)}></div>
+        )}
+
         <div className="round-bar">
           <div className="recent-content">
             <div className="recent-grid">
@@ -457,7 +459,6 @@ export default function RoyelPage() {
           </div>
         </div>
 
-        {/* Wheel Area */}
         <div className="wheel-area">
           <div className="wheel-frame">
             <div className="wheel" id="wheel"></div>
@@ -471,7 +472,6 @@ export default function RoyelPage() {
 
         <div className="wheel-underline"></div>
 
-        {/* Number Grid */}
         <section className="section">
           <div className="section-head">
             <h3>{t("SELECT YOUR NUMBERS", "আপনার নাম্বার সিলেক্ট করুন")}</h3>
@@ -480,23 +480,13 @@ export default function RoyelPage() {
           <div className="number-grid" id="numberGrid"></div>
         </section>
 
-        {/* Bottom Card */}
         <div className="bottom-card">
-          
-          {/* 👇 নতুন রেডিয়াল চিপ মেনু 👇 */}
           <div className="chip-radial-container">
-            <div 
-              className="chip-radial-backdrop" 
-              onClick={() => setIsChipMenuOpen(false)}
-              style={{ display: isChipMenuOpen ? "block" : "none" }}
-            ></div>
-
             <div className={`chip-arc ${isChipMenuOpen ? "open" : ""}`}>
               {chipAmounts.map((amount, index) => {
-                // ৭টি চিপের জন্য অর্ধবৃত্তের কোণ হিসাব (-80 থেকে +80 ডিগ্রি)
                 const totalChips = chipAmounts.length;
-                const startAngle = -80;
-                const endAngle = 80;
+                const startAngle = -70; // অর্ধবৃত্তের কভারেজ বাড়ানো হলো
+                const endAngle = 70;
                 const angleStep = (endAngle - startAngle) / (totalChips - 1);
                 const angle = startAngle + index * angleStep;
                 
@@ -517,7 +507,6 @@ export default function RoyelPage() {
               })}
             </div>
 
-            {/* মেইন সিলেক্টেড চিপ বাটন */}
             <button 
               className="chip-main-btn"
               style={{ backgroundImage: `url('${getChipImage(selectedChip)}')` }}
@@ -541,7 +530,6 @@ export default function RoyelPage() {
           </div>
         </div>
 
-        {/* Modal */}
         <div className={`modal-backdrop ${modal.open ? "open" : ""}`} onClick={() => setModal(prev => ({ ...prev, open: false }))}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-head">
