@@ -16,7 +16,7 @@ interface MenuBarProps {
   nonce: number;
   onChangeClientSeed: (newSeed: string) => void;
   onOpenStats: () => void; 
-  onShowRecent: () => void; // 👈 নতুন প্রপ
+  onShowRecent: () => void;
 }
 
 export default function MenuBar({
@@ -144,7 +144,6 @@ export default function MenuBar({
           <span>{t("History", "হিস্ট্রি")}</span>
         </button>
 
-        {/* 👇 Statistics এর পাশে Recent Result দেখার আইকন 👇 */}
         <div style={{ display: 'flex', gap: '5px', margin: '4px 0' }}>
           <button className="mb-option" style={{ flex: 1, padding: '12px 10px' }} onClick={() => { setIsOpen(false); onShowRecent(); }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
