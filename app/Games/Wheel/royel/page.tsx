@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import "./royel.css";
 
@@ -31,12 +31,10 @@ const numbers: { number: number; multiplier: number; weight: number; hot?: boole
 
 const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
 
-// 👇 ইমেজ পাথ ফিক্স (GitHub Pages এর NextJS ফোল্ডারের জন্য)
 const getChipImage = (amount: number) => {
   if (typeof window !== "undefined" && window.location.hostname === "localhost") {
     return `/chip/${amount}.png`;
   }
-  // আপনার GitHub রিপোর নাম "NextJS", তাই বেস পাথ এখানে বসানো হলো
   return `/NextJS/chip/${amount}.png`;
 };
 
@@ -52,7 +50,22 @@ const ROUND_COUNTDOWN = 20;
 const BET_LOCK_SECONDS = 5;
 const SPIN_DURATION = 7000;
 
+// 👇 ওয়েল-বেসড সাদা SVG লোডার
+const WheelLoader = () => (
+  <svg viewBox="0 0 100 100" className="wheel-loader-svg">
+    <circle cx="50" cy="50" r="45" stroke="rgba(255,255,255,0.15)" strokeWidth="5" fill="none" />
+    <circle cx="50" cy="50" r="45" stroke="#ffffff" strokeWidth="5" fill="none" strokeDasharray="60 220" strokeLinecap="round" />
+    <circle cx="50" cy="50" r="28" stroke="rgba(255,255,255,0.4)" strokeWidth="3" fill="none" />
+    {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+      <line key={deg} x1="50" y1="15" x2="50" y2="25" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" transform={`rotate(${deg} 50 50)`} />
+    ))}
+    <circle cx="50" cy="50" r="6" fill="#ffffff" />
+  </svg>
+);
+
 export default function RoyelPage() {
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     let balance = 0;
     let balanceLoaded = false;
@@ -295,18 +308,27 @@ export default function RoyelPage() {
       timer.className = "center-countdown" + (type ? " " + type : "");
     }
 
+    // 👇 CSS Transition ব্যবহার করে ১০০% স্মুথ অ্যানিমেশন (ল্যাগ ফিক্স)
     function animateWheel(startAngle: number, endAngle: number, duration: number): Promise<void> {
       return new Promise((resolve) => {
-        const startTime = performance.now();
-        function frame(now: number): void {
-          const elapsed = now - startTime;
-          const progress = Math.min(elapsed / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 4);
-          applyWheelRotation(startAngle + (endAngle - startAngle) * eased);
-          if (progress < 1) requestAnimationFrame(frame);
-          else { applyWheelRotation(endAngle); resolve(); }
-        }
-        requestAnimationFrame(frame);
+        // ট্রানজিশন সেট করা হলো (ease-out কুইন্ট)
+        wheel.style.transition = `transform ${duration}ms cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
+        wheelLabels.style.transition = `transform ${duration}ms cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
+
+        // ব্রাউজারকে রি-ফ্লো করতে বাধ্য করা
+        void wheel.offsetHeight;
+
+        // ফাইনাল পজিশনে পাঠানো
+        wheel.style.transform = `translate(-50%,-50%) rotate(${endAngle}deg)`;
+        wheelLabels.style.transform = `translate(-50%,-50%) rotate(${endAngle}deg)`;
+
+        // duration শেষ হওয়ার পর রিজলভ করা
+        setTimeout(() => {
+          wheel.style.transition = 'none';
+          wheelLabels.style.transition = 'none';
+          wheelRotation = endAngle;
+          resolve();
+        }, duration);
       });
     }
 
@@ -412,10 +434,30 @@ export default function RoyelPage() {
       }
     }
 
+    // 👇 লোডিং ম্যানেজমেন্ট (কমপক্ষে ২.৫ সেকেন্ড)
+    const startTime = Date.now();
+    let dataLoaded = false;
+    let minTimePassed = false;
+
+    const checkReady = () => {
+      if (dataLoaded && minTimePassed) {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBalance().then(() => {
+      dataLoaded = true;
+      checkReady();
+    });
+
+    setTimeout(() => {
+      minTimePassed = true;
+      checkReady();
+    }, 2500);
+
     applyWheelRotation(0); renderGrid(); renderChips(); renderRecentResults(); updateBottomBar();
     roundStartTime = Date.now(); roundPhase = "betting"; bettingOpen = true; updateCenterTimer("20");
 
-    void fetchBalance();
     timerInterval = setInterval(updateTimer, 100);
 
     return () => {
@@ -426,72 +468,79 @@ export default function RoyelPage() {
   }, []);
 
   return (
-    <div className="royel-page" id="royelPage">
-      <div className="round-bar">
-        <div className="recent-content">
-          <div className="recent-grid" id="recentGrid"></div>
-          <div className="top-controls">
-            <button className="top-icon-btn" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false">
-              <svg viewBox="0 0 24 24"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
-            </button>
-          </div>
-        </div>
-        <div className="menu-panel" id="menuPanel">
-          <div className="menu-title">LUCKY ROYALE</div>
-          <button className="menu-option" id="historyBtn">◷ &nbsp; {t("History", "হিস্ট্রি")}</button>
-          <button className="menu-option" id="layoutBtn">▦ &nbsp; {t("Layout", "লেআউট")}</button>
-          <button className="menu-option" id="fairnessBtn">♧ &nbsp; {t("Limit Fairness", "ফেয়ারনেস")}</button>
-        </div>
+    <>
+      {/* ওয়েল-বেসড লোডিং স্ক্রিন */}
+      <div className={`loading-overlay ${isLoading ? "" : "hidden"}`}>
+        <WheelLoader />
       </div>
 
-      <div className="wheel-area">
-        <div className="wheel-frame">
-          <div className="wheel" id="wheel"></div>
-          <svg className="wheel-label" id="wheelLabels" viewBox="0 0 290 290" aria-hidden="true"></svg>
-          <div className="pointer-rotator"></div>
-          <div className="wheel-center">
-            <strong className="center-countdown" id="wheelCountdown">20</strong>
+      <div className="royel-page" id="royelPage">
+        <div className="round-bar">
+          <div className="recent-content">
+            <div className="recent-grid" id="recentGrid"></div>
+            <div className="top-controls">
+              <button className="top-icon-btn" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
+              </button>
+            </div>
+          </div>
+          <div className="menu-panel" id="menuPanel">
+            <div className="menu-title">LUCKY ROYALE</div>
+            <button className="menu-option" id="historyBtn">◷ &nbsp; {t("History", "হিস্ট্রি")}</button>
+            <button className="menu-option" id="layoutBtn">▦ &nbsp; {t("Layout", "লেআউট")}</button>
+            <button className="menu-option" id="fairnessBtn">♧ &nbsp; {t("Limit Fairness", "ফেয়ারনেস")}</button>
+          </div>
+        </div>
+
+        <div className="wheel-area">
+          <div className="wheel-frame">
+            <div className="wheel" id="wheel"></div>
+            <svg className="wheel-label" id="wheelLabels" viewBox="0 0 290 290" aria-hidden="true"></svg>
+            <div className="pointer-rotator"></div>
+            <div className="wheel-center">
+              <strong className="center-countdown" id="wheelCountdown">20</strong>
+            </div>
+          </div>
+        </div>
+
+        <div className="wheel-underline"></div>
+
+        <section className="section">
+          <div className="section-head">
+            <h3>{t("SELECT YOUR NUMBERS", "আপনার নাম্বার সিলেক্ট করুন")}</h3>
+            <span>{t("20 NUMBERS", "২০টি নাম্বার")}</span>
+          </div>
+          <div className="number-grid" id="numberGrid"></div>
+        </section>
+
+        <div className="bottom-card">
+          <div className="chip-row" id="chipRow"></div>
+          <div className="bottom-stats">
+            <div className="bottom-item">
+              <span className="bottom-label">{t("BALANCE", "ব্যালেন্স")}</span>
+              <span className="bottom-value bottom-money" id="bottomBalance">...</span>
+            </div>
+            <div className="bottom-item center">
+              <span className="bottom-label">{t("TOTAL BET", "মোট বাজি")}</span>
+              <span className="bottom-value bottom-money" id="bottomTotalBet">৳0</span>
+            </div>
+            <div className="bottom-item right">
+              <span className="bottom-label">{t("WIN / LOSS", "লাভ / লস")}</span>
+              <span className="bottom-value neutral" id="winLoss">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="modal-backdrop" id="modalBackdrop">
+          <div className="modal-box">
+            <div className="modal-head">
+              <h3 id="modalTitle">{t("HISTORY", "হিস্ট্রি")}</h3>
+              <button className="modal-close" id="modalClose">×</button>
+            </div>
+            <div id="modalContent"></div>
           </div>
         </div>
       </div>
-
-      <div className="wheel-underline"></div>
-
-      <section className="section">
-        <div className="section-head">
-          <h3>{t("SELECT YOUR NUMBERS", "আপনার নাম্বার সিলেক্ট করুন")}</h3>
-          <span>{t("20 NUMBERS", "২০টি নাম্বার")}</span>
-        </div>
-        <div className="number-grid" id="numberGrid"></div>
-      </section>
-
-      <div className="bottom-card">
-        <div className="chip-row" id="chipRow"></div>
-        <div className="bottom-stats">
-          <div className="bottom-item">
-            <span className="bottom-label">{t("BALANCE", "ব্যালেন্স")}</span>
-            <span className="bottom-value bottom-money" id="bottomBalance">...</span>
-          </div>
-          <div className="bottom-item center">
-            <span className="bottom-label">{t("TOTAL BET", "মোট বাজি")}</span>
-            <span className="bottom-value bottom-money" id="bottomTotalBet">৳0</span>
-          </div>
-          <div className="bottom-item right">
-            <span className="bottom-label">{t("WIN / LOSS", "লাভ / লস")}</span>
-            <span className="bottom-value neutral" id="winLoss">—</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="modal-backdrop" id="modalBackdrop">
-        <div className="modal-box">
-          <div className="modal-head">
-            <h3 id="modalTitle">{t("HISTORY", "হিস্ট্রি")}</h3>
-            <button className="modal-close" id="modalClose">×</button>
-          </div>
-          <div id="modalContent"></div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
