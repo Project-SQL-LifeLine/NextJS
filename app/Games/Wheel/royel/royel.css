@@ -98,15 +98,14 @@
  display: flex;
  flex-direction: column;
  align-items: center;
- overflow: visible !important;
 }
 
 /* 👇 RADIAL CHIP MENU STYLES 👇 */
 .chip-radial-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 998;
+  background: rgba(0,0,0,0.65);
+  z-index: 998; /* Bottom card (999) এর ঠিক নিচে */
 }
 
 .chip-radial-container {
@@ -142,7 +141,7 @@
 
 .chip-arc {
   position: absolute;
-  bottom: 28px; /* মেইন বাটনের ঠিক মাঝখান থেকে */
+  bottom: 28px; 
   left: 50%;
   width: 0;
   height: 0;
@@ -168,8 +167,7 @@
 .chip-arc.open .chip-arc-item {
   pointer-events: auto;
   opacity: 1;
-  /* translateY(-100px) দিলে চিপগুলো ঠিক ওপরে সুন্দরভাবে ফ্যান হবে */
-  transform: translate(-50%, 0) rotate(var(--angle)) translateY(-100px) rotate(calc(var(--angle) * -1)) scale(1);
+  transform: translate(-50%, 0) rotate(var(--angle)) translateY(-105px) rotate(calc(var(--angle) * -1)) scale(1);
 }
 
 .chip-arc-item.active {
@@ -232,7 +230,7 @@
  .chip-main-btn { width: 46px; height: 46px; }
  .chip-arc-item { width: 36px; height: 36px; }
  .chip-arc.open .chip-arc-item {
-   transform: translate(-50%, 0) rotate(var(--angle)) translateY(-85px) rotate(calc(var(--angle) * -1)) scale(1);
+   transform: translate(-50%, 0) rotate(var(--angle)) translateY(-90px) rotate(calc(var(--angle) * -1)) scale(1);
  }
  .chip-arc { bottom: 23px; }
  .chip-radial-container { height: 46px; }
