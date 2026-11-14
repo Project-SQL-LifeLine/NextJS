@@ -28,7 +28,6 @@ export default function MenuBar({
 }: MenuBarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // মেনুর বাইরে ক্লিক করলে মেনু বন্ধ হয়ে যাবে
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -40,7 +39,6 @@ export default function MenuBar({
     return () => document.removeEventListener("click", handleOutsideClick);
   }, []);
 
-  // গ্লোবাল ফাংশন যা মোডালের ভেতরের HTML থেকে কল করা হবে
   useEffect(() => {
     (window as any).saveClientSeed = (newSeed: string) => {
       if (!newSeed.trim()) return;
@@ -127,8 +125,6 @@ export default function MenuBar({
       </button>
 
       <div className={`mb-panel ${isOpen ? "open" : ""}`}>
-        <div className="mb-title">LUCKY ROYALE</div>
-        
         <button className="mb-option" onClick={handleHistory}>
           <div className="mb-option-left">
             <span className="mb-icon">◷</span>
