@@ -485,7 +485,7 @@ export default function RoyelPage() {
             <div className={`chip-arc ${isChipMenuOpen ? "open" : ""}`}>
               {chipAmounts.map((amount, index) => {
                 const totalChips = chipAmounts.length;
-                const startAngle = -70; // অর্ধবৃত্তের কভারেজ বাড়ানো হলো
+                const startAngle = -70;
                 const endAngle = 70;
                 const angleStep = (endAngle - startAngle) / (totalChips - 1);
                 const angle = startAngle + index * angleStep;
