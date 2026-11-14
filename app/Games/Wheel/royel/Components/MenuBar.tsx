@@ -15,7 +15,8 @@ interface MenuBarProps {
   serverSeedHash: string;
   nonce: number;
   onChangeClientSeed: (newSeed: string) => void;
-  onOpenStats: () => void; // 👈 নতুন প্রপ
+  onOpenStats: () => void; 
+  onShowRecent: () => void; // 👈 নতুন প্রপ
 }
 
 export default function MenuBar({
@@ -28,6 +29,7 @@ export default function MenuBar({
   nonce,
   onChangeClientSeed,
   onOpenStats,
+  onShowRecent,
 }: MenuBarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -142,10 +144,22 @@ export default function MenuBar({
           <span>{t("History", "হিস্ট্রি")}</span>
         </button>
 
-        {/* 👇 Statistics বাটন 👇 */}
-        <button className="mb-option" onClick={() => { setIsOpen(false); onOpenStats(); }}>
-          <span>{t("Statistics", "পরিসংখ্যান")}</span>
-        </button>
+        {/* 👇 Statistics এর পাশে Recent Result দেখার আইকন 👇 */}
+        <div style={{ display: 'flex', gap: '5px', margin: '4px 0' }}>
+          <button className="mb-option" style={{ flex: 1, padding: '12px 10px' }} onClick={() => { setIsOpen(false); onShowRecent(); }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg viewBox="0 0 24 24" style={{ width: '16px', height: '16px', stroke: '#fff', fill: 'none', strokeWidth: 2 }}>
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span>{t("Recent", "সাম্প্রতিক")}</span>
+            </div>
+          </button>
+          
+          <button className="mb-option" style={{ flex: 1.5, padding: '12px 10px' }} onClick={() => { setIsOpen(false); onOpenStats(); }}>
+            <span>{t("Statistics", "পরিসংখ্যান")}</span>
+          </button>
+        </div>
         
         <button className="mb-option" onClick={handlePayoutLimit}>
           <span>{t("Payout Limit", "পেআউট লিমিট")}</span>
