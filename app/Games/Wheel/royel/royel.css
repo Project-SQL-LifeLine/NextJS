@@ -9,6 +9,15 @@
  margin:0 auto;
  min-height:100vh;
  padding-bottom:125px;
+ 
+ /* MenuBar CSS Variables (Dynamic Colors) */
+ --menu-bg: #183f35;
+ --menu-btn-bg: #0d241e;
+ --menu-border: #ffffff55;
+ --menu-text: #ffffff;
+ --menu-gold: #F5C451;
+ --menu-hover: #285b48;
+ --menu-line: #ffffff22;
 }
 .royel-page button{font-family:inherit;cursor:pointer;border:0}
 .royel-page button:disabled{opacity:.45;cursor:not-allowed}
@@ -48,6 +57,7 @@
 .recent-content{
  display:flex;
  align-items:center;
+ justify-content: space-between;
  gap:7px;
 }
 .recent-grid{
@@ -76,59 +86,6 @@
  opacity:.9;
 }
 .top-controls{display:flex;gap:5px}
-.top-icon-btn{
- width:30px;
- height:30px;
- display:flex;
- align-items:center;
- justify-content:center;
- background:#0d241e;
- border:1px solid #fff;
- border-radius:5px;
- color:#fff;
-}
-.top-icon-btn svg{
- width:18px;height:18px;
- stroke:#fff;fill:none;
- stroke-width:2;
- stroke-linecap:round;
- stroke-linejoin:round;
-}
-.top-icon-btn.active{background:#1F51FF}
-
-/* MENU */
-.menu-panel{
- display:none;
- position:absolute;
- top:calc(100% + 3px);
- right:9px;
- width:175px;
- padding:7px;
- background:#183f35;
- border:1px solid #fff;
- border-radius:7px;
- box-shadow:0 5px 18px #0009;
- z-index:50;
-}
-.menu-panel.open{display:block}
-.menu-option{
- width:100%;
- padding:10px 8px;
- text-align:left;
- color:#fff;
- background:transparent;
- border-radius:5px;
- font-size:11px;
- font-weight:bold;
-}
-.menu-option:active{background:#285b48}
-.menu-option + .menu-option{border-top:1px solid #ffffff22}
-.menu-title{
- color:#F5C451;
- font-size:10px;
- padding:5px 8px 7px;
- font-weight:900;
-}
 
 /* WHEEL */
 .wheel-area{
@@ -160,7 +117,6 @@
   0 0 0 7px #a53b36,
   0 5px 25px #000b;
  will-change:transform;
- /* GPU Acceleration for smooth animation */
  transform: translateZ(0);
  backface-visibility: hidden;
 }
@@ -175,7 +131,6 @@
  z-index:3;
  overflow:visible;
  will-change:transform;
- /* GPU Acceleration */
  transform: translateZ(0);
  backface-visibility: hidden;
 }
@@ -264,7 +219,6 @@
 .section-head h3{font-size:12px}
 .section-head span{font-size:9px;color:#A6B6BF}
 
-/* FIXED ROULETTE GRID */
 .number-grid{
  display:grid;
  grid-template-columns:repeat(4,minmax(0,1fr));
@@ -294,7 +248,6 @@
  transition:border-color .2s,box-shadow .2s;
 }
 
-/* ROULETTE RED CELLS */
 .number-card.roulette-red{
  background:linear-gradient(145deg,#963434,#762323);
  border-color:#a54b45;
@@ -304,7 +257,6 @@
   0 3px 5px #0008;
 }
 
-/* ROULETTE GREEN CELLS */
 .number-card.roulette-green{
  background:linear-gradient(145deg,#286047,#194431);
  border-color:#477b60;
@@ -314,7 +266,6 @@
   0 3px 5px #0008;
 }
 
-/* HOT BADGE AND ANIMATION */
 .number-card.hot {
  border: 2px solid #ffaa00;
  animation: hotPulse 1.5s infinite alternate;
@@ -339,7 +290,6 @@
  to { box-shadow: inset 0 2px 5px #ffffff20, inset 0 -5px 8px #3c1010aa, 0 0 15px #ff3b3b; border-color: #ff3b3b; }
 }
 
-/* BET SELECTED - MATCH BASE COLOR */
 .number-card.roulette-red.selected{
  border:3px solid #e45b55;
  box-shadow:
@@ -357,7 +307,6 @@
   0 0 9px #35c77b66;
 }
 
-/* WINNING NUMBER HIGHLIGHT */
 .number-card.hit-red{
  border:3px solid #ff3939 !important;
  box-shadow:
@@ -401,7 +350,6 @@
  text-shadow:0 1px 3px #000;
 }
 
-/* ONE CHIP + CUMULATIVE BET AMOUNT */
 .bet-chip-display{
  display:flex;
  flex-direction:column;
@@ -419,8 +367,6 @@
  text-shadow:0 1px 3px #000,0 0 4px #000;
  white-space:nowrap;
 }
-
-/* MINI CHIP */
 .mini-chip{
  width:28px;
  height:28px;
@@ -447,8 +393,6 @@
  z-index:999;
  padding:7px 10px 9px;
 }
-
-/* CHIP ROW - CENTERING FIX */
 .chip-row{
  display:grid;
  grid-template-columns:repeat(7,minmax(0,1fr));
@@ -459,7 +403,6 @@
  justify-items:center;
 }
 
-/* MAIN CHIPS - PERFECT CIRCLE FIX */
 .chip{
  width:100%;
  max-width:40px;
@@ -551,6 +494,7 @@
  width:27px;height:27px;
  border-radius:5px;
  font-size:17px;
+ cursor:pointer;
 }
 .history-list{
  display:grid;
@@ -578,13 +522,8 @@
 .modal-text strong{color:#ff7777}
 
 /* COMPACT MODE */
-.royel-page.compact .number-card{
- height:88px;
-}
-.royel-page.compact .number-grid{
- grid-auto-rows:88px;
- gap:4px;
-}
+.royel-page.compact .number-card{height:88px}
+.royel-page.compact .number-grid{grid-auto-rows:88px;gap:4px}
 .royel-page.compact .number-card .number{font-size:14px}
 .royel-page.compact .section{margin-bottom:6px}
 
@@ -602,7 +541,6 @@
  .chip-row{gap:3px}
  .chip{max-width:34px;}
  .recent-cell{height:27px}
- .top-icon-btn{width:27px;height:29px}
  .mini-chip{width:24px;height:24px;}
  .bet-total{font-size:9px}
 }
