@@ -4,36 +4,33 @@ import { useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import "./royel.css";
 
-// Language helper (Master Rule)
 const t = (en: string, bn: string) => en;
 
-// 👇 ছোট - বড় - ছোট - বড় প্যাটার্নে সাজানো (সাথে ওয়েট যুক্ত করা হয়েছে)
-const numbers: { number: number; multiplier: number; weight: number }[] = [
-  { number: 2,    multiplier: 2,   weight: 2500 }, // 1st Small
-  { number: 70,   multiplier: 40,  weight: 200  }, // 1st Big
-  { number: 3,    multiplier: 3,   weight: 2000 }, // 2nd Small
-  { number: 1000, multiplier: 50,  weight: 150  }, // 2nd Big
-  { number: 5,    multiplier: 5,   weight: 1000 }, // 3rd Small
-  { number: 90,   multiplier: 60,  weight: 100  }, // 3rd Big
-  { number: 8,    multiplier: 8,   weight: 800  }, // 4th Small
-  { number: 300,  multiplier: 70,  weight: 100  }, // 4th Big
-  { number: 10,   multiplier: 10,  weight: 500  }, // 5th Small
-  { number: 150,  multiplier: 80,  weight: 80   }, // 5th Big
-  { number: 200,  multiplier: 15,  weight: 500  }, // 6th Small
-  { number: 20,   multiplier: 100, weight: 50   }, // 6th Big
-  { number: 30,   multiplier: 20,  weight: 400  }, // 7th Small
-  { number: 40,   multiplier: 150, weight: 30   }, // 7th Big
-  { number: 500,  multiplier: 25,  weight: 300  }, // 8th Small
-  { number: 60,   multiplier: 200, weight: 50   }, // 8th Big
-  { number: 50,   multiplier: 30,  weight: 300  }, // 9th Small
-  { number: 80,   multiplier: 300, weight: 30   }, // 9th Big
-  { number: 700,  multiplier: 35,  weight: 200  }, // 10th Small
-  { number: 100,  multiplier: 500, weight: 10   }, // 10th Big
+const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
+  { number: 2,    multiplier: 2,   weight: 2500 },
+  { number: 70,   multiplier: 40,  weight: 200  },
+  { number: 3,    multiplier: 3,   weight: 2000 },
+  { number: 1000, multiplier: 50,  weight: 150  },
+  { number: 5,    multiplier: 5,   weight: 1000 },
+  { number: 90,   multiplier: 60,  weight: 100  },
+  { number: 8,    multiplier: 8,   weight: 800  },
+  { number: 300,  multiplier: 70,  weight: 100  },
+  { number: 10,   multiplier: 10,  weight: 500  },
+  { number: 150,  multiplier: 80,  weight: 80   },
+  { number: 200,  multiplier: 15,  weight: 500  },
+  { number: 20,   multiplier: 100, weight: 50   },
+  { number: 30,   multiplier: 20,  weight: 400  },
+  { number: 40,   multiplier: 150, weight: 30   },
+  { number: 500,  multiplier: 25,  weight: 300  },
+  { number: 60,   multiplier: 200, weight: 50, hot: true }, // 🔥 ২০০x HOT
+  { number: 50,   multiplier: 30,  weight: 300  },
+  { number: 80,   multiplier: 300, weight: 30   },
+  { number: 700,  multiplier: 35,  weight: 200  },
+  { number: 100,  multiplier: 500, weight: 10   },
 ];
 
 const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
 
-// গ্রিড ও হুইলের কালার (অল্টারনেট সবুজ ও লাল)
 const colors: string[] = [
   "#214E3A", "#8B2929", "#28563E", "#7B2929",
   "#244A38", "#922F2F", "#28563E", "#7B2929",
@@ -61,7 +58,6 @@ export default function RoyelPage() {
     let recentResults: { number: number; multiplier: number; color: string }[] = [];
     let timerInterval: ReturnType<typeof setInterval> | null = null;
     let currentUserId: string | null = null;
-
     let lastWinnerNumber: number | null = null;
 
     const wheel = document.getElementById("wheel") as HTMLDivElement;
@@ -91,30 +87,16 @@ export default function RoyelPage() {
         const { data: userData } = await supabase.auth.getUser();
         const user = userData?.user;
         if (!user) {
-          currentUserId = null;
-          balanceLoaded = true;
-          balance = 0;
-          updateBottomBar();
-          return;
+          currentUserId = null; balanceLoaded = true; balance = 0; updateBottomBar(); return;
         }
         currentUserId = user.id;
         const { data: profile, error } = await supabase
           .from("profiles").select("balance").eq("id", user.id).single();
-        if (error) {
-          console.warn("Balance fetch error:", error.message);
-          balanceLoaded = true;
-          updateBottomBar();
-          return;
-        }
+        if (error) { balanceLoaded = true; updateBottomBar(); return; }
         balance = profile?.balance != null ? Number(profile.balance) : 0;
-        balanceLoaded = true;
-        updateBottomBar();
-        renderGrid();
-        renderChips();
+        balanceLoaded = true; updateBottomBar(); renderGrid(); renderChips();
       } catch (err) {
-        console.warn("Balance fetch exception:", err);
-        balanceLoaded = true;
-        updateBottomBar();
+        balanceLoaded = true; updateBottomBar();
       }
     }
 
@@ -144,62 +126,41 @@ export default function RoyelPage() {
       modalTitle.textContent = title;
       modalContent.innerHTML = content;
       modalBackdrop.classList.add("open");
-      menuPanel.classList.remove("open");
-      menuToggle.classList.remove("active");
-      menuToggle.setAttribute("aria-expanded", "false");
+      menuPanel.classList.remove("open"); menuToggle.classList.remove("active");
     }
 
-    document.getElementById("modalClose")!.addEventListener("click", () => {
-      modalBackdrop.classList.remove("open");
-    });
-    modalBackdrop.addEventListener("click", (event) => {
-      if (event.target === modalBackdrop) modalBackdrop.classList.remove("open");
-    });
+    document.getElementById("modalClose")!.addEventListener("click", () => modalBackdrop.classList.remove("open"));
+    modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) modalBackdrop.classList.remove("open"); });
 
     document.getElementById("historyBtn")!.addEventListener("click", () => {
       if (!recentResults.length) {
         openModal(t("HISTORY", "হিস্ট্রি"), `<p class="modal-text">${t("No results available yet.", "এখনো কোনো রেজাল্ট নেই।")}</p>`);
         return;
       }
-      const html = `
-        <div class="history-list">
-         ${recentResults.map((r) => `
-          <div class="history-item" style="background:${r.color}">
-           ${r.number}<small>${r.multiplier}X</small>
-          </div>`).join("")}
-        </div>`;
+      const html = `<div class="history-list">${recentResults.map((r) => `
+        <div class="history-item" style="background:${r.color}">${r.number}<small>${r.multiplier}X</small></div>
+      `).join("")}</div>`;
       openModal(t("RESULT HISTORY", "রেজাল্ট হিস্ট্রি"), html);
     });
 
     document.getElementById("layoutBtn")!.addEventListener("click", () => {
       const compact = (document.getElementById("royelPage") as HTMLDivElement).classList.toggle("compact");
-      openModal(
-        t("LAYOUT", "লেআউট"),
-        `<p class="modal-text">${t("Layout mode", "লেআউট মোড")}: <strong>${compact ? t("Compact", "কমপ্যাক্ট") : t("Normal", "নরমাল")}</strong></p>`
-      );
+      openModal(t("LAYOUT", "লেআউট"), `<p class="modal-text">${t("Layout mode", "লেআউট মোড")}: <strong>${compact ? t("Compact", "কমপ্যাক্ট") : t("Normal", "নরমাল")}</strong></p>`);
     });
 
     document.getElementById("fairnessBtn")!.addEventListener("click", () => {
-      openModal(
-        t("FAIRNESS", "ফেয়ারনেস"),
-        `<div class="modal-text">
+      openModal(t("FAIRNESS", "ফেয়ারনেস"), `<div class="modal-text">
          <strong>${t("Game Information", "গেমের তথ্য")}</strong><br>
          ${t("20 segments weighted random. House edge is maintained.", "২০টি সেগমেন্ট ওয়েটেড র‍্যান্ডম। হাউজ এজ নিশ্চিত করা হয়েছে।")}<br><br>
          <strong>${t("Provably Fair", "প্রমাণযোগ্য ফেয়ার")}</strong><br>
          HMAC-SHA256(client_seed:nonce, server_seed).
-        </div>`
-      );
+        </div>`);
     });
 
-    const gradient = colors
-      .map((color, index) => `${color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`)
-      .join(",");
+    const gradient = colors.map((color, index) => `${color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`).join(",");
     wheel.style.background = `conic-gradient(${gradient})`;
 
-    const centerX = 145;
-    const centerY = 145;
-    const labelRadius = 105;
-    const labelGroups: SVGGElement[] = [];
+    const centerX = 145; const centerY = 145; const labelRadius = 105; const labelGroups: SVGGElement[] = [];
 
     numbers.forEach((item, index) => {
       const segmentCenter = index * segmentAngle + segmentAngle / 2;
@@ -215,7 +176,8 @@ export default function RoyelPage() {
       numberText.setAttribute("x", String(x));
       numberText.setAttribute("y", String(y - 4));
       numberText.setAttribute("class", "wheel-number");
-      numberText.textContent = String(item.number);
+      // 🔥 HOT ইমোজি হুইলে দেখানোর জন্য
+      numberText.textContent = item.hot ? `🔥${item.number}` : String(item.number);
 
       const multiplierText = document.createElementNS(svgNS, "text");
       multiplierText.setAttribute("x", String(x));
@@ -298,19 +260,20 @@ export default function RoyelPage() {
           "number-card " + colorClass +
           (amount > 0 ? " selected" : "") +
           (isWinner ? " " + hitClass : "") +
-          (!bettingOpen ? " locked" : "");
+          (!bettingOpen ? " locked" : "") +
+          (item.hot ? " hot" : ""); // 🔥 HOT ক্লাস
 
         let chipDisplay = "";
         if (amount > 0) {
           const lastChip = chips.length ? chips[chips.length - 1] : selectedChip;
-          chipDisplay = `
-           <span class="bet-chip-display">
-            <span class="bet-total">${money(amount)}</span>
-            <span class="mini-chip">${format(lastChip)}</span>
-           </span>`;
+          chipDisplay = `<span class="bet-chip-display"><span class="bet-total">${money(amount)}</span><span class="mini-chip">${format(lastChip)}</span></span>`;
         }
 
+        // 🔥 HOT ইমোজি গ্রিডে দেখানোর জন্য
+        const hotBadge = item.hot ? '<span class="hot-badge">🔥 HOT</span>' : '';
+
         card.innerHTML = `
+         ${hotBadge}
          <span class="number">${item.number}</span>
          <span class="multiplier">${item.multiplier}X</span>
          ${chipDisplay}`;
@@ -322,10 +285,7 @@ export default function RoyelPage() {
 
     function updateCenterTimer(value: number | string | null, type: string = ""): void {
       const timer = document.getElementById("wheelCountdown") as HTMLElement;
-      if (value === null) {
-        timer.className = "center-countdown hidden";
-        return;
-      }
+      if (value === null) { timer.className = "center-countdown hidden"; return; }
       timer.textContent = String(value);
       timer.className = "center-countdown" + (type ? " " + type : "");
     }
@@ -337,8 +297,7 @@ export default function RoyelPage() {
           const elapsed = now - startTime;
           const progress = Math.min(elapsed / duration, 1);
           const eased = 1 - Math.pow(1 - progress, 4);
-          const current = startAngle + (endAngle - startAngle) * eased;
-          applyWheelRotation(current);
+          applyWheelRotation(startAngle + (endAngle - startAngle) * eased);
           if (progress < 1) requestAnimationFrame(frame);
           else { applyWheelRotation(endAngle); resolve(); }
         }
@@ -347,63 +306,42 @@ export default function RoyelPage() {
     }
 
     function resetRound(): void {
-      spinning = false;
-      bettingOpen = true;
-      roundPhase = "betting";
-      roundStartTime = Date.now();
-      renderGrid();
-      renderChips();
-      updateBottomBar();
-      updateCenterTimer(ROUND_COUNTDOWN);
+      spinning = false; bettingOpen = true; roundPhase = "betting"; roundStartTime = Date.now();
+      renderGrid(); renderChips(); updateBottomBar(); updateCenterTimer(ROUND_COUNTDOWN);
       void fetchBalance();
     }
 
     async function startAutomaticSpin(): Promise<void> {
       if (spinning) return;
-      spinning = true;
-      bettingOpen = false;
-      roundPhase = "spinning";
-
-      renderGrid();
-      updateCenterTimer(null);
-      renderChips();
+      spinning = true; bettingOpen = false; roundPhase = "spinning";
+      renderGrid(); updateCenterTimer(null); renderChips();
 
       const totalBet = getTotalBet();
       let winnerNumber = 0;
       let rpcData = null;
 
       if (totalBet > 0) {
-        const payload = Object.keys(bets).map(k => ({
-          number: Number(k),
-          amount: bets[Number(k)]
-        }));
-
+        const payload = Object.keys(bets).map(k => ({ number: Number(k), amount: bets[Number(k)] }));
         try {
           const { data, error } = await supabase.rpc('play_wheel', { p_bets: payload });
           
+          // RPC থেকে আসা এরর (যেমন ব্যালেন্স কম) ছাড়া অন্য কোনো এরর নেই
           if (error) {
             openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${error.message}</p>`);
-            resetRound();
-            return;
+            resetRound(); return;
           }
           rpcData = data;
           winnerNumber = Number(data.winner_number);
         } catch (err: any) {
           openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${err.message || "Network Error"}</p>`);
-          resetRound();
-          return;
+          resetRound(); return;
         }
       } else {
-        // ডেমো স্পিন (ইউজার বাজি না ধরলেও হুইল ঘুরবে)
-        // এখন আর আলাদা অ্যারে লাগবে না, প্রতিটা নাম্বারের নিজের weight আছে
         let rand = Math.random() * 9300;
         let cum = 0;
         for (let i = 0; i < numbers.length; i++) {
           cum += numbers[i].weight;
-          if (rand < cum) {
-            winnerNumber = numbers[i].number;
-            break;
-          }
+          if (rand < cum) { winnerNumber = numbers[i].number; break; }
         }
       }
 
@@ -416,7 +354,6 @@ export default function RoyelPage() {
       const endRotation = wheelRotation + extraSpins + distance;
 
       await animateWheel(wheelRotation, endRotation, SPIN_DURATION);
-      
       finishDraw(winnerNumber, rpcData);
     }
 
@@ -451,17 +388,7 @@ export default function RoyelPage() {
 
       bets = {};
       betChips = {};
-      spinning = false;
-      roundPhase = "betting";
-      bettingOpen = true;
-      roundStartTime = Date.now();
-
-      renderGrid();
-      renderChips();
-      updateBottomBar();
-      updateCenterTimer(ROUND_COUNTDOWN);
-
-      void fetchBalance(); 
+      resetRound();
     }
 
     function updateTimer(): void {
@@ -469,16 +396,12 @@ export default function RoyelPage() {
         const elapsed = (Date.now() - roundStartTime) / 1000;
         const remaining = Math.max(0, ROUND_COUNTDOWN - Math.floor(elapsed));
         if (remaining > BET_LOCK_SECONDS) {
-          bettingOpen = true;
-          updateCenterTimer(remaining);
+          bettingOpen = true; updateCenterTimer(remaining);
         } else if (remaining > 0) {
-          bettingOpen = false;
-          updateCenterTimer(remaining, "warning");
-          renderGrid();
-          renderChips();
+          bettingOpen = false; updateCenterTimer(remaining, "warning");
+          renderGrid(); renderChips();
         } else {
-          bettingOpen = false;
-          updateCenterTimer(null);
+          bettingOpen = false; updateCenterTimer(null);
           startAutomaticSpin();
         }
       } else if (roundPhase === "spinning") {
@@ -486,16 +409,8 @@ export default function RoyelPage() {
       }
     }
 
-    applyWheelRotation(0);
-    renderGrid();
-    renderChips();
-    renderRecentResults();
-    updateBottomBar();
-
-    roundStartTime = Date.now();
-    roundPhase = "betting";
-    bettingOpen = true;
-    updateCenterTimer("20");
+    applyWheelRotation(0); renderGrid(); renderChips(); renderRecentResults(); updateBottomBar();
+    roundStartTime = Date.now(); roundPhase = "betting"; bettingOpen = true; updateCenterTimer("20");
 
     void fetchBalance();
     timerInterval = setInterval(updateTimer, 100);
@@ -513,13 +428,8 @@ export default function RoyelPage() {
         <div className="recent-content">
           <div className="recent-grid" id="recentGrid"></div>
           <div className="top-controls">
-            <button className="top-icon-btn" id="menuToggle" type="button"
-              aria-label="Open menu" aria-expanded="false">
-              <svg viewBox="0 0 24 24">
-                <path d="M4 6h16"></path>
-                <path d="M4 12h16"></path>
-                <path d="M4 18h16"></path>
-              </svg>
+            <button className="top-icon-btn" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false">
+              <svg viewBox="0 0 24 24"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
             </button>
           </div>
         </div>
@@ -537,7 +447,7 @@ export default function RoyelPage() {
           <svg className="wheel-label" id="wheelLabels" viewBox="0 0 290 290" aria-hidden="true"></svg>
           <div className="pointer-rotator"></div>
           <div className="wheel-center">
-            <strong class="center-countdown" id="wheelCountdown">20</strong>
+            <strong className="center-countdown" id="wheelCountdown">20</strong>
           </div>
         </div>
       </div>
