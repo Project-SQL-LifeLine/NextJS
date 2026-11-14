@@ -7,6 +7,7 @@ import "./royel.css";
 
 const t = (en: string, bn: string) => en;
 
+// 👇 এখানে 80 এবং 100 নাম্বারে hot: true যোগ করা হয়েছে 👇
 const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
   { number: 2,    multiplier: 2,   weight: 2500 },
   { number: 70,   multiplier: 40,  weight: 200  },
@@ -25,9 +26,9 @@ const numbers: { number: number; multiplier: number; weight: number; hot?: boole
   { number: 500,  multiplier: 25,  weight: 300  },
   { number: 60,   multiplier: 200, weight: 50, hot: true },
   { number: 50,   multiplier: 30,  weight: 300  },
-  { number: 80,   multiplier: 300, weight: 30   },
+  { number: 80,   multiplier: 300, weight: 30, hot: true }, // 👈 HOT যোগ হলো
   { number: 700,  multiplier: 35,  weight: 200  },
-  { number: 100,  multiplier: 500, weight: 10   },
+  { number: 100,  multiplier: 500, weight: 10, hot: true }, // 👈 HOT যোগ হলো
 ];
 
 const chipAmounts: number[] = [10, 50, 200, 500, 1000, 2500, 5000];
@@ -121,7 +122,7 @@ export default function RoyelPage() {
     let balanceLoaded = false;
     let bets: Record<number, number> = {};
     let betChips: Record<number, number[]> = {};
-    let betHistory: { number: number; amount: number }[] = []; // 👈 আনডু ফাংশনের জন্য হিস্ট্রি
+    let betHistory: { number: number; amount: number }[] = []; 
     let spinning = false;
     let wheelRotation = 0;
     let bettingOpen = true;
@@ -220,13 +221,12 @@ export default function RoyelPage() {
       bets[number] = (bets[number] || 0) + amount;
       if (!betChips[number]) betChips[number] = [];
       betChips[number].push(amount);
-      betHistory.push({ number, amount }); // হিস্ট্রিতে সেভ করা হলো
+      betHistory.push({ number, amount });
 
       updateBottomBar();
       renderGrid();
     }
 
-    // 👇 আনডু ফাংশন 👇
     function handleUndo(): void {
       if (!bettingOpen || spinning) return;
       if (betHistory.length === 0) return;
@@ -249,7 +249,6 @@ export default function RoyelPage() {
       renderGrid();
     }
 
-    // 👇 2x ডাবল ফাংশন 👇
     function handleDouble(): void {
       if (!bettingOpen || spinning) return;
       const totalBet = getTotalBet();
@@ -263,7 +262,7 @@ export default function RoyelPage() {
       balance -= totalBet;
       Object.keys(bets).forEach(k => {
         const num = Number(k);
-        betHistory.push({ number: num, amount: bets[num] }); // ডাবল হওয়া এমাউন্টও হিস্ট্রিতে যাবে
+        betHistory.push({ number: num, amount: bets[num] });
         bets[num] *= 2;
         if (!betChips[num]) betChips[num] = [];
         betChips[num].push(bets[num] / 2);
@@ -424,7 +423,7 @@ export default function RoyelPage() {
 
       bets = {};
       betChips = {};
-      betHistory = []; // রাউন্ড শেষে হিস্ট্রি ক্লিয়ার
+      betHistory = []; 
       resetRound();
     }
 
@@ -468,9 +467,17 @@ export default function RoyelPage() {
 
     timerInterval = setInterval(updateTimer, 100);
 
+    // Custom Events for Undo and 2x buttons
+    const handleUndoEvent = () => handleUndo();
+    const handleDoubleEvent = () => handleDouble();
+    document.addEventListener('undoBet', handleUndoEvent);
+    document.addEventListener('doubleBet', handleDoubleEvent);
+
     return () => {
       if (timerInterval) clearInterval(timerInterval);
       wheelLabels.innerHTML = "";
+      document.removeEventListener('undoBet', handleUndoEvent);
+      document.removeEventListener('doubleBet', handleDoubleEvent);
     };
   }, [soundOn]); 
 
@@ -559,7 +566,6 @@ export default function RoyelPage() {
               })}
             </div>
 
-            {/* 👇 নতুন Undo, Main Chip, এবং 2x বাটনের রো 👇 */}
             <div className="chip-controls-row">
               <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('undoBet'))}>
                 <svg viewBox="0 0 24 24">
