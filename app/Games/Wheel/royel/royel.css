@@ -156,11 +156,11 @@
  font-weight:900;
  paint-order:stroke;
  stroke:#17231E;
- stroke-width:2px;
+ stroke-width:1.5px;
  stroke-linejoin:round;
 }
-.wheel-label .wheel-number{fill:#fff;font-size:13px}
-.wheel-label .wheel-multiplier{fill:#FFD76A;font-size:10px}
+.wheel-label .wheel-number{fill:#fff;font-size:10px}
+.wheel-label .wheel-multiplier{fill:#FFD76A;font-size:8px}
 
 .pointer-rotator{
  position:absolute;
@@ -542,8 +542,8 @@
  .number-grid{gap:4px;grid-auto-rows:92px}
  .number-card{height:92px}
  .number-card .number{font-size:14px}
- .wheel-label .wheel-number{font-size:12px}
- .wheel-label .wheel-multiplier{font-size:9px}
+ .wheel-label .wheel-number{font-size:9px}
+ .wheel-label .wheel-multiplier{font-size:7px}
  .bottom-card{padding-left:8px;padding-right:8px}
  .bottom-value{font-size:10px}
  .bottom-label{font-size:7px}
