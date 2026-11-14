@@ -121,6 +121,7 @@ export default function RoyelPage() {
     let balanceLoaded = false;
     let bets: Record<number, number> = {};
     let betChips: Record<number, number[]> = {};
+    let betHistory: { number: number; amount: number }[] = []; // 👈 আনডু ফাংশনের জন্য হিস্ট্রি
     let spinning = false;
     let wheelRotation = 0;
     let bettingOpen = true;
@@ -219,6 +220,56 @@ export default function RoyelPage() {
       bets[number] = (bets[number] || 0) + amount;
       if (!betChips[number]) betChips[number] = [];
       betChips[number].push(amount);
+      betHistory.push({ number, amount }); // হিস্ট্রিতে সেভ করা হলো
+
+      updateBottomBar();
+      renderGrid();
+    }
+
+    // 👇 আনডু ফাংশন 👇
+    function handleUndo(): void {
+      if (!bettingOpen || spinning) return;
+      if (betHistory.length === 0) return;
+
+      const lastBet = betHistory.pop()!;
+      balance += lastBet.amount;
+      bets[lastBet.number] -= lastBet.amount;
+
+      if (bets[lastBet.number] <= 0) {
+        delete bets[lastBet.number];
+        delete betChips[lastBet.number];
+      } else {
+        if (betChips[lastBet.number]) {
+          betChips[lastBet.number].pop();
+        }
+      }
+
+      playSound("bet");
+      updateBottomBar();
+      renderGrid();
+    }
+
+    // 👇 2x ডাবল ফাংশন 👇
+    function handleDouble(): void {
+      if (!bettingOpen || spinning) return;
+      const totalBet = getTotalBet();
+      if (totalBet === 0) return;
+      
+      if (balance < totalBet) {
+        openModal(t("ERROR", "এরর"), `<p class="modal-text" style="color:#ff4d4d">${t("Insufficient balance to double.", "ডাবল করার জন্য পর্যাপ্ত ব্যালেন্স নেই।")}</p>`);
+        return;
+      }
+
+      balance -= totalBet;
+      Object.keys(bets).forEach(k => {
+        const num = Number(k);
+        betHistory.push({ number: num, amount: bets[num] }); // ডাবল হওয়া এমাউন্টও হিস্ট্রিতে যাবে
+        bets[num] *= 2;
+        if (!betChips[num]) betChips[num] = [];
+        betChips[num].push(bets[num] / 2);
+      });
+
+      playSound("bet");
       updateBottomBar();
       renderGrid();
     }
@@ -373,6 +424,7 @@ export default function RoyelPage() {
 
       bets = {};
       betChips = {};
+      betHistory = []; // রাউন্ড শেষে হিস্ট্রি ক্লিয়ার
       resetRound();
     }
 
@@ -430,7 +482,6 @@ export default function RoyelPage() {
 
       <div className="royel-page" id="royelPage">
         
-        {/* Backdrop for Chip Menu */}
         {isChipMenuOpen && (
           <div className="chip-radial-backdrop" onClick={() => setIsChipMenuOpen(false)}></div>
         )}
@@ -482,10 +533,10 @@ export default function RoyelPage() {
 
         <div className={`bottom-card ${isChipMenuOpen ? "menu-open" : ""}`}>
           <div className="chip-radial-container">
+            
             <div className={`chip-arc ${isChipMenuOpen ? "open" : ""}`}>
               {chipAmounts.map((amount, index) => {
                 const totalChips = chipAmounts.length;
-                // অর্ধবৃত্তের জন্য -75 থেকে +75 ডিগ্রি (মোট ১৫০ ডিগ্রি)
                 const startAngle = -75; 
                 const endAngle = 75;
                 const angleStep = (endAngle - startAngle) / (totalChips - 1);
@@ -508,11 +559,26 @@ export default function RoyelPage() {
               })}
             </div>
 
-            <button 
-              className="chip-main-btn"
-              style={{ backgroundImage: `url('${getChipImage(selectedChip)}')` }}
-              onClick={() => setIsChipMenuOpen(!isChipMenuOpen)}
-            ></button>
+            {/* 👇 নতুন Undo, Main Chip, এবং 2x বাটনের রো 👇 */}
+            <div className="chip-controls-row">
+              <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('undoBet'))}>
+                <svg viewBox="0 0 24 24">
+                  <path d="M3 7v6h6"></path>
+                  <path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path>
+                </svg>
+              </button>
+
+              <button 
+                className="chip-main-btn"
+                style={{ backgroundImage: `url('${getChipImage(selectedChip)}')` }}
+                onClick={() => setIsChipMenuOpen(!isChipMenuOpen)}
+              ></button>
+
+              <button className="chip-action-btn" onClick={() => document.dispatchEvent(new CustomEvent('doubleBet'))}>
+                2X
+              </button>
+            </div>
+
           </div>
 
           <div className={`bottom-stats ${isChipMenuOpen ? "hidden" : ""}`}>
