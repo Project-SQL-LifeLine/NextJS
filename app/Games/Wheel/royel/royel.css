@@ -389,21 +389,17 @@
  text-shadow:0 1px 3px #000,0 0 4px #000;
  white-space:nowrap;
 }
+
+/* MINI CHIP (Now using Image) */
 .mini-chip{
  width:28px;
  height:28px;
  flex-shrink:0;
  border-radius:50%;
- display:flex;
- align-items:center;
- justify-content:center;
- background:radial-gradient(circle at 35% 30%,#ff7777,#b51f32 65%,#6e1020);
- border:2px dashed #ffe2a0;
- color:#fff;
- font-size:8px;
- font-weight:900;
  box-shadow:0 1px 4px #0009;
- text-shadow:0 1px 2px #000;
+ background-size: cover;
+ background-position: center;
+ background-repeat: no-repeat;
 }
 .number-card.locked{opacity:.65}
 
@@ -429,7 +425,7 @@
  border-bottom:1px solid #426b58;
 }
 
-/* CASINO STYLE CHIPS */
+/* MAIN CHIPS (Now using Image) */
 .chip{
  width:100%;
  aspect-ratio:1/1;
@@ -439,35 +435,14 @@
  display:flex;
  align-items:center;
  justify-content:center;
- font-size:10px;
- font-weight:900;
- color:#fff;
- text-shadow:0 1px 2px #000;
- box-shadow:0 2px 4px #0008, inset 0 0 0 2px #ffffff55;
+ box-shadow:0 2px 4px #0008;
  border:2px solid transparent;
- background:var(--chip-bg);
- padding:2px;
+ background-size: cover;
+ background-position: center;
+ background-repeat: no-repeat;
+ padding:0;
  transition:transform .2s;
 }
-.chip::before {
- content: "";
- position: absolute;
- inset: 4px;
- border-radius: 50%;
- border: 2px dashed #fff;
- pointer-events: none;
- opacity: 0.8;
-}
-
-/* Individual Chip Colors */
-.chip:nth-child(1) { --chip-bg: repeating-conic-gradient(#f6c86b 0 15deg, #b57b24 15deg 30deg); }
-.chip:nth-child(2) { --chip-bg: repeating-conic-gradient(#78caff 0 15deg, #1767a5 15deg 30deg); }
-.chip:nth-child(3) { --chip-bg: repeating-conic-gradient(#ff8585 0 15deg, #b51f32 15deg 30deg); }
-.chip:nth-child(4) { --chip-bg: repeating-conic-gradient(#d59aff 0 15deg, #7132a6 15deg 30deg); }
-.chip:nth-child(5) { --chip-bg: repeating-conic-gradient(#75dba0 0 15deg, #18834a 15deg 30deg); }
-.chip:nth-child(6) { --chip-bg: repeating-conic-gradient(#d4d4d4 0 15deg, #666 15deg 30deg); }
-.chip:nth-child(7) { --chip-bg: repeating-conic-gradient(#ffd700 0 15deg, #b8860b 15deg 30deg); }
-
 .chip.active{
  outline:2px solid #fff;
  outline-offset:2px;
@@ -592,10 +567,9 @@
  .bottom-value{font-size:10px}
  .bottom-label{font-size:7px}
  .chip-row{gap:3px}
- .chip{font-size:8px; max-height:34px;}
- .chip::before{inset:2px;}
+ .chip{max-height:34px;}
  .recent-cell{height:27px}
  .top-icon-btn{width:27px;height:29px}
- .mini-chip{width:24px;height:24px;font-size:7px}
+ .mini-chip{width:24px;height:24px;}
  .bet-total{font-size:9px}
 }
