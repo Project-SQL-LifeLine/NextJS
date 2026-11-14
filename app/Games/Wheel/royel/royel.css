@@ -169,8 +169,8 @@
 .chip-arc.open .chip-arc-item {
   pointer-events: auto;
   opacity: 1;
-  /* উপরের দিকে ফ্যান আউট হবে (translateY -100px) */
-  transform: translate(-50%, 0) rotate(var(--angle)) translateY(-95px) rotate(calc(var(--angle) * -1)) scale(1);
+  /* উপরের দিকে ফ্যান আউট হবে (translateY -130px বাড়ানো হয়েছে যাতে চিপগুলো একটার সাথে আরেকটা না লাগে) */
+  transform: translate(-50%, 0) rotate(var(--angle)) translateY(-130px) rotate(calc(var(--angle) * -1)) scale(1);
 }
 
 .chip-arc-item.active {
@@ -233,7 +233,8 @@
  .chip-main-btn { width: 46px; height: 46px; }
  .chip-arc-item { width: 36px; height: 36px; }
  .chip-arc.open .chip-arc-item {
-   transform: translate(-50%, 0) rotate(var(--angle)) translateY(-75px) rotate(calc(var(--angle) * -1)) scale(1);
+   /* ছোট স্ক্রিনেও চিপগুলো আলাদা রাখার জন্য translateY বাড়ানো হলো */
+   transform: translate(-50%, 0) rotate(var(--angle)) translateY(-105px) rotate(calc(var(--angle) * -1)) scale(1);
  }
  .chip-arc { bottom: 23px; }
  .chip-radial-container { height: 46px; }
