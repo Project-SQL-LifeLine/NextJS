@@ -13,21 +13,18 @@ const numbers: { number: number; multiplier: number; weight: number; hot?: boole
   { number: 8,    multiplier: 8,   weight: 800  },
   { number: 10,   multiplier: 10,  weight: 500  },
   { number: 20,   multiplier: 100, weight: 100  },
-  
   { number: 30,   multiplier: 20,  weight: 300  },
   { number: 40,   multiplier: 150, weight: 50   },
   { number: 50,   multiplier: 30,  weight: 200  },
   { number: 60,   multiplier: 200, weight: 30, hot: true },
   { number: 70,   multiplier: 40,  weight: 600  },
   { number: 80,   multiplier: 300, weight: 15, hot: true },
-  
   { number: 90,   multiplier: 60,  weight: 300  },
   { number: 100,  multiplier: 500, weight: 5, hot: true },
   { number: 150,  multiplier: 80,  weight: 150  },
   { number: 200,  multiplier: 15,  weight: 400  },
   { number: 300,  multiplier: 70,  weight: 200  },
   { number: 500,  multiplier: 25,  weight: 200  },
-  
   { number: 700,  multiplier: 35,  weight: 100  },
   { number: 1000, multiplier: 50,  weight: 400  }
 ];
@@ -41,12 +38,13 @@ const getChipImage = (amount: number) => {
   return `/NextJS/chip/${amount}.png`;
 };
 
+// 👇 নতুন থিমের কালার (Deep Blue & Deep Violet) 👇
 const colors: string[] = [
-  "#214E3A", "#8B2929", "#28563E", "#7B2929",
-  "#244A38", "#922F2F", "#28563E", "#7B2929",
-  "#214E3A", "#922F2F", "#28563E", "#7B2929",
-  "#214E3A", "#922F2F", "#28563E", "#7B2929",
-  "#214E3A", "#922F2F", "#28563E", "#7B2929",
+  "#1E3A8A", "#4C1D95", "#1E3A8A", "#4C1D95", // Navy Blue, Deep Purple
+  "#1E3A8A", "#4C1D95", "#1E3A8A", "#4C1D95",
+  "#1E3A8A", "#4C1D95", "#1E3A8A", "#4C1D95",
+  "#1E3A8A", "#4C1D95", "#1E3A8A", "#4C1D95",
+  "#1E3A8A", "#4C1D95", "#1E3A8A", "#4C1D95",
 ];
 
 const ROUND_COUNTDOWN = 20;
@@ -179,7 +177,7 @@ export default function LuckyRoyelPage() {
     let lastType = "";
 
     history.forEach((res, index) => {
-      const isGreen = res.color === "#214E3A" || res.color === "#28563E" || res.color === "#244A38";
+      const isGreen = res.color === "#1E3A8A"; // এখন নীলকে গ্রিনের জায়গায় ধরা হচ্ছে
       const type = isGreen ? "Green" : "Red";
 
       if (index === 0) {
@@ -207,7 +205,7 @@ export default function LuckyRoyelPage() {
     let redCount = 0;
 
     recentResults.forEach(r => {
-      const isGreen = r.color === "#214E3A" || r.color === "#28563E" || r.color === "#244A38";
+      const isGreen = r.color === "#1E3A8A";
       if (isGreen) greenCount++;
       else redCount++;
     });
