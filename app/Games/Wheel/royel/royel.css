@@ -343,3 +343,96 @@ html, body {
   flex-wrap: wrap;
   gap: 4px;
 }
+
+/* 👇 History Full Screen Fix 👇 */
+.modal-box.is-fullscreen {
+  max-width: 480px;
+  width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  border-radius: 0;
+  border: none;
+  padding: 15px;
+  background: #0d241e;
+}
+
+.modal-box.is-fullscreen .modal-head {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+/* History List Styles */
+.history-full-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-full-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.hfi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.hfi-id {
+  font-size: 11px;
+  color: #a9c4b3;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.hfi-id:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hfi-profit {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.hfi-details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.hfi-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hfi-label {
+  font-size: 9px;
+  color: #a9c4b3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hfi-val {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.hfi-bets {
+  padding-top: 5px;
+}
