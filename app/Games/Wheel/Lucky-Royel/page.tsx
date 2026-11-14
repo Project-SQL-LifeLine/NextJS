@@ -6,6 +6,7 @@ import { useLanguage } from "@/lib/LanguageContext";
 import MenuBar from "../royel/Components/MenuBar";
 import "./royel.css";
 
+// 👇 ছোট থেকে বড় সাইজ অনুযায়ী সাজানো হয়েছে 👇
 const numbers: { number: number; multiplier: number; weight: number; hot?: boolean }[] = [
   { number: 2,    multiplier: 2,   weight: 2500 },
   { number: 3,    multiplier: 3,   weight: 2000 },
@@ -13,18 +14,21 @@ const numbers: { number: number; multiplier: number; weight: number; hot?: boole
   { number: 8,    multiplier: 8,   weight: 800  },
   { number: 10,   multiplier: 10,  weight: 500  },
   { number: 20,   multiplier: 100, weight: 100  },
+  
   { number: 30,   multiplier: 20,  weight: 300  },
   { number: 40,   multiplier: 150, weight: 50   },
   { number: 50,   multiplier: 30,  weight: 200  },
   { number: 60,   multiplier: 200, weight: 30, hot: true },
   { number: 70,   multiplier: 40,  weight: 600  },
   { number: 80,   multiplier: 300, weight: 15, hot: true },
+  
   { number: 90,   multiplier: 60,  weight: 300  },
   { number: 100,  multiplier: 500, weight: 5, hot: true },
   { number: 150,  multiplier: 80,  weight: 150  },
   { number: 200,  multiplier: 15,  weight: 400  },
   { number: 300,  multiplier: 70,  weight: 200  },
   { number: 500,  multiplier: 25,  weight: 200  },
+  
   { number: 700,  multiplier: 35,  weight: 100  },
   { number: 1000, multiplier: 50,  weight: 400  }
 ];
@@ -40,7 +44,7 @@ const getChipImage = (amount: number) => {
 
 // 👇 হাই-কন্ট্রাস্ট নীল ও বেগুনি কালার 👇
 const colors: string[] = [
-  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE", // Vibrant Blue, Vibrant Purple
+  "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
   "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
   "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
   "#1D4ED8", "#7E22CE", "#1D4ED8", "#7E22CE",
@@ -169,23 +173,27 @@ export default function LuckyRoyelPage() {
     } catch (e) { console.warn(e); }
   };
 
+  // 👇 নতুন Bead Road লজিক (সর্বোচ্চ ৬টি সারি) 👇
   const buildBeadRoad = () => {
     if (recentResults.length === 0) return [];
     const history = [...recentResults].reverse();
     const columns: { number: number; color: string; type: string }[][] = [];
     let currentCol: { number: number; color: string; type: string }[] = [];
     let lastType = "";
+    const MAX_ROWS = 6; // সর্বোচ্চ ৬টি সারি
 
     history.forEach((res, index) => {
-      const isGreen = res.color === "#1D4ED8"; // Blue
-      const type = isGreen ? "Green" : "Red"; // Keeping logic same
+      const isGreen = res.color === "#1D4ED8";
+      const type = isGreen ? "Green" : "Red";
 
       if (index === 0) {
         currentCol.push({ ...res, type });
       } else {
-        if (type === lastType) {
+        // যদি একই রঙ হয় এবং কলামের সাইজ ৬ এর কম থাকে
+        if (type === lastType && currentCol.length < MAX_ROWS) {
           currentCol.push({ ...res, type });
         } else {
+          // যদি রঙ চেঞ্জ হয় অথবা কলাম ৬টি পূর্ণ হয়ে যায়
           columns.push(currentCol);
           currentCol = [{ ...res, type }];
         }
