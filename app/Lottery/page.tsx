@@ -170,4 +170,100 @@ export default function LotteryHomePage() {
           {/* ২. Jackpot এর ঠিক নিচে ইমেজ */}
           <div className="w-full mt-1 mb-2">
             <img 
-              src="https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d
+              src="https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d5e7a1d3.png" 
+              alt="Lottery Banner Link" 
+              className="w-full h-auto rounded-xl shadow-md object-cover"
+            />
+          </div>
+
+          {/* ৩. Ticket Grid (Buy & Win) */}
+          <div>
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="section-title">Buy & Win</h2>
+              <span className="text-[10px] text-[#F5B041] font-bold">Select Draw</span>
+            </div>
+            
+            <div className="ticket-list-container">
+              {ticketTiers.map((tier, index) => (
+                <div key={index} className="lotto-card">
+                  {/* Header */}
+                  <div className="lotto-card-header">
+                    <div className={`lotto-card-title ${tier.color}`}>
+                      {tier.title} {tier.titleSpan && <span style={{ color: tier.color === 'orange' ? '#16a34a' : '#f97316' }}>{tier.titleSpan}</span>}
+                    </div>
+                    <div className="lotto-card-date">
+                      <span>{yesterdayDate}</span> 
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* ডাটাবেস থেকে আসা রিয়েল টিকিট নাম্বার */}
+                  <div className="ticket-number-container">
+                    {userTickets[tier.price] ? (
+                      <span className="ticket-number">
+                        {userTickets[tier.price].match(/.{1,4}/g)?.join("  ") || userTickets[tier.price]}
+                      </span>
+                    ) : (
+                      <span className="ticket-number-placeholder">•••• •••• ••••</span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="lotto-card-actions">
+                    <button 
+                      className="lotto-btn" 
+                      style={{ backgroundColor: '#184f35', borderColor: '#2e9b4a', color: '#ffffff' }}
+                      onClick={() => router.push('/Lottery/winners')}
+                    >
+                      Draw History
+                    </button>
+                    <button 
+                      className="lotto-btn" 
+                      style={{ backgroundColor: '#184f35', borderColor: '#2e9b4a', color: '#ffffff' }}
+                      onClick={() => router.push(`/Lottery/tickets-buy-activity?price=${tier.price}`)}
+                    >
+                      Buy ৳{tier.price}
+                    </button>
+                  </div>
+
+                  {/* Green Timer Bar */}
+                  <div className="lotto-timer-bar">
+                    <div className="lotto-timer-label">
+                      Next<br/>Draw
+                    </div>
+                    <div className="lotto-timer-boxes">
+                      <div className="lotto-t-box">
+                        <span className="t-val">{timeLeft.days}</span>
+                        <span className="t-lbl">Days</span>
+                      </div>
+                      <div className="lotto-t-box">
+                        <span className="t-val">{timeLeft.hours}</span>
+                        <span className="t-lbl">Hours</span>
+                      </div>
+                      <div className="lotto-t-box">
+                        <span className="t-val">{timeLeft.minutes}</span>
+                        <span className="t-lbl">Mins</span>
+                      </div>
+                      <div className="lotto-t-box">
+                        <span className="t-val">{timeLeft.seconds}</span>
+                        <span className="t-lbl">Secs</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </main>
+
+        <Footer />
+      </div>
+    </div>
+  );
+}
