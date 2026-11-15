@@ -198,3 +198,25 @@
   opacity: 0.7;
   color: #FFFFFF;
 }
+
+/* =========================================
+   Lottery SVG Loading Animation (3.1s logic in JS)
+   ========================================= */
+.lottery-winner-loader {
+  animation: spinPulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes spinPulse {
+  0% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  }
+  50% {
+    transform: scale(1.15) rotate(180deg);
+    filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.9));
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  }
+}
