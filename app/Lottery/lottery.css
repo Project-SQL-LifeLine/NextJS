@@ -1,951 +1,151 @@
-
-/* ==========================================
-   PREMIUM LOTTERY LANDING PAGE
-   Complete CSS Replacement
-   Existing JSX Classes Preserved
-   ========================================== */
-
-:root {
-  --lottery-bg: #0d241e;
-  --lottery-primary: #183f35;
-  --lottery-card: #142f26;
-  --lottery-card-light: #1b4032;
-  --lottery-green: #248653;
-  --lottery-green-light: #43b477;
-  --lottery-gold: #e5bd70;
-  --lottery-gold-light: #f5d99b;
-  --lottery-text: #ffffff;
-  --lottery-muted: #a6b8ae;
-  --lottery-border: rgba(218, 190, 126, 0.28);
-}
-
-/* ==========================================
-   1. PAGE BACKGROUND
-   ========================================== */
-
-.lottery-page-wrapper {
-  min-height: 100vh;
-  width: 100%;
-  font-family: inherit;
-  position: relative;
-  background: var(--lottery-bg);
-  color: var(--lottery-text);
-  overflow-x: hidden;
-}
-
-.lottery-fixed-bg {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100vh;
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-  z-index: 0;
-  background-color: var(--lottery-bg);
-}
-
-.lottery-overlay {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
-  width: 100%;
-  padding-bottom: 85px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(8, 27, 21, 0.66) 0%,
-      rgba(9, 30, 23, 0.90) 45%,
-      #0d241e 100%
-    );
-}
-
-.lottery-main {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-}
-
-/* ==========================================
-   2. SECTION HEADINGS
-   ========================================== */
-
-.section-title {
-  font-size: 17px;
-  font-weight: 900;
-  color: #ffffff;
-  letter-spacing: 0.25px;
-  margin: 0;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-}
-
-.lottery-main > div > .flex.justify-between {
-  margin-bottom: 13px;
-}
-
-/* ==========================================
-   3. JACKPOT HERO SLIDER
-   ========================================== */
-
-.jackpot-slider-wrapper {
-  position: relative;
-  margin: 0 -16px;
-  min-height: 190px;
-  padding-bottom: 23px;
+/* =========================================
+   New White Card Layout (Matching Image)
+   ========================================= */
+.white-lottery-card {
+  background-color: #ffffff;
+  border-radius: 12px;
   overflow: hidden;
-
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  border-top: 1px solid rgba(245,217,155,0.16);
-  border-bottom: 1px solid rgba(245,217,155,0.22);
-
-  box-shadow:
-    0 12px 30px rgba(0,0,0,0.32),
-    inset 0 -30px 50px rgba(0,0,0,0.25);
-}
-
-.jackpot-overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(7,24,18,0.25),
-      rgba(7,24,18,0.82)
-    );
-
-  z-index: 1;
-}
-
-.jackpot-track {
-  display: flex;
-  width: 100%;
-  position: relative;
-  z-index: 2;
-  transition: transform 0.55s cubic-bezier(0.22,1,0.36,1);
-}
-
-.jackpot-slide {
-  flex: 0 0 100%;
-  padding: 21px 16px 14px;
-  text-align: center;
-  position: relative;
-}
-
-.jackpot-title {
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--lottery-gold-light);
-  margin-bottom: 5px;
-
-  text-shadow: 0 2px 8px #000;
-}
-
-.jackpot-amount {
-  font-size: clamp(30px, 8vw, 40px);
-  line-height: 1.2;
-  font-weight: 1000;
-  letter-spacing: -1px;
-  color: #ffffff;
   margin-bottom: 16px;
-
-  text-shadow:
-    0 3px 5px rgba(0,0,0,0.7),
-    0 0 22px rgba(245,176,65,0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: #333;
 }
 
-.timer-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-
-.timer-box {
-  min-width: 58px;
-  padding: 7px 10px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  background: rgba(9,28,21,0.88);
-  border: 1px solid rgba(245,217,155,0.38);
-  border-radius: 9px;
-
-  box-shadow:
-    inset 0 1px 4px rgba(255,255,255,0.06),
-    0 4px 12px rgba(0,0,0,0.3);
-}
-
-.timer-box span:first-child {
-  font-size: 18px;
-  font-weight: 900;
-  font-family: monospace;
-  color: #ffffff;
-}
-
-.timer-box span:last-child {
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--lottery-gold);
-  margin-top: 3px;
-}
-
-.jackpot-dots {
-  position: absolute;
-  bottom: 8px;
-  left: 0;
-  width: 100%;
-
-  display: flex;
-  justify-content: center;
-  gap: 7px;
-
-  z-index: 10;
-}
-
-.jackpot-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 10px;
-
-  background: rgba(255,255,255,0.35);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.jackpot-dot.active {
-  width: 23px;
-  background: var(--lottery-gold);
-  box-shadow: 0 0 10px rgba(245,176,65,0.55);
-}
-
-/* ==========================================
-   4. PREMIUM DIGITAL TICKET CARDS
-   One Full-Width Ticket Per Row
-   ========================================== */
-
-.ticket-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  width: 100%;
-}
-
-.ticket-card {
-  width: 100%;
-  min-height: 165px;
-  position: relative;
-  overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  padding: 23px 20px;
-  border-radius: 15px;
-
-  background:
-    radial-gradient(
-      ellipse at 50% -20%,
-      rgba(255,255,255,0.10),
-      transparent 65%
-    ),
-    linear-gradient(
-      145deg,
-      #1b4936 0%,
-      #112f24 48%,
-      #0c261d 100%
-    );
-
-  border: 1px solid rgba(218,190,126,0.42);
-
-  box-shadow:
-    0 8px 20px rgba(0,0,0,0.38),
-    inset 0 1px 0 rgba(255,255,255,0.12),
-    inset 0 -1px 0 rgba(0,0,0,0.35);
-
-  cursor: pointer;
-
-  transition:
-    transform 0.22s ease,
-    box-shadow 0.22s ease,
-    border-color 0.22s ease;
-}
-
-/* Ticket Decorative Top Line */
-
-.ticket-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 12%;
-  width: 76%;
-  height: 2px;
-
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #f5d99b,
-    transparent
-  );
-
-  opacity: 0.8;
-}
-
-/* Ticket Side Perforations */
-
-.ticket-card::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 19px;
-
-  transform: translateY(-50%);
-
-  background:
-    radial-gradient(
-      circle at 0 50%,
-      var(--lottery-bg) 0 9px,
-      transparent 10px
-    ),
-    radial-gradient(
-      circle at 100% 50%,
-      var(--lottery-bg) 0 9px,
-      transparent 10px
-    );
-
-  pointer-events: none;
-}
-
-/* Ticket Price */
-
-.ticket-price {
-  position: relative;
-  z-index: 2;
-
-  font-size: clamp(30px, 8vw, 38px);
-  line-height: 1.15;
-  font-weight: 1000;
-  letter-spacing: -0.5px;
-
-  color: #ffffff;
-  margin-bottom: 5px;
-
-  text-shadow:
-    0 2px 4px rgba(0,0,0,0.7),
-    0 0 15px rgba(245,217,155,0.14);
-}
-
-/* Ticket Label */
-
-.ticket-label {
-  position: relative;
-  z-index: 2;
-
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-
-  color: #d5c59c;
-  margin-bottom: 19px;
-}
-
-/* Buy Button */
-
-.buy-btn {
-  position: relative;
-  z-index: 3;
-
-  width: 100%;
-  max-width: 260px;
-  min-height: 44px;
-
-  padding: 11px 20px;
-
-  border: 1px solid #f5d99b;
-  border-radius: 8px;
-
-  background:
-    linear-gradient(
-      180deg,
-      #3b9a62 0%,
-      #217247 50%,
-      #175b39 100%
-    );
-
-  color: #ffffff;
-
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-
-  box-shadow:
-    0 4px 12px rgba(0,0,0,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.2);
-
-  cursor: pointer;
-}
-
-/* Ticket Tier Variations */
-
-.ticket-card.tier-50 {
-  border-color: rgba(190,200,205,0.65);
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(220,230,235,0.13), transparent 65%),
-    linear-gradient(145deg,#34443f,#172c25 55%,#10251d);
-}
-
-.ticket-card.tier-100 {
-  border-color: rgba(83,190,119,0.75);
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(83,190,119,0.18), transparent 65%),
-    linear-gradient(145deg,#205a3b,#123a29 55%,#0d291e);
-}
-
-.ticket-card.tier-250 {
-  border-color: rgba(87,160,220,0.8);
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(87,160,220,0.19), transparent 65%),
-    linear-gradient(145deg,#234a63,#17364a 55%,#102838);
-}
-
-.ticket-card.tier-500 {
-  border-color: rgba(185,125,218,0.8);
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(185,125,218,0.18), transparent 65%),
-    linear-gradient(145deg,#50325f,#332341 55%,#21172c);
-}
-
-.ticket-card.tier-1000 {
-  border: 1.5px solid #e5bd70;
-
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(245,217,155,0.23), transparent 65%),
-    linear-gradient(145deg,#66502b,#3b3020 55%,#241d14);
-
-  box-shadow:
-    0 9px 25px rgba(0,0,0,0.42),
-    0 0 18px rgba(229,189,112,0.16),
-    inset 0 1px 0 rgba(255,255,255,0.18);
-}
-
-.ticket-card.tier-1000 .ticket-price {
-  color: #ffe3a6;
-}
-
-@media (hover: hover) {
-  .ticket-card:hover {
-    transform: translateY(-3px);
-
-    box-shadow:
-      0 13px 28px rgba(0,0,0,0.45),
-      0 0 17px rgba(229,189,112,0.13);
-  }
-
-  .buy-btn:hover {
-    filter: brightness(1.12);
-  }
-}
-
-.ticket-card:active {
-  transform: scale(0.985);
-}
-
-.buy-btn:active {
-  transform: scale(0.98);
-}
-
-/* ==========================================
-   5. LOTTERY INFORMATION
-   Ready for Future JSX
-   ========================================== */
-
-.lottery-info-section {
-  width: 100%;
-  padding: 17px;
-
-  border-radius: 16px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(27,68,49,0.97),
-      rgba(13,38,29,0.98)
-    );
-
-  border: 1px solid rgba(218,190,126,0.35);
-
-  box-shadow:
-    0 9px 24px rgba(0,0,0,0.3),
-    inset 0 1px 0 rgba(255,255,255,0.06);
-}
-
-.lottery-info-grid {
-  display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 11px;
-}
-
-.lottery-info-item {
-  min-width: 0;
-  padding: 14px 11px;
-
-  border-radius: 11px;
-
-  background: rgba(7,25,18,0.58);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.lottery-info-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.7px;
-  color: #a8bdb0;
-}
-
-.lottery-info-value {
-  font-size: 22px;
-  font-weight: 900;
-  color: #ffffff;
-  margin-top: 7px;
-  overflow-wrap: anywhere;
-}
-
-.lottery-info-highlight {
-  color: var(--lottery-gold-light);
-}
-
-.lottery-progress {
-  width: 100%;
-  height: 9px;
-  overflow: hidden;
-  border-radius: 20px;
-  background: rgba(0,0,0,0.38);
-}
-
-.lottery-progress-fill {
-  height: 100%;
-  border-radius: inherit;
-
-  background: linear-gradient(
-    90deg,
-    #237b4b,
-    #57c987
-  );
-
-  box-shadow: 0 0 10px rgba(87,201,135,0.3);
-}
-
-/* ==========================================
-   6. TRUST & SECURITY
-   Ready for Future JSX
-   ========================================== */
-
-.trust-security-section {
-  width: 100%;
-  padding: 18px;
-
-  border-radius: 16px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(23,62,46,0.98),
-      rgba(12,35,27,0.98)
-    );
-
-  border: 1px solid rgba(91,174,123,0.32);
-
-  box-shadow:
-    0 9px 24px rgba(0,0,0,0.28),
-    inset 0 1px 0 rgba(255,255,255,0.06);
-}
-
-.trust-security-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.trust-security-item {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-
-  padding: 13px;
-
-  border-radius: 11px;
-
-  background: rgba(5,24,17,0.45);
-  border: 1px solid rgba(255,255,255,0.07);
-}
-
-.trust-security-icon {
-  flex: 0 0 40px;
-  width: 40px;
-  height: 40px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 10px;
-
-  color: var(--lottery-gold-light);
-  background: rgba(229,189,112,0.12);
-  border: 1px solid rgba(229,189,112,0.2);
-}
-
-.trust-security-title {
-  font-size: 13px;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.trust-security-description {
-  font-size: 11px;
-  line-height: 1.6;
-  color: #a8bdb0;
-  margin-top: 3px;
-}
-
-/* ==========================================
-   7. SMART WALLET
-   ========================================== */
-
-.wallet-card {
-  position: relative;
-  overflow: hidden;
-
-  padding: 19px;
-
-  border-radius: 15px;
-
-  background:
-    radial-gradient(
-      ellipse at top right,
-      rgba(229,189,112,0.14),
-      transparent 65%
-    ),
-    linear-gradient(
-      145deg,
-      #1b4834,
-      #102e23 70%,
-      #0c261d
-    );
-
-  border: 1px solid rgba(229,189,112,0.55);
-
-  box-shadow:
-    0 10px 25px rgba(0,0,0,0.32),
-    inset 0 1px 0 rgba(255,255,255,0.1);
-}
-
-.wallet-header {
+.wlc-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-
-  margin-bottom: 17px;
-  padding-bottom: 14px;
-
-  border-bottom: 1px solid rgba(229,189,112,0.23);
+  padding: 16px 16px 12px;
 }
 
-.wallet-header h4 {
-  font-size: 13px;
+.wlc-title {
+  font-size: 22px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.5px;
+}
+
+.wlc-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 800;
-  color: #ffffff;
-  margin: 0;
+  font-size: 14px;
+  color: #111;
 }
 
-.wallet-header .amount {
-  font-size: clamp(19px,5vw,23px);
-  font-weight: 1000;
-  color: var(--lottery-gold-light);
-
-  text-shadow: 0 0 13px rgba(229,189,112,0.2);
-}
-
-.wallet-actions {
+.wlc-numbers {
   display: flex;
-  gap: 11px;
+  gap: 8px;
+  padding: 0 16px 16px;
+  flex-wrap: wrap;
 }
 
-.withdraw-btn,
-.reload-btn {
-  flex: 1;
-  min-height: 45px;
-
-  border-radius: 9px;
-
-  font-size: 12px;
-  font-weight: 900;
-
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.withdraw-btn {
-  color: #ffffff;
-
-  background: linear-gradient(
-    180deg,
-    #246b49,
-    #174b32
-  );
-
-  border: 1px solid rgba(255,255,255,0.3);
-}
-
-.reload-btn {
-  color: #241b0c;
-
-  background: linear-gradient(
-    180deg,
-    #f5d99b,
-    #dca94d
-  );
-
-  border: 1px solid #ffe6ad;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.22);
-}
-
-.withdraw-btn:active,
-.reload-btn:active {
-  transform: scale(0.97);
-}
-
-/* ==========================================
-   8. LIVE WINNERS TICKER
-   ========================================== */
-
-.winners-ticker-wrapper {
-  position: relative;
-  overflow: hidden;
-
-  width: 100%;
-  min-height: 53px;
-
+.wlc-ball {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-
-  border-radius: 11px;
-
-  background:
-    linear-gradient(
-      110deg,
-      rgba(24,64,46,0.98),
-      rgba(14,39,29,0.98)
-    );
-
-  border: 1px solid rgba(218,190,126,0.25);
-
-  box-shadow: 0 5px 15px rgba(0,0,0,0.24);
-}
-
-.winners-ticker-wrapper::before,
-.winners-ticker-wrapper::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  width: 30px;
-  height: 100%;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.winners-ticker-wrapper::before {
-  left: 0;
-  background: linear-gradient(
-    90deg,
-    #153b2b,
-    transparent
-  );
-}
-
-.winners-ticker-wrapper::after {
-  right: 0;
-  background: linear-gradient(
-    270deg,
-    #153b2b,
-    transparent
-  );
-}
-
-.winners-ticker {
-  display: flex;
-  gap: 27px;
-
-  width: max-content;
-
-  padding: 13px 0;
-
-  animation: scroll-ticker 23s linear infinite;
-}
-
-.winner-ticker-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.winner-ticker-item .winner-id {
-  color: #b5c6bb;
+  justify-content: center;
   font-weight: 700;
+  font-size: 16px;
 }
 
-.winner-ticker-item .winner-prize {
-  color: var(--lottery-gold-light);
+.wlc-ball.green {
+  background-color: #2e7d32;
+  color: #ffffff;
+}
+
+.wlc-ball.bonus {
+  background-color: #ffffff;
+  border: 2px solid #f57c00;
+  color: #f57c00;
+}
+
+.wlc-raffle-box {
+  margin: 0 16px 16px;
+  background-color: #4caf50;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: white;
+}
+
+.wlc-raffle-title {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
+.wlc-raffle-value {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.wlc-actions {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+.wlc-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 24px;
+  border: 1.5px solid #111;
+  background-color: #ffffff;
+  color: #111;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wlc-btn:active {
+  background-color: #eee;
+}
+
+.wlc-footer {
+  background-color: #4caf50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+}
+
+.wlc-next-draw {
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.wlc-timer-container {
+  display: flex;
+  gap: 6px;
+}
+
+.wlc-timer-box {
+  background: #ffffff;
+  border-radius: 4px;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 42px;
+}
+
+.wlc-timer-label {
+  color: #d32f2f;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.wlc-timer-value {
+  color: #000000;
+  font-size: 16px;
   font-weight: 900;
-}
-
-@keyframes scroll-ticker {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-/* ==========================================
-   9. RESPONSIVE MOBILE DESIGN
-   ========================================== */
-
-@media (max-width: 480px) {
-
-  .lottery-main {
-    padding: 13px;
-    gap: 22px;
-  }
-
-  .jackpot-slider-wrapper {
-    margin-left: -13px;
-    margin-right: -13px;
-    min-height: 185px;
-  }
-
-  .jackpot-slide {
-    padding-top: 20px;
-  }
-
-  .ticket-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .ticket-card {
-    min-height: 165px;
-    padding: 22px 18px;
-    border-radius: 14px;
-  }
-
-  .ticket-price {
-    font-size: 34px;
-  }
-
-  .buy-btn {
-    max-width: 100%;
-    min-height: 46px;
-  }
-
-  .wallet-card {
-    padding: 15px;
-  }
-
-  .wallet-header .amount {
-    font-size: 19px;
-  }
-
-  .lottery-info-grid {
-    gap: 9px;
-  }
-
-  .lottery-info-item {
-    padding: 12px 9px;
-  }
-
-  .lottery-info-value {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 360px) {
-
-  .lottery-main {
-    padding: 11px;
-  }
-
-  .jackpot-slider-wrapper {
-    margin-left: -11px;
-    margin-right: -11px;
-  }
-
-  .timer-container {
-    gap: 6px;
-  }
-
-  .timer-box {
-    min-width: 52px;
-    padding: 6px;
-  }
-
-  .ticket-card {
-    min-height: 155px;
-  }
-
-  .wallet-header {
-    align-items: flex-start;
-  }
-
-  .wallet-actions {
-    gap: 8px;
-  }
-
-  .lottery-info-value {
-    font-size: 18px;
-  }
-}
-
-/* ==========================================
-   10. ACCESSIBILITY & MOTION
-   ========================================== */
-
-@media (prefers-reduced-motion: reduce) {
-
-  .winners-ticker {
-    animation: none;
-  }
-
-  .jackpot-track,
-  .ticket-card,
-  .buy-btn {
-    transition: none;
-  }
 }
