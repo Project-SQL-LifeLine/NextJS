@@ -2,18 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabase/client"; // পাথ চেক করুন
-import LotteryHeader from "../Lottery/Header/Header"; // হেডার পাথ
-import LotteryFooter from "../Lottery/Footer/Footer"; // ফুটার পাথ
+import { supabase } from "../../lib/supabase/client"; // আপনার পাথ অনুযায়ী চেক করুন
+import LotteryHeader from "../Lottery/Header/Header";
+import LotteryFooter from "../Lottery/Footer/Footer";
 import "./notification.css";
 
 export default function NotificationPage() {
   const router = useRouter();
+  
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   
-  // কোন কার্ডটি বড় করা হয়েছে তা ট্র্যাক করার জন্য
+  // কোন নোটিফিকেশনটি বড় (Expand) করা হয়েছে তা ট্র্যাক করার জন্য
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,11 +26,15 @@ export default function NotificationPage() {
           return;
         }
 
-        // প্রোফাইল ডাটা হেডারের জন্য
-        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+        // হেডারের জন্য প্রোফাইল ডাটা
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
         if (profileData) setProfile(profileData);
 
-        // নোটিফিকেশন ডাটা
+        // নোটিফিকেশন ডাটা ফেচ
         const { data, error } = await supabase
           .from("user_notifications")
           .select("*")
@@ -38,12 +43,23 @@ export default function NotificationPage() {
         if (error) {
           console.error("Fetch Error:", error.message);
         } else if (data) {
-          // শুধু active এবং ইউজারের নিজের বা ব্রডকাস্ট নোটিফিকেশন ফিল্টার
+          // ব্রাউজারের লোকাল স্টোরেজ থেকে পড়া ব্রডকাস্ট নোটিফিকেশনগুলোর লিস্ট নিন
+          const readBroadcasts = JSON.parse(localStorage.getItem("read_broadcast_notifs") || "[]");
+
           const myNotifications = data.filter((notif) => {
             const isActive = notif.status === 'active' || notif.status === null;
             const isForMe = notif.user_id === user.id || notif.user_id === null;
-            return isActive && isForMe;
+            
+            if (!isActive || !isForMe) return false;
+
+            // যদি ব্রডকাস্ট হয় এবং লোকাল স্টোরেজে থাকে, তবে তাকে read (পঠিত) হিসেবে সেট করুন
+            if (notif.user_id === null && readBroadcasts.includes(notif.id)) {
+              notif.is_read = true;
+            }
+
+            return true;
           });
+          
           setNotifications(myNotifications);
         }
       } catch (err) {
@@ -56,7 +72,30 @@ export default function NotificationPage() {
     fetchData();
   }, []);
 
-  // ৩০ শব্দের বেশি হলে "See More" দেখানোর লজিক
+  // নোটিফিকেশন রিড (পঠিত) মার্ক করার ফাংশন
+  const handleRead = async (notif: any) => {
+    if (!notif.is_read) {
+      // লোকাল স্টেট আপডেট (ডট মুছে যাবে)
+      setNotifications(prev => 
+        prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n)
+      );
+      
+      // যদি নির্দিষ্ট ইউজারের নোটিফিকেশন হয়, তবে ডাটাবেসে আপডেট হবে
+      if (notif.user_id) {
+        await supabase.from("user_notifications").update({ is_read: true }).eq("id", notif.id);
+      } 
+      // যদি ব্রডকাস্ট (সবার জন্য) নোটিফিকেশন হয়, তবে লোকাল স্টোরেজে সেভ হবে
+      else {
+        const readBroadcasts = JSON.parse(localStorage.getItem("read_broadcast_notifs") || "[]");
+        if (!readBroadcasts.includes(notif.id)) {
+          readBroadcasts.push(notif.id);
+          localStorage.setItem("read_broadcast_notifs", JSON.stringify(readBroadcasts));
+        }
+      }
+    }
+  };
+
+  // ৩০ শব্দের বেশি হলে টেক্সট কাটার (Truncate) লজিক
   const truncateText = (text: string, isExpanded: boolean) => {
     if (!text) return "";
     const words = text.trim().split(/\s+/);
@@ -71,18 +110,7 @@ export default function NotificationPage() {
     return text;
   };
 
-  // নোটিফিকেশনে ক্লিক করলে Read মার্ক করা
-  const handleRead = async (notif: any) => {
-    if (!notif.is_read) {
-      setNotifications(prev => 
-        prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n)
-      );
-      if (notif.user_id) {
-        await supabase.from("user_notifications").update({ is_read: true }).eq("id", notif.id);
-      }
-    }
-  };
-
+  // সময় ফরম্যাট করার লজিক
   const timeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -102,7 +130,7 @@ export default function NotificationPage() {
       {/* মেইন কন্টেন্ট */}
       <main className="notification-main">
         <div className="notification-header-title">
-          <h1 className="text-xl font-bold text-white mb-4">Notifications</h1>
+          <h1 className="text-xl font-bold text-white mb-2">Notifications</h1>
         </div>
 
         {loading ? (
@@ -122,7 +150,8 @@ export default function NotificationPage() {
           <div className="notification-list">
             {notifications.map((notif) => {
               const isExpanded = expandedId === notif.id;
-              const hasMoreWords = notif.message.trim().split(/\s+/).length > 30;
+              const wordCount = notif.message ? notif.message.trim().split(/\s+/).length : 0;
+              const hasMoreWords = wordCount > 30;
 
               return (
                 <div 
@@ -135,7 +164,7 @@ export default function NotificationPage() {
                     {!notif.is_read && <span className="unread-dot"></span>}
                   </div>
                   
-                  {/* মেসেজ (৩০ শব্দের লিমিটসহ) */}
+                  {/* মেসেজ (৩০ শব্দের লিমিটসহ, কালার সাদা) */}
                   <p className="notif-message">
                     {truncateText(notif.message, isExpanded)}
                   </p>
@@ -145,9 +174,9 @@ export default function NotificationPage() {
                     <button 
                       className="see-more-btn"
                       onClick={(e) => {
-                        e.stopPropagation(); // কার্ডের ক্লিক ইভেন্ট বন্ধ করতে
+                        e.stopPropagation(); // কার্ডের মেইন ক্লিক ইভেন্ট বন্ধ করতে
                         setExpandedId(isExpanded ? null : notif.id);
-                        handleRead(notif);
+                        handleRead(notif); // ক্লিক করলে রিড মার্ক হবে
                       }}
                     >
                       {isExpanded ? "See Less" : "See More"}
