@@ -34,20 +34,24 @@
 }
 
 /* =========================================
-   1. Jackpot Slider
+   1. Jackpot Slider (With Lottery Symbols)
    ========================================= */
 .jackpot-slider-wrapper {
   margin: 0 -16px; 
-  background-size: cover;
+  
+  /* জ্যাকপট স্লাইডারে নতুন SVG সিম্বল যুক্ত করা হলো */
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='20' cy='20' r='10'/%3E%3Cpath d='M50 10l3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1z'/%3E%3Crect x='40' y='50' width='24' height='14' rx='3'/%3E%3Cpath d='M10 60h10M10 65h10'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 90px 90px;
   background-position: center;
-  background-repeat: no-repeat;
+  background-repeat: repeat;
+  
   border-bottom: 2px solid #0b1a13;
   overflow: hidden;
   position: relative;
   padding-bottom: 16px; 
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   min-height: 160px; 
-  background-color: #103626;
+  background-color: #103626; /* ফলব্যাক কালার */
 }
 
 .jackpot-overlay {
@@ -56,7 +60,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, rgba(11, 26, 19, 0.4) 0%, rgba(11, 26, 19, 0.85) 100%);
+  background: linear-gradient(180deg, rgba(11, 26, 19, 0.3) 0%, rgba(11, 26, 19, 0.9) 100%);
   z-index: 1;
 }
 
@@ -177,7 +181,7 @@
   position: relative;
   background: linear-gradient(145deg, rgba(27, 42, 35, 0.98), rgba(13, 26, 19, 0.98));
   backdrop-filter: blur(10px);
-  border: 1px dashed rgba(255, 255, 255, 0.15); /* টিকিটের মতো ড্যাশড বর্ডার */
+  border: 1px dashed rgba(255, 255, 255, 0.15); 
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 8px 25px rgba(0,0,0,0.6);
@@ -193,20 +197,20 @@
 .lotto-card::after {
   content: '';
   position: absolute;
-  top: 50%; /* টিকিটের মাঝখানে */
+  top: 50%; 
   width: 24px;
   height: 24px;
-  background-color: #0b1a13; /* মেইন ব্যাকগ্রাউন্ড কালার */
+  background-color: #0b1a13; 
   border-radius: 50%;
   transform: translateY(-50%);
   box-shadow: inset -2px 0 5px rgba(0,0,0,0.5);
   z-index: 10;
 }
 .lotto-card::before {
-  left: -12px; /* বাম দিকের কাটা অংশ */
+  left: -12px; 
 }
 .lotto-card::after {
-  right: -12px; /* ডান দিকের কাটা অংশ */
+  right: -12px; 
 }
 
 .lotto-card-header {
@@ -318,8 +322,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(0, 0, 0, 0.4); /* টিকিটের নিচের অংশ */
-  border-top: 2px dashed rgba(255, 255, 255, 0.15); /* টিয়ার-অফ ড্যাশ লাইন */
+  background: rgba(0, 0, 0, 0.4); 
+  border-top: 2px dashed rgba(255, 255, 255, 0.15); 
   padding: 12px 16px;
 }
 
