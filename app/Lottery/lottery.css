@@ -1,5 +1,5 @@
 /* =========================================
-   Main Layout & Background with SVG Pattern
+   Main Layout & Background
    ========================================= */
 .lottery-page-wrapper {
   min-height: 100vh;
@@ -9,14 +9,12 @@
   background-color: #0b1a13; 
 }
 
-/* Content Overlay with Lottery SVG Symbols */
 .lottery-overlay {
   position: relative;
   z-index: 1; 
   min-height: 100vh;
   width: 100%;
   background-color: #0b1a13;
-  /* মেইন ব্যাকগ্রাউন্ডে সাদা লটারি সিম্বল */
   background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 30h20v10a5 5 0 0 0 0 10v10H20V50a5 5 0 0 0 0-10V30z'/%3E%3Cpath d='M80 80l5 15h15l-12 9 5 15-13-9-13 9 5-15-12-9h15z'/%3E%3Ccircle cx='90' cy='30' r='12'/%3E%3Cpath d='M30 90l10-10m0 10l-10-10'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 150px 150px; 
   padding-bottom: 65px; 
@@ -34,17 +32,13 @@
 }
 
 /* =========================================
-   1. Jackpot Slider (With Lottery Symbols)
+   1. Jackpot Slider (With Image)
    ========================================= */
 .jackpot-slider-wrapper {
   margin: 0 -16px; 
-  
-  /* জ্যাকপট স্লাইডারে নতুন SVG সিম্বল যুক্ত করা হলো */
-  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='20' cy='20' r='10'/%3E%3Cpath d='M50 10l3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1z'/%3E%3Crect x='40' y='50' width='24' height='14' rx='3'/%3E%3Cpath d='M10 60h10M10 65h10'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 90px 90px;
+  background-size: cover; /* ইমেজ পুরো কার্ডে ফিট হবে */
   background-position: center;
-  background-repeat: repeat;
-  
+  background-repeat: no-repeat;
   border-bottom: 2px solid #0b1a13;
   overflow: hidden;
   position: relative;
@@ -54,13 +48,14 @@
   background-color: #103626; /* ফলব্যাক কালার */
 }
 
+/* ইমেজের ওপর টেক্সট স্পষ্ট দেখার জন্য ডার্ক ওভারলে */
 .jackpot-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, rgba(11, 26, 19, 0.3) 0%, rgba(11, 26, 19, 0.9) 100%);
+  background: linear-gradient(180deg, rgba(11, 26, 19, 0.6) 0%, rgba(11, 26, 19, 0.95) 100%);
   z-index: 1;
 }
 
@@ -117,6 +112,7 @@
   flex-direction: column;
   align-items: center;
   box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px); /* টাইমারের পেছনে হালকা ব্লার */
 }
 
 .timer-box span:first-child {
@@ -176,7 +172,6 @@
   gap: 20px;
 }
 
-/* The Lottery Ticket Card Design */
 .lotto-card {
   position: relative;
   background: linear-gradient(145deg, rgba(27, 42, 35, 0.98), rgba(13, 26, 19, 0.98));
@@ -188,11 +183,9 @@
   color: #ffffff;
   display: flex;
   flex-direction: column;
-  /* টিকিটের ভেতরে হালকা ওয়াটারমার্ক (LOTTO লেখা) */
   background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='40' font-family='sans-serif' font-weight='bold' fill='rgba(255,255,255,0.02)' transform='rotate(-30 100 100)'%3ELOTTO%3C/text%3E%3C/svg%3E");
 }
 
-/* টিকিটের দুই পাশে কাটা অংশ (Punch Holes) */
 .lotto-card::before,
 .lotto-card::after {
   content: '';
@@ -206,12 +199,8 @@
   box-shadow: inset -2px 0 5px rgba(0,0,0,0.5);
   z-index: 10;
 }
-.lotto-card::before {
-  left: -12px; 
-}
-.lotto-card::after {
-  right: -12px; 
-}
+.lotto-card::before { left: -12px; }
+.lotto-card::after { right: -12px; }
 
 .lotto-card-header {
   display: flex;
@@ -240,9 +229,6 @@
   color: #A0ADB0; 
 }
 
-/* =========================================
-   Real Ticket Number Styles
-   ========================================= */
 .ticket-number-container {
   display: flex;
   justify-content: center;
@@ -266,7 +252,6 @@
   position: relative;
 }
 
-/* বারকোডের ইফেক্ট দেওয়ার জন্য ছোট ড্যাশ লাইন */
 .ticket-number::before, .ticket-number::after {
   content: '|||| ||| ||||| ||';
   position: absolute;
@@ -290,9 +275,6 @@
   border: 1px dashed rgba(255, 255, 255, 0.1);
 }
 
-/* =========================================
-   Buttons & Timer
-   ========================================= */
 .lotto-card-actions {
   display: flex;
   gap: 10px;
@@ -317,7 +299,6 @@
   box-shadow: 0 0 10px rgba(46, 155, 74, 0.3);
 }
 
-/* Dark Timer Bar (Bottom Tear-off Section of Ticket) */
 .lotto-timer-bar {
   display: flex;
   align-items: center;
