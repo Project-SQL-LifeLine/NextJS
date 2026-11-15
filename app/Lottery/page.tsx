@@ -15,6 +15,7 @@ export default function LotteryHomePage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({ days: "00", hours: "00", minutes: "00", seconds: "00" });
+  const [yesterdayDate, setYesterdayDate] = useState(""); // ডাইনামিক তারিখের জন্য স্টেট
   
   const jackpotAmounts = [50000, 100000, 250000, 500000, 1000000];
   const [activeJackpot, setActiveJackpot] = useState(0);
@@ -44,6 +45,23 @@ export default function LotteryHomePage() {
   }, [jackpotAmounts.length]);
 
   // ==========================================
+  // গতকালের তারিখ বের করার লজিক
+  // ==========================================
+  useEffect(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1); // আজকের তারিখ থেকে ১ দিন বিয়োগ
+    
+    // ফরম্যাট: "MON 14 MAR"
+    const formattedDate = d.toLocaleDateString('en-GB', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short'
+    }).toUpperCase().replace(',', ''); 
+    
+    setYesterdayDate(formattedDate);
+  }, []);
+
+  // ==========================================
   // টাইমার লজিক: প্রতিদিন রাত 12:30 AM (00:30:00) এর জন্য
   // ==========================================
   useEffect(() => {
@@ -61,7 +79,6 @@ export default function LotteryHomePage() {
 
       const diff = target.getTime() - now.getTime();
       
-      // দিন, ঘণ্টা, মিনিট, সেকেন্ড ক্যালকুলেশন
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
       const m = Math.floor((diff / 1000 / 60) % 60);
@@ -138,8 +155,8 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* 1.5 নতুন যোগ করা ইমেজ ব্যানার */}
-          <div className="w-full mt-2 mb-2">
+          {/* 1.5 Jackpot কার্ডের ঠিক নিচে ইমেজ */}
+          <div className="w-full mt-1 mb-3">
             <img 
               src="https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d5e7a1d3.png" 
               alt="Lottery Promo Banner" 
@@ -147,10 +164,10 @@ export default function LotteryHomePage() {
             />
           </div>
 
-          {/* 2. Ticket Grid (New Design) */}
+          {/* 2. Ticket Grid */}
           <div>
             <div className="flex justify-between items-center mb-3">
-              <h2 className="section-title">Buy & Win</h2> {/* Play থেকে Buy করা হলো */}
+              <h2 className="section-title">Buy & Win</h2>
               <span className="text-[10px] text-[#F5B041] font-bold">Select Draw</span>
             </div>
             
@@ -163,7 +180,8 @@ export default function LotteryHomePage() {
                       {tier.title} {tier.titleSpan && <span style={{ color: tier.color === 'orange' ? '#16a34a' : '#f97316' }}>{tier.titleSpan}</span>}
                     </div>
                     <div className="lotto-card-date">
-                      <span>TUE 2 MAR</span>
+                      {/* ডাইনামিক গতকালের তারিখ */}
+                      <span>{yesterdayDate || "Loading..."}</span> 
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                         <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -185,15 +203,20 @@ export default function LotteryHomePage() {
 
                   {/* Actions */}
                   <div className="lotto-card-actions">
-                    <button className="lotto-btn" onClick={() => router.push('/Lottery/winners')}>
+                    {/* নাম্বার সার্কেলের কালারের সাথে মিল রেখে বাটন কালার */}
+                    <button 
+                      className="lotto-btn" 
+                      style={{ backgroundColor: '#184f35', borderColor: '#2e9b4a', color: '#ffffff' }}
+                      onClick={() => router.push('/Lottery/winners')}
+                    >
                       Draw History
                     </button>
                     <button 
                       className="lotto-btn" 
-                      style={{ backgroundColor: '#183f35', borderColor: '#183f35', color: '#ffffff' }}
+                      style={{ backgroundColor: '#184f35', borderColor: '#2e9b4a', color: '#ffffff' }}
                       onClick={() => router.push(`/Lottery/tickets-buy-activity?price=${tier.price}`)}
                     >
-                      Buy ৳{tier.price} {/* Play থেকে Buy করা হলো */}
+                      Buy ৳{tier.price}
                     </button>
                   </div>
 
