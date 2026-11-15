@@ -1,51 +1,67 @@
+/* =========================================
+   Main Layout (Fixed Height & No Page Scroll)
+   ========================================= */
 .terms-page-wrapper {
   background-color: #0d241e;
-  min-height: 100vh;
+  height: 100dvh; /* মোবাইলের জন্য পারফেক্ট ফুল হাইট */
   width: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* পুরো পেজ স্ক্রল বন্ধ */
 }
 
 .terms-page {
-  flex: 1;
+  flex: 1; /* হেডার এবং ফুটারের মাঝের অংশ দখল করবে */
   padding: 16px;
-  padding-bottom: 90px; /* ফুটারের জন্য জায়গা */
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  align-items: center;
+  overflow: hidden;
 }
 
 .terms-card {
   background: rgba(27, 42, 35, 0.95);
   backdrop-filter: blur(10px);
-  border: 1px solid #FFFFFF; /* Gold থেকে White */
+  border: 1px solid #FFFFFF;
   border-radius: 12px;
   padding: 20px;
   width: 100%;
   max-width: 600px;
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1); /* হালকা সাদা শ্যাডো */
+  margin: 0 auto;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+  
+  /* কার্ডের উচ্চতা ফ্লেক্সিবল করা হলো */
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
 }
 
 .terms-title {
   font-size: 18px;
   font-weight: 800;
-  color: #FFFFFF; /* Gold থেকে White */
+  color: #FFFFFF;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  flex-shrink: 0; /* টাইটেল সঙ্কুচিত হবে না */
 }
 
-/* স্ক্রলেবল টার্মস বক্স */
+/* =========================================
+   Scrollable Text Box (Only this part scrolls)
+   ========================================= */
 .terms-scroll-box {
   background: #0d241e;
   border: 1px solid #2B4236;
   border-radius: 8px;
   padding: 16px;
-  height: 400px; 
-  overflow-y: auto; 
-  margin-bottom: 20px;
   font-size: 12px;
   color: #A0ADB0;
   line-height: 1.6;
+  margin-bottom: 16px;
+  
+  /* ফ্লেক্সিবল স্ক্রলিং */
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* ফ্লেক্সবক্সে স্ক্রল কাজ করার জন্য জরুরি */
 }
 
 /* কাস্টম স্ক্রলবার ডিজাইন */
@@ -57,7 +73,7 @@
   border-radius: 10px;
 }
 .terms-scroll-box::-webkit-scrollbar-thumb {
-  background: #FFFFFF; /* Gold থেকে White */
+  background: #FFFFFF;
   border-radius: 10px;
 }
 
@@ -77,32 +93,35 @@
   text-align: justify;
 }
 
-/* চেকবক্স স্টাইল */
+/* =========================================
+   Checkbox & Button (Fixed at Bottom)
+   ========================================= */
 .terms-checkbox-label {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.05); /* Gold থেকে হালকা White */
-  padding: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
   color: #fff;
-  margin-bottom: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Gold থেকে হালকা White */
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0; /* চেকবক্স সঙ্কুচিত হবে না */
 }
 
 .terms-checkbox {
   margin-top: 2px;
   width: 18px;
   height: 18px;
-  accent-color: #FFFFFF; /* Gold থেকে White */
+  accent-color: #FFFFFF;
   cursor: pointer;
 }
 
 .terms-btn {
   width: 100%;
-  padding: 16px;
+  padding: 14px;
   background: #184f35;
   border: 1px solid #FFFFFF;
   border-radius: 8px;
@@ -111,6 +130,7 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
+  flex-shrink: 0; /* বাটন সঙ্কুচিত হবে না */
 }
 
 .terms-btn:disabled {
