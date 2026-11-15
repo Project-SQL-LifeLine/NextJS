@@ -186,142 +186,153 @@ export default function FeePaymentPage() {
     );
   }
 
+  // ==========================================
+  // Under Review ফুল স্ক্রিন UI (কার্ড ছাড়া, স্ক্রল বন্ধ)
+  // ==========================================
+  if (isUnderReview) {
+    return (
+      <div className="fee-payment-page h-screen flex flex-col overflow-hidden">
+        <LotteryHeader userProfile={profile} />
+        
+        {/* স্ক্রিনের মাঝখানে ফিক্সড থাকার জন্য flex-1 এবং justify-center */}
+        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-20">
+          
+          {/* Clock Icon */}
+          <div className="mb-6">
+            <svg className="w-24 h-24 text-[#A0ADB0]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          
+          <h3 className="text-2xl font-black text-white text-center mb-3">Under Review</h3>
+          <p className="text-white font-semibold text-lg text-center mb-2">
+            Payment Verification
+          </p>
+          <p className="text-[#A0ADB0] text-sm text-center mb-10">
+            Please Wait 1/2 Hours
+          </p>
+          
+          {/* Spinner */}
+          <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // ফর্ম UI
+  // ==========================================
   return (
     <div className="fee-payment-page">
       <LotteryHeader userProfile={profile} />
 
       <main className="fee-main">
-        {isUnderReview ? (
-          // Under Review UI
-          <div className="under-review-box">
-            <div className="flex justify-center mb-4">
-              <svg className="w-16 h-16 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+        <div className="fee-box">
+          <h3>{t("VAT & GST FEE", "ভ্যাট এবং জিএসটি ফি")}</h3>
+          <p className="fee-instruction">
+            {t("Send the exact amount to the number below to unlock your withdrawal.", "আপনার উত্তোলন আনলক করতে নিচের নাম্বারে সঠিক পরিমাণ পাঠান।")}
+          </p>
+
+          <div className="number-copy-box">
+            <div className="flex items-center gap-2">
+               <img 
+                 src="https://i.ibb.co.com/ynRH1K3z/file-00000000ee6482089b62b469990f602a.png" 
+                 alt="bKash" 
+                 className="bkash-logo" 
+               />
+               <span>{settings?.fee_payment_number}</span>
             </div>
-            <h3 className="text-xl font-black text-white text-center mb-2">Under Review</h3>
-            <p className="text-white font-semibold text-center mb-1">
-              Payment Verification
-            </p>
-            <p className="text-gray-400 text-sm text-center">
-              Please Wait 1/2 Hours
-            </p>
-            <div className="mt-6 flex justify-center">
-              <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-            </div>
+            <button onClick={copyNumber} className="copy-btn">
+              {copied ? t("Copied!", "কপি!") : t("Copy", "কপি")}
+            </button>
           </div>
-        ) : (
-          // ফর্ম UI
-          <div className="fee-box">
-            <h3>{t("VAT & GST FEE", "ভ্যাট এবং জিএসটি ফি")}</h3>
-            <p className="fee-instruction">
-              {t("Send the exact amount to the number below to unlock your withdrawal.", "আপনার উত্তোলন আনলক করতে নিচের নাম্বারে সঠিক পরিমাণ পাঠান।")}
-            </p>
 
-            <div className="number-copy-box">
-              <div className="flex items-center gap-2">
-                 <img 
-                   src="https://i.ibb.co.com/ynRH1K3z/file-00000000ee6482089b62b469990f602a.png" 
-                   alt="bKash" 
-                   className="bkash-logo" 
-                 />
-                 <span>{settings?.fee_payment_number}</span>
-              </div>
-              <button onClick={copyNumber} className="copy-btn">
-                {copied ? t("Copied!", "কপি!") : t("Copy", "কপি")}
-              </button>
-            </div>
-
-            <div className="fee-table">
-              {mgmtPct > 0 && (
-                <div className="fee-row">
-                  <span>{t("Management Fee", "ম্যানেজমেন্ট ফি")} ({mgmtPct}%)</span>
-                  <span>৳ {mgmtAmount.toFixed(2)}</span>
-                </div>
-              )}
-              {srvcPct > 0 && (
-                <div className="fee-row">
-                  <span>{t("Service Fee", "সার্ভিস ফি")} ({srvcPct}%)</span>
-                  <span>৳ {srvcAmount.toFixed(2)}</span>
-                </div>
-              )}
-              {netPct > 0 && (
-                <div className="fee-row">
-                  <span>{t("Network Fee", "নেটওয়ার্ক ফি")} ({netPct}%)</span>
-                  <span>৳ {netAmount.toFixed(2)}</span>
-                </div>
-              )}
-              {vatPct > 0 && (
-                <div className="fee-row">
-                  <span>{t("VAT", "ভ্যাট")} ({vatPct}%)</span>
-                  <span>৳ {vatAmount.toFixed(2)}</span>
-                </div>
-              )}
-              {gstPct > 0 && (
-                <div className="fee-row">
-                  <span>{t("GST", "জিএসটি")} ({gstPct}%)</span>
-                  <span>৳ {gstAmount.toFixed(2)}</span>
-                </div>
-              )}
-              
+          <div className="fee-table">
+            {mgmtPct > 0 && (
               <div className="fee-row">
-                <span>{t("Total Payable", "মোট প্রদেয়")}</span>
-                <div className="flex items-center">
-                  {/* Green থেকে White করা হলো */}
-                  <span className="text-white font-bold text-[18px]">৳ {totalFeeAmount.toFixed(2)}</span>
-                  <button onClick={copyAmountToClipboard} className="copy-amount-btn" title="Copy Amount">
-                    {copiedAmount ? (
-                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                         <polyline points="20 6 9 17 4 12"></polyline>
-                       </svg>
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                      </svg>
-                    )}
-                  </button>
-                </div>
+                <span>{t("Management Fee", "ম্যানেজমেন্ট ফি")} ({mgmtPct}%)</span>
+                <span>৳ {mgmtAmount.toFixed(2)}</span>
+              </div>
+            )}
+            {srvcPct > 0 && (
+              <div className="fee-row">
+                <span>{t("Service Fee", "সার্ভিস ফি")} ({srvcPct}%)</span>
+                <span>৳ {srvcAmount.toFixed(2)}</span>
+              </div>
+            )}
+            {netPct > 0 && (
+              <div className="fee-row">
+                <span>{t("Network Fee", "নেটওয়ার্ক ফি")} ({netPct}%)</span>
+                <span>৳ {netAmount.toFixed(2)}</span>
+              </div>
+            )}
+            {vatPct > 0 && (
+              <div className="fee-row">
+                <span>{t("VAT", "ভ্যাট")} ({vatPct}%)</span>
+                <span>৳ {vatAmount.toFixed(2)}</span>
+              </div>
+            )}
+            {gstPct > 0 && (
+              <div className="fee-row">
+                <span>{t("GST", "জিএসটি")} ({gstPct}%)</span>
+                <span>৳ {gstAmount.toFixed(2)}</span>
+              </div>
+            )}
+            
+            <div className="fee-row">
+              <span>{t("Total Payable", "মোট প্রদেয়")}</span>
+              <div className="flex items-center">
+                <span className="text-white font-bold text-[18px]">৳ {totalFeeAmount.toFixed(2)}</span>
+                <button onClick={copyAmountToClipboard} className="copy-amount-btn" title="Copy Amount">
+                  {copiedAmount ? (
+                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                       <polyline points="20 6 9 17 4 12"></polyline>
+                     </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
-
-            <div className="input-group">
-              <label>{t("Transaction ID (TrxID) *", "ট্রানজেকশন আইডি (TrxID) *")}</label>
-              <input 
-                type="text"
-                value={trxId}
-                onChange={(e) => setTrxId(e.target.value)}
-                placeholder={t("Enter TrxID here", "এখানে TrxID দিন")}
-                className="input-field"
-                disabled={submitting}
-              />
-            </div>
-
-            {message.text && <div className={`msg-box ${message.type}`}>{message.text}</div>}
           </div>
-        )}
+
+          <div className="input-group">
+            <label>{t("Transaction ID (TrxID) *", "ট্রানজেকশন আইডি (TrxID) *")}</label>
+            <input 
+              type="text"
+              value={trxId}
+              onChange={(e) => setTrxId(e.target.value)}
+              placeholder={t("Enter TrxID here", "এখানে TrxID দিন")}
+              className="input-field"
+              disabled={submitting}
+            />
+          </div>
+
+          {message.text && <div className={`msg-box ${message.type}`}>{message.text}</div>}
+        </div>
       </main>
 
-      {!isUnderReview && (
-        <div className="submit-btn-wrapper">
-          <button 
-            onClick={handleSubmitFee} 
-            disabled={submitting || !trxId || totalFeeAmount <= 0}
-            className="submit-btn flex justify-center items-center gap-2"
-          >
-            {submitting ? (
-              <>
-                <svg className="w-5 h-5 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                {t("Processing...", "প্রসেসিং...")}
-              </>
-            ) : (
-              t("Pay Fee", "ফি পরিশোধ করুন")
-            )}
-          </button>
-        </div>
-      )}
+      <div className="submit-btn-wrapper">
+        <button 
+          onClick={handleSubmitFee} 
+          disabled={submitting || !trxId || totalFeeAmount <= 0}
+          className="submit-btn flex justify-center items-center gap-2"
+        >
+          {submitting ? (
+            <>
+              <svg className="w-5 h-5 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {t("Processing...", "প্রসেসিং...")}
+            </>
+          ) : (
+            t("Pay Fee", "ফি পরিশোধ করুন")
+          )}
+        </button>
+      </div>
     </div>
   );
 }
