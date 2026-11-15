@@ -27,7 +27,9 @@ export default function TicketCheckerPage() {
   // সার্চ বা স্ক্যান করে ডাটা বের করার ফাংশন
   // ==========================================
   const checkTicket = async (numberToCheck: string) => {
+    // ইনপুট থেকে স্পেস রিমুভ করা হচ্ছে
     const cleanNumber = numberToCheck.replace(/\s/g, '');
+    
     if (!cleanNumber || cleanNumber.length < 10) {
       setErrorMsg("অনুগ্রহ করে সঠিক ১২ ডিজিটের টিকিট নাম্বার দিন।");
       return;
@@ -39,17 +41,23 @@ export default function TicketCheckerPage() {
     setShowScanner(false); // স্ক্যানার বন্ধ
 
     try {
+      // আপনার টেবিল (ticket_transactions) এবং কলাম (ticket_number) ব্যবহার করে কুয়েরি
       const { data, error } = await supabase
         .from("ticket_transactions")
         .select("*")
         .eq("ticket_number", cleanNumber)
         .eq("transaction_type", "ticket_purchase")
         .eq("status", "approved")
-        .single();
+        .maybeSingle(); // single() এর বদলে maybeSingle() ব্যবহার করা হলো
 
-      if (error || !data) {
+      if (error) {
+        console.error("Supabase Error:", error);
+        setErrorMsg("সার্ভারে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+      } else if (!data) {
+        // ডাটা না পাওয়া গেলে (নকল টিকিট)
         setErrorMsg("❌ এই টিকিটটি আমাদের ডাটাবেসে পাওয়া যায়নি। এটি নকল হতে পারে!");
       } else {
+        // ডাটা পাওয়া গেলে (আসল টিকিট)
         setResult(data);
       }
     } catch (err) {
@@ -251,6 +259,7 @@ export default function TicketCheckerPage() {
             <div className="flex justify-between">
               <span className="text-gray-400">Ticket Number:</span>
               <span className="font-mono font-bold text-white tracking-widest">
+                {/* টেক্সট ফরম্যাটে ৪ ডিজিট পর পর স্পেস দেওয়া হচ্ছে */}
                 {result.ticket_number.match(/.{1,4}/g)?.join("  ") || result.ticket_number}
               </span>
             </div>
