@@ -9,12 +9,13 @@ import "./winners.css";
 
 export default function WinnersPage() {
   const { t } = useLanguage();
-  const basePath = process.env.NODE_ENV === "production" ? "/NextJS" : "";
-
+  
   const [profile, setProfile] = useState<any>(null);
   const [winners, setWinners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  
+  // কপি স্টেট (আইডি এবং টাইপ ট্র্যাক করার জন্য)
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const maskGameId = (gameId: string) => {
     if (!gameId) return "Unknown";
@@ -23,11 +24,11 @@ export default function WinnersPage() {
     return `${id.slice(0, 2)}****${id.slice(-2)}`;
   };
 
-  const handleCopy = (text: string, id: string) => {
+  const handleCopy = (text: string, key: string) => {
     if (!text || text === "N/A") return;
     navigator.clipboard.writeText(text).then(() => {
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
     }).catch(err => console.error("Failed to copy:", err));
   };
 
@@ -68,27 +69,19 @@ export default function WinnersPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d241e] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#F5B041] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-[#FFFFFF] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div 
-      className="winners-page"
-      style={{ 
-        backgroundImage: `url(${basePath}/winner.png)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}
-    >
+    <div className="winners-page">
       <div className="winners-overlay">
         <LotteryHeader userProfile={profile} />
 
         <main className="winners-main">
           <h1 className="winners-title">
-            <svg className="w-5 h-5 text-[#F5B041]" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
             </svg>
             {t("Recent Winners", "সাম্প্রতিক বিজয়ী")}
@@ -120,24 +113,41 @@ export default function WinnersPage() {
                         {new Date(winner.draw_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </span>
                       
+                      {/* টিকেট নাম্বার এবং কপি বাটন */}
                       <div className="winner-details-box">
                         <span className="detail-label">Ticket:</span>
                         <span className="detail-value">{winner.winning_ticket_number || "N/A"}</span>
+                        {winner.winning_ticket_number && (
+                          <button 
+                            onClick={() => handleCopy(winner.winning_ticket_number, winner.id + '-ticket')}
+                            className="copy-btn"
+                            title="Copy Ticket ID"
+                          >
+                            {copiedKey === winner.id + '-ticket' ? (
+                              <span className="text-white text-[9px] font-bold">Copied!</span>
+                            ) : (
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                              </svg>
+                            )}
+                          </button>
+                        )}
                       </div>
                       
+                      {/* Verify ID (পূর্বে Seed ID ছিল) এবং কপি বাটন */}
                       <div className="winner-details-box">
-                        <span className="detail-label">Seed ID:</span>
+                        <span className="detail-label">Verify ID:</span>
                         <span className="detail-value">
                           {winner.profiles?.lottery_track_id || "N/A"}
                         </span>
                         {winner.profiles?.lottery_track_id && (
                           <button 
-                            onClick={() => handleCopy(winner.profiles.lottery_track_id, winner.id)}
+                            onClick={() => handleCopy(winner.profiles.lottery_track_id, winner.id + '-verify')}
                             className="copy-btn"
-                            title="Copy Seed ID"
+                            title="Copy Verify ID"
                           >
-                            {copiedId === winner.id ? (
-                              <span className="text-[#00E701] text-[9px] font-bold">Copied!</span>
+                            {copiedKey === winner.id + '-verify' ? (
+                              <span className="text-white text-[9px] font-bold">Copied!</span>
                             ) : (
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
