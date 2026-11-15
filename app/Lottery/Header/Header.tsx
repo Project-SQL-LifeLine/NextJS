@@ -52,26 +52,34 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [hasUnread, setHasUnread] = useState(false); // নতুন স্টেট
+  const [hasUnread, setHasUnread] = useState(false);
 
   useEffect(() => {
     const checkUserAndNotifications = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setIsLoggedIn(!!user);
 
-      // লগইন থাকলে আনরিড নোটিফিকেশন চেক করা
       if (user) {
+        // ১. ইউজারের নিজের এবং ব্রডকাস্ট (null) আনরিড নোটিফিকেশন খোঁজা
         const { data, error } = await supabase
           .from("user_notifications")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("is_read", false)
-          .limit(1);
+          .select("id, user_id")
+          .or(`user_id.eq.${user.id},user_id.is.null`)
+          .eq("is_read", false);
 
-        if (!error && data && data.length > 0) {
-          setHasUnread(true);
-        } else {
-          setHasUnread(false);
+        if (!error && data) {
+          // ২. localStorage থেকে পড়া ব্রডকাস্ট নোটিফিকেশনগুলোর লিস্ট নিন
+          const readBroadcasts = JSON.parse(localStorage.getItem("read_broadcast_notifs") || "[]");
+
+          // ৩. ফিল্টার করুন: যেসব ব্রডকাস্ট লোকাল স্টোরেজে নেই, সেগুলোই আসল আনরিড
+          const actualUnread = data.filter(notif => {
+            if (notif.user_id === null) {
+              return !readBroadcasts.includes(notif.id);
+            }
+            return true; // নিজের নোটিফিকেশন হলে সেটা আনরিডই আছে
+          });
+
+          setHasUnread(actualUnread.length > 0);
         }
       }
     };
@@ -95,11 +103,8 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
 
   return (
     <>
-      {/* হেডার ব্যাকগ্রাউন্ড কালার #184f35 করা হলো */}
       <header className="bg-[#184f35] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#26352e]">
-        
         <div className="flex items-center gap-3">
-          {/* Lotto Logo/Text */}
           <div className="flex flex-col">
             <div className="text-xl font-black text-[#F5B041] tracking-widest uppercase leading-tight drop-shadow-md">
               Lotto
@@ -108,20 +113,17 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
         </div>
         
         <div className="flex items-center gap-3">
-          {/* Notification Icon (লগইন থাকলে দেখাবে) */}
           {isLoggedIn ? (
             <button 
-              onClick={() => router.push("/Notification")} // পাথ আপডেট করা হয়েছে
+              onClick={() => router.push("/Notification")}
               className="relative p-1.5 rounded-full bg-black/20 hover:bg-black/40 transition border border-white/10"
             >
               <Icons.Bell />
-              {/* লাল ডট শুধুমাত্র আনরিড নোটিফিকেশন থাকলে দেখাবে */}
               {hasUnread && (
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
               )}
             </button>
           ) : (
-            /* লগইন না থাকলে Login এবং Signup বাটন দেখাবে */
             <div className="flex items-center gap-2">
               <Link 
                 href="/user/login?redirect=/Lottery" 
@@ -138,7 +140,6 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
             </div>
           )}
 
-          {/* Hamburger Menu Button */}
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white ml-1">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -147,14 +148,12 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
         </div>
       </header>
 
-      {/* Dropdown Menu Overlay */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setIsMenuOpen(false)}>
           <div 
-            className="absolute top-[60px] right-3 mt-1 w-64 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1" // মেনুবারের কালার আপডেট করা হয়েছে
+            className="absolute top-[60px] right-3 mt-1 w-64 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* ১. Buy Tickets */}
             <button 
               onClick={handleBuyTicketsClick}
               className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
@@ -162,10 +161,8 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               <Icons.Ticket /> <span className="text-[11px] font-semibold">{t("Buy Tickets", "টিকিট কিনুন")}</span>
             </button>
 
-            {/* লগইন থাকলে বাকি অপশনগুলো দেখাবে */}
             {isLoggedIn && (
               <>
-                {/* ২. Withdraw Fund */}
                 <button 
                   onClick={() => { setIsMenuOpen(false); router.push("/Lottery/withdraw-terms"); }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
@@ -173,7 +170,6 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
                   <Icons.Money /> <span className="text-[11px] font-semibold">{t("Withdraw Fund", "ফান্ড উত্তোলন")}</span>
                 </button>
 
-                {/* ৩. Winner */}
                 <button 
                   onClick={() => { setIsMenuOpen(false); router.push("/Lottery/winners"); }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
@@ -183,7 +179,6 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               </>
             )}
 
-            {/* ৪. Terms Condition */}
             <button 
               onClick={() => { setIsMenuOpen(false); router.push("/Lottery/withdraw-terms"); }}
               className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
@@ -191,7 +186,6 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               <Icons.Document /> <span className="text-[11px] font-semibold">{t("Terms Condition", "শর্তাবলী")}</span>
             </button>
 
-            {/* Language Selector */}
             <div className="px-4 py-2 flex flex-col gap-2 border-b border-[#26352e]">
               <span className="text-[11px] text-white/70 font-semibold flex items-center gap-2">
                 <Icons.Globe /> {t("Language", "ভাষা")}
@@ -212,7 +206,6 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               </div>
             </div>
 
-            {/* Logout */}
             {isLoggedIn && (
               <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-[#ED4163] hover:bg-black/20 transition">
                 <Icons.Logout /> <span className="text-[11px] font-semibold">{t("Logout", "লগআউট")}</span>
