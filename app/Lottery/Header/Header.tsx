@@ -8,14 +8,9 @@ import { useLanguage } from "../../../lib/LanguageContext";
 import { useSiteSettings } from "../../../lib/SiteSettingsContext";
 
 const Icons = {
-  Wallet: () => (
-    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-    </svg>
-  ),
-  EyeOff: () => (
+  Bell: () => (
     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
     </svg>
   ),
   Logout: () => (
@@ -56,7 +51,6 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
   const { siteName } = useSiteSettings(); 
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [hideBalance, setHideBalance] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -76,7 +70,6 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
   const handleBuyTicketsClick = () => {
     setIsMenuOpen(false);
     if (!isLoggedIn) {
-      // ইউজার লগইন না থাকলে লগইন পেজে পাঠাবে এবং লগইন শেষে লটারি পেজে ফেরত আনবে
       router.push("/user/login?redirect=/Lottery");
     } else {
       router.push("/Lottery");
@@ -88,8 +81,6 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
       <header className="bg-[#183F35] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#26352e]">
         
         <div className="flex items-center gap-3">
-          {/* Back Button সরিয়ে দেওয়া হয়েছে */}
-          
           {/* Lotto Logo/Text */}
           <div className="flex flex-col">
             <div className="text-xl font-black text-[#F5B041] tracking-widest uppercase leading-tight drop-shadow-md">
@@ -99,14 +90,16 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
         </div>
         
         <div className="flex items-center gap-3">
-          {/* Lottery Balance (লগইন থাকলে দেখাবে) */}
+          {/* Notification Icon (লগইন থাকলে দেখাবে) */}
           {isLoggedIn ? (
-            <div className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full border border-[#26352e]">
-              <Icons.Wallet />
-              <span className="text-white text-[11px] font-bold">
-                ৳ {hideBalance ? "****" : (Number(userProfile?.lottery_balance) || 0).toFixed(2)}
-              </span>
-            </div>
+            <button 
+              onClick={() => router.push("/Lottery/notification")}
+              className="relative p-1.5 rounded-full bg-black/20 hover:bg-black/40 transition border border-white/10"
+            >
+              <Icons.Bell />
+              {/* লাল ডট (নোটিফিকেশন থাকার সিগন্যাল) */}
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+            </button>
           ) : (
             /* লগইন না থাকলে Login এবং Signup বাটন দেখাবে */
             <div className="flex items-center gap-2">
@@ -177,16 +170,6 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
             >
               <Icons.Document /> <span className="text-[11px] font-semibold">{t("Terms Condition", "শর্তাবলী")}</span>
             </button>
-
-            {/* Hide/Show Balance */}
-            {isLoggedIn && (
-              <button 
-                onClick={() => setHideBalance(!hideBalance)}
-                className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
-              >
-                <Icons.EyeOff /> <span className="text-[11px] font-semibold">{hideBalance ? t("Show Balance", "ব্যালেন্স দেখান") : t("Hide Balance", "ব্যালেন্স লুকান")}</span>
-              </button>
-            )}
 
             {/* Language Selector */}
             <div className="px-4 py-2 flex flex-col gap-2 border-b border-[#26352e]">
