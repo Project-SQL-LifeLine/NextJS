@@ -4,7 +4,7 @@
   --border-color: #2B4236;
   --text-main: #FFFFFF;
   --text-muted: #A0ADB0;
-  --white: #FFFFFF; /* Gold থেকে White করা হলো */
+  --gold: #FFFFFF; /* Gold থেকে White করা হলো */
   --btn-green: #184f35;
 
   background-color: var(--bg-main);
@@ -12,10 +12,6 @@
   width: 100%;
   font-family: inherit;
   padding-bottom: 90px;
-  
-  /* মেইন ব্যাকগ্রাউন্ডে সাদা লটারি টিকিট SVG সিম্বল */
-  background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='20' y='30' width='80' height='60' rx='8'/%3E%3Ccircle cx='30' cy='60' r='6'/%3E%3Ccircle cx='90' cy='60' r='6'/%3E%3Cpath d='M50 60h20M45 45l10 10m-10 0l10-10'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 150px 150px;
 }
 
 .ticket-buy-main {
@@ -25,15 +21,13 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  position: relative;
-  z-index: 2;
 }
 
 /* =========================================
    1. Premium CSS-Based Ticket Design
    ========================================= */
 .ticket-preview-card {
-  background: linear-gradient(135deg, #9b00d3 0%, #6a11cb 100%); 
+  background: linear-gradient(135deg, #9b00d3 0%, #6a11cb 100%);
   border-radius: 12px;
   display: flex;
   position: relative;
@@ -51,7 +45,7 @@
   top: 50%;
   width: 24px;
   height: 24px;
-  background-color: var(--bg-main); 
+  background-color: var(--bg-main);
   border-radius: 50%;
   transform: translateY(-50%);
   z-index: 2;
@@ -90,7 +84,7 @@
 
 .ticket-price-tag {
   display: inline-block;
-  background: var(--white); /* White */
+  background: #FFFFFF; /* Gold থেকে White */
   color: #000;
   padding: 6px 16px;
   border-radius: 20px;
@@ -113,7 +107,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.15); 
+  background: rgba(0, 0, 0, 0.15);
   z-index: 10;
 }
 
@@ -123,7 +117,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #FFFFFF; 
+  background: #FFFFFF;
   border-radius: 4px;
   padding: 2px;
 }
@@ -147,20 +141,8 @@
 .input-section h3 {
   font-size: 12px;
   color: var(--text-main);
-  margin-bottom: 8px;
-  font-weight: 700;
-}
-
-/* নতুন ডিসক্লেইমার স্টাইল */
-.disclaimer-text {
-  font-size: 10px;
-  color: #ff4d4d; /* লাল রঙের ওয়ার্নিং */
-  line-height: 1.4;
   margin-bottom: 12px;
-  background: rgba(255, 77, 77, 0.1);
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 77, 77, 0.2);
+  font-weight: 700;
 }
 
 .ticket-number-input {
@@ -169,7 +151,7 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 14px 10px;
-  color: var(--white); /* Gold to White */
+  color: #FFFFFF; /* Gold থেকে White */
   font-size: 18px; 
   font-weight: 800;
   text-align: center;
@@ -180,8 +162,8 @@
 }
 
 .ticket-number-input:focus {
-  border-color: var(--white); /* Gold to White */
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* White shadow */
+  border-color: #FFFFFF; /* Gold থেকে White */
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 .ticket-number-input::placeholder {
@@ -208,8 +190,8 @@
 
 .action-btn {
   background: transparent;
-  color: var(--white); /* Gold to White */
-  border: 1px solid var(--white); /* Gold to White */
+  color: #FFFFFF; /* Gold থেকে White */
+  border: 1px solid #FFFFFF; /* Gold থেকে White */
   border-radius: 4px;
   padding: 6px 10px;
   font-size: 10px;
@@ -219,7 +201,7 @@
 }
 
 .action-btn:hover {
-  background: rgba(255, 255, 255, 0.1); /* Gold to White shadow */
+  background: rgba(255, 255, 255, 0.1); /* Gold থেকে White */
 }
 
 /* =========================================
@@ -273,4 +255,44 @@
   text-align: center;
   margin-top: 10px;
   font-weight: bold;
+}
+
+/* Disclaimer Box */
+.disclaimer-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid #FFFFFF;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 16px;
+}
+
+.disclaimer-box p {
+  font-size: 11px;
+  color: #A0ADB0;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.disclaimer-box strong {
+  color: #FFFFFF;
+}
+
+/* Loader Animation */
+.ticket-loader {
+  animation: ticketSpinPulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes ticketSpinPulse {
+  0% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  }
+  50% {
+    transform: scale(1.15) rotate(180deg);
+    filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.9));
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  }
 }
