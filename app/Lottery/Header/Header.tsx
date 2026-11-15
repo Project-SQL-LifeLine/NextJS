@@ -52,13 +52,30 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false); // নতুন স্টেট
 
   useEffect(() => {
-    const checkUser = async () => {
+    const checkUserAndNotifications = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setIsLoggedIn(!!user);
+
+      // লগইন থাকলে আনরিড নোটিফিকেশন চেক করা
+      if (user) {
+        const { data, error } = await supabase
+          .from("user_notifications")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("is_read", false)
+          .limit(1);
+
+        if (!error && data && data.length > 0) {
+          setHasUnread(true);
+        } else {
+          setHasUnread(false);
+        }
+      }
     };
-    checkUser();
+    checkUserAndNotifications();
   }, [userProfile]);
 
   const handleLogout = async () => {
@@ -78,7 +95,8 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
 
   return (
     <>
-      <header className="bg-[#183F35] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#26352e]">
+      {/* হেডার ব্যাকগ্রাউন্ড কালার #184f35 করা হলো */}
+      <header className="bg-[#184f35] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#26352e]">
         
         <div className="flex items-center gap-3">
           {/* Lotto Logo/Text */}
@@ -93,12 +111,14 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
           {/* Notification Icon (লগইন থাকলে দেখাবে) */}
           {isLoggedIn ? (
             <button 
-              onClick={() => router.push("/Lottery/notification")}
+              onClick={() => router.push("/Notification")} // পাথ আপডেট করা হয়েছে
               className="relative p-1.5 rounded-full bg-black/20 hover:bg-black/40 transition border border-white/10"
             >
               <Icons.Bell />
-              {/* লাল ডট (নোটিফিকেশন থাকার সিগন্যাল) */}
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+              {/* লাল ডট শুধুমাত্র আনরিড নোটিফিকেশন থাকলে দেখাবে */}
+              {hasUnread && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+              )}
             </button>
           ) : (
             /* লগইন না থাকলে Login এবং Signup বাটন দেখাবে */
@@ -131,7 +151,7 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setIsMenuOpen(false)}>
           <div 
-            className="absolute top-[60px] right-3 mt-1 w-64 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
+            className="absolute top-[60px] right-3 mt-1 w-64 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1" // মেনুবারের কালার আপডেট করা হয়েছে
             onClick={(e) => e.stopPropagation()}
           >
             {/* ১. Buy Tickets */}
