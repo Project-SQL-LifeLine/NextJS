@@ -5,17 +5,17 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase/client";
 import { useLanguage } from "../../lib/LanguageContext";
 import LotteryHeader from "./Header/Header";
-import BottomNav from "../../components/BottomNav";
+// BottomNav সরিয়ে Footer যুক্ত করা হয়েছে
+import Footer from "./Footer/Footer"; 
 import "./lottery.css";
 
 export default function LotteryHomePage() {
   const router = useRouter();
   const { t } = useLanguage(); 
-  // basePath আর ব্যাকগ্রাউন্ড ইমেজের প্রয়োজন নেই, তাই বাদ দেওয়া হলো
   
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [timeLeft, setTimeLeft] = useState({ hours: "00", minutes: "00", seconds: "00" });
+  const [timeLeft, setTimeLeft] = useState({ days: "00", hours: "00", minutes: "00", seconds: "00" });
   
   const jackpotAmounts = [50000, 100000, 250000, 500000, 1000000];
   const [activeJackpot, setActiveJackpot] = useState(0);
@@ -69,13 +69,11 @@ export default function LotteryHomePage() {
       const s = Math.floor((diff / 1000) % 60);
 
       setTimeLeft({
-        // Days বের করার জন্য আমরা hours এর সাথে ২৪ গুণ করে যোগ করতে পারি, অথবা আলাদা ভেরিয়েবল রাখতে পারি। 
-        // এখানে শুধু দিনের জন্য আলাদা অবজেক্ট রাখছি যাতে টাইমার বক্সে দেখানো সহজ হয়।
         days: d.toString().padStart(2, "0"),
         hours: h.toString().padStart(2, "0"),
         minutes: m.toString().padStart(2, "0"),
         seconds: s.toString().padStart(2, "0"),
-      } as any); // TypeScript ignore for quick fix, you can update the state type
+      });
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -103,8 +101,6 @@ export default function LotteryHomePage() {
   return (
     <div className="lottery-page-wrapper pb-20">
       
-      {/* ফিক্সড ব্যাকগ্রাউন্ড ইমেজ সরিয়ে দেওয়া হয়েছে */}
-
       <div className="lottery-overlay">
         <LotteryHeader userProfile={profile} />
 
@@ -181,7 +177,6 @@ export default function LotteryHomePage() {
 
                   {/* Actions */}
                   <div className="lotto-card-actions">
-                    {/* Draw History ক্লিক করলে winners পেজে যাবে */}
                     <button className="lotto-btn" onClick={() => router.push('/Lottery/winners')}>
                       Draw History
                     </button>
@@ -200,7 +195,7 @@ export default function LotteryHomePage() {
                     </div>
                     <div className="lotto-timer-boxes">
                       <div className="lotto-t-box">
-                        <span className="t-val">{timeLeft.days || "0"}</span>
+                        <span className="t-val">{timeLeft.days}</span>
                         <span className="t-lbl">Days</span>
                       </div>
                       <div className="lotto-t-box">
@@ -222,11 +217,10 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* Wallet এবং Live Winners সেকশন সম্পূর্ণ বাদ দেওয়া হয়েছে */}
-
         </main>
 
-        <BottomNav />
+        {/* BottomNav এর জায়গায় Footer যুক্ত করা হলো */}
+        <Footer />
       </div>
     </div>
   );
