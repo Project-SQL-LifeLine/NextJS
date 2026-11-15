@@ -8,7 +8,8 @@ import { supabase } from "../../../lib/supabase/client";
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const refCode = searchParams.get("ref"); // রেফারেল কোড রিসিভ করা হলো
+  const refCode = searchParams.get("ref"); 
+  const redirectPath = searchParams.get("redirect"); // রিডাইরেক্ট পাথ রিসিভ করা হলো
 
   const [isLoadingPage, setIsLoadingPage] = useState(true);
   
@@ -87,7 +88,7 @@ function SignupForm() {
           game_id: formData.game_id,
           mobile: formData.mobile,
           password: formData.password,
-          ref: refCode // রেফারেল কোড পাঠানো হলো
+          ref: refCode 
         },
       });
 
@@ -95,7 +96,10 @@ function SignupForm() {
         throw new Error(data?.error || funcError?.message || "Signup failed. Wrong user or password.");
       }
 
-      router.push("/user/login");
+      // সফলভাবে সাইনআপ হলে, redirect প্যারামিটারসহ লগইন পেজে পাঠানো হবে
+      const loginUrl = redirectPath ? `/user/login?redirect=${redirectPath}` : "/user/login";
+      router.push(loginUrl);
+
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -112,11 +116,38 @@ function SignupForm() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10" style={{ backgroundColor: "#18221E" }}>
-      
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-10 relative overflow-hidden" 
+      style={{ backgroundColor: "#18221E" }}
+    >
+      {/* ক্যাসিনো ও লটারি প্রতীকসহ ব্যাকগ্রাউন্ড SVG (কম অপাকিটি) */}
+      <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.04]">
+        <svg 
+          width="100%" 
+          height="100%" 
+          viewBox="0 0 100 100" 
+          preserveAspectRatio="xMidYMid slice" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          strokeWidth="0.5"
+        >
+          {/* Dice (ক্যাসিনো) */}
+          <rect x="10" y="20" width="30" height="30" rx="4" transform="rotate(15 25 35)" />
+          <circle cx="18" cy="28" r="1.5" fill="#FFFFFF" />
+          <circle cx="32" cy="42" r="1.5" fill="#FFFFFF" />
+          <circle cx="25" cy="35" r="1.5" fill="#FFFFFF" />
+          
+          {/* Lottery Ticket/Star (লটারি) */}
+          <path d="M 70 30 L 75 45 L 90 45 L 78 55 L 82 70 L 70 60 L 58 70 L 62 55 L 50 45 L 65 45 Z" />
+          
+          {/* Spade / Card (ক্যাসিনো) */}
+          <path d="M 30 70 C 30 70, 20 85, 20 90 C 20 95, 30 95, 30 90 C 30 95, 40 95, 40 90 C 40 85, 30 70, 30 70 Z" />
+        </svg>
+      </div>
+
       <div 
-        className="w-full max-w-sm rounded-xl shadow-lg"
-        style={{ backgroundColor: "#1B2A23", border: "1px solid #263C32", padding: "24px 20px" }}
+        className="w-full max-w-sm rounded-xl shadow-lg relative z-10 backdrop-blur-sm"
+        style={{ backgroundColor: "rgba(27, 42, 35, 0.95)", border: "1px solid #263C32", padding: "24px 20px" }}
       >
         <h1 className="text-xl font-bold text-white text-center mb-5">Register</h1>
 
@@ -133,8 +164,7 @@ function SignupForm() {
           
           {/* Username */}
           <div>
-            <label className="text-sm font-semibold mb-1.5 block" style={{ color: "#A0ADB0" }}>Username</label>
-            <div className="flex items-center px-3 rounded-lg" style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "42px" }}>
+            <div className="flex items-center px-3 rounded-lg" style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "44px" }}>
               <svg className="w-4 h-4 mr-2" style={{ color: "#A0ADB0" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -143,7 +173,7 @@ function SignupForm() {
                 name="game_id"
                 value={formData.game_id}
                 onChange={handleChange}
-                placeholder="Min 8 characters"
+                placeholder="Username (Min 8 characters)"
                 required
                 className="w-full bg-transparent border-none outline-none text-white text-sm"
               />
@@ -152,8 +182,7 @@ function SignupForm() {
 
           {/* Mobile Number */}
           <div>
-            <label className="text-sm font-semibold mb-1.5 block" style={{ color: "#A0ADB0" }}>Mobile Number</label>
-            <div className="flex items-center px-3 rounded-lg" style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "42px" }}>
+            <div className="flex items-center px-3 rounded-lg" style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "44px" }}>
               <svg className="w-4 h-4 mr-2" style={{ color: "#A0ADB0" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
@@ -162,7 +191,7 @@ function SignupForm() {
                 name="mobile"
                 value={formData.mobile}
                 onChange={handleChange}
-                placeholder="01XXXXXXXXX"
+                placeholder="Mobile Number (01XXXXXXXXX)"
                 required
                 className="w-full bg-transparent border-none outline-none text-white text-sm"
               />
@@ -171,8 +200,7 @@ function SignupForm() {
 
           {/* Password */}
           <div>
-            <label className="text-sm font-semibold mb-1.5 block" style={{ color: "#A0ADB0" }}>Password</label>
-            <div className="flex items-center px-3 rounded-lg" style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "42px" }}>
+            <div className="flex items-center px-3 rounded-lg" style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "44px" }}>
               <svg className="w-4 h-4 mr-2" style={{ color: "#A0ADB0" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
@@ -181,7 +209,7 @@ function SignupForm() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Min 8 characters"
+                placeholder="Password"
                 required
                 className="w-full bg-transparent border-none outline-none text-white text-sm"
               />
@@ -197,8 +225,7 @@ function SignupForm() {
 
           {/* Confirm Password */}
           <div>
-            <label className="text-sm font-semibold mb-1.5 block" style={{ color: "#A0ADB0" }}>Confirm Password</label>
-            <div className="flex items-center px-3 rounded-lg" style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "42px" }}>
+            <div className="flex items-center px-3 rounded-lg" style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "44px" }}>
               <svg className="w-4 h-4 mr-2" style={{ color: "#A0ADB0" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
@@ -207,7 +234,7 @@ function SignupForm() {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                placeholder="Re-enter password"
+                placeholder="Confirm Password"
                 required
                 className="w-full bg-transparent border-none outline-none text-white text-sm"
               />
@@ -236,7 +263,7 @@ function SignupForm() {
         </form>
 
         <p className="text-xs text-center mt-4" style={{ color: "#A0ADB0" }}>
-          Already have an account? <Link href="/user/login" className="font-semibold hover:underline" style={{ color: "#00E701" }}>Login</Link>
+          Already have an account? <Link href={`/user/login${redirectPath ? `?redirect=${redirectPath}` : ""}`} className="font-semibold hover:underline" style={{ color: "#00E701" }}>Login</Link>
         </p>
       </div>
     </div>
