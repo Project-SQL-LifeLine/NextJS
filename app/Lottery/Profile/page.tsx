@@ -10,18 +10,24 @@ import "./profile.css";
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   // মডাল স্টেট
   const [activeModal, setActiveModal] = useState<"pin" | "password" | "trick" | null>(null);
-  const [inputValue, setInputValue] = useState("");
+  const [oldInputValue, setOldInputValue] = useState(""); // পুরনো পিন বা পাসওয়ার্ড
+  const [inputValue, setInputValue] = useState(""); // নতুন পিন বা পাসওয়ার্ড
   const [modalMessage, setModalMessage] = useState({ type: "", text: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // একাউন্ট নাম্বার দেখার স্টেট
+  const [showAccountNumber, setShowAccountNumber] = useState(false);
 
   const fetchProfile = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        setUserEmail(user.email || "");
         const { data } = await supabase
           .from("profiles")
           .select("id, game_id, lottery_balance, created_at, lottery_account_number, lottery_secret_pin")
@@ -40,33 +46,50 @@ export default function ProfilePage() {
     fetchProfile();
   }, []);
 
-  // হ্যান্ডেল সাবমিট (পিন, পাসওয়ার্ড, ট্রিক)
   const handleModalSubmit = async () => {
-    if (!inputValue.trim()) return;
     setIsSubmitting(true);
     setModalMessage({ type: "", text: "" });
 
     try {
+      // ১. পিন পরিবর্তন লজিক
       if (activeModal === "pin") {
         if (inputValue.length !== 4 || isNaN(Number(inputValue))) {
-          throw new Error("PIN must be exactly 4 digits.");
+          throw new Error("New PIN must be exactly 4 digits.");
+        }
+        if (profile?.lottery_secret_pin && oldInputValue !== profile.lottery_secret_pin) {
+          throw new Error("Incorrect old PIN.");
         }
         const { error } = await supabase.from("profiles").update({ lottery_secret_pin: inputValue }).eq("id", profile.id);
         if (error) throw error;
+        
         setModalMessage({ type: "success", text: "PIN updated successfully!" });
         fetchProfile();
         setTimeout(() => closeModal(), 1500);
 
-      } else if (activeModal === "password") {
+      } 
+      // ২. পাসওয়ার্ড পরিবর্তন লজিক
+      else if (activeModal === "password") {
         if (inputValue.length < 6) {
-          throw new Error("Password must be at least 6 characters.");
+          throw new Error("New Password must be at least 6 characters.");
         }
-        const { error } = await supabase.auth.updateUser({ password: inputValue });
-        if (error) throw error;
+        // পুরনো পাসওয়ার্ড ভেরিফাই করা
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: userEmail,
+          password: oldInputValue,
+        });
+        if (signInError) throw new Error("Incorrect old password.");
+
+        // নতুন পাসওয়ার্ড সেট করা
+        const { error: updateError } = await supabase.auth.updateUser({ password: inputValue });
+        if (updateError) throw updateError;
+        
         setModalMessage({ type: "success", text: "Password changed successfully!" });
         setTimeout(() => closeModal(), 1500);
 
-      } else if (activeModal === "trick") {
+      } 
+      // ৩. ট্রিক সাবমিট
+      else if (activeModal === "trick") {
+        if (!inputValue.trim()) throw new Error("Please write your trick.");
         const { error } = await supabase.from("trick_submissions").insert({
           user_id: profile.id,
           trick_content: inputValue
@@ -84,6 +107,7 @@ export default function ProfilePage() {
 
   const closeModal = () => {
     setActiveModal(null);
+    setOldInputValue("");
     setInputValue("");
     setModalMessage({ type: "", text: "" });
   };
@@ -105,10 +129,15 @@ export default function ProfilePage() {
     ? new Date(profile.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) 
     : "N/A";
   
-  // অ্যাকাউন্ট নাম্বার ফরম্যাট করা (৪ ডিজিট পর পর স্পেস)
-  const formattedAccNum = profile?.lottery_account_number 
-    ? profile.lottery_account_number.match(/.{1,4}/g)?.join(" ") 
-    : "0000 0000 0000 0000";
+  // ১৬ ডিজিটের অ্যাকাউন্ট নাম্বার ফরম্যাট
+  let displayAccNum = "**** **** **** ****";
+  if (profile?.lottery_account_number) {
+    if (showAccountNumber) {
+      displayAccNum = profile.lottery_account_number.match(/.{1,4}/g)?.join(" ") || profile.lottery_account_number;
+    } else {
+      displayAccNum = `${profile.lottery_account_number.slice(0, 2)}**********${profile.lottery_account_number.slice(-2)}`;
+    }
+  }
 
   return (
     <div className="profile-wrapper">
@@ -125,13 +154,26 @@ export default function ProfilePage() {
           </div>
 
           <div className="v-card-balance-section">
-            <p className="v-card-balance-label">Lottery Balance</p>
             <h3 className="v-card-balance">৳ {balance}</h3>
           </div>
 
           <div className="v-card-footer">
-            <div>
-              <p className="v-card-acc-number">{formattedAccNum}</p>
+            <div className="v-card-footer-left">
+              <div className="v-acc-row">
+                <p className="v-card-acc-number">{displayAccNum}</p>
+                <button className="eye-btn" onClick={() => setShowAccountNumber(!showAccountNumber)}>
+                  {showAccountNumber ? (
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
               <p className="v-card-name">{accountName}</p>
             </div>
             <div>
@@ -186,32 +228,93 @@ export default function ProfilePage() {
 
       <LotteryFooter />
 
-      {/* মডাল ওভারলে */}
+      {/* Full Screen Modals */}
       {activeModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3 className="modal-title">
+        <div className="fullscreen-modal">
+          {/* মডাল হেডার */}
+          <div className="modal-header">
+            <button onClick={closeModal} className="modal-back-btn">
+              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h3 className="modal-header-title">
               {activeModal === "pin" && (profile?.lottery_secret_pin ? "Change Secret PIN" : "Set Secret PIN")}
               {activeModal === "password" && "Change Password"}
               {activeModal === "trick" && "Submit Trick"}
             </h3>
+          </div>
 
-            {activeModal === "trick" ? (
-              <textarea 
-                className="modal-input modal-textarea"
-                placeholder="Write your trick here..."
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-              />
-            ) : (
-              <input 
-                type={activeModal === "pin" ? "number" : "password"}
-                className="modal-input"
-                placeholder={activeModal === "pin" ? "Enter 4-digit PIN" : "Enter new password"}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                maxLength={activeModal === "pin" ? 4 : undefined}
-              />
+          {/* মডাল বডি */}
+          <div className="modal-body">
+            
+            {/* পিন পরিবর্তন ফর্ম */}
+            {activeModal === "pin" && (
+              <>
+                {profile?.lottery_secret_pin && (
+                  <div className="form-group">
+                    <label className="form-label">Old 4-Digit PIN</label>
+                    <input 
+                      type="password"
+                      className="modal-input"
+                      placeholder="Enter old PIN"
+                      value={oldInputValue}
+                      onChange={(e) => setOldInputValue(e.target.value)}
+                      maxLength={4}
+                    />
+                  </div>
+                )}
+                <div className="form-group">
+                  <label className="form-label">New 4-Digit PIN</label>
+                  <input 
+                    type="password"
+                    className="modal-input"
+                    placeholder="Enter new PIN"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    maxLength={4}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* পাসওয়ার্ড পরিবর্তন ফর্ম */}
+            {activeModal === "password" && (
+              <>
+                <div className="form-group">
+                  <label className="form-label">Old Password</label>
+                  <input 
+                    type="password"
+                    className="modal-input"
+                    placeholder="Enter old password"
+                    value={oldInputValue}
+                    onChange={(e) => setOldInputValue(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">New Password</label>
+                  <input 
+                    type="password"
+                    className="modal-input"
+                    placeholder="Enter new password"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* ট্রিক সাবমিট ফর্ম */}
+            {activeModal === "trick" && (
+              <div className="form-group">
+                <label className="form-label">Your Trick</label>
+                <textarea 
+                  className="modal-input modal-textarea"
+                  placeholder="Write your trick here..."
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                />
+              </div>
             )}
 
             {modalMessage.text && (
@@ -219,13 +322,13 @@ export default function ProfilePage() {
                 {modalMessage.text}
               </p>
             )}
+          </div>
 
-            <div className="modal-buttons">
-              <button onClick={closeModal} className="btn-cancel">Cancel</button>
-              <button onClick={handleModalSubmit} disabled={isSubmitting} className="btn-submit">
-                {isSubmitting ? "Saving..." : "Submit"}
-              </button>
-            </div>
+          {/* মডাল ফুটার (সাবমিট বাটন) */}
+          <div className="modal-footer">
+            <button onClick={handleModalSubmit} disabled={isSubmitting} className="btn-submit">
+              {isSubmitting ? "Saving..." : "Confirm & Save"}
+            </button>
           </div>
         </div>
       )}
