@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowLeft, MoreVertical, Wifi, Check } from "lucide-react";
 
 export default function ProfilePage() {
   const [selectedMethod, setSelectedMethod] = useState("visa");
@@ -16,7 +15,38 @@ export default function ProfilePage() {
   const emergencyFund = 280;
   const transactionFee = 5;
   const vat = 267;
-  const total = adminFee + emergencyFund + transactionFee + vat; // 762 (ছবিতে 765 দেওয়া আছে, আমরা ডাইনামিক রাখলাম)
+  const total = adminFee + emergencyFund + transactionFee + vat;
+
+  // কাস্টম SVG আইকন কম্পোনেন্ট (কোনো প্যাকেজের প্রয়োজন নেই)
+  const BackIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+  );
+
+  const MoreIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="1"></circle>
+      <circle cx="12" cy="5" r="1"></circle>
+      <circle cx="12" cy="19" r="1"></circle>
+    </svg>
+  );
+
+  const WifiIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rotate-90 text-[#07130d]">
+      <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+      <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+      <line x1="12" y1="20" x2="12.01" y2="20"></line>
+    </svg>
+  );
+
+  const CheckIcon = () => (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-black">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  );
 
   return (
     <div className="min-h-screen bg-[#05100b] text-white font-sans flex justify-center">
@@ -26,11 +56,11 @@ export default function ProfilePage() {
         {/* হেডার */}
         <div className="flex items-center justify-between mt-2">
           <button className="p-2 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition">
-            <ArrowLeft size={20} />
+            <BackIcon />
           </button>
           <h1 className="text-lg font-medium tracking-wide">Lottery Wallet</h1>
           <button className="p-2 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition">
-            <MoreVertical size={20} />
+            <MoreIcon />
           </button>
         </div>
 
@@ -60,7 +90,7 @@ export default function ProfilePage() {
 
           {/* কন্টাক্টলেস আইকন */}
           <div className="absolute right-5 top-16 w-8 h-14 bg-[#e0fbf0] rounded-lg flex items-center justify-center opacity-90">
-            <Wifi size={18} className="text-[#07130d] rotate-90" />
+            <WifiIcon />
           </div>
         </div>
 
@@ -77,7 +107,7 @@ export default function ProfilePage() {
             <span className="font-bold italic text-lg">VISA</span>
             {selectedMethod === "visa" && (
               <div className="absolute top-2 right-2 w-4 h-4 bg-[#00ffaa] rounded-full flex items-center justify-center">
-                <Check size={10} className="text-black" />
+                <CheckIcon />
               </div>
             )}
           </button>
@@ -96,7 +126,7 @@ export default function ProfilePage() {
             </div>
             {selectedMethod === "mastercard" && (
               <div className="absolute top-2 right-2 w-4 h-4 bg-[#00ffaa] rounded-full flex items-center justify-center">
-                <Check size={10} className="text-black" />
+                <CheckIcon />
               </div>
             )}
           </button>
@@ -112,7 +142,7 @@ export default function ProfilePage() {
             <span className="font-bold text-lg font-serif">WISE</span>
             {selectedMethod === "wise" && (
               <div className="absolute top-2 right-2 w-4 h-4 bg-[#00ffaa] rounded-full flex items-center justify-center">
-                <Check size={10} className="text-black" />
+                <CheckIcon />
               </div>
             )}
           </button>
