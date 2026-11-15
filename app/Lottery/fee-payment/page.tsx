@@ -22,6 +22,7 @@ export default function FeePaymentPage() {
   const [copiedAmount, setCopiedAmount] = useState(false);
 
   useEffect(() => {
+    // ১. ডাটা ফেচ করার ফাংশন
     const fetchData = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -39,11 +40,17 @@ export default function FeePaymentPage() {
         if (settingsData) setSettings(settingsData);
       } catch (error) {
         console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
       }
     };
-    fetchData();
+
+    // ২. ৩.১ সেকেন্ডের (৩১০০ মিলি সেকেন্ড) টাইমার
+    const timer = new Promise((resolve) => setTimeout(resolve, 3100));
+
+    // ৩. ডাটা এবং টাইমার দুটোই শেষ হওয়ার পর loading false হবে
+    Promise.all([fetchData(), timer]).then(() => {
+      setLoading(false);
+    });
+
   }, [router]);
 
   const copyNumber = () => {
@@ -110,6 +117,7 @@ export default function FeePaymentPage() {
     }
   };
 
+  // ৩.১ সেকেন্ডের লোডিং স্ক্রিন
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
@@ -224,7 +232,6 @@ export default function FeePaymentPage() {
           disabled={submitting || !trxId || totalFeeAmount <= 0}
           className="submit-btn"
         >
-          {/* বাটনে অ্যামাউন্ট দেখানো বন্ধ করা হলো */}
           {submitting ? t("Processing...", "প্রসেসিং...") : t("Pay Fee", "ফি পরিশোধ করুন")}
         </button>
       </div>
