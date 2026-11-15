@@ -28,11 +28,6 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
     </svg>
   ),
-  Back: () => (
-    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
-  ),
   Ticket: () => (
     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z" />
@@ -81,7 +76,8 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
   const handleBuyTicketsClick = () => {
     setIsMenuOpen(false);
     if (!isLoggedIn) {
-      router.push("/user/login");
+      // ইউজার লগইন না থাকলে লগইন পেজে পাঠাবে এবং লগইন শেষে লটারি পেজে ফেরত আনবে
+      router.push("/user/login?redirect=/Lottery");
     } else {
       router.push("/Lottery");
     }
@@ -92,10 +88,7 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
       <header className="bg-[#183F35] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#26352e]">
         
         <div className="flex items-center gap-3">
-          {/* Back Button */}
-          <button onClick={() => router.push("/")} className="text-white">
-            <Icons.Back />
-          </button>
+          {/* Back Button সরিয়ে দেওয়া হয়েছে */}
           
           {/* Lotto Logo/Text */}
           <div className="flex flex-col">
@@ -106,13 +99,29 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
         </div>
         
         <div className="flex items-center gap-3">
-          {/* Lottery Balance */}
-          {isLoggedIn && (
+          {/* Lottery Balance (লগইন থাকলে দেখাবে) */}
+          {isLoggedIn ? (
             <div className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full border border-[#26352e]">
               <Icons.Wallet />
               <span className="text-white text-[11px] font-bold">
                 ৳ {hideBalance ? "****" : (Number(userProfile?.lottery_balance) || 0).toFixed(2)}
               </span>
+            </div>
+          ) : (
+            /* লগইন না থাকলে Login এবং Signup বাটন দেখাবে */
+            <div className="flex items-center gap-2">
+              <Link 
+                href="/user/login?redirect=/Lottery" 
+                className="border border-white text-white px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-white/10 transition"
+              >
+                {t("Login", "লগইন")}
+              </Link>
+              <Link 
+                href="/user/signup?redirect=/Lottery" 
+                className="bg-[#F5B041] text-black px-3 py-1.5 rounded-full text-[11px] font-bold hover:opacity-90 transition"
+              >
+                {t("Signup", "সাইনআপ")}
+              </Link>
             </div>
           )}
 
@@ -128,7 +137,6 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
       {/* Dropdown Menu Overlay */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setIsMenuOpen(false)}>
-          {/* মেনুটি যাতে হেডারের নিচে ঠিকমতো বসে, সেজন্য top-[64px] এবং mt-2 ব্যবহার করা হয়েছে */}
           <div 
             className="absolute top-[60px] right-3 mt-1 w-64 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
             onClick={(e) => e.stopPropagation()}
