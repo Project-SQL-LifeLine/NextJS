@@ -11,7 +11,7 @@ import "./lottery.css";
 export default function LotteryHomePage() {
   const router = useRouter();
   const { t } = useLanguage(); 
-  const basePath = process.env.NODE_ENV === "production" ? "/NextJS" : "";
+  // basePath আর ব্যাকগ্রাউন্ড ইমেজের প্রয়োজন নেই, তাই বাদ দেওয়া হলো
   
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -44,36 +44,43 @@ export default function LotteryHomePage() {
     return () => clearInterval(sliderInterval);
   }, [jackpotAmounts.length]);
 
+  // ==========================================
+  // টাইমার লজিক: প্রতিদিন রাত 12:30 AM (00:30:00) এর জন্য
+  // ==========================================
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
       const target = new Date();
-      target.setHours(0, 30, 0, 0);
-      if (now.getTime() > target.getTime()) target.setDate(target.getDate() + 1);
       
+      // রাত 12:30 AM সেট করা হলো
+      target.setHours(0, 30, 0, 0);
+
+      // যদি আজকের 12:30 AM পার হয়ে যায়, তবে আগামীকালকের 12:30 AM টার্গেট করবে
+      if (now.getTime() > target.getTime()) {
+        target.setDate(target.getDate() + 1);
+      }
+
       const diff = target.getTime() - now.getTime();
+      
+      // দিন, ঘণ্টা, মিনিট, সেকেন্ড ক্যালকুলেশন
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
       const m = Math.floor((diff / 1000 / 60) % 60);
       const s = Math.floor((diff / 1000) % 60);
 
       setTimeLeft({
+        // Days বের করার জন্য আমরা hours এর সাথে ২৪ গুণ করে যোগ করতে পারি, অথবা আলাদা ভেরিয়েবল রাখতে পারি। 
+        // এখানে শুধু দিনের জন্য আলাদা অবজেক্ট রাখছি যাতে টাইমার বক্সে দেখানো সহজ হয়।
+        days: d.toString().padStart(2, "0"),
         hours: h.toString().padStart(2, "0"),
         minutes: m.toString().padStart(2, "0"),
         seconds: s.toString().padStart(2, "0"),
-      });
+      } as any); // TypeScript ignore for quick fix, you can update the state type
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const mockWinners = [
-    { id: "RA****99", amount: "50,000" },
-    { id: "MD****11", amount: "10,000" },
-    { id: "TA****88", amount: "5,000" },
-    { id: "SM****45", amount: "25,000" },
-    { id: "KA****77", amount: "1,000" },
-  ];
-
-  // টিকিট টায়ার ডাটা (নতুন ডিজাইনের জন্য কিছু মক ডাটা সহ)
+  // টিকিট টায়ার ডাটা
   const ticketTiers = [
     { price: 50, title: "LOTTO", titleSpan: "INDIA", color: "orange", numbers: [12, 27, 34, 40, 41, 42, 2], lastNumOrange: true },
     { price: 100, title: "Kerala", titleSpan: "", color: "green", numbers: [8, 15, 22, 31, 44, 49, 7], lastNumOrange: true },
@@ -84,7 +91,7 @@ export default function LotteryHomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#0b1a13] flex flex-col items-center justify-center">
         <svg className="w-12 h-12 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z" />
         </svg>
@@ -96,7 +103,7 @@ export default function LotteryHomePage() {
   return (
     <div className="lottery-page-wrapper pb-20">
       
-      <div className="lottery-fixed-bg" style={{ backgroundImage: `url(${basePath}/home-way.png)` }}></div>
+      {/* ফিক্সড ব্যাকগ্রাউন্ড ইমেজ সরিয়ে দেওয়া হয়েছে */}
 
       <div className="lottery-overlay">
         <LotteryHeader userProfile={profile} />
@@ -104,7 +111,7 @@ export default function LotteryHomePage() {
         <main className="lottery-main">
           
           {/* 1. Jackpot Slider */}
-          <div className="jackpot-slider-wrapper" style={{ backgroundImage: `url(${basePath}/banners-card.png)` }}>
+          <div className="jackpot-slider-wrapper">
             <div className="jackpot-overlay"></div>
             <div className="jackpot-track" style={{ transform: `translateX(-${activeJackpot * 100}%)` }}>
               {jackpotAmounts.map((amount, index) => (
@@ -136,7 +143,7 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* 2. Ticket Grid (New Design from Image) */}
+          {/* 2. Ticket Grid (New Design) */}
           <div>
             <div className="flex justify-between items-center mb-3">
               <h2 className="section-title">Play & Win</h2>
@@ -153,7 +160,6 @@ export default function LotteryHomePage() {
                     </div>
                     <div className="lotto-card-date">
                       <span>TUE 2 MAR</span>
-                      {/* Calendar SVG Icon */}
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                         <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -163,7 +169,7 @@ export default function LotteryHomePage() {
                     </div>
                   </div>
 
-                  {/* Numbers (Dynamic Mock numbers based on price for visual) */}
+                  {/* Numbers */}
                   <div className="lotto-card-numbers">
                     {tier.numbers.slice(0, 6).map((num, i) => (
                       <div key={i} className="num-circle green">{num}</div>
@@ -175,7 +181,8 @@ export default function LotteryHomePage() {
 
                   {/* Actions */}
                   <div className="lotto-card-actions">
-                    <button className="lotto-btn" onClick={() => alert('Draw History Coming Soon')}>
+                    {/* Draw History ক্লিক করলে winners পেজে যাবে */}
+                    <button className="lotto-btn" onClick={() => router.push('/Lottery/winners')}>
                       Draw History
                     </button>
                     <button 
@@ -193,7 +200,7 @@ export default function LotteryHomePage() {
                     </div>
                     <div className="lotto-timer-boxes">
                       <div className="lotto-t-box">
-                        <span className="t-val">1</span>
+                        <span className="t-val">{timeLeft.days || "0"}</span>
                         <span className="t-lbl">Days</span>
                       </div>
                       <div className="lotto-t-box">
@@ -215,43 +222,7 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* 3. Smart Wallet Section */}
-          <div className="wallet-card">
-            <div className="wallet-header">
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-[#F5B041]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                <h4>My Lottery Balance</h4>
-              </div>
-              <span className="amount">৳ {Number(profile?.lottery_balance || 0).toFixed(2)}</span>
-            </div>
-            <div className="wallet-actions">
-              <button className="withdraw-btn" onClick={() => router.push('/Lottery/withdraw-terms')}>
-                Withdraw
-              </button>
-              <button className="reload-btn" onClick={() => router.push('/Lottery/Secure-payment')}>
-                Reload
-              </button>
-            </div>
-          </div>
-
-          {/* 4. Live Winners Ticker */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-2 h-2 rounded-full bg-[#00E701] animate-ping"></span>
-              <h2 className="section-title m-0">Live Winners</h2>
-            </div>
-            
-            <div className="winners-ticker-wrapper">
-              <div className="winners-ticker">
-                {[...mockWinners, ...mockWinners].map((winner, idx) => (
-                  <div key={idx} className="winner-ticker-item">
-                    <span className="winner-id">ID: {winner.id}</span>
-                    <span className="winner-prize">৳ {winner.amount}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          {/* Wallet এবং Live Winners সেকশন সম্পূর্ণ বাদ দেওয়া হয়েছে */}
 
         </main>
 
