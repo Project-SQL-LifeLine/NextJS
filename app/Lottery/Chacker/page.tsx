@@ -1,290 +1,67 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "../../../lib/supabase/client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useLanguage } from "../../../lib/LanguageContext";
 
-// TypeScript এর জন্য BarcodeDetector ডিক্লেয়ার করা
-declare global {
-  interface Window {
-    BarcodeDetector: any;
-  }
-}
+export default function LotteryFooter() {
+  const pathname = usePathname();
+  const { t } = useLanguage();
 
-export default function TicketCheckerPage() {
-  const router = useRouter();
-  
-  const [ticketNumber, setTicketNumber] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
-  const [errorMsg, setErrorMsg] = useState("");
-  
-  const [showScanner, setShowScanner] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-
-  // ==========================================
-  // সার্চ বা স্ক্যান করে ডাটা বের করার ফাংশন
-  // ==========================================
-  const checkTicket = useCallback(async (numberToCheck: string) => {
-    const cleanNumber = numberToCheck.replace(/\s/g, '');
-    
-    if (!cleanNumber || cleanNumber.length < 10) {
-      setErrorMsg("অনুগ্রহ করে সঠিক ১২ ডিজিটের টিকিট নাম্বার দিন।");
-      return;
-    }
-
-    setLoading(true);
-    setResult(null);
-    setErrorMsg("");
-    setShowScanner(false); // স্ক্যানার বন্ধ
-
-    try {
-      const { data, error } = await supabase
-        .from("ticket_transactions")
-        .select("*")
-        .eq("ticket_number", cleanNumber)
-        .eq("transaction_type", "ticket_purchase")
-        .eq("status", "approved")
-        .maybeSingle();
-
-      if (error) {
-        console.error("Supabase Error:", error);
-        setErrorMsg("সার্ভারে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
-      } else if (!data) {
-        setErrorMsg("❌ এই টিকিটটি আমাদের ডাটাবেসে পাওয়া যায়নি। এটি নকল হতে পারে!");
-      } else {
-        setResult(data);
-      }
-    } catch (err) {
-      console.error(err);
-      setErrorMsg("সার্ভারে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // ==========================================
-  // ক্যামেরা স্ট্রিম বন্ধ করার ফাংশন
-  // ==========================================
-  const stopScanner = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-  }, []);
-
-  // ==========================================
-  // নেটিভ BarcodeDetector API দিয়ে স্ক্যানার লজিক
-  // ==========================================
-  useEffect(() => {
-    let barcodeDetector: any = null;
-    let animationFrameId: number;
-
-    const startScanner = async () => {
-      try {
-        // চেক করা হচ্ছে ব্রাউজার BarcodeDetector সাপোর্ট করে কিনা
-        if (!("BarcodeDetector" in window)) {
-          setErrorMsg("আপনার ব্রাউজারটি বারকোড স্ক্যান সমর্থন করে না। ম্যানুয়ালি টিকিট নাম্বার দিন।");
-          setShowScanner(false);
-          return;
-        }
-
-        // নির্দিষ্ট ফরম্যাট না দিয়ে ডিফল্ট কনস্ট্রাক্টর ব্যবহার করা হলো (ক্র্যাশ রোধে)
-        barcodeDetector = new window.BarcodeDetector();
-
-        // ক্যামেরা চালু করা
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-        });
-        
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-
-        const scanFrame = async () => {
-          // readyState === 4 মানে ভিডিও প্লে হওয়ার জন্য রেডি
-          if (videoRef.current && videoRef.current.readyState === 4) {
-            try {
-              const barcodes = await barcodeDetector.detect(videoRef.current);
-              if (barcodes.length > 0) {
-                const scannedValue = barcodes[0].rawValue;
-                setTicketNumber(scannedValue);
-                checkTicket(scannedValue);
-                stopScanner();
-                return;
-              }
-            } catch (e) {
-              // স্ক্যান এরর ইগনোর (প্রায়ই হয় যখন ফ্রেমে কোনো বারকোড থাকে না)
-            }
-          }
-          animationFrameId = requestAnimationFrame(scanFrame);
-        };
-        
-        animationFrameId = requestAnimationFrame(scanFrame);
-
-      } catch (err) {
-        console.error("Camera/Scanner error:", err);
-        setErrorMsg("ক্যামেরা চালু করতে সমস্যা হয়েছে। পারমিশন চেক করুন।");
-        setShowScanner(false);
-      }
-    };
-
-    if (showScanner) {
-      startScanner();
-    }
-
-    return () => {
-      stopScanner();
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
-  }, [showScanner, checkTicket, stopScanner]);
+  const isActive = (path: string) => pathname === path;
 
   return (
-    <div className="min-h-screen bg-[#0b1a13] text-white p-4 pb-20 font-sans">
+    <nav className="bg-[#184f35] border-t border-[#26352e] fixed bottom-0 w-full flex justify-around items-center py-1 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
       
-      {/* হেডার */}
-      <div className="flex items-center gap-4 mb-6 mt-2">
-        <button onClick={() => router.back()} className="p-2 bg-white/5 rounded-xl border border-white/10">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
+      {/* 1. Home / Play */}
+      <Link href="/Lottery" className={`flex flex-col items-center cursor-pointer transition-colors text-white`}>
+        <div className={`p-1 rounded-lg ${isActive("/Lottery") ? "bg-white/10" : ""}`}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-        </button>
-        <h1 className="text-xl font-bold tracking-wide">Ticket Checker</h1>
-      </div>
-
-      {/* ইনপুট এবং স্ক্যান বাটন */}
-      <div className="bg-[#103626] p-5 rounded-2xl border border-white/10 shadow-lg mb-6">
-        <label className="text-xs text-[#A0ADB0] mb-2 block">Enter 12-Digit Ticket Number</label>
-        
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-            </div>
-            <input
-              type="text"
-              className="w-full bg-[#0b1a13] border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#00ffaa]"
-              placeholder="e.g. 2152 2618 4808"
-              value={ticketNumber}
-              onChange={(e) => setTicketNumber(e.target.value)}
-              maxLength={15}
-            />
-          </div>
-          
-          <button
-            onClick={() => setShowScanner(true)}
-            className="bg-[#184f35] hover:bg-[#1f6343] border border-[#2e9b4a] px-4 rounded-xl flex items-center justify-center transition-colors"
-            title="Scan Barcode"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00ffaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
-              <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
-              <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
-              <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
-              <rect x="7" y="7" width="3" height="10"></rect>
-              <rect x="12" y="7" width="2" height="10"></rect>
-              <rect x="16" y="7" width="1" height="10"></rect>
-            </svg>
-          </button>
         </div>
+        <span className="text-[9px] font-bold mt-0.5">{t("Play", "খেলুন")}</span>
+      </Link>
 
-        <button
-          onClick={() => checkTicket(ticketNumber)}
-          disabled={loading}
-          className="w-full mt-4 bg-[#00ffaa] text-[#0b1a13] font-bold py-3 rounded-xl hover:bg-[#00e699] transition-colors disabled:opacity-50"
-        >
-          {loading ? "Searching..." : "Check Ticket"}
-        </button>
-      </div>
-
-      {/* স্ক্যানার কন্টেইনার */}
-      {showScanner && (
-        <div className="mb-6 rounded-2xl overflow-hidden border-2 border-[#00ffaa] bg-black relative">
-          <div className="bg-[#184f35] p-2 text-center text-sm text-white flex justify-between items-center">
-            <span>Scanning Barcode...</span>
-            <button onClick={() => setShowScanner(false)} className="text-red-400 font-bold px-2">Close</button>
-          </div>
-          <video 
-            ref={videoRef} 
-            autoPlay 
-            playsInline 
-            className="w-full h-64 object-cover"
-          ></video>
-          
-          {/* স্ক্যানার ওভারলে গ্রাফিক্স */}
-          <div className="absolute inset-0 border-2 border-[#00ffaa]/50 m-8 pointer-events-none rounded-lg">
-             <div className="w-full h-0.5 bg-red-500 absolute top-1/2 -translate-y-1/2 animate-pulse"></div>
-          </div>
+      {/* 2. Checker (New) */}
+      <Link href="/Lottery/Chacker" className={`flex flex-col items-center cursor-pointer transition-colors text-white`}>
+        <div className={`p-1 rounded-lg ${isActive("/Lottery/Chacker") ? "bg-white/10" : ""}`}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
-      )}
+        <span className="text-[9px] font-bold mt-0.5">{t("Checker", "চেকার")}</span>
+      </Link>
 
-      {/* এরর মেসেজ */}
-      {errorMsg && (
-        <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-xl text-center text-sm font-semibold mb-6">
-          {errorMsg}
+      {/* 3. My Tickets (Path Updated) */}
+      <Link href="/Lottery/tickets-buy-activity" className={`flex flex-col items-center cursor-pointer transition-colors text-white`}>
+        <div className={`p-1 rounded-lg ${isActive("/Lottery/tickets-buy-activity") ? "bg-white/10" : ""}`}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z" />
+          </svg>
         </div>
-      )}
+        <span className="text-[9px] font-bold mt-0.5">{t("Tickets", "টিকিট")}</span>
+      </Link>
 
-      {/* রেজাল্ট কার্ড */}
-      {result && (
-        <div className="bg-gradient-to-br from-[#184f35] to-[#0b1a13] border border-[#2e9b4a] p-6 rounded-2xl shadow-[0_0_20px_rgba(46,155,74,0.2)] relative overflow-hidden">
-          
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/5 text-6xl font-black rotate-12 pointer-events-none">
-            VERIFIED
-          </div>
-
-          <div className="flex justify-between items-start mb-6 relative z-10">
-            <div>
-              <h2 className="text-[#00ffaa] font-black text-xl mb-1 flex items-center gap-2">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-                REAL TICKET
-              </h2>
-              <p className="text-xs text-gray-400">This ticket is authentic and valid.</p>
-            </div>
-            <div className="bg-[#00ffaa] text-[#0b1a13] px-3 py-1 rounded-full text-xs font-bold">
-              APPROVED
-            </div>
-          </div>
-
-          <div className="space-y-3 text-sm border-t border-white/10 pt-4 relative z-10">
-            <div className="flex justify-between">
-              <span className="text-gray-400">Ticket Number:</span>
-              <span className="font-mono font-bold text-white tracking-widest">
-                {result.ticket_number.match(/.{1,4}/g)?.join("  ") || result.ticket_number}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Ticket Tier:</span>
-              <span className="font-bold text-[#F5B041]">৳ {result.ticket_tier}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Purchase Date:</span>
-              <span className="text-white">
-                {new Date(result.created_at).toLocaleDateString('en-GB', {
-                  day: 'numeric', month: 'short', year: 'numeric',
-                  hour: '2-digit', minute: '2-digit'
-                })}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Transaction ID:</span>
-              <span className="text-white font-mono text-xs">{result.id.split('-')[0]}...</span>
-            </div>
-          </div>
+      {/* 4. Winners */}
+      <Link href="/Lottery/winners" className={`flex flex-col items-center cursor-pointer transition-colors text-white`}>
+        <div className={`p-1 rounded-lg ${isActive("/Lottery/winners") ? "bg-white/10" : ""}`}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
         </div>
-      )}
+        <span className="text-[9px] font-bold mt-0.5">{t("Winners", "বিজয়ী")}</span>
+      </Link>
 
-    </div>
+      {/* 5. Withdraw */}
+      <Link href="/Lottery/withdraw-terms" className={`flex flex-col items-center cursor-pointer transition-colors text-white`}>
+        <div className={`p-1 rounded-lg ${isActive("/Lottery/withdraw-terms") || isActive("/Lottery/Secure-cashout-activity") || isActive("/Lottery/fee-payment") ? "bg-white/10" : ""}`}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <span className="text-[9px] font-bold mt-0.5">{t("Withdraw", "উত্তোলন")}</span>
+      </Link>
+    </nav>
   );
 }
