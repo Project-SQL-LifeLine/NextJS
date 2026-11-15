@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
 import LotteryHeader from "../Header/Header";
+// আপনার নির্দেশনা অনুযায়ী সঠিক ফুটার পাথ
 import LotteryFooter from "../Footer/Footer";
 import "./winners.css";
 
@@ -12,7 +13,7 @@ export default function WinnersPage() {
   
   const [profile, setProfile] = useState<any>(null);
   const [winners, setWinners] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // কন্ট্রোল লোডিং স্ক্রিন
   
   // কপি স্টেট (আইডি এবং টাইপ ট্র্যাক করার জন্য)
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -33,6 +34,9 @@ export default function WinnersPage() {
   };
 
   useEffect(() => {
+    // ৩.১ সেকেন্ড (৩১০০ মিলি সেকেন্ড) টাইমার
+    const timer = new Promise((resolve) => setTimeout(resolve, 3100));
+
     const fetchData = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -58,18 +62,45 @@ export default function WinnersPage() {
         if (drawsData) setWinners(drawsData);
       } catch (err) {
         console.error("Error fetching winners:", err);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchData();
+    // Promise.all ব্যবহার করে ডাটা ফেচ এবং ৩.১ সেকেন্ড টাইমার একসাথে রান করা হচ্ছে
+    // যাতে ডাটা আগে লোড হলেও টাইমার শেষ হওয়ার আগে লোডার না সরে
+    Promise.all([fetchData(), timer]).then(() => {
+      setLoading(false);
+    });
+
   }, []);
 
+  // ==========================================
+  // ৩.১ সেকেন্ডের সাদা লটারি SVG অ্যানিমেশন
+  // ==========================================
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0d241e] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#FFFFFF] border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center relative overflow-hidden">
+        {/* ব্যাকগ্রাউন্ড সিম্বল (অ্যানিমেশন চলাকালীন) */}
+        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' stroke=\'%23ffffff\' stroke-width=\'1\'%3E%3Cpath d=\'M30 10l5 15h15l-12 9 5 15-13-9-13 9 5-15-12-9h15z\'/%3E%3C/g%3E%3C/svg%3E')] bg-repeat"></div>
+        
+        <div className="relative z-10 flex flex-col items-center">
+          {/* সাদা লটারি টিকিট / ট্রফি SVG */}
+          <div className="lottery-winner-loader">
+            <svg 
+              className="w-16 h-16 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.6)]" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24" 
+              strokeWidth="1.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z" />
+            </svg>
+          </div>
+          <p className="text-white mt-6 font-bold tracking-widest animate-pulse text-[12px]">
+            LOADING WINNERS...
+          </p>
+        </div>
       </div>
     );
   }
@@ -134,7 +165,7 @@ export default function WinnersPage() {
                         )}
                       </div>
                       
-                      {/* Verify ID (পূর্বে Seed ID ছিল) এবং কপি বাটন */}
+                      {/* Verify ID এবং কপি বাটন */}
                       <div className="winner-details-box">
                         <span className="detail-label">Verify ID:</span>
                         <span className="detail-value">
