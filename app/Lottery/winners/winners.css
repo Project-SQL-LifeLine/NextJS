@@ -4,13 +4,17 @@
   font-family: inherit;
   position: relative;
   background-color: #0d241e;
+  
+  /* মেইন ব্যাকগ্রাউন্ডে লটারি থিমের সাদা SVG সিম্বল */
+  background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M40 20h40v15a20 20 0 0 1-40 0V20z'/%3E%3Cpath d='M30 25h10M80 25h10'/%3E%3Cpath d='M60 55v15m-15 10h30'/%3E%3Ccircle cx='90' cy='40' r='5'/%3E%3Ccircle cx='30' cy='80' r='5'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 150px 150px;
 }
 
-/* ব্যাকগ্রাউন্ড ছবির ওপর কালো ও সবুজের মিশ্রণ (যাতে টেক্সট পড়া যায়) */
+/* ব্যাকগ্রাউন্ড ওভারলে */
 .winners-overlay {
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(to bottom, rgba(13, 36, 30, 0.7), rgba(13, 36, 30, 0.95));
+  background: linear-gradient(to bottom, rgba(13, 36, 30, 0.85), rgba(13, 36, 30, 0.95));
   padding-bottom: 80px;
 }
 
@@ -26,7 +30,7 @@
 .winners-title {
   font-size: 16px;
   font-weight: 800;
-  color: #FFFFFF;
+  color: #FFFFFF; /* White */
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -41,17 +45,21 @@
   gap: 12px;
 }
 
-/* নতুন গ্লাস ইফেক্ট (Glassmorphism) লিস্ট আইটেম */
+/* গ্লাস ইফেক্ট লিস্ট আইটেম */
 .winner-list-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: rgba(27, 42, 35, 0.85); /* হালকা ট্রান্সপারেন্ট ব্যাকগ্রাউন্ড */
-  backdrop-filter: blur(10px); /* গ্লাস ইফেক্ট */
-  border: 1px solid rgba(43, 66, 54, 0.8);
+  background: rgba(27, 42, 35, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15); /* White border */
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  
+  /* গ্রিড কার্ডেও সাদা SVG সিম্বল */
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1.5'%3E%3Cpath d='M20 20l10 10m-10 0l10-10'/%3E%3Cpath d='M70 70l10 10m-10 0l10-10'/%3E%3Ccircle cx='80' cy='20' r='4'/%3E%3Ccircle cx='20' cy='80' r='4'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 80px;
 }
 
 .winner-left {
@@ -65,13 +73,13 @@
 .winner-id {
   font-size: 14px;
   font-weight: 800;
-  color: #FFFFFF;
+  color: #FFFFFF; /* White */
   font-family: monospace;
 }
 
 .winner-date {
   font-size: 10px;
-  color: #A0ADB0;
+  color: rgba(255, 255, 255, 0.7); /* Light White */
 }
 
 .winner-badge {
@@ -92,21 +100,21 @@
   background: rgba(0, 0, 0, 0.4);
   padding: 4px 8px;
   border-radius: 4px;
-  border: 1px solid #2B4236;
+  border: 1px solid rgba(255, 255, 255, 0.15); /* White border */
   width: fit-content;
   max-width: 100%;
 }
 
 .detail-label {
   font-size: 9px;
-  color: #A0ADB0;
+  color: rgba(255, 255, 255, 0.8); /* Light White */
   font-weight: 600;
   white-space: nowrap;
 }
 
 .detail-value {
   font-size: 10px;
-  color: #F5B041;
+  color: #FFFFFF; /* Gold to White */
   font-family: monospace;
   font-weight: 700;
   white-space: nowrap;
@@ -125,12 +133,12 @@
   justify-content: center;
   padding: 0;
   margin-left: 4px;
-  color: #A0ADB0;
+  color: rgba(255, 255, 255, 0.7); /* Grey to Light White */
   transition: color 0.2s;
 }
 
 .copy-btn:hover {
-  color: #F5B041;
+  color: #FFFFFF; /* Gold to White */
 }
 
 /* ডান দিকের অংশ */
@@ -145,14 +153,14 @@
 .winner-prize {
   font-size: 16px;
   font-weight: 900;
-  color: #00E701;
+  color: #00E701; /* Prize amount remains Green for visual hierarchy */
   white-space: nowrap;
   text-shadow: 0 0 10px rgba(0, 231, 1, 0.3);
 }
 
 .winner-tier {
   font-size: 9px;
-  color: #A0ADB0;
+  color: rgba(255, 255, 255, 0.8); /* Grey to Light White */
   font-weight: 700;
   white-space: nowrap;
 }
@@ -177,9 +185,9 @@
   text-align: center;
   padding: 40px 16px;
   background: rgba(27, 42, 35, 0.85);
-  border: 1px dashed #2B4236;
+  border: 1px dashed rgba(255, 255, 255, 0.2); /* White border */
   border-radius: 12px;
-  color: #A0ADB0;
+  color: rgba(255, 255, 255, 0.8); /* Light White */
   backdrop-filter: blur(10px);
 }
 
@@ -187,5 +195,6 @@
   width: 48px;
   height: 48px;
   margin-bottom: 12px;
-  opacity: 0.5;
+  opacity: 0.7;
+  color: #FFFFFF;
 }
