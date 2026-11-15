@@ -53,16 +53,26 @@ export default function LotteryFooter() {
         <span className="text-[9px] font-bold mt-0.5">{t("Winners", "বিজয়ী")}</span>
       </Link>
 
-      {/* 5. Transfer (পূর্বে Withdraw ছিল) */}
+      {/* 5. Transfer */}
       <Link href="/Lottery/withdraw-terms" className={`flex flex-col items-center cursor-pointer transition-colors text-white`}>
         <div className={`p-1 rounded-lg transition-all duration-200 ${isActive("/Lottery/withdraw-terms") || isActive("/Lottery/Secure-cashout-activity") || isActive("/Lottery/fee-payment") ? "bg-[#183f35]" : ""}`}>
-          {/* Transfer Icon (Arrows) */}
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
           </svg>
         </div>
         <span className="text-[9px] font-bold mt-0.5">{t("Transfer", "ট্রান্সফার")}</span>
       </Link>
+
+      {/* 6. Profile (নতুন যুক্ত করা হলো) */}
+      <Link href="/Lottery/Profile" className={`flex flex-col items-center cursor-pointer transition-colors text-white`}>
+        <div className={`p-1 rounded-lg transition-all duration-200 ${isActive("/Lottery/Profile") ? "bg-[#183f35]" : ""}`}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <span className="text-[9px] font-bold mt-0.5">{t("Profile", "প্রোফাইল")}</span>
+      </Link>
+
     </nav>
   );
 }
