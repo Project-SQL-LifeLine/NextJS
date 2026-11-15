@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
 import LotteryHeader from "../Header/Header";
-import LotteryFooter from "../Footer/Footer"; // BottomNav সরিয়ে Footer যুক্ত করা হলো
+import LotteryFooter from "../Footer/Footer";
 import "./withdraw-terms.css";
 
 export default function WithdrawTermsPage() {
@@ -27,12 +27,9 @@ export default function WithdrawTermsPage() {
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
-      } finally {
-        setLoading(false);
       }
     };
     
-    // ২.৯ সেকেন্ডের লোডিং টাইমার
     const timer = new Promise((resolve) => setTimeout(resolve, 2900));
     Promise.all([fetchData(), timer]).then(() => {
       setLoading(false);
@@ -79,20 +76,20 @@ export default function WithdrawTermsPage() {
   }
 
   return (
-    // h-[100dvh] এবং overflow-hidden ব্যবহার করে পেজ স্ক্রল বন্ধ করা হয়েছে
+    /* h-[100dvh] এবং overflow-hidden দিয়ে পুরো স্ক্রিন ফিক্স করা হয়েছে */
     <div className="terms-page-wrapper h-[100dvh] flex flex-col overflow-hidden bg-[#0d241e]">
       <LotteryHeader userProfile={profile} />
 
-      {/* flex-1 ব্যবহার করে মেইন কন্টেন্টকে স্ক্রিনের বাকি অংশ দখল করতে দেওয়া হয়েছে */}
-      <div className="terms-page flex-1 flex flex-col px-4 py-3 overflow-hidden">
-        <div className="terms-card flex flex-col h-full max-h-[85vh]">
+      {/* মেইন কন্টেন্ট */
+      /* এখানে pb-[90px] যুক্ত করা হয়েছে যাতে ফুটারের জন্য জায়গা ছেড়ে দেওয়া হয় এবং বাটন উপরে উঠে আসে */}
+      <div className="terms-page flex-1 flex flex-col px-4 pt-3 pb-[90px] overflow-hidden">
+        
+        <div className="terms-card flex flex-col h-full max-h-full">
           <h1 className="terms-title shrink-0">
             {t("Withdrawal Terms & Conditions", "উত্তোলনের শর্তাবলী")}
           </h1>
           
-          {/* এই বক্সটিই শুধু স্ক্রল হবে */}
           <div className="terms-scroll-box flex-1 overflow-y-auto min-h-0 mb-4">
-            
             <h3>{t("1. General Provisions", "১. সাধারণ বিধানাবলী")}</h3>
             <p>{t("By accessing, registering, or participating in any lottery services provided by us, you agree to be bound by these Terms & Conditions. If you do not agree with any part of these terms, you must immediately cease using our services.", "আমাদের প্রদত্ত যেকোনো লটারি পরিষেবা ব্যবহার, নিবন্ধন বা অংশগ্রহণের মাধ্যমে আপনি এই শর্তাবলী মেনে নিতে সম্মত হচ্ছেন। আপনি যদি এই শর্তাবলীর কোনো অংশে সম্মত না হন, তবে অবশ্যই আমাদের পরিষেবা ব্যবহার বন্ধ করতে হবে।")}</p>
             
@@ -121,7 +118,6 @@ export default function WithdrawTermsPage() {
             <p>{t("We reserve the right to update, modify, or change these terms at any time without prior notice. It is the user's responsibility to review the terms periodically.", "আমরা পূর্ব নোটিশ ছাড়াই যেকোনো সময় এই শর্তাবলী আপডেট, পরিবর্তন বা পরিবর্তন করার অধিকার রাখি। শর্তাবলী পর্যায়ক্রমে পর্যালোচনা করা ব্যবহারকারীর দায়িত্ব।")}</p>
           </div>
 
-          {/* চেকবক্স এবং বাটন স্ক্রল হবে না */}
           <div className="shrink-0">
             <label className="terms-checkbox-label">
               <input 
