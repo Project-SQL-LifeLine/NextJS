@@ -167,16 +167,9 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* ২. Jackpot এর ঠিক নিচে ইমেজ */}
-          <div className="w-full mt-1 mb-2">
-            <img 
-              src="https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d5e7a1d3.png" 
-              alt="Lottery Banner Link" 
-              className="w-full h-auto rounded-xl shadow-md object-cover"
-            />
-          </div>
+          {/* ইমেজ সেকশনটি এখান থেকে সরিয়ে দেওয়া হয়েছে */}
 
-          {/* ৩. Ticket Grid (Buy & Win) */}
+          {/* ২. Ticket Grid (Buy & Win) */}
           <div>
             <div className="flex justify-between items-center mb-3">
               <h2 className="section-title">Buy & Win</h2>
@@ -217,14 +210,12 @@ export default function LotteryHomePage() {
                   <div className="lotto-card-actions">
                     <button 
                       className="lotto-btn" 
-                      style={{ backgroundColor: '#184f35', borderColor: '#2e9b4a', color: '#ffffff' }}
                       onClick={() => router.push('/Lottery/winners')}
                     >
                       Draw History
                     </button>
                     <button 
                       className="lotto-btn" 
-                      style={{ backgroundColor: '#184f35', borderColor: '#2e9b4a', color: '#ffffff' }}
                       onClick={() => router.push(`/Lottery/tickets-buy-activity?price=${tier.price}`)}
                     >
                       Buy ৳{tier.price}
