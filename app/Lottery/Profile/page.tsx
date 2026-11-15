@@ -114,8 +114,9 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#05100b] flex flex-col items-center justify-center">
-        <svg className="w-10 h-10 text-[#00ffaa] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
+        {/* সাদা লোডার SVG */}
+        <svg className="w-10 h-10 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
         </svg>
         <p className="text-white mt-4 font-bold tracking-widest animate-pulse text-[11px]">LOADING WALLET...</p>
@@ -181,8 +182,9 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {/* কন্টাক্টলেস আইকন (সাদা SVG) */}
           <div className="v-card-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#07130d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rotate-90">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rotate-90">
               <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
               <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
               <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
