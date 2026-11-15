@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect"); // লটারি রিডাইরেক্ট পাথ
+
   const [isLoadingPage, setIsLoadingPage] = useState(true);
   
   const [gameId, setGameId] = useState("");
@@ -16,7 +19,6 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // useEffect ব্যবহার করা হয়েছে (useState এর ভেতরে টাইমার কাজ করে না)
   useEffect(() => {
     const timer = setTimeout(() => setIsLoadingPage(false), 800);
     return () => clearTimeout(timer);
@@ -51,8 +53,13 @@ export default function LoginPage() {
         if (sessionError) throw sessionError;
       }
 
-      router.push("/");
-      router.refresh(); // হোমপেজে গিয়ে নতুন করে সেশন চেক করার জন্য
+      // রিডাইরেক্ট লজিক
+      if (redirectPath) {
+        router.push(redirectPath);
+      } else {
+        router.push("/");
+      }
+      router.refresh(); 
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -69,18 +76,45 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: "#18221E" }}>
-      
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden" 
+      style={{ backgroundColor: "#18221E" }}
+    >
+      {/* ক্যাসিনো ও লটারি প্রতীকসহ ব্যাকগ্রাউন্ড SVG (কম অপাকিটি) */}
+      <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.04]">
+        <svg 
+          width="100%" 
+          height="100%" 
+          viewBox="0 0 100 100" 
+          preserveAspectRatio="xMidYMid slice" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          strokeWidth="0.5"
+        >
+          {/* Dice (ক্যাসিনো) */}
+          <rect x="10" y="20" width="30" height="30" rx="4" transform="rotate(15 25 35)" />
+          <circle cx="18" cy="28" r="1.5" fill="#FFFFFF" />
+          <circle cx="32" cy="42" r="1.5" fill="#FFFFFF" />
+          <circle cx="25" cy="35" r="1.5" fill="#FFFFFF" />
+          
+          {/* Lottery Ticket/Star (লটারি) */}
+          <path d="M 70 30 L 75 45 L 90 45 L 78 55 L 82 70 L 70 60 L 58 70 L 62 55 L 50 45 L 65 45 Z" />
+          
+          {/* Spade / Card (ক্যাসিনো) */}
+          <path d="M 30 70 C 30 70, 20 85, 20 90 C 20 95, 30 95, 30 90 C 30 95, 40 95, 40 90 C 40 85, 30 70, 30 70 Z" />
+        </svg>
+      </div>
+
       {/* কার্ড সেকশন */}
       <div 
-        className="w-full max-w-sm rounded-xl shadow-lg"
+        className="w-full max-w-sm rounded-xl shadow-lg relative z-10 backdrop-blur-sm"
         style={{ 
-          backgroundColor: "#1B2A23", 
+          backgroundColor: "rgba(27, 42, 35, 0.95)", 
           border: "1px solid #263C32", 
           padding: "24px 20px" 
         }}
       >
-        <h1 className="text-xl font-bold text-white text-center mb-5">Login to your account</h1>
+        <h1 className="text-xl font-bold text-white text-center mb-5">Login Account</h1>
 
         {error && (
           <div 
@@ -93,10 +127,10 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="flex flex-col gap-3">
           <div>
-            <label className="text-sm font-semibold mb-1.5 block" style={{ color: "#A0ADB0" }}>Mobile Number / Game ID</label>
+            {/* লেবেল সরানো হয়েছে */}
             <div 
               className="flex items-center px-3 rounded-lg"
-              style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "42px" }}
+              style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "44px" }}
             >
               <svg className="w-4 h-4 mr-2" style={{ color: "#A0ADB0" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -105,7 +139,7 @@ export default function LoginPage() {
                 type="text"
                 value={gameId}
                 onChange={(e) => setGameId(e.target.value)}
-                placeholder="Enter mobile number or Game ID"
+                placeholder="Mobile Or Id"
                 required
                 className="w-full bg-transparent border-none outline-none text-white text-sm"
               />
@@ -116,7 +150,7 @@ export default function LoginPage() {
             <label className="text-sm font-semibold mb-1.5 block" style={{ color: "#A0ADB0" }}>Password</label>
             <div 
               className="flex items-center px-3 rounded-lg"
-              style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "42px" }}
+              style={{ backgroundColor: "#121816", border: "1px solid #263C32", height: "44px" }}
             >
               <svg className="w-4 h-4 mr-2" style={{ color: "#A0ADB0" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -170,11 +204,19 @@ export default function LoginPage() {
 
         <p className="text-xs text-center mt-4" style={{ color: "#A0ADB0" }}>
           Don't have an account?{" "}
-          <Link href="/user/signup" className="font-semibold hover:underline" style={{ color: "#00E701" }}>
+          <Link href={`/user/signup${redirectPath ? `?redirect=${redirectPath}` : ""}`} className="font-semibold hover:underline" style={{ color: "#00E701" }}>
             Create Account
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" style={{ backgroundColor: "#18221E" }}></div>}>
+      <LoginForm />
+    </Suspense>
   );
 }
