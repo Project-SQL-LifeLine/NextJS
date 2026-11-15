@@ -17,6 +17,9 @@ export default function LotteryHomePage() {
   const [timeLeft, setTimeLeft] = useState({ days: "00", hours: "00", minutes: "00", seconds: "00" });
   const [yesterdayDate, setYesterdayDate] = useState(""); 
   
+  // ইউজারের কেনা টিকিটগুলো রাখার স্টেট (Tier অনুযায়ী)
+  const [userTickets, setUserTickets] = useState<{[key: number]: string}>({});
+  
   const jackpotAmounts = [50000, 100000, 250000, 500000, 1000000];
   const [activeJackpot, setActiveJackpot] = useState(0);
 
@@ -25,11 +28,32 @@ export default function LotteryHomePage() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-          if (data) setProfile(data);
+          // ১. প্রোফাইল ডাটা ফেচ
+          const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+          if (profileData) setProfile(profileData);
+
+          // ২. টিকিট ট্রানজেকশন থেকে টিকিট নাম্বার ফেচ
+          const { data: ticketsData } = await supabase
+            .from("ticket_transactions")
+            .select("ticket_tier, ticket_number")
+            .eq("user_id", user.id)
+            .eq("transaction_type", "ticket_purchase")
+            .eq("status", "approved")
+            .order("created_at", { ascending: false }); // লেটেস্ট টিকিট আগে আসবে
+
+          if (ticketsData) {
+            const ticketsMap: {[key: number]: string} = {};
+            // প্রতিটি টায়ারের জন্য সর্বশেষ কেনা টিকিটটি ম্যাপ করা হচ্ছে
+            ticketsData.forEach(t => {
+              if (!ticketsMap[t.ticket_tier]) {
+                ticketsMap[t.ticket_tier] = t.ticket_number;
+              }
+            });
+            setUserTickets(ticketsMap);
+          }
         }
       } catch (error) {
-        console.error("Error fetching profile:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false); 
       }
@@ -84,11 +108,11 @@ export default function LotteryHomePage() {
   }, []);
 
   const ticketTiers = [
-    { price: 50, title: "LOTTO", titleSpan: "INDIA", color: "orange", numbers: [12, 27, 34, 40, 41, 42, 2], lastNumOrange: true },
-    { price: 100, title: "Kerala", titleSpan: "", color: "green", numbers: [8, 15, 22, 31, 44, 49, 7], lastNumOrange: true },
-    { price: 250, title: "Sambad", titleSpan: "", color: "orange", numbers: [3, 11, 19, 25, 33, 48, 9], lastNumOrange: true },
-    { price: 500, title: "LOTTO", titleSpan: "GOLD", color: "green", numbers: [1, 5, 14, 28, 36, 45, 6], lastNumOrange: true },
-    { price: 1000, title: "LOTTO", titleSpan: "MEGA", color: "orange", numbers: [2, 9, 18, 29, 38, 47, 5], lastNumOrange: true },
+    { price: 50, title: "LOTTO", titleSpan: "INDIA", color: "orange" },
+    { price: 100, title: "Kerala", titleSpan: "", color: "green" },
+    { price: 250, title: "Sambad", titleSpan: "", color: "orange" },
+    { price: 500, title: "LOTTO", titleSpan: "GOLD", color: "green" },
+    { price: 1000, title: "LOTTO", titleSpan: "MEGA", color: "orange" },
   ];
 
   if (loading) {
@@ -143,103 +167,7 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* ২. Today's Jackpot স্লাইডারের ঠিক নিচে আপনার দেওয়া ইমেজ */}
-          <div className="w-full -mt-2 mb-2">
+          {/* ২. Jackpot এর ঠিক নিচে ইমেজ */}
+          <div className="w-full mt-1 mb-2">
             <img 
-              src="https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d5e7a1d3.png" 
-              alt="Lottery Banner Link" 
-              className="w-full h-auto rounded-xl shadow-md object-cover"
-            />
-          </div>
-
-          {/* ৩. Ticket Grid */}
-          <div>
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="section-title">Buy & Win</h2>
-              <span className="text-[10px] text-[#F5B041] font-bold">Select Draw</span>
-            </div>
-            
-            <div className="ticket-list-container">
-              {ticketTiers.map((tier, index) => (
-                <div key={index} className="lotto-card">
-                  {/* Header */}
-                  <div className="lotto-card-header">
-                    <div className={`lotto-card-title ${tier.color}`}>
-                      {tier.title} {tier.titleSpan && <span style={{ color: tier.color === 'orange' ? '#16a34a' : '#f97316' }}>{tier.titleSpan}</span>}
-                    </div>
-                    <div className="lotto-card-date">
-                      {/* গতকালের রিয়েল তারিখ */}
-                      <span>{yesterdayDate}</span> 
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Numbers */}
-                  <div className="lotto-card-numbers">
-                    {tier.numbers.slice(0, 6).map((num, i) => (
-                      <div key={i} className="num-circle green">{num}</div>
-                    ))}
-                    {tier.lastNumOrange && (
-                      <div className="num-circle orange">{tier.numbers[6]}</div>
-                    )}
-                  </div>
-
-                  {/* Actions (নাম্বার কালারের সাথে মিলে বাটন কালার) */}
-                  <div className="lotto-card-actions">
-                    <button 
-                      className="lotto-btn" 
-                      style={{ backgroundColor: '#184f35', borderColor: '#2e9b4a', color: '#ffffff' }}
-                      onClick={() => router.push('/Lottery/winners')}
-                    >
-                      Draw History
-                    </button>
-                    <button 
-                      className="lotto-btn" 
-                      style={{ backgroundColor: '#184f35', borderColor: '#2e9b4a', color: '#ffffff' }}
-                      onClick={() => router.push(`/Lottery/tickets-buy-activity?price=${tier.price}`)}
-                    >
-                      Buy ৳{tier.price}
-                    </button>
-                  </div>
-
-                  {/* Green Timer Bar */}
-                  <div className="lotto-timer-bar">
-                    <div className="lotto-timer-label">
-                      Next<br/>Draw
-                    </div>
-                    <div className="lotto-timer-boxes">
-                      <div className="lotto-t-box">
-                        <span className="t-val">{timeLeft.days}</span>
-                        <span className="t-lbl">Days</span>
-                      </div>
-                      <div className="lotto-t-box">
-                        <span className="t-val">{timeLeft.hours}</span>
-                        <span className="t-lbl">Hours</span>
-                      </div>
-                      <div className="lotto-t-box">
-                        <span className="t-val">{timeLeft.minutes}</span>
-                        <span className="t-lbl">Mins</span>
-                      </div>
-                      <div className="lotto-t-box">
-                        <span className="t-val">{timeLeft.seconds}</span>
-                        <span className="t-lbl">Secs</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </main>
-
-        <Footer />
-      </div>
-    </div>
-  );
-}
+              src="https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d
