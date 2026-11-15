@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase/client";
 import { useLanguage } from "../../lib/LanguageContext";
 import LotteryHeader from "./Header/Header";
-// BottomNav সরিয়ে Footer যুক্ত করা হয়েছে
 import Footer from "./Footer/Footer"; 
 import "./lottery.css";
 
@@ -139,10 +138,19 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
+          {/* 1.5 নতুন যোগ করা ইমেজ ব্যানার */}
+          <div className="w-full mt-2 mb-2">
+            <img 
+              src="https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d5e7a1d3.png" 
+              alt="Lottery Promo Banner" 
+              className="w-full h-auto rounded-lg shadow-lg object-cover"
+            />
+          </div>
+
           {/* 2. Ticket Grid (New Design) */}
           <div>
             <div className="flex justify-between items-center mb-3">
-              <h2 className="section-title">Play & Win</h2>
+              <h2 className="section-title">Buy & Win</h2> {/* Play থেকে Buy করা হলো */}
               <span className="text-[10px] text-[#F5B041] font-bold">Select Draw</span>
             </div>
             
@@ -182,9 +190,10 @@ export default function LotteryHomePage() {
                     </button>
                     <button 
                       className="lotto-btn" 
+                      style={{ backgroundColor: '#183f35', borderColor: '#183f35', color: '#ffffff' }}
                       onClick={() => router.push(`/Lottery/tickets-buy-activity?price=${tier.price}`)}
                     >
-                      Play ৳{tier.price}
+                      Buy ৳{tier.price} {/* Play থেকে Buy করা হলো */}
                     </button>
                   </div>
 
@@ -219,7 +228,6 @@ export default function LotteryHomePage() {
 
         </main>
 
-        {/* BottomNav এর জায়গায় Footer যুক্ত করা হলো */}
         <Footer />
       </div>
     </div>
