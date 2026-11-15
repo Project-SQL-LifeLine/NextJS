@@ -18,6 +18,7 @@ function TicketBuyContent() {
   const [profile, setProfile] = useState<any>(null);
   const [ticketNumber, setTicketNumber] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true); // ২.৯ সেকেন্ডের লোডিং স্টেট
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -30,8 +31,13 @@ function TicketBuyContent() {
     }
   };
 
+  // ২.৯ সেকেন্ড (২৯০০ মিলি সেকেন্ড) লোডিং টাইমার লজিক
   useEffect(() => {
-    fetchData();
+    const timer = new Promise((resolve) => setTimeout(resolve, 2900));
+    
+    Promise.all([fetchData(), timer]).then(() => {
+      setLoading(false);
+    });
   }, []);
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,25 +112,49 @@ function TicketBuyContent() {
   const currentBalance = Number(profile?.lottery_balance || 0);
   const hasEnoughBalance = currentBalance >= ticketPrice;
 
+  // ==========================================
+  // ২.৯ সেকেন্ডের সাদা লটারি SVG অ্যানিমেশন
+  // ==========================================
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
+        <div className="ticket-loader">
+          {/* সাদা টিকিট SVG */}
+          <svg 
+            className="w-16 h-16 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.6)]" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24" 
+            strokeWidth="1.5" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z" />
+          </svg>
+        </div>
+        <p className="text-white mt-6 font-bold tracking-widest animate-pulse text-[12px]">
+          LOADING TICKET...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="ticket-buy-page pb-20">
       <LotteryHeader userProfile={profile} />
 
       <main className="ticket-buy-main">
         
-        {/* নতুন সম্পূর্ণ CSS ভিত্তিক টিকিট ডিজাইন */}
+        {/* সম্পূর্ণ CSS ভিত্তিক টিকিট ডিজাইন */}
         <div className="ticket-preview-card">
-          {/* বাম দিক */}
           <div className="ticket-left">
             <h2 className="ticket-title">LUCKY<br/>TICKET</h2>
             <span className="ticket-subtitle">{t("Official Draw", "অফিসিয়াল ড্র")}</span>
             <div className="ticket-price-tag">৳ {ticketPrice}</div>
           </div>
 
-          {/* মাঝখানের ড্যাশ লাইন */}
           <div className="ticket-divider"></div>
 
-          {/* ডান দিক (বারকোড) */}
           <div className="ticket-right">
             <div className="barcode-vertical-wrapper">
               <img 
@@ -140,21 +170,14 @@ function TicketBuyContent() {
 
         {/* নাম্বার ইনপুট সেকশন */}
         <div className="input-section">
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex justify-between items-center mb-3">
             <h3>{t("Select 12-Digit Ticket Number", "১২ ডিজিটের টিকিট নাম্বার দিন")}</h3>
+            
             {/* Gold থেকে White করা হলো */}
             <span className="text-[10px] text-white font-bold bg-white/10 px-2 py-1 rounded border border-white/30">
               {t("Balance", "ব্যালেন্স")}: ৳ {currentBalance.toFixed(2)}
             </span>
           </div>
-
-          {/* নতুন ডিসক্লেইমার যুক্ত করা হলো */}
-          <p className="disclaimer-text">
-            {t(
-              "Warning: Any attempt at fraud or manipulation will result in temporary suspension of your account for verification.",
-              "সতর্কতা: জালিয়াতি বা কারসাজির কোনো চেষ্টা করা হলে যাচাইয়ের জন্য আপনার অ্যাকাউন্ট সাময়িকভাবে স্থগিত রাখা হতে পারে।"
-            )}
-          </p>
           
           <input
             type="tel"
@@ -181,11 +204,23 @@ function TicketBuyContent() {
 
           {error && <div className="error-msg">{error}</div>}
           {successMsg && <div className="success-msg">{successMsg}</div>}
+
+          {/* নতুন যোগ করা Disclaimer (সতর্কতামূলক বার্তা) */}
+          <div className="disclaimer-box">
+            <p>
+              <strong>⚠️ {t("Disclaimer:", "সতর্কতা:")}</strong>{" "}
+              {t(
+                "If any user attempts fraud, forgery, or manipulation with ticket numbers, the authority reserves the right to temporarily suspend their account for verification purposes.",
+                "যদি কোনো ইউজার জালিয়াতি, টিকিট নাম্বার জাল বা ম্যানিপুলেট করার চেষ্টা করে, তবে যাচাইয়ের জন্য কর্তৃপক্ষ তাদের অ্যাকাউন্ট সাময়িকভাবে স্থগিত রাখার অধিকার রাখে।"
+              )}
+            </p>
+          </div>
+
         </div>
 
       </main>
 
-      {/* সাবমিট বাটন (কন্ডিশনাল) */}
+      {/* সাবমিট বাটন */}
       <div className="submit-btn-wrapper">
         {hasEnoughBalance ? (
           <button 
@@ -198,8 +233,7 @@ function TicketBuyContent() {
         ) : (
           <button 
             onClick={handleReloadBalance} 
-            /* Gold থেকে White করা হলো (Black টেক্সট) */
-            className="buy-ticket-btn !bg-white !text-black !border-black"
+            className="buy-ticket-btn !bg-white !text-black !border-black" /* Gold থেকে White */
           >
             {t("Reload Balance", "ব্যালেন্স রিলোড করুন")}
           </button>
