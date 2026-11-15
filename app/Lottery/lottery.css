@@ -4,6 +4,11 @@
   font-family: inherit;
   position: relative;
   background-color: #0b1a13; /* মেইন ডার্ক ব্যাকগ্রাউন্ড */
+  
+  /* নতুন যোগ করা হয়েছে: সাদা SVG প্যাটার্ন */
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 L35 25 L55 30 L35 35 L30 55 L25 35 L5 30 L25 25 Z' fill='rgba(255,255,255,0.04)' /%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-attachment: fixed; /* স্ক্রল করলেও ব্যাকগ্রাউন্ড ফিক্স থাকবে */
 }
 
 /* Content Overlay */
@@ -12,7 +17,8 @@
   z-index: 1; 
   min-height: 100vh;
   width: 100%;
-  background: #0b1a13;
+  /* ব্যাকগ্রাউন্ড ট্রান্সপারেন্ট করা হলো যাতে SVG প্যাটার্নটি দেখা যায় */
+  background: transparent; 
   padding-bottom: 65px; 
 }
 
@@ -38,7 +44,7 @@
   position: relative;
   padding-bottom: 16px; 
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-  min-height: 160px; /* উচ্চতা কিছুটা বাড়ানো হলো */
+  min-height: 160px; 
   background-color: #103626;
 }
 
@@ -65,7 +71,6 @@
   padding: 20px 16px 15px 16px; 
   text-align: center;
   position: relative;
-  /* টেক্সট নিচের দিকে রাখার জন্য Flexbox */
   display: flex;
   flex-direction: column;
   justify-content: flex-end; 
@@ -169,7 +174,7 @@
 .lotto-card {
   background: linear-gradient(145deg, rgba(27, 42, 35, 0.95), rgba(13, 26, 19, 0.95));
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.08); /* হালকা বর্ডার */
+  border: 1px solid rgba(255, 255, 255, 0.08); 
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(0,0,0,0.4);
@@ -183,7 +188,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px dashed rgba(255,255,255,0.05); /* আলাদা করার জন্য ড্যাশড লাইন */
+  border-bottom: 1px dashed rgba(255,255,255,0.05); 
 }
 
 .lotto-card-title {
@@ -202,18 +207,18 @@
   gap: 6px;
   font-weight: 700;
   font-size: 13px;
-  color: #A0ADB0; /* ডার্ক থিমের জন্য হালকা গ্রে */
+  color: #A0ADB0; 
 }
 
 /* =========================================
-   Real Ticket Number Styles (নতুন আপডেট)
+   Real Ticket Number Styles
    ========================================= */
 .ticket-number-container {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px 16px;
-  min-height: 70px; /* কার্ডের উচ্চতা ঠিক রাখার জন্য */
+  min-height: 70px; 
 }
 
 .ticket-number {
@@ -221,7 +226,7 @@
   font-size: 20px;
   font-weight: 900;
   letter-spacing: 2px;
-  color: #00ffaa; /* নিয়ন গ্রিন */
+  color: #00ffaa; 
   background: #0b1a13;
   padding: 10px 16px;
   border-radius: 8px;
@@ -235,7 +240,7 @@
   font-size: 20px;
   font-weight: 900;
   letter-spacing: 2px;
-  color: #4a5e55; /* ডার্ক গ্রে */
+  color: #4a5e55; 
   padding: 10px 16px;
   border-radius: 8px;
   border: 1px dashed rgba(255, 255, 255, 0.1);
@@ -253,7 +258,7 @@
 .lotto-btn {
   flex: 1;
   padding: 12px 0;
-  border-radius: 8px; /* রাউন্ডেড শেপ */
+  border-radius: 8px; 
   border: 1px solid #2e9b4a;
   background: #184f35;
   color: #ffffff;
@@ -273,7 +278,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(0, 0, 0, 0.25); /* কার্ডের নিচে ডার্ক ওভারলে */
+  background: rgba(0, 0, 0, 0.25); 
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   padding: 12px 16px;
 }
@@ -291,8 +296,8 @@
 }
 
 .lotto-t-box {
-  background: #0b1a13; /* মেইন ব্যাকগ্রাউন্ড কালার */
-  border: 1px solid rgba(0, 255, 170, 0.2); /* হালকা নিয়ন বর্ডার */
+  background: #0b1a13; 
+  border: 1px solid rgba(0, 255, 170, 0.2); 
   border-radius: 6px;
   padding: 6px 8px;
   text-align: center;
@@ -301,7 +306,7 @@
 
 .lotto-t-box .t-val {
   display: block;
-  color: #00ffaa; /* নিয়ন গ্রিন নাম্বার */
+  color: #00ffaa; 
   font-weight: 800;
   font-size: 16px;
   line-height: 1;
