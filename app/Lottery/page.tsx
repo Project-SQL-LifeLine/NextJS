@@ -17,7 +17,6 @@ export default function LotteryHomePage() {
   const [timeLeft, setTimeLeft] = useState({ days: "00", hours: "00", minutes: "00", seconds: "00" });
   const [yesterdayDate, setYesterdayDate] = useState(""); 
   
-  // ইউজারের কেনা টিকিটগুলো রাখার স্টেট (Tier অনুযায়ী)
   const [userTickets, setUserTickets] = useState<{[key: number]: string}>({});
   
   const jackpotAmounts = [50000, 100000, 250000, 500000, 1000000];
@@ -28,22 +27,19 @@ export default function LotteryHomePage() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          // ১. প্রোফাইল ডাটা ফেচ
           const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
           if (profileData) setProfile(profileData);
 
-          // ২. টিকিট ট্রানজেকশন থেকে টিকিট নাম্বার ফেচ
           const { data: ticketsData } = await supabase
             .from("ticket_transactions")
             .select("ticket_tier, ticket_number")
             .eq("user_id", user.id)
             .eq("transaction_type", "ticket_purchase")
             .eq("status", "approved")
-            .order("created_at", { ascending: false }); // লেটেস্ট টিকিট আগে আসবে
+            .order("created_at", { ascending: false }); 
 
           if (ticketsData) {
             const ticketsMap: {[key: number]: string} = {};
-            // প্রতিটি টায়ারের জন্য সর্বশেষ কেনা টিকিটটি ম্যাপ করা হচ্ছে
             ticketsData.forEach(t => {
               if (!ticketsMap[t.ticket_tier]) {
                 ticketsMap[t.ticket_tier] = t.ticket_number;
@@ -68,7 +64,6 @@ export default function LotteryHomePage() {
     return () => clearInterval(sliderInterval);
   }, [jackpotAmounts.length]);
 
-  // গতকালের তারিখ বের করার লজিক
   useEffect(() => {
     const d = new Date();
     d.setDate(d.getDate() - 1); 
@@ -80,7 +75,6 @@ export default function LotteryHomePage() {
     setYesterdayDate(formattedDate);
   }, []);
 
-  // টাইমার লজিক
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
@@ -134,8 +128,11 @@ export default function LotteryHomePage() {
 
         <main className="lottery-main">
           
-          {/* ১. Today's Jackpot Slider */}
-          <div className="jackpot-slider-wrapper">
+          {/* ১. Today's Jackpot Slider (ইমেজ ব্যাকগ্রাউন্ডসহ) */}
+          <div 
+            className="jackpot-slider-wrapper"
+            style={{ backgroundImage: `url(https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d5e7a1d3.png)` }}
+          >
             <div className="jackpot-overlay"></div>
             <div className="jackpot-track" style={{ transform: `translateX(-${activeJackpot * 100}%)` }}>
               {jackpotAmounts.map((amount, index) => (
@@ -167,8 +164,6 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* ইমেজ সেকশনটি এখান থেকে সরিয়ে দেওয়া হয়েছে */}
-
           {/* ২. Ticket Grid (Buy & Win) */}
           <div>
             <div className="flex justify-between items-center mb-3">
@@ -179,7 +174,6 @@ export default function LotteryHomePage() {
             <div className="ticket-list-container">
               {ticketTiers.map((tier, index) => (
                 <div key={index} className="lotto-card">
-                  {/* Header */}
                   <div className="lotto-card-header">
                     <div className={`lotto-card-title ${tier.color}`}>
                       {tier.title} {tier.titleSpan && <span style={{ color: tier.color === 'orange' ? '#16a34a' : '#f97316' }}>{tier.titleSpan}</span>}
@@ -195,7 +189,6 @@ export default function LotteryHomePage() {
                     </div>
                   </div>
 
-                  {/* ডাটাবেস থেকে আসা রিয়েল টিকিট নাম্বার */}
                   <div className="ticket-number-container">
                     {userTickets[tier.price] ? (
                       <span className="ticket-number">
@@ -206,23 +199,15 @@ export default function LotteryHomePage() {
                     )}
                   </div>
 
-                  {/* Actions */}
                   <div className="lotto-card-actions">
-                    <button 
-                      className="lotto-btn" 
-                      onClick={() => router.push('/Lottery/winners')}
-                    >
+                    <button className="lotto-btn" onClick={() => router.push('/Lottery/winners')}>
                       Draw History
                     </button>
-                    <button 
-                      className="lotto-btn" 
-                      onClick={() => router.push(`/Lottery/tickets-buy-activity?price=${tier.price}`)}
-                    >
+                    <button className="lotto-btn" onClick={() => router.push(`/Lottery/tickets-buy-activity?price=${tier.price}`)}>
                       Buy ৳{tier.price}
                     </button>
                   </div>
 
-                  {/* Green Timer Bar */}
                   <div className="lotto-timer-bar">
                     <div className="lotto-timer-label">
                       Next<br/>Draw
