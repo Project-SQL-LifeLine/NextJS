@@ -18,10 +18,10 @@
 /* ফি বক্স ডিজাইন */
 .fee-box {
   background: var(--bg-card, #1B2A23);
-  border: 1px dashed #F5B041;
+  border: 1px dashed #FFFFFF; /* Gold থেকে White */
   border-radius: 12px;
   padding: 20px;
-  background: rgba(245, 176, 65, 0.05);
+  background: rgba(255, 255, 255, 0.05); /* হালকা সাদা ব্যাকগ্রাউন্ড */
 }
 
 .fee-box h3 {
@@ -30,6 +30,7 @@
   color: #FFFFFF;
   margin-bottom: 12px;
   text-align: center;
+  text-transform: uppercase;
 }
 
 .fee-instruction {
@@ -45,22 +46,28 @@
   justify-content: space-between;
   align-items: center;
   background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(245, 176, 65, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Gold থেকে White */
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 16px;
+}
+
+.bkash-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .number-copy-box span {
   font-size: 18px;
   font-family: monospace;
   font-weight: 900;
-  color: #F5B041;
+  color: #FFFFFF; /* Gold থেকে White */
   letter-spacing: 1px;
 }
 
 .copy-btn {
-  background: #F5B041;
+  background: #FFFFFF; /* Gold থেকে White */
   color: #000;
   border: none;
   border-radius: 4px;
@@ -100,6 +107,24 @@
   font-size: 18px;
 }
 
+/* অ্যামাউন্ট কপি বাটন */
+.copy-amount-btn {
+  background: none;
+  border: none;
+  color: #A0ADB0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  padding: 2px;
+  transition: color 0.2s;
+}
+
+.copy-amount-btn:hover {
+  color: #FFFFFF;
+}
+
 /* ইনপুট ফিল্ড */
 .input-group {
   display: flex;
@@ -127,7 +152,7 @@
 }
 
 .input-field:focus {
-  border-color: #F5B041;
+  border-color: #FFFFFF; /* Gold থেকে White */
 }
 
 /* সাবমিট বাটন */
