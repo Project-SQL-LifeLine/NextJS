@@ -2,151 +2,168 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabase/client"; // আপনার পাথ অনুযায়ী চেক করে নিন
-import { useLanguage } from "../../lib/LanguageContext"; // আপনার পাথ অনুযায়ী চেক করে নিন
+import { supabase } from "../../lib/supabase/client"; // পাথ চেক করুন
+import LotteryHeader from "../Lottery/Header/Header"; // হেডার পাথ
+import LotteryFooter from "../Lottery/Footer/Footer"; // ফুটার পাথ
 import "./notification.css";
 
 export default function NotificationPage() {
   const router = useRouter();
-  const { t } = useLanguage();
-  
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+  
+  // কোন কার্ডটি বড় করা হয়েছে তা ট্র্যাক করার জন্য
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // ডাটা ফেচ করার ফাংশন (লেটেস্ট ডাটাবেস স্ট্রাকচার অনুযায়ী)
-  const fetchNotifications = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const now = new Date().toISOString();
-        
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setLoading(false);
+          return;
+        }
+
+        // প্রোফাইল ডাটা হেডারের জন্য
+        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+        if (profileData) setProfile(profileData);
+
+        // নোটিফিকেশন ডাটা
         const { data, error } = await supabase
           .from("user_notifications")
           .select("*")
-          // ১. শুধু active নোটিফিকেশন দেখাবে (hidden বা blocked বাদ যাবে)
-          .eq("status", "active")
-          // ২. scheduled_at হয় নাল হবে (ইনস্ট্যান্ট), অথবা বর্তমান সময়ের চেয়ে ছোট হবে
-          .or(`scheduled_at.is.null,scheduled_at.lte.${now}`)
-          // ৩. হয় ইউজারের নিজের আইডি হবে, অথবা user_id নাল হবে (সবার জন্য ব্রডকাস্ট)
-          .or(`user_id.eq.${user.id},user_id.is.null`)
           .order("created_at", { ascending: false });
 
         if (error) {
-          console.error("Supabase Error:", error);
+          console.error("Fetch Error:", error.message);
         } else if (data) {
-          setNotifications(data);
+          // শুধু active এবং ইউজারের নিজের বা ব্রডকাস্ট নোটিফিকেশন ফিল্টার
+          const myNotifications = data.filter((notif) => {
+            const isActive = notif.status === 'active' || notif.status === null;
+            const isForMe = notif.user_id === user.id || notif.user_id === null;
+            return isActive && isForMe;
+          });
+          setNotifications(myNotifications);
         }
+      } catch (err) {
+        console.error("Error:", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Error fetching notifications:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  useEffect(() => {
-    fetchNotifications();
+    fetchData();
   }, []);
 
-  // নোটিফিকেশনে ক্লিক করলে (Expand/Collapse এবং Read মার্ক করা)
-  const handleCardClick = async (notif: any) => {
-    // ১. এক্সপ্যান্ড/কলাপ্স টগল করা
-    if (expandedId === notif.id) {
-      setExpandedId(null); // কলাপ্স
-    } else {
-      setExpandedId(notif.id); // এক্সপ্যান্ড
+  // ৩০ শব্দের বেশি হলে "See More" দেখানোর লজিক
+  const truncateText = (text: string, isExpanded: boolean) => {
+    if (!text) return "";
+    const words = text.trim().split(/\s+/);
+    
+    // যদি এক্সপ্যান্ড করা থাকে, পুরো টেক্সট দেখাবে
+    if (isExpanded) return text;
+    
+    // যদি ৩০ শব্দের বেশি হয়, তবে প্রথম ৩০ শব্দ দেখাবে
+    if (words.length > 30) {
+      return words.slice(0, 30).join(" ") + "...";
     }
+    return text;
+  };
 
-    // ২. যদি আনরিড (unread) থাকে, তবে ডাটাবেসে রিড (read) হিসেবে আপডেট করা
+  // নোটিফিকেশনে ক্লিক করলে Read মার্ক করা
+  const handleRead = async (notif: any) => {
     if (!notif.is_read) {
-      // লোকাল স্টেট আপডেট (তাৎক্ষণিক UI পরিবর্তনের জন্য ডট মুছে যাবে)
       setNotifications(prev => 
         prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n)
       );
-
-      // ডাটাবেস আপডেট (শুধুমাত্র যদি নোটিফিকেশনটি ওই নির্দিষ্ট ইউজারের হয়)
-      // *নোট: ব্রডকাস্ট (user_id: null) নোটিফিকেশন ডাটাবেসে আপডেট করা যাবে না, তবে UI-তে রিড হয়ে যাবে।
       if (notif.user_id) {
-        await supabase
-          .from("user_notifications")
-          .update({ is_read: true })
-          .eq("id", notif.id);
+        await supabase.from("user_notifications").update({ is_read: true }).eq("id", notif.id);
       }
     }
   };
 
-  // সময় ফরম্যাট করা (যেমন: Just now, 2 hours ago)
   const timeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diffInSeconds < 60) return t("Just now", "এইমাত্র");
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} ${t("mins ago", "মিনিট আগে")}`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} ${t("hours ago", "ঘণ্টা আগে")}`;
-    return `${Math.floor(diffInSeconds / 86400)} ${t("days ago", "দিন আগে")}`;
+    if (diffInSeconds < 60) return "Just now";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
   };
 
-  // লোডিং স্টেট
-  if (loading) {
-    return (
-      <div className="notification-wrapper items-center justify-center">
-        <svg className="w-10 h-10 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        <p className="text-white mt-4 text-xs font-semibold tracking-wider animate-pulse">LOADING...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="notification-wrapper">
-      
+    <div className="notification-layout">
       {/* হেডার */}
-      <div className="notification-header">
-        <button onClick={() => router.back()} className="back-btn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-        </button>
-        <h1 className="notification-title">{t("Notifications", "নোটিফিকেশন")}</h1>
-      </div>
+      <LotteryHeader userProfile={profile} />
 
-      {/* নোটিফিকেশন লিস্ট */}
-      <div className="notification-list">
-        {notifications.length === 0 ? (
+      {/* মেইন কন্টেন্ট */}
+      <main className="notification-main">
+        <div className="notification-header-title">
+          <h1 className="text-xl font-bold text-white mb-4">Notifications</h1>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center h-40">
+            <svg className="w-8 h-8 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+        ) : notifications.length === 0 ? (
           <div className="empty-notif">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
-            <p className="text-sm font-medium">{t("No notifications yet.", "এখনো কোনো নোটিফিকেশন নেই।")}</p>
+            <p className="text-sm font-medium text-gray-400">No notifications yet.</p>
           </div>
         ) : (
-          notifications.map((notif) => (
-            <div 
-              key={notif.id} 
-              className={`notif-card ${!notif.is_read ? 'unread' : ''}`}
-              onClick={() => handleCardClick(notif)}
-            >
-              <div className="notif-header">
-                <h3 className="notif-title">{notif.title}</h3>
-                {/* আনরিড ডট */}
-                {!notif.is_read && <span className="unread-dot"></span>}
-              </div>
-              
-              {/* মেসেজ: expandedId মিললে expanded ক্লাস যুক্ত হবে এবং পুরো লেখা দেখাবে */}
-              <p className={`notif-message ${expandedId === notif.id ? "expanded" : ""}`}>
-                {notif.message}
-              </p>
-              
-              <span className="notif-time">{timeAgo(notif.created_at)}</span>
-            </div>
-          ))
+          <div className="notification-list">
+            {notifications.map((notif) => {
+              const isExpanded = expandedId === notif.id;
+              const hasMoreWords = notif.message.trim().split(/\s+/).length > 30;
+
+              return (
+                <div 
+                  key={notif.id} 
+                  className={`notif-card ${!notif.is_read ? 'unread' : ''}`}
+                  onClick={() => handleRead(notif)}
+                >
+                  <div className="notif-header">
+                    <h3 className="notif-title">{notif.title}</h3>
+                    {!notif.is_read && <span className="unread-dot"></span>}
+                  </div>
+                  
+                  {/* মেসেজ (৩০ শব্দের লিমিটসহ) */}
+                  <p className="notif-message">
+                    {truncateText(notif.message, isExpanded)}
+                  </p>
+
+                  {/* See More / See Less বাটন */}
+                  {(hasMoreWords || isExpanded) && (
+                    <button 
+                      className="see-more-btn"
+                      onClick={(e) => {
+                        e.stopPropagation(); // কার্ডের ক্লিক ইভেন্ট বন্ধ করতে
+                        setExpandedId(isExpanded ? null : notif.id);
+                        handleRead(notif);
+                      }}
+                    >
+                      {isExpanded ? "See Less" : "See More"}
+                    </button>
+                  )}
+                  
+                  <span className="notif-time">{timeAgo(notif.created_at)}</span>
+                </div>
+              );
+            })}
+          </div>
         )}
-      </div>
-      
+      </main>
+
+      {/* ফুটার */}
+      <LotteryFooter />
     </div>
   );
 }
