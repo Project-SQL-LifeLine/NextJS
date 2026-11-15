@@ -17,8 +17,8 @@
   width: 100%;
   background-color: #0b1a13;
   /* মেইন ব্যাকগ্রাউন্ডে সাদা লটারি সিম্বল */
-  background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 30h20v10a5 5 0 0 0 0 10v10H20V50a5 5 0 0 0 0-10V30z'/%3E%3Cpath d='M80 80l5 15h15l-12 9 5 15-13-9-13 9 5-15-12-9h15z'/%3E%3Ccircle cx='90' cy='30' r='12'/%3E%3Cpath d='M30 90l10-10m0 10l-10-10'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 150px 150px; /* সিম্বলের সাইজ */
+  background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 30h20v10a5 5 0 0 0 0 10v10H20V50a5 5 0 0 0 0-10V30z'/%3E%3Cpath d='M80 80l5 15h15l-12 9 5 15-13-9-13 9 5-15-12-9h15z'/%3E%3Ccircle cx='90' cy='30' r='12'/%3E%3Cpath d='M30 90l10-10m0 10l-10-10'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 150px 150px; 
   padding-bottom: 65px; 
 }
 
@@ -156,7 +156,7 @@
 }
 
 /* =========================================
-   2. Ticket Grid (Dark Theme with SVG Pattern)
+   2. Ticket Grid (Real Lottery Card Design)
    ========================================= */
 .section-title {
   font-size: 14px;
@@ -169,23 +169,44 @@
 .ticket-list-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
-/* The Dark Glassmorphism Card Design with internal SVG */
+/* The Lottery Ticket Card Design */
 .lotto-card {
-  /* কার্ডের ভেতরেও হালকা সিম্বল যুক্ত করা হলো */
-  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1.5'%3E%3Cpath d='M20 20h15v8a4 4 0 0 0 0 8v8H20v-8a4 4 0 0 0 0-8v-8z'/%3E%3Ccircle cx='70' cy='70' r='10'/%3E%3C/g%3E%3C/svg%3E"), 
-              linear-gradient(145deg, rgba(27, 42, 35, 0.95), rgba(13, 26, 19, 0.95));
-  background-size: 80px 80px, cover;
+  position: relative;
+  background: linear-gradient(145deg, rgba(27, 42, 35, 0.98), rgba(13, 26, 19, 0.98));
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.08); 
+  border: 1px dashed rgba(255, 255, 255, 0.15); /* টিকিটের মতো ড্যাশড বর্ডার */
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
   color: #ffffff;
   display: flex;
   flex-direction: column;
+  /* টিকিটের ভেতরে হালকা ওয়াটারমার্ক (LOTTO লেখা) */
+  background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='40' font-family='sans-serif' font-weight='bold' fill='rgba(255,255,255,0.02)' transform='rotate(-30 100 100)'%3ELOTTO%3C/text%3E%3C/svg%3E");
+}
+
+/* টিকিটের দুই পাশে কাটা অংশ (Punch Holes) */
+.lotto-card::before,
+.lotto-card::after {
+  content: '';
+  position: absolute;
+  top: 50%; /* টিকিটের মাঝখানে */
+  width: 24px;
+  height: 24px;
+  background-color: #0b1a13; /* মেইন ব্যাকগ্রাউন্ড কালার */
+  border-radius: 50%;
+  transform: translateY(-50%);
+  box-shadow: inset -2px 0 5px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+.lotto-card::before {
+  left: -12px; /* বাম দিকের কাটা অংশ */
+}
+.lotto-card::after {
+  right: -12px; /* ডান দিকের কাটা অংশ */
 }
 
 .lotto-card-header {
@@ -193,7 +214,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px dashed rgba(255,255,255,0.05); 
+  border-bottom: 1px dashed rgba(255,255,255,0.1); 
 }
 
 .lotto-card-title {
@@ -233,12 +254,26 @@
   letter-spacing: 2px;
   color: #00ffaa; 
   background: #0b1a13;
-  padding: 10px 16px;
+  padding: 10px 20px;
   border-radius: 8px;
   border: 1px dashed rgba(0, 255, 170, 0.4);
-  box-shadow: inset 0 0 10px rgba(0, 255, 170, 0.1);
+  box-shadow: inset 0 0 10px rgba(0, 255, 170, 0.15);
   text-shadow: 0 0 5px rgba(0, 255, 170, 0.5);
+  position: relative;
 }
+
+/* বারকোডের ইফেক্ট দেওয়ার জন্য ছোট ড্যাশ লাইন */
+.ticket-number::before, .ticket-number::after {
+  content: '|||| ||| ||||| ||';
+  position: absolute;
+  font-size: 8px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.ticket-number::before { left: 4px; }
+.ticket-number::after { right: 4px; }
 
 .ticket-number-placeholder {
   font-family: monospace;
@@ -246,7 +281,7 @@
   font-weight: 900;
   letter-spacing: 2px;
   color: #4a5e55; 
-  padding: 10px 16px;
+  padding: 10px 20px;
   border-radius: 8px;
   border: 1px dashed rgba(255, 255, 255, 0.1);
 }
@@ -278,13 +313,13 @@
   box-shadow: 0 0 10px rgba(46, 155, 74, 0.3);
 }
 
-/* Dark Timer Bar (Bottom of Card) */
+/* Dark Timer Bar (Bottom Tear-off Section of Ticket) */
 .lotto-timer-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(0, 0, 0, 0.35); /* কার্ডের নিচে ডার্ক ওভারলে */
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.4); /* টিকিটের নিচের অংশ */
+  border-top: 2px dashed rgba(255, 255, 255, 0.15); /* টিয়ার-অফ ড্যাশ লাইন */
   padding: 12px 16px;
 }
 
