@@ -18,18 +18,18 @@
 .terms-card {
   background: rgba(27, 42, 35, 0.95);
   backdrop-filter: blur(10px);
-  border: 1px solid #F5B041;
+  border: 1px solid #FFFFFF; /* Gold থেকে White */
   border-radius: 12px;
   padding: 20px;
   width: 100%;
   max-width: 600px;
-  box-shadow: 0 4px 15px rgba(245, 176, 65, 0.15);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1); /* হালকা সাদা শ্যাডো */
 }
 
 .terms-title {
   font-size: 18px;
   font-weight: 800;
-  color: #F5B041;
+  color: #FFFFFF; /* Gold থেকে White */
   text-align: center;
   margin-bottom: 20px;
 }
@@ -57,7 +57,7 @@
   border-radius: 10px;
 }
 .terms-scroll-box::-webkit-scrollbar-thumb {
-  background: #F5B041;
+  background: #FFFFFF; /* Gold থেকে White */
   border-radius: 10px;
 }
 
@@ -82,21 +82,21 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: rgba(245, 176, 65, 0.1);
+  background: rgba(255, 255, 255, 0.05); /* Gold থেকে হালকা White */
   padding: 14px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
   color: #fff;
   margin-bottom: 20px;
-  border: 1px solid rgba(245, 176, 65, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Gold থেকে হালকা White */
 }
 
 .terms-checkbox {
   margin-top: 2px;
   width: 18px;
   height: 18px;
-  accent-color: #F5B041;
+  accent-color: #FFFFFF; /* Gold থেকে White */
   cursor: pointer;
 }
 
