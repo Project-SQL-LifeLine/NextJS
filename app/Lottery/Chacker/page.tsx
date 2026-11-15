@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
-import { Html5QrcodeScanner } from "html5-qrcode";
+
+// TypeScript এর জন্য BarcodeDetector ডিক্লেয়ার করা
+declare global {
+  interface Window {
+    BarcodeDetector: any;
+  }
+}
 
 export default function TicketCheckerPage() {
   const router = useRouter();
@@ -14,13 +20,15 @@ export default function TicketCheckerPage() {
   const [errorMsg, setErrorMsg] = useState("");
   
   const [showScanner, setShowScanner] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   // ==========================================
   // সার্চ বা স্ক্যান করে ডাটা বের করার ফাংশন
   // ==========================================
   const checkTicket = async (numberToCheck: string) => {
-    // ১২ ডিজিটের না হলে বা খালি থাকলে কিছুই করবে না
-    if (!numberToCheck || numberToCheck.length < 10) {
+    const cleanNumber = numberToCheck.replace(/\s/g, '');
+    if (!cleanNumber || cleanNumber.length < 10) {
       setErrorMsg("অনুগ্রহ করে সঠিক ১২ ডিজিটের টিকিট নাম্বার দিন।");
       return;
     }
@@ -28,23 +36,20 @@ export default function TicketCheckerPage() {
     setLoading(true);
     setResult(null);
     setErrorMsg("");
-    setShowScanner(false); // স্ক্যানার বন্ধ করে দেবে
+    setShowScanner(false); // স্ক্যানার বন্ধ
 
     try {
-      // ডাটাবেস থেকে টিকিট চেক করা (ticket_transactions টেবিল)
       const { data, error } = await supabase
         .from("ticket_transactions")
         .select("*")
-        .eq("ticket_number", numberToCheck)
+        .eq("ticket_number", cleanNumber)
         .eq("transaction_type", "ticket_purchase")
         .eq("status", "approved")
         .single();
 
       if (error || !data) {
-        // টিকিট না পাওয়া গেলে
         setErrorMsg("❌ এই টিকিটটি আমাদের ডাটাবেসে পাওয়া যায়নি। এটি নকল হতে পারে!");
       } else {
-        // টিকিট পাওয়া গেলে
         setResult(data);
       }
     } catch (err) {
@@ -56,34 +61,77 @@ export default function TicketCheckerPage() {
   };
 
   // ==========================================
-  // বারকোড স্ক্যানার লজিক
+  // নেটিভ BarcodeDetector API দিয়ে স্ক্যানার লজিক
   // ==========================================
   useEffect(() => {
+    let barcodeDetector: any = null;
+    let animationFrameId: number;
+
+    const startScanner = async () => {
+      try {
+        if (!("BarcodeDetector" in window)) {
+          setErrorMsg("আপনার ব্রাউজারটি বারকোড স্ক্যান সমর্থন করে না। অনুগ্রহ করে ম্যানুয়ালি টিকিট নাম্বার দিন।");
+          setShowScanner(false);
+          return;
+        }
+
+        barcodeDetector = new window.BarcodeDetector({
+          formats: ["qr_code", "code_128", "ean_13", "upc_a"],
+        });
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+        
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+
+        const scanFrame = async () => {
+          if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+            try {
+              const barcodes = await barcodeDetector.detect(videoRef.current);
+              if (barcodes.length > 0) {
+                const scannedValue = barcodes[0].rawValue;
+                setTicketNumber(scannedValue);
+                checkTicket(scannedValue);
+                stopScanner(); // স্ক্যান সফল হলে বন্ধ
+                return;
+              }
+            } catch (e) {
+              // স্ক্যান এরর ইগনোর
+            }
+          }
+          animationFrameId = requestAnimationFrame(scanFrame);
+        };
+        
+        animationFrameId = requestAnimationFrame(scanFrame);
+
+      } catch (err) {
+        console.error("Camera error:", err);
+        setErrorMsg("ক্যামেরা চালু করতে সমস্যা হয়েছে। অনুগ্রহ করে পারমিশন দিন।");
+        setShowScanner(false);
+      }
+    };
+
     if (showScanner) {
-      // স্ক্যানার ইনিশিয়ালাইজ
-      const scanner = new Html5QrcodeScanner(
-        "reader",
-        { fps: 10, qrbox: { width: 250, height: 150 } }, // বারকোডের জন্য রেক্ট্যাঙ্গেল শেপ
-        /* verbose= */ false
-      );
-
-      // স্ক্যান সফল হলে
-      const onScanSuccess = (decodedText: string) => {
-        scanner.clear(); // স্ক্যানার বন্ধ
-        setTicketNumber(decodedText);
-        checkTicket(decodedText); // অটোমেটিক সার্চ
-      };
-
-      scanner.render(onScanSuccess, (error) => {
-        // স্ক্যান এরর ইগনোর করবে
-      });
-
-      // ক্লিনআপ ফাংশন
-      return () => {
-        scanner.clear().catch(e => console.error("Failed to clear scanner", e));
-      };
+      startScanner();
     }
+
+    return () => {
+      stopScanner();
+    };
   }, [showScanner]);
+
+  const stopScanner = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+    }
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0b1a13] text-white p-4 pb-20 font-sans">
@@ -117,7 +165,7 @@ export default function TicketCheckerPage() {
               placeholder="e.g. 2152 2618 4808"
               value={ticketNumber}
               onChange={(e) => setTicketNumber(e.target.value)}
-              maxLength={15} // স্পেস সহ
+              maxLength={15}
             />
           </div>
           
@@ -139,7 +187,7 @@ export default function TicketCheckerPage() {
         </div>
 
         <button
-          onClick={() => checkTicket(ticketNumber.replace(/\s/g, ''))}
+          onClick={() => checkTicket(ticketNumber)}
           disabled={loading}
           className="w-full mt-4 bg-[#00ffaa] text-[#0b1a13] font-bold py-3 rounded-xl hover:bg-[#00e699] transition-colors disabled:opacity-50"
         >
@@ -149,12 +197,22 @@ export default function TicketCheckerPage() {
 
       {/* স্ক্যানার কন্টেইনার */}
       {showScanner && (
-        <div className="mb-6 rounded-2xl overflow-hidden border-2 border-[#00ffaa] bg-black">
+        <div className="mb-6 rounded-2xl overflow-hidden border-2 border-[#00ffaa] bg-black relative">
           <div className="bg-[#184f35] p-2 text-center text-sm text-white flex justify-between items-center">
             <span>Scanning Barcode...</span>
             <button onClick={() => setShowScanner(false)} className="text-red-400 font-bold px-2">Close</button>
           </div>
-          <div id="reader" className="w-full"></div>
+          <video 
+            ref={videoRef} 
+            autoPlay 
+            playsInline 
+            className="w-full h-64 object-cover"
+          ></video>
+          
+          {/* স্ক্যানার ওভারলে গ্রাফিক্স */}
+          <div className="absolute inset-0 border-2 border-[#00ffaa]/50 m-8 pointer-events-none rounded-lg">
+             <div className="w-full h-0.5 bg-red-500 absolute top-1/2 -translate-y-1/2 animate-pulse"></div>
+          </div>
         </div>
       )}
 
@@ -169,12 +227,11 @@ export default function TicketCheckerPage() {
       {result && (
         <div className="bg-gradient-to-br from-[#184f35] to-[#0b1a13] border border-[#2e9b4a] p-6 rounded-2xl shadow-[0_0_20px_rgba(46,155,74,0.2)] relative overflow-hidden">
           
-          {/* ওয়াটারমার্ক */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/5 text-6xl font-black rotate-12 pointer-events-none">
             VERIFIED
           </div>
 
-          <div className="flex justify-between items-start mb-6">
+          <div className="flex justify-between items-start mb-6 relative z-10">
             <div>
               <h2 className="text-[#00ffaa] font-black text-xl mb-1 flex items-center gap-2">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -190,7 +247,7 @@ export default function TicketCheckerPage() {
             </div>
           </div>
 
-          <div className="space-y-3 text-sm border-t border-white/10 pt-4">
+          <div className="space-y-3 text-sm border-t border-white/10 pt-4 relative z-10">
             <div className="flex justify-between">
               <span className="text-gray-400">Ticket Number:</span>
               <span className="font-mono font-bold text-white tracking-widest">
