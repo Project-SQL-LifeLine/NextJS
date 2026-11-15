@@ -110,7 +110,7 @@ export default function LotteryHomePage() {
 
         <main className="lottery-main">
           
-          {/* ১. Today's Jackpot Slider */}
+          {/* ১. Today's Jackpot Slider (লেখাগুলো নিচের দিকে থাকবে) */}
           <div className="jackpot-slider-wrapper">
             <div className="jackpot-overlay"></div>
             <div className="jackpot-track" style={{ transform: `translateX(-${activeJackpot * 100}%)` }}>
@@ -143,8 +143,8 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* ২. Today's Jackpot স্লাইডারের ঠিক নিচে আপনার দেওয়া ইমেজ */}
-          <div className="w-full -mt-2 mb-2">
+          {/* ২. Jackpot এর ঠিক নিচে আপনার দেওয়া ইমেজ */}
+          <div className="w-full mt-1 mb-2">
             <img 
               src="https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d5e7a1d3.png" 
               alt="Lottery Banner Link" 
@@ -152,7 +152,7 @@ export default function LotteryHomePage() {
             />
           </div>
 
-          {/* ৩. Ticket Grid */}
+          {/* ৩. Ticket Grid (Buy & Win) */}
           <div>
             <div className="flex justify-between items-center mb-3">
               <h2 className="section-title">Buy & Win</h2>
