@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
 import LotteryHeader from "../Header/Header";
-// BottomNav সরিয়ে LotteryFooter যুক্ত করা হলো
-import LotteryFooter from "../Footer/Footer"; 
+import LotteryFooter from "../Footer/Footer"; // BottomNav সরিয়ে Footer যুক্ত করা হলো
 import "./withdraw-terms.css";
 
 export default function WithdrawTermsPage() {
@@ -18,7 +17,6 @@ export default function WithdrawTermsPage() {
   const [isChecked, setIsChecked] = useState(false);
   const [proceeding, setProceeding] = useState(false);
 
-  // পেজ লোড হওয়ার সময় ব্যাকগ্রাউন্ডে ইউজার ডাটা লোড করা
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -33,7 +31,12 @@ export default function WithdrawTermsPage() {
         setLoading(false);
       }
     };
-    fetchData();
+    
+    // ২.৯ সেকেন্ডের লোডিং টাইমার
+    const timer = new Promise((resolve) => setTimeout(resolve, 2900));
+    Promise.all([fetchData(), timer]).then(() => {
+      setLoading(false);
+    });
   }, []);
 
   const handleProceed = async () => {
@@ -62,7 +65,6 @@ export default function WithdrawTermsPage() {
     }
   };
 
-  // লোডিং স্ক্রিন
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
@@ -77,56 +79,50 @@ export default function WithdrawTermsPage() {
   }
 
   return (
-    <div className="terms-page-wrapper">
+    // h-[100dvh] এবং overflow-hidden ব্যবহার করে পেজ স্ক্রল বন্ধ করা হয়েছে
+    <div className="terms-page-wrapper h-[100dvh] flex flex-col overflow-hidden bg-[#0d241e]">
       <LotteryHeader userProfile={profile} />
 
-      <div className="terms-page">
-        <div className="terms-card">
-          <h1 className="terms-title">
+      {/* flex-1 ব্যবহার করে মেইন কন্টেন্টকে স্ক্রিনের বাকি অংশ দখল করতে দেওয়া হয়েছে */}
+      <div className="terms-page flex-1 flex flex-col px-4 py-3 overflow-hidden">
+        <div className="terms-card flex flex-col h-full max-h-[85vh]">
+          <h1 className="terms-title shrink-0">
             {t("Withdrawal Terms & Conditions", "উত্তোলনের শর্তাবলী")}
           </h1>
           
-          {/* স্ক্রলেবল টার্মস বক্স */}
-          <div className="terms-scroll-box">
-            <h3>{t("1. GENERAL PROVISIONS AND ELIGIBILITY", "১. সাধারণ বিধান এবং যোগ্যতা")}</h3>
-            <p>{t("By accessing, registering, or participating in any lottery services provided by the Lottery Authority, you agree to be bound by these Terms and Conditions. Participants must be at least 18 years of age and legally capable of entering into binding contracts.", "লটারি কর্তৃপক্ষের দ্বারা প্রদত্ত যেকোনো লটারি পরিষেবা অ্যাক্সেস, নিবন্ধন বা অংশগ্রহণ করার মাধ্যমে, আপনি এই শর্তাবলী মেনে চলতে সম্মত হচ্ছেন। অংশগ্রহণকারীদের বয়স কমপক্ষে ১৮ বছর হতে হবে এবং আইনত চুক্তি করার উপযুক্ত হতে হবে।")}</p>
+          {/* এই বক্সটিই শুধু স্ক্রল হবে */}
+          <div className="terms-scroll-box flex-1 overflow-y-auto min-h-0 mb-4">
             
-            <h3>{t("2. ACCOUNT REGISTRATION AND SECURITY", "২. অ্যাকাউন্ট নিবন্ধন এবং নিরাপত্তা")}</h3>
-            <p>{t("Users must provide accurate, current, and complete information during the registration process. You are solely responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.", "ব্যবহারকারীদের অবশ্যই নিবন্ধন প্রক্রিয়া চলাকালীন সঠিক, বর্তমান এবং সম্পূর্ণ তথ্য প্রদান করতে হবে। আপনার অ্যাকাউন্টের তথ্যের গোপনীয়তা বজায় রাখা এবং আপনার অ্যাকাউন্টের অধীনে ঘটে যাওয়া সমস্ত কার্যক্রমের জন্য আপনি একাই দায়ী।")}</p>
+            <h3>{t("1. General Provisions", "১. সাধারণ বিধানাবলী")}</h3>
+            <p>{t("By accessing, registering, or participating in any lottery services provided by us, you agree to be bound by these Terms & Conditions. If you do not agree with any part of these terms, you must immediately cease using our services.", "আমাদের প্রদত্ত যেকোনো লটারি পরিষেবা ব্যবহার, নিবন্ধন বা অংশগ্রহণের মাধ্যমে আপনি এই শর্তাবলী মেনে নিতে সম্মত হচ্ছেন। আপনি যদি এই শর্তাবলীর কোনো অংশে সম্মত না হন, তবে অবশ্যই আমাদের পরিষেবা ব্যবহার বন্ধ করতে হবে।")}</p>
             
-            <h3>{t("3. TICKET PURCHASES AND PRICING STRUCTURE", "৩. টিকিট ক্রয় এবং মূল্য কাঠামো")}</h3>
-            <p>{t("Lottery tickets can be purchased exclusively using the Lottery Wallet balance. All purchases are final and non-refundable. Ticket numbers are generated randomly or selected manually, and each ticket is valid only for the specific draw it was purchased for.", "লটারি টিকিট শুধুমাত্র লটারি ওয়ালেট ব্যালেন্স ব্যবহার করে কেনা যাবে। সমস্ত ক্রয় চূড়ান্ত এবং অফেরতযোগ্য। টিকিট নম্বরগুলি এলোমেলোভাবে তৈরি বা ম্যানুয়ালি নির্বাচন করা হয় এবং প্রতিটি টিকিট শুধুমাত্র যে ড্রয়ের জন্য কেনা হয়েছিল তার জন্যই বৈধ।")}</p>
+            <h3>{t("2. Eligibility and Account Security", "২. যোগ্যতা এবং অ্যাকাউন্ট নিরাপত্তা")}</h3>
+            <p>{t("Users must be at least 18 years of age. You are solely responsible for maintaining the confidentiality of your account credentials. Any activity performed through your account will be deemed as your responsibility.", "ব্যবহারকারীর বয়স অবশ্যই কমপক্ষে ১৮ বছর হতে হবে। আপনার অ্যাকাউন্টের পাসওয়ার্ড এবং তথ্যের গোপনীয়তা রক্ষার দায়িত্ব শুধুমাত্র আপনার। আপনার অ্যাকাউন্টের মাধ্যমে করা যেকোনো কার্যক্রম আপনার নিজের দায়িত্ব বলে গণ্য হবে।")}</p>
             
-            <h3>{t("4. DRAW MECHANICS AND SCHEDULING", "৪. ড্র মেকানিক্স এবং সময়সূচী")}</h3>
-            <p>{t("The draws will be conducted daily at a designated time (12:30 AM). The results will be published immediately after the draw on the Winners page. Late entries or tickets purchased after the cut-off time will be automatically entered into the next day's draw.", "ড্র প্রতিদিন একটি নির্ধারিত সময়ে (রাত ১২:৩০) অনুষ্ঠিত হবে। ড্র শেষ হওয়ার সাথে সাথে ফলাফল বিজয়ীদের পৃষ্ঠায় প্রকাশ করা হবে। কাট-অফ সময়ের পরে কেনা টিকিটগুলি স্বয়ংক্রিয়ভাবে পরের দিনের ড্রতে প্রবেশ করবে।")}</p>
-            
-            <h3>{t("5. WINNER SELECTION AND JACKPOT DISTRIBUTION", "৫. বিজয়ী নির্বাচন এবং জ্যাকপট বিতরণ")}</h3>
-            <p>{t("The selection of winners is conducted through a secure and verified random number generator. The prize amount will be automatically credited to the winner's Lottery Wallet balance. The authority's decision regarding winners is final and binding.", "বিজয়ীদের নির্বাচন একটি সুরক্ষিত এবং যাচাইকৃত র‍্যান্ডম নম্বর জেনারেটরের মাধ্যমে করা হয়। পুরস্কারের পরিমাণ স্বয়ংক্রিয়ভাবে বিজয়ীর লটারি ওয়ালেট ব্যালেন্সে যোগ করা হবে। বিজয়ীদের সম্পর্কে কর্তৃপক্ষের সিদ্ধান্তই চূড়ান্ত এবং বাধ্যতামূলক।")}</p>
-            
-            <h3>{t("6. FEES, CHARGES, AND TAXES", "৬. ফি, চার্জ এবং কর")}</h3>
-            <p>{t("To facilitate bank withdrawals, users are required to pay specific activation fees (including VAT, GST, Management, and Network fees). These fees are mandatory to process the withdrawal and verify the user's account.", "ব্যাংক প্রত্যাহার সহজতর করার জন্য, ব্যবহারকারীদের নির্দিষ্ট অ্যাক্টিভেশন ফি (ভ্যাট, জিএসটি, ম্যানেজমেন্ট এবং নেটওয়ার্ক ফিসহ) দিতে হবে। প্রত্যাহার প্রক্রিয়া এবং ব্যবহারকারীর অ্যাকাউন্ট যাচাই করার জন্য এই ফিগুলি বাধ্যতামূলক।")}</p>
-            
-            <h3>{t("7. WITHDRAWAL POLICIES AND RESTRICTIONS", "৭. প্রত্যাহার নীতি এবং বিধিনিষেধ")}</h3>
-            <p>{t("Withdrawals from the Lottery Wallet are strictly subject to the minimum withdrawal limit (e.g., 50,000 BDT). The authority may require additional verification (such as KYC documents) before processing large withdrawals. Withdrawals are processed within 24-48 hours.", "লটারি ওয়ালেট থেকে প্রত্যাহার কঠোরভাবে সর্বনিম্ন প্রত্যাহার সীমা (যেমন: ৫০,০০০ টাকা) সাপেক্ষে। বড় পরিমাণ প্রত্যাহার প্রক্রিয়া করার আগে কর্তৃপক্ষ অতিরিক্ত যাচাইকরণ (যেমন: KYC ডকুমেন্ট) প্রয়োজন হতে পারে। প্রত্যাহার ২৪-৪৮ ঘণ্টার মধ্যে প্রক্রিয়া করা হয়।")}</p>
-            
-            <h3>{t("8. USER CONDUCT AND PROHIBITED ACTIVITIES", "৮. ব্যবহারকারীর আচরণ এবং নিষিদ্ধ কার্যক্রম")}</h3>
-            <p>{t("Users agree not to engage in any fraudulent, abusive, or illegal activities, including but not limited to using multiple accounts, exploiting bugs, or manipulating the draw system. Violations will result in immediate account suspension.", "ব্যবহারকারীরা একাধিক অ্যাকাউন্ট ব্যবহার, বাগ শোষণ বা ড্র সিস্টেম ম্যানিপুলেশনসহ যেকোনো প্রতারণামূলক, অপব্যবহারমূলক বা অবৈধ কার্যকলাপে জড়িত না থাকতে সম্মত হন। লঙ্ঘনের ফলে অবিলম্বে অ্যাকাউন্ট স্থগিত করা হবে।")}</p>
-            
-            <h3>{t("9. LIMITATION OF LIABILITY", "৯. দায়বদ্ধতার সীমাবদ্ধতা")}</h3>
-            <p>{t("The Lottery Authority provides its services on an 'as is' and 'as available' basis. We are not liable for any network failures, server downtime, or technical glitches that may affect ticket purchases or draw results.", "লটারি কর্তৃপক্ষ তার পরিষেবাগুলি 'যেমন আছে' এবং 'যেমন উপলব্ধ' ভিত্তিতে সরবরাহ করে। কোনো নেটওয়ার্ক ব্যর্থতা, সার্ভার ডাউনটাইম বা টেকনিক্যাল ত্রুটির জন্য আমরা দায়ী নই যা টিকিট ক্রয় বা ড্র ফলাফলকে প্রভাবিত করতে পারে।")}</p>
-            
-            <h3>{t("10. ACCOUNT SUSPENSION AND TERMINATION", "১০. অ্যাকাউন্ট স্থগিত এবং সমাপ্তি")}</h3>
-            <p>{t("The Lottery Authority reserves the right to suspend or terminate any account suspected of fraud, money laundering, or violating these terms. Funds in suspended accounts may be withheld pending investigation.", "লটারি কর্তৃপক্ষ প্রতারণা, মানি লন্ডারিং বা এই শর্তাবলী লঙ্ঘনের সন্দেহে যেকোনো অ্যাকাউন্ট স্থগিত বা বন্ধ করার অধিকার সংরক্ষণ করে। তদন্তের সময় স্থগিত অ্যাকাউন্টের তহবিল আটকে রাখা হতে পারে।")}</p>
-            
-            <h3>{t("11. MODIFICATION OF TERMS", "১১. শর্তাবলী পরিবর্তন")}</h3>
-            <p>{t("The Lottery Authority reserves the right to update or modify these Terms and Conditions at any time without prior notice. It is the user's responsibility to review the terms periodically for any changes.", "লটারি কর্তৃপক্ষ পূর্ব নোটিশ ছাড়াই যেকোনো সময় এই শর্তাবলী আপডেট বা পরিবর্তন করার অধিকার সংরক্ষণ করে। যেকোনো পরিবর্তনের জন্য পর্যায়ক্রমে শর্তাবলী পর্যালোচনা করা ব্যবহারকারীর দায়িত্ব।")}</p>
-            
-            <h3>{t("12. DISPUTE RESOLUTION AND GOVERNING LAW", "১২. বিরোধ নিষ্পত্তি এবং পরিচালনা আইন")}</h3>
-            <p>{t("Any disputes arising out of or relating to these Terms or the services provided shall be resolved through binding arbitration in accordance with the local laws of the jurisdiction where the Lottery Authority operates.", "এই শর্তাবলী বা প্রদত্ত পরিষেবাগুলির সাথে সম্পর্কিত যেকোনো বিরোধ নিষ্পত্তি স্থানীয় আইন অনুসারে বাধ্যতামূলক সালিশের মাধ্যমে সমাধান করা হবে।")}</p>
+            <h3>{t("3. Minimum Withdrawal Limit", "৩. সর্বনিম্ন উইথড্র সীমা")}</h3>
+            <p>{t("The minimum withdrawal amount is 50,000 BDT. Withdrawal requests below this limit will not be processed by the system.", "সর্বনিম্ন উত্তোলনের পরিমাণ ৫০,০০০ টাকা। এই সীমার নিচে কোনো উত্তোলনের অনুরোধ সিস্টেম দ্বারা প্রসেস করা হবে না।")}</p>
+
+            <h3>{t("4. Verification Fees and Taxes", "৪. ভেরিফিকেশন ফি এবং কর")}</h3>
+            <p>{t("To process withdrawals, users must clear all applicable management fees, service fees, network fees, VAT, and GST. Withdrawals will remain locked until these fees are fully paid and verified by the authority.", "উত্তোলন প্রক্রিয়া করতে, ব্যবহারকারীকে অবশ্যই সমস্ত প্রযোজ্য ম্যানেজমেন্ট ফি, সার্ভিস ফি, নেটওয়ার্ক ফি, ভ্যাট এবং জিএসটি পরিশোধ করতে হবে। এই ফিগুলো সম্পূর্ণরূপে পরিশোধ এবং কর্তৃপক্ষ দ্বারা যাচাই না হওয়া পর্যন্ত উত্তোলন লক থাকবে।")}</p>
+
+            <h3>{t("5. KYC and Anti-Money Laundering (AML)", "৫. কেওয়াইসি এবং মানি লন্ডারিং প্রতিরোধ")}</h3>
+            <p>{t("We strictly follow AML policies. We reserve the right to request identity verification (NID/Passport) before processing any withdrawal. Failure to provide valid documents will result in account suspension.", "আমরা কঠোরভাবে মানি লন্ডারিং প্রতিরোধ নীতি অনুসরণ করি। যেকোনো উত্তোলন প্রসেস করার আগে আমরা পরিচয় যাচাইকরণ (NID/পাসপোর্ট) চাওয়ার অধিকার রাখি। বৈধ নথি প্রদান করতে ব্যর্থ হলে অ্যাকাউন্ট স্থগিত করা হবে।")}</p>
+
+            <h3>{t("6. Processing Time", "৬. প্রসেসিং সময়")}</h3>
+            <p>{t("Once the fee is paid and verified, withdrawal requests are typically processed within 1 to 2 business days. However, during high traffic or technical maintenance, it may take longer.", "ফি পরিশোধ এবং যাচাই হওয়ার পর, উত্তোলনের অনুরোধ সাধারণত ১ থেকে ২ কার্যদিবসের মধ্যে প্রসেস করা হয়। তবে অতিরিক্ত চাপ বা কারিগরি রক্ষণাবেক্ষণের সময় এটি আরও বেশি সময় নিতে পারে।")}</p>
+
+            <h3>{t("7. Prohibited Activities", "৭. নিষিদ্ধ কার্যক্রম")}</h3>
+            <p>{t("Users agree not to engage in any fraudulent activities, hacking, using multiple accounts to manipulate the system, or submitting fake transaction IDs. Violation will lead to permanent account termination and forfeiture of funds.", "ব্যবহারকারীরা কোনো ধরনের প্রতারণা, হ্যাকিং, সিস্টেম ম্যানিপুলেট করতে একাধিক অ্যাকাউন্ট ব্যবহার বা ভুয়া ট্রানজেকশন আইডি জমা দেওয়ার সাথে জড়িত থাকতে সম্মত নন। এই নিয়ম ভঙ্গ করলে অ্যাকাউন্ট স্থায়ীভাবে বন্ধ করা হবে এবং সমস্ত অর্থ বাজেয়াপ্ত করা হবে।")}</p>
+
+            <h3>{t("8. Limitation of Liability", "৮. দায়বদ্ধতার সীমাবদ্ধতা")}</h3>
+            <p>{t("The Lottery Authority is not liable for any network issues, bank delays, or technical glitches that may cause delays in withdrawal processing. Our maximum liability is limited to the amount of the pending withdrawal.", "লটারি কর্তৃপক্ষ কোনো নেটওয়ার্ক সমস্যা, ব্যাংক বিলম্ব বা কারিগরি ত্রুটির জন্য দায়ী নয়, যা উত্তোলন প্রক্রিয়ায় বিলম্ব ঘটাতে পারে। আমাদের সর্বোচ্চ দায়বদ্ধতা পেন্ডিং উত্তোলনের পরিমাণের মধ্যে সীমাবদ্ধ।")}</p>
+
+            <h3>{t("9. Modification of Terms", "৯. শর্তাবলী পরিবর্তন")}</h3>
+            <p>{t("We reserve the right to update, modify, or change these terms at any time without prior notice. It is the user's responsibility to review the terms periodically.", "আমরা পূর্ব নোটিশ ছাড়াই যেকোনো সময় এই শর্তাবলী আপডেট, পরিবর্তন বা পরিবর্তন করার অধিকার রাখি। শর্তাবলী পর্যায়ক্রমে পর্যালোচনা করা ব্যবহারকারীর দায়িত্ব।")}</p>
           </div>
 
-          {/* চেকবক্স এবং বাটন (এগুলো স্ক্রল হবে না, ফিক্সড থাকবে) */}
-          <div className="terms-action-box">
+          {/* চেকবক্স এবং বাটন স্ক্রল হবে না */}
+          <div className="shrink-0">
             <label className="terms-checkbox-label">
               <input 
                 type="checkbox" 
@@ -134,15 +130,24 @@ export default function WithdrawTermsPage() {
                 onChange={(e) => setIsChecked(e.target.checked)}
                 className="terms-checkbox"
               />
-              <span>{t("I have read, understood, and agree to the Terms & Conditions.", "আমি শর্তাবলী পড়েছি, বুঝেছি এবং সম্মত আছি।")}</span>
+              {t("I have read, understood, and agree to the Terms & Conditions.", "আমি শর্তাবলী পড়েছি, বুঝেছি এবং সম্মত আছি।")}
             </label>
 
             <button 
               onClick={handleProceed}
               disabled={!isChecked || proceeding}
-              className="terms-btn"
+              className="terms-btn flex justify-center items-center gap-2"
             >
-              {proceeding ? t("Processing...", "প্রসেসিং...") : t("Proceed to Verification", "ভেরিফিকেশনে এগিয়ে যান")}
+              {proceeding ? (
+                <>
+                  <svg className="w-5 h-5 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  {t("Processing...", "প্রসেসিং...")}
+                </>
+              ) : (
+                t("Proceed to Verification", "ভেরিফিকেশনে এগিয়ে যান")
+              )}
             </button>
           </div>
         </div>
