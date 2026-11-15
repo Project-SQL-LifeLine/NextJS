@@ -140,12 +140,21 @@ function TicketBuyContent() {
 
         {/* নাম্বার ইনপুট সেকশন */}
         <div className="input-section">
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex justify-between items-center mb-2">
             <h3>{t("Select 12-Digit Ticket Number", "১২ ডিজিটের টিকিট নাম্বার দিন")}</h3>
-            <span className="text-[10px] text-[#F5B041] font-bold bg-[#F5B041]/10 px-2 py-1 rounded border border-[#F5B041]/30">
+            {/* Gold থেকে White করা হলো */}
+            <span className="text-[10px] text-white font-bold bg-white/10 px-2 py-1 rounded border border-white/30">
               {t("Balance", "ব্যালেন্স")}: ৳ {currentBalance.toFixed(2)}
             </span>
           </div>
+
+          {/* নতুন ডিসক্লেইমার যুক্ত করা হলো */}
+          <p className="disclaimer-text">
+            {t(
+              "Warning: Any attempt at fraud or manipulation will result in temporary suspension of your account for verification.",
+              "সতর্কতা: জালিয়াতি বা কারসাজির কোনো চেষ্টা করা হলে যাচাইয়ের জন্য আপনার অ্যাকাউন্ট সাময়িকভাবে স্থগিত রাখা হতে পারে।"
+            )}
+          </p>
           
           <input
             type="tel"
@@ -174,8 +183,6 @@ function TicketBuyContent() {
           {successMsg && <div className="success-msg">{successMsg}</div>}
         </div>
 
-        {/* পেমেন্ট মেথড সেকশন সরিয়ে দেওয়া হয়েছে */}
-
       </main>
 
       {/* সাবমিট বাটন (কন্ডিশনাল) */}
@@ -191,7 +198,8 @@ function TicketBuyContent() {
         ) : (
           <button 
             onClick={handleReloadBalance} 
-            className="buy-ticket-btn !bg-[#F5B041] !text-black !border-black"
+            /* Gold থেকে White করা হলো (Black টেক্সট) */
+            className="buy-ticket-btn !bg-white !text-black !border-black"
           >
             {t("Reload Balance", "ব্যালেন্স রিলোড করুন")}
           </button>
