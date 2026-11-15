@@ -14,18 +14,27 @@ export default function NotificationPage() {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // ডাটা ফেচ করা
+  // ডাটা ফেচ করার ফাংশন (লেটেস্ট ডাটাবেস স্ট্রাকচার অনুযায়ী)
   const fetchNotifications = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        const now = new Date().toISOString();
+        
         const { data, error } = await supabase
           .from("user_notifications")
           .select("*")
-          .eq("user_id", user.id)
+          // ১. শুধু active নোটিফিকেশন দেখাবে (hidden বা blocked বাদ যাবে)
+          .eq("status", "active")
+          // ২. scheduled_at হয় নাল হবে (ইনস্ট্যান্ট), অথবা বর্তমান সময়ের চেয়ে ছোট হবে
+          .or(`scheduled_at.is.null,scheduled_at.lte.${now}`)
+          // ৩. হয় ইউজারের নিজের আইডি হবে, অথবা user_id নাল হবে (সবার জন্য ব্রডকাস্ট)
+          .or(`user_id.eq.${user.id},user_id.is.null`)
           .order("created_at", { ascending: false });
 
-        if (!error && data) {
+        if (error) {
+          console.error("Supabase Error:", error);
+        } else if (data) {
           setNotifications(data);
         }
       }
@@ -40,7 +49,7 @@ export default function NotificationPage() {
     fetchNotifications();
   }, []);
 
-  // নোটিফিকেশনে ক্লিক করলে
+  // নোটিফিকেশনে ক্লিক করলে (Expand/Collapse এবং Read মার্ক করা)
   const handleCardClick = async (notif: any) => {
     // ১. এক্সপ্যান্ড/কলাপ্স টগল করা
     if (expandedId === notif.id) {
@@ -51,37 +60,42 @@ export default function NotificationPage() {
 
     // ২. যদি আনরিড (unread) থাকে, তবে ডাটাবেসে রিড (read) হিসেবে আপডেট করা
     if (!notif.is_read) {
-      // লোকাল স্টেট আপডেট (তাৎক্ষণিক UI পরিবর্তনের জন্য)
+      // লোকাল স্টেট আপডেট (তাৎক্ষণিক UI পরিবর্তনের জন্য ডট মুছে যাবে)
       setNotifications(prev => 
         prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n)
       );
 
-      // ডাটাবেস আপডেট
-      await supabase
-        .from("user_notifications")
-        .update({ is_read: true })
-        .eq("id", notif.id);
+      // ডাটাবেস আপডেট (শুধুমাত্র যদি নোটিফিকেশনটি ওই নির্দিষ্ট ইউজারের হয়)
+      // *নোট: ব্রডকাস্ট (user_id: null) নোটিফিকেশন ডাটাবেসে আপডেট করা যাবে না, তবে UI-তে রিড হয়ে যাবে।
+      if (notif.user_id) {
+        await supabase
+          .from("user_notifications")
+          .update({ is_read: true })
+          .eq("id", notif.id);
+      }
     }
   };
 
-  // সময় ফরম্যাট করা (যেমন: 2 hours ago)
+  // সময় ফরম্যাট করা (যেমন: Just now, 2 hours ago)
   const timeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diffInSeconds < 60) return "Just now";
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-    return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    if (diffInSeconds < 60) return t("Just now", "এইমাত্র");
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} ${t("mins ago", "মিনিট আগে")}`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} ${t("hours ago", "ঘণ্টা আগে")}`;
+    return `${Math.floor(diffInSeconds / 86400)} ${t("days ago", "দিন আগে")}`;
   };
 
+  // লোডিং স্টেট
   if (loading) {
     return (
       <div className="notification-wrapper items-center justify-center">
-        <svg className="w-8 h-8 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-10 h-10 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
+        <p className="text-white mt-4 text-xs font-semibold tracking-wider animate-pulse">LOADING...</p>
       </div>
     );
   }
@@ -118,10 +132,11 @@ export default function NotificationPage() {
             >
               <div className="notif-header">
                 <h3 className="notif-title">{notif.title}</h3>
+                {/* আনরিড ডট */}
                 {!notif.is_read && <span className="unread-dot"></span>}
               </div>
               
-              {/* মেসেজ: expandedId মিললে expanded ক্লাস যুক্ত হবে */}
+              {/* মেসেজ: expandedId মিললে expanded ক্লাস যুক্ত হবে এবং পুরো লেখা দেখাবে */}
               <p className={`notif-message ${expandedId === notif.id ? "expanded" : ""}`}>
                 {notif.message}
               </p>
