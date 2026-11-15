@@ -15,7 +15,7 @@ export default function LotteryHomePage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({ days: "00", hours: "00", minutes: "00", seconds: "00" });
-  const [yesterdayDate, setYesterdayDate] = useState(""); // ডাইনামিক তারিখের জন্য স্টেট
+  const [yesterdayDate, setYesterdayDate] = useState(""); 
   
   const jackpotAmounts = [50000, 100000, 250000, 500000, 1000000];
   const [activeJackpot, setActiveJackpot] = useState(0);
@@ -44,41 +44,30 @@ export default function LotteryHomePage() {
     return () => clearInterval(sliderInterval);
   }, [jackpotAmounts.length]);
 
-  // ==========================================
   // গতকালের তারিখ বের করার লজিক
-  // ==========================================
   useEffect(() => {
     const d = new Date();
-    d.setDate(d.getDate() - 1); // আজকের তারিখ থেকে ১ দিন বিয়োগ
-    
-    // ফরম্যাট: "MON 14 MAR"
+    d.setDate(d.getDate() - 1); 
     const formattedDate = d.toLocaleDateString('en-GB', {
       weekday: 'short',
       day: 'numeric',
       month: 'short'
     }).toUpperCase().replace(',', ''); 
-    
     setYesterdayDate(formattedDate);
   }, []);
 
-  // ==========================================
-  // টাইমার লজিক: প্রতিদিন রাত 12:30 AM (00:30:00) এর জন্য
-  // ==========================================
+  // টাইমার লজিক
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
       const target = new Date();
-      
-      // রাত 12:30 AM সেট করা হলো
       target.setHours(0, 30, 0, 0);
 
-      // যদি আজকের 12:30 AM পার হয়ে যায়, তবে আগামীকালকের 12:30 AM টার্গেট করবে
       if (now.getTime() > target.getTime()) {
         target.setDate(target.getDate() + 1);
       }
 
       const diff = target.getTime() - now.getTime();
-      
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
       const m = Math.floor((diff / 1000 / 60) % 60);
@@ -94,7 +83,6 @@ export default function LotteryHomePage() {
     return () => clearInterval(timer);
   }, []);
 
-  // টিকিট টায়ার ডাটা
   const ticketTiers = [
     { price: 50, title: "LOTTO", titleSpan: "INDIA", color: "orange", numbers: [12, 27, 34, 40, 41, 42, 2], lastNumOrange: true },
     { price: 100, title: "Kerala", titleSpan: "", color: "green", numbers: [8, 15, 22, 31, 44, 49, 7], lastNumOrange: true },
@@ -122,7 +110,7 @@ export default function LotteryHomePage() {
 
         <main className="lottery-main">
           
-          {/* 1. Jackpot Slider */}
+          {/* ১. Today's Jackpot Slider */}
           <div className="jackpot-slider-wrapper">
             <div className="jackpot-overlay"></div>
             <div className="jackpot-track" style={{ transform: `translateX(-${activeJackpot * 100}%)` }}>
@@ -155,16 +143,16 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* 1.5 Jackpot কার্ডের ঠিক নিচে ইমেজ */}
-          <div className="w-full mt-1 mb-3">
+          {/* ২. Today's Jackpot স্লাইডারের ঠিক নিচে আপনার দেওয়া ইমেজ */}
+          <div className="w-full -mt-2 mb-2">
             <img 
               src="https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d5e7a1d3.png" 
-              alt="Lottery Promo Banner" 
-              className="w-full h-auto rounded-lg shadow-lg object-cover"
+              alt="Lottery Banner Link" 
+              className="w-full h-auto rounded-xl shadow-md object-cover"
             />
           </div>
 
-          {/* 2. Ticket Grid */}
+          {/* ৩. Ticket Grid */}
           <div>
             <div className="flex justify-between items-center mb-3">
               <h2 className="section-title">Buy & Win</h2>
@@ -180,8 +168,8 @@ export default function LotteryHomePage() {
                       {tier.title} {tier.titleSpan && <span style={{ color: tier.color === 'orange' ? '#16a34a' : '#f97316' }}>{tier.titleSpan}</span>}
                     </div>
                     <div className="lotto-card-date">
-                      {/* ডাইনামিক গতকালের তারিখ */}
-                      <span>{yesterdayDate || "Loading..."}</span> 
+                      {/* গতকালের রিয়েল তারিখ */}
+                      <span>{yesterdayDate}</span> 
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                         <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -201,9 +189,8 @@ export default function LotteryHomePage() {
                     )}
                   </div>
 
-                  {/* Actions */}
+                  {/* Actions (নাম্বার কালারের সাথে মিলে বাটন কালার) */}
                   <div className="lotto-card-actions">
-                    {/* নাম্বার সার্কেলের কালারের সাথে মিল রেখে বাটন কালার */}
                     <button 
                       className="lotto-btn" 
                       style={{ backgroundColor: '#184f35', borderColor: '#2e9b4a', color: '#ffffff' }}
