@@ -1,298 +1,337 @@
-.profile-wrapper {
-  min-height: 100vh;
-  background-color: #05100b;
-  color: white;
-  font-family: inherit;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
+"use client";
 
-.profile-main {
-  flex: 1;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  padding-bottom: 90px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../../lib/supabase/client";
+import LotteryHeader from "../Header/Header";
+import LotteryFooter from "../Footer/Footer";
+import "./profile.css";
 
-/* Virtual Card */
-.v-card {
-  position: relative;
-  width: 100%;
-  height: 220px;
-  border-radius: 24px;
-  padding: 24px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #142f23 0%, #07130d 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  margin-top: 16px;
-}
+export default function ProfilePage() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [loading, setLoading] = useState(true);
 
-.v-card-glow {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 120px;
-  height: 120px;
-  background: #00ffaa;
-  opacity: 0.1;
-  filter: blur(40px);
-  border-radius: 50%;
-}
+  // মডাল স্টেট
+  const [activeModal, setActiveModal] = useState<"pin" | "password" | "trick" | null>(null);
+  const [oldInputValue, setOldInputValue] = useState(""); // পুরনো পিন বা পাসওয়ার্ড
+  const [inputValue, setInputValue] = useState(""); // নতুন পিন বা পাসওয়ার্ড
+  const [modalMessage, setModalMessage] = useState({ type: "", text: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // একাউন্ট নাম্বার দেখার স্টেট
+  const [showAccountNumber, setShowAccountNumber] = useState(false);
 
-.v-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
+  const fetchProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email || "");
+        const { data } = await supabase
+          .from("profiles")
+          .select("id, game_id, lottery_balance, created_at, lottery_account_number, lottery_secret_pin")
+          .eq("id", user.id)
+          .single();
+        if (data) setProfile(data);
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-.v-card-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
-}
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
-.v-card-balance-section {
-  margin-top: 24px;
-}
+  const handleModalSubmit = async () => {
+    setIsSubmitting(true);
+    setModalMessage({ type: "", text: "" });
 
-.v-card-balance {
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-}
+    try {
+      // ১. পিন পরিবর্তন লজিক
+      if (activeModal === "pin") {
+        if (inputValue.length !== 4 || isNaN(Number(inputValue))) {
+          throw new Error("New PIN must be exactly 4 digits.");
+        }
+        if (profile?.lottery_secret_pin && oldInputValue !== profile.lottery_secret_pin) {
+          throw new Error("Incorrect old PIN.");
+        }
+        const { error } = await supabase.from("profiles").update({ lottery_secret_pin: inputValue }).eq("id", profile.id);
+        if (error) throw error;
+        
+        setModalMessage({ type: "success", text: "PIN updated successfully!" });
+        fetchProfile();
+        setTimeout(() => closeModal(), 1500);
 
-.v-card-footer {
-  margin-top: 28px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  width: 100%;
-}
+      } 
+      // ২. পাসওয়ার্ড পরিবর্তন লজিক
+      else if (activeModal === "password") {
+        if (inputValue.length < 6) {
+          throw new Error("New Password must be at least 6 characters.");
+        }
+        // পুরনো পাসওয়ার্ড ভেরিফাই করা
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: userEmail,
+          password: oldInputValue,
+        });
+        if (signInError) throw new Error("Incorrect old password.");
 
-.v-card-footer-left {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+        // নতুন পাসওয়ার্ড সেট করা
+        const { error: updateError } = await supabase.auth.updateUser({ password: inputValue });
+        if (updateError) throw updateError;
+        
+        setModalMessage({ type: "success", text: "Password changed successfully!" });
+        setTimeout(() => closeModal(), 1500);
 
-.v-acc-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+      } 
+      // ৩. ট্রিক সাবমিট
+      else if (activeModal === "trick") {
+        if (!inputValue.trim()) throw new Error("Please write your trick.");
+        const { error } = await supabase.from("trick_submissions").insert({
+          user_id: profile.id,
+          trick_content: inputValue
+        });
+        if (error) throw error;
+        setModalMessage({ type: "success", text: "Trick submitted successfully!" });
+        setTimeout(() => closeModal(), 1500);
+      }
+    } catch (err: any) {
+      setModalMessage({ type: "error", text: err.message || "Something went wrong." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-.v-card-acc-number {
-  font-size: 14px;
-  color: #d1d5db;
-  letter-spacing: 1.5px;
-  font-family: monospace;
-  white-space: nowrap;
-}
+  const closeModal = () => {
+    setActiveModal(null);
+    setOldInputValue("");
+    setInputValue("");
+    setModalMessage({ type: "", text: "" });
+  };
 
-.eye-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: #9ca3af;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#05100b] flex flex-col items-center justify-center">
+        <svg className="w-10 h-10 text-[#00ffaa] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+        </svg>
+        <p className="text-white mt-4 font-bold tracking-widest animate-pulse text-[11px]">LOADING WALLET...</p>
+      </div>
+    );
+  }
 
-.eye-btn:hover {
-  color: #ffffff;
-}
+  const balance = Number(profile?.lottery_balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const accountName = profile?.game_id || "User";
+  const creationDate = profile?.created_at 
+    ? new Date(profile.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) 
+    : "N/A";
+  
+  // ১৬ ডিজিটের অ্যাকাউন্ট নাম্বার ফরম্যাট
+  let displayAccNum = "**** **** **** ****";
+  if (profile?.lottery_account_number) {
+    if (showAccountNumber) {
+      displayAccNum = profile.lottery_account_number.match(/.{1,4}/g)?.join(" ") || profile.lottery_account_number;
+    } else {
+      displayAccNum = `${profile.lottery_account_number.slice(0, 2)}**********${profile.lottery_account_number.slice(-2)}`;
+    }
+  }
 
-.v-card-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: #d1d5db;
-}
+  return (
+    <div className="profile-wrapper">
+      <LotteryHeader userProfile={profile} />
 
-.v-card-date {
-  font-size: 10px;
-  color: #9ca3af;
-  white-space: nowrap;
-  padding-bottom: 2px;
-}
+      <div className="profile-main">
+        
+        {/* ভার্চুয়াল কার্ড */}
+        <div className="v-card">
+          <div className="v-card-glow"></div>
+          
+          <div className="v-card-header">
+            <h2 className="v-card-title">Account Holder Name</h2>
+          </div>
 
-.v-card-icon {
-  position: absolute;
-  right: 20px;
-  top: 60px;
-  width: 32px;
-  height: 56px;
-  background: #e0fbf0;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.9;
-}
+          <div className="v-card-balance-section">
+            <h3 className="v-card-balance">৳ {balance}</h3>
+          </div>
 
-/* Card Grid */
-.action-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
+          <div className="v-card-footer">
+            <div className="v-card-footer-left">
+              <div className="v-acc-row">
+                <p className="v-card-acc-number">{displayAccNum}</p>
+                <button className="eye-btn" onClick={() => setShowAccountNumber(!showAccountNumber)}>
+                  {showAccountNumber ? (
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              <p className="v-card-name">{accountName}</p>
+            </div>
+            <div>
+              <p className="v-card-date">Since: {creationDate}</p>
+            </div>
+          </div>
 
-.action-card {
-  background: #0f1e17;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 16px 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
+          <div className="v-card-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#07130d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rotate-90">
+              <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+              <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+              <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+              <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+          </div>
+        </div>
 
-.action-card:active {
-  transform: scale(0.95);
-}
+        {/* অ্যাকশন কার্ড গ্রিড */}
+        <div className="action-grid">
+          {/* Set Pin */}
+          <div className="action-card" onClick={() => setActiveModal("pin")}>
+            <div className="action-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <span className="action-text">{profile?.lottery_secret_pin ? "Change Pin" : "Set Pin"}</span>
+          </div>
 
-.action-card:hover {
-  background: #142f23;
-  border-color: #184f35;
-}
+          {/* Change Password */}
+          <div className="action-card" onClick={() => setActiveModal("password")}>
+            <div className="action-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+            </div>
+            <span className="action-text">Change Password</span>
+          </div>
 
-.action-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(0, 255, 170, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #00ffaa;
-}
+          {/* Trick Submit */}
+          <div className="action-card" onClick={() => setActiveModal("trick")}>
+            <div className="action-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <span className="action-text">Trick Submit</span>
+          </div>
+        </div>
 
-.action-text {
-  font-size: 11px;
-  font-weight: 700;
-  text-align: center;
-  color: #e5e7eb;
-}
+      </div>
 
-/* Full Screen Modals */
-.fullscreen-modal {
-  position: fixed;
-  inset: 0;
-  background: #05100b;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  animation: slideUp 0.3s ease-out forwards;
-}
+      <LotteryFooter />
 
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
+      {/* Full Screen Modals */}
+      {activeModal && (
+        <div className="fullscreen-modal">
+          {/* মডাল হেডার */}
+          <div className="modal-header">
+            <button onClick={closeModal} className="modal-back-btn">
+              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h3 className="modal-header-title">
+              {activeModal === "pin" && (profile?.lottery_secret_pin ? "Change Secret PIN" : "Set Secret PIN")}
+              {activeModal === "password" && "Change Password"}
+              {activeModal === "trick" && "Submit Trick"}
+            </h3>
+          </div>
 
-.modal-header {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
+          {/* মডাল বডি */}
+          <div className="modal-body">
+            
+            {/* পিন পরিবর্তন ফর্ম */}
+            {activeModal === "pin" && (
+              <>
+                {profile?.lottery_secret_pin && (
+                  <div className="form-group">
+                    <label className="form-label">Old 4-Digit PIN</label>
+                    <input 
+                      type="password"
+                      className="modal-input"
+                      placeholder="Enter old PIN"
+                      value={oldInputValue}
+                      onChange={(e) => setOldInputValue(e.target.value)}
+                      maxLength={4}
+                    />
+                  </div>
+                )}
+                <div className="form-group">
+                  <label className="form-label">New 4-Digit PIN</label>
+                  <input 
+                    type="password"
+                    className="modal-input"
+                    placeholder="Enter new PIN"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    maxLength={4}
+                  />
+                </div>
+              </>
+            )}
 
-.modal-back-btn {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+            {/* পাসওয়ার্ড পরিবর্তন ফর্ম */}
+            {activeModal === "password" && (
+              <>
+                <div className="form-group">
+                  <label className="form-label">Old Password</label>
+                  <input 
+                    type="password"
+                    className="modal-input"
+                    placeholder="Enter old password"
+                    value={oldInputValue}
+                    onChange={(e) => setOldInputValue(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">New Password</label>
+                  <input 
+                    type="password"
+                    className="modal-input"
+                    placeholder="Enter new password"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
 
-.modal-header-title {
-  font-size: 18px;
-  font-weight: 700;
-  margin-left: 12px;
-}
+            {/* ট্রিক সাবমিট ফর্ম */}
+            {activeModal === "trick" && (
+              <div className="form-group">
+                <label className="form-label">Your Trick</label>
+                <textarea 
+                  className="modal-input modal-textarea"
+                  placeholder="Write your trick here..."
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                />
+              </div>
+            )}
 
-.modal-body {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-}
+            {modalMessage.text && (
+              <p className={`msg-text ${modalMessage.type === "error" ? "msg-error" : "msg-success"}`}>
+                {modalMessage.text}
+              </p>
+            )}
+          </div>
 
-.form-group {
-  margin-bottom: 20px;
+          {/* মডাল ফুটার (সাবমিট বাটন) */}
+          <div className="modal-footer">
+            <button onClick={handleModalSubmit} disabled={isSubmitting} className="btn-submit">
+              {isSubmitting ? "Saving..." : "Confirm & Save"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
-
-.form-label {
-  display: block;
-  font-size: 12px;
-  color: #9ca3af;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-.modal-input {
-  width: 100%;
-  background: #0f1e17;
-  border: 1px solid #2b4236;
-  border-radius: 12px;
-  padding: 16px;
-  color: white;
-  font-size: 16px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.modal-input:focus {
-  border-color: #00ffaa;
-}
-
-.modal-textarea {
-  resize: none;
-  height: 120px;
-}
-
-.modal-footer {
-  padding: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  background: #05100b;
-}
-
-.btn-submit {
-  width: 100%;
-  padding: 16px;
-  background: #00ffaa;
-  color: #05100b;
-  font-weight: 800;
-  font-size: 16px;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.msg-text {
-  font-size: 12px;
-  text-align: center;
-  margin-top: 12px;
-  font-weight: 600;
-}
-.msg-error { color: #ff4d4d; }
-.msg-success { color: #00ffaa; }
