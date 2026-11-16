@@ -5,6 +5,29 @@
   flex-direction: column;
 }
 
+/* Loading Animation Wrapper */
+.transactions-loading-wrapper {
+  position: fixed;
+  inset: 0;
+  background-color: #0d241e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.svg-loader {
+  animation: spinPulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  color: #ffffff; /* সাদা আইকন */
+}
+
+@keyframes spinPulse {
+  0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+  50% { transform: scale(1.15) rotate(180deg); opacity: 1; }
+  100% { transform: scale(1) rotate(360deg); opacity: 0.8; }
+}
+
 .transactions-main {
   flex: 1;
   padding: 16px;
@@ -22,16 +45,16 @@
   padding-bottom: 12px;
   margin-bottom: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
 .filter-tabs::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
 }
 
 .filter-btn {
-  background: #183f35; /* বাটনের কালার আপডেট */
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #183f35; /* নির্দেশনা অনুযায়ী বাটন কালার */
+  color: #9ca3af;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 12px;
@@ -42,9 +65,10 @@
 }
 
 .filter-btn.active {
-  background: #ffffff; /* অ্যাক্টিভ হলে সাদা */
-  color: #183f35;
+  background: #183f35;
+  color: #ffffff;
   border-color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 /* Transaction List */
@@ -70,6 +94,7 @@
   gap: 12px;
 }
 
+/* সাদা আইকন ব্যাকগ্রাউন্ড */
 .tx-icon {
   width: 40px;
   height: 40px;
@@ -77,9 +102,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff; /* সব আইকন সাদা করা হলো */
-  background: rgba(255, 255, 255, 0.05); /* হালকা সাদা ব্যাকগ্রাউন্ড */
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1); /* হালকা সাদা ব্যাকগ্রাউন্ড */
+  color: #ffffff; /* সাদা আইকন */
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .tx-info h4 {
@@ -108,8 +133,9 @@
   font-weight: 800;
 }
 
-.tx-amount.positive { color: #ffffff; } /* গোল্ডের বদলে সাদা */
-.tx-amount.negative { color: #ffffff; }
+/* টাকার পরিমাণ সাদা করা হলো */
+.tx-amount.positive { color: #ffffff; }
+.tx-amount.negative { color: #ffffff; opacity: 0.7; }
 
 /* Status Badges */
 .status-badge {
@@ -118,10 +144,30 @@
   padding: 3px 8px;
   border-radius: 4px;
   text-transform: uppercase;
+  border: 1px solid transparent;
 }
-.status-badge.pending { background: rgba(255, 255, 255, 0.1); color: #ffffff; }
-.status-badge.approved { background: rgba(255, 255, 255, 0.15); color: #ffffff; }
-.status-badge.rejected { background: rgba(255, 255, 255, 0.05); color: #9ca3af; }
+.status-badge.pending { background: rgba(255, 255, 255, 0.05); color: #ffffff; border-color: rgba(255, 255, 255, 0.2); }
+.status-badge.approved { background: rgba(255, 255, 255, 0.1); color: #ffffff; }
+.status-badge.rejected { background: rgba(255, 255, 255, 0.05); color: #9ca3af; border-color: rgba(255, 255, 255, 0.1); }
+
+/* Load More Button */
+.load-more-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 16px;
+  background: #183f35; /* নির্দেশনা অনুযায়ী */
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.load-more-btn:hover {
+  background: #1f5144;
+}
 
 /* Empty State */
 .empty-state {
@@ -129,28 +175,4 @@
   padding: 40px 20px;
   color: #9ca3af;
   font-size: 14px;
-}
-
-/* Load More Button */
-.load-more-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.load-more-btn {
-  background: #183f35; /* নির্দেশিত বাটন কালার */
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.load-more-btn:hover {
-  background: #1f5547;
-  border-color: #ffffff;
 }
