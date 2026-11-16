@@ -13,9 +13,10 @@ export default function LotteryHomePage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({ days: "00", hours: "00", minutes: "00", seconds: "00" });
-  const [currentDate, setCurrentDate] = useState(""); // আজকের তারিখের জন্য স্টেট
+  const [currentDate, setCurrentDate] = useState(""); 
   
-  const jackpotAmounts = [50000, 100000, 250000, 500000, 1000000];
+  // ব্যানারে নতুন প্রাইজ পুল আপডেট করা হলো
+  const jackpotAmounts = [20000, 50000, 100000, 200000];
   const [activeJackpot, setActiveJackpot] = useState(0);
 
   useEffect(() => {
@@ -74,13 +75,12 @@ export default function LotteryHomePage() {
     return () => clearInterval(timer);
   }, []);
 
-  // আপডেট করা টিকিট টায়ার
+  // আপডেট করা টিকিট টায়ার (1000 বাদ দেওয়া হয়েছে এবং নতুন দাম বসানো হয়েছে)
   const ticketTiers = [
-    { price: 50, title: "LOTTO", titleSpan: "BD", color: "orange" },
-    { price: 100, title: "MEGA", titleSpan: "BD I", color: "green" },
-    { price: 250, title: "DHAKA", titleSpan: "MEGA II", color: "orange" },
-    { price: 500, title: "DHAKA", titleSpan: "MEGA I", color: "green" },
-    { price: 1000, title: "Lotto", titleSpan: "Super Mega", color: "orange" },
+    { price: 20, title: "LOTTO", titleSpan: "BD", color: "orange" },
+    { price: 50, title: "MEGA", titleSpan: "BD I", color: "green" },
+    { price: 100, title: "DHAKA", titleSpan: "MEGA II", color: "orange" },
+    { price: 200, title: "DHAKA", titleSpan: "MEGA I", color: "green" },
   ];
 
   if (loading) {
@@ -129,7 +129,7 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* ২. Ticket List (Buy & Win লেখা সরানো হয়েছে) */}
+          {/* ২. Ticket List */}
           <div className="mt-4">
             <div className="ticket-list-container">
               {ticketTiers.map((tier, index) => (
@@ -148,8 +148,6 @@ export default function LotteryHomePage() {
                       </svg>
                     </div>
                   </div>
-
-                  {/* ডটের (.......) বক্সটি সরিয়ে দেওয়া হয়েছে */}
 
                   {/* Actions */}
                   <div className="lotto-card-actions">
