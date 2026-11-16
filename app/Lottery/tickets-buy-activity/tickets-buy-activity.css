@@ -34,7 +34,7 @@
   overflow: hidden;
   aspect-ratio: 2 / 1; 
   box-shadow: 0 10px 25px rgba(106, 17, 203, 0.4);
-  min-height: 190px; /* হাইট কিছুটা বাড়ানো হলো Prize Pool এর জন্য */
+  min-height: 190px;
   border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -82,7 +82,6 @@
   letter-spacing: 1px;
 }
 
-/* নতুন Prize Pool ডিজাইন */
 .prize-pool-display {
   margin-top: 10px;
   display: flex;
@@ -101,7 +100,7 @@
 .pool-amount {
   font-size: 18px;
   font-weight: 900;
-  color: #FFD700; /* গোল্ডেন কালার */
+  color: #FFD700;
   text-shadow: 0 2px 5px rgba(0,0,0,0.5);
   letter-spacing: 0.5px;
 }
@@ -114,7 +113,7 @@
   border-radius: 20px;
   font-size: 16px;
   font-weight: 900;
-  margin-top: 12px; /* একটু কমানো হলো */
+  margin-top: 12px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
@@ -137,7 +136,7 @@
 
 .barcode-vertical-wrapper {
   width: 38px; 
-  height: 130px; /* বারকোড হাইট বাড়ানো হলো */
+  height: 130px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -153,7 +152,7 @@
 }
 
 /* =========================================
-   2. Input Section
+   2. Input Section & Live Counter
    ========================================= */
 .input-section {
   background: var(--bg-card);
@@ -162,11 +161,48 @@
   padding: 16px;
 }
 
-.input-section h3 {
-  font-size: 12px;
-  color: var(--text-main);
-  margin-bottom: 12px;
+/* Live Counter Design */
+.live-counter-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
   font-weight: 700;
+  color: #ffffff;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #ff4d4d;
+  border-radius: 50%;
+  animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(255, 77, 77, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 77, 77, 0); }
+}
+
+.sold-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: #F5B041;
+  background: rgba(245, 176, 65, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 .ticket-number-input {
