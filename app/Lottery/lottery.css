@@ -1,9 +1,172 @@
 /* =========================================
-   Premium Lottery Card Design
+   Main Layout
    ========================================= */
+.lottery-page-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  font-family: inherit;
+  position: relative;
+  background-color: #0d241e; 
+}
+
+.lottery-overlay {
+  position: relative;
+  z-index: 1; 
+  min-height: 100vh;
+  width: 100%;
+  background-color: #0d241e;
+  padding-bottom: 65px; 
+}
+
+.lottery-main {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+/* =========================================
+   1. Jackpot Slider (Fixed Height!)
+   ========================================= */
+.jackpot-slider-wrapper {
+  margin: 0 -16px; 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* ইমেজ যাতে বিশাল হয়ে পুরো স্ক্রিন না ঢেকে ফেলে সেজন্য হাইট ফিক্স করা হলো */
+  height: 180px; 
+  min-height: 180px;
+  max-height: 180px;
+  
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  background-color: #103626;
+}
+
+.jackpot-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(180deg, rgba(11, 26, 19, 0.3) 0%, rgba(11, 26, 19, 0.9) 100%);
+  z-index: 1;
+}
+
+.jackpot-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.jackpot-slide {
+  flex: 0 0 100%;
+  padding: 15px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; 
+  height: 100%;
+}
+
+.jackpot-title {
+  font-size: 10px;
+  color: #F5B041;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.jackpot-amount {
+  font-size: 32px; 
+  font-weight: 900;
+  color: #FFFFFF;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  margin-bottom: 12px; 
+}
+
+.timer-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.timer-box {
+  background: rgba(11, 26, 19, 0.85); 
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 4px 8px; 
+  min-width: 55px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timer-box span:first-child {
+  font-size: 15px; 
+  font-weight: 900;
+  color: #FFFFFF; 
+  font-family: monospace;
+}
+
+.timer-box span:last-child {
+  font-size: 8px;
+  color: #A0ADB0;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.jackpot-dots {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 10;
+}
+
+.jackpot-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.jackpot-dot.active {
+  background: #F5B041;
+  width: 16px;
+  border-radius: 4px;
+}
+
+/* =========================================
+   2. Premium Lottery Card Design
+   ========================================= */
+.section-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.ticket-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .lotto-card {
   position: relative;
-  /* গ্লাসমরফিজম এবং ৩ডি শ্যাডো */
   background: linear-gradient(145deg, rgba(24, 45, 36, 0.95), rgba(10, 22, 16, 0.98));
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -13,50 +176,40 @@
   color: #ffffff;
   display: flex;
   flex-direction: column;
-  margin-bottom: 8px;
 }
 
-/* টিকিটের দুই পাশে কাটা অংশ (Punch Holes) */
+/* Punch Holes */
 .lotto-card::before,
 .lotto-card::after {
   content: '';
   position: absolute;
-  top: 55%; /* বাটনের ঠিক উপরে */
-  width: 24px;
-  height: 24px;
-  background-color: #0b1a13; /* মেইন পেজ ব্যাকগ্রাউন্ড কালার */
+  top: 55%; 
+  width: 24px; height: 24px;
+  background-color: #0d241e; 
   border-radius: 50%;
   transform: translateY(-50%);
-  box-shadow: inset -2px -2px 5px rgba(0,0,0,0.5), inset 2px 2px 5px rgba(255,255,255,0.05);
+  box-shadow: inset -2px -2px 5px rgba(0,0,0,0.5);
   z-index: 10;
 }
 .lotto-card::before { left: -12px; }
 .lotto-card::after { right: -12px; }
 
-/* হেডার (টাইটেল ও ডেট) */
 .lotto-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 18px 20px;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.15); /* টিকিটের ড্যাশ লাইন */
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.15); 
 }
 
 .lotto-card-title {
   font-size: 20px;
   font-weight: 900;
   font-style: italic;
-  letter-spacing: 0.5px;
 }
 
-.lotto-card-title.orange { 
-  color: #F5B041; 
-  text-shadow: 0 0 10px rgba(245, 176, 65, 0.3);
-}
-.lotto-card-title.green { 
-  color: #00E701; 
-  text-shadow: 0 0 10px rgba(0, 231, 1, 0.3);
-}
+.lotto-card-title.orange { color: #F5B041; text-shadow: 0 0 10px rgba(245, 176, 65, 0.3); }
+.lotto-card-title.green { color: #00E701; text-shadow: 0 0 10px rgba(0, 231, 1, 0.3); }
 
 .lotto-card-date {
   display: flex;
@@ -71,13 +224,12 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* টিকিট নাম্বার / বারকোড ডিজাইন */
+/* Ticket Number / Barcode */
 .ticket-number-container {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 24px 20px;
-  min-height: 80px;
 }
 
 .ticket-number {
@@ -90,22 +242,7 @@
   padding: 12px 24px;
   border-radius: 12px;
   border: 2px dashed rgba(0, 255, 170, 0.3);
-  box-shadow: inset 0 0 15px rgba(0, 255, 170, 0.1), 0 4px 10px rgba(0,0,0,0.3);
-  position: relative;
-  overflow: hidden;
-}
-
-/* বারকোডের মতো লম্বা দাগ দেওয়ার জন্য (অপশনাল ইফেক্ট) */
-.ticket-number::after {
-  content: '| | ||| || ||| | |||';
-  position: absolute;
-  bottom: 2px;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  font-size: 10px;
-  color: rgba(0, 255, 170, 0.2);
-  letter-spacing: 2px;
+  box-shadow: inset 0 0 15px rgba(0, 255, 170, 0.1);
 }
 
 .ticket-number-placeholder {
@@ -120,7 +257,7 @@
   border: 2px dashed rgba(255, 255, 255, 0.1);
 }
 
-/* অ্যাকশন বাটনসমূহ */
+/* Buttons */
 .lotto-card-actions {
   display: flex;
   gap: 12px;
@@ -135,13 +272,8 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
 }
 
-/* Draw History বাটন (সেকেন্ডারি) */
 .lotto-btn.secondary {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -149,22 +281,20 @@
 }
 .lotto-btn.secondary:hover {
   background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.4);
 }
 
-/* Buy বাটন (প্রাইমারি - নিয়ন গ্লো) */
 .lotto-btn.primary {
   background: linear-gradient(to right, #184f35, #1f6343);
   border: 1px solid #2e9b4a;
   color: #ffffff;
-  box-shadow: 0 4px 15px rgba(46, 155, 74, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(46, 155, 74, 0.3);
 }
 .lotto-btn.primary:hover {
   box-shadow: 0 6px 20px rgba(46, 155, 74, 0.5);
   transform: translateY(-1px);
 }
 
-/* টাইমার বার */
+/* Timer Bar */
 .lotto-timer-bar {
   display: flex;
   align-items: center;
@@ -188,7 +318,7 @@
 }
 
 .lotto-t-box {
-  background: #05100b; /* খুব ডার্ক */
+  background: #05100b; 
   border: 1px solid rgba(0, 255, 170, 0.2); 
   border-radius: 8px;
   padding: 8px 10px;
@@ -203,7 +333,7 @@
   font-weight: 900;
   font-size: 18px;
   line-height: 1;
-  text-shadow: 0 0 8px rgba(0, 255, 170, 0.6); /* নিয়ন গ্লো টেক্সট */
+  text-shadow: 0 0 8px rgba(0, 255, 170, 0.6); 
   font-family: monospace;
 }
 
