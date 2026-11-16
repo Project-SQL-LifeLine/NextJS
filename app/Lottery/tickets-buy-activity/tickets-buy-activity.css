@@ -4,7 +4,7 @@
   --border-color: #2B4236;
   --text-main: #FFFFFF;
   --text-muted: #A0ADB0;
-  --gold: #FFFFFF; /* Gold থেকে White করা হলো */
+  --gold: #FFFFFF; 
   --btn-green: #184f35;
 
   background-color: var(--bg-main);
@@ -34,7 +34,7 @@
   overflow: hidden;
   aspect-ratio: 2 / 1; 
   box-shadow: 0 10px 25px rgba(106, 17, 203, 0.4);
-  min-height: 180px;
+  min-height: 190px; /* হাইট কিছুটা বাড়ানো হলো Prize Pool এর জন্য */
   border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -82,15 +82,39 @@
   letter-spacing: 1px;
 }
 
+/* নতুন Prize Pool ডিজাইন */
+.prize-pool-display {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pool-label {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.pool-amount {
+  font-size: 18px;
+  font-weight: 900;
+  color: #FFD700; /* গোল্ডেন কালার */
+  text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  letter-spacing: 0.5px;
+}
+
 .ticket-price-tag {
   display: inline-block;
-  background: #FFFFFF; /* Gold থেকে White */
+  background: #FFFFFF; 
   color: #000;
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 16px;
   font-weight: 900;
-  margin-top: 16px;
+  margin-top: 12px; /* একটু কমানো হলো */
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
@@ -113,7 +137,7 @@
 
 .barcode-vertical-wrapper {
   width: 38px; 
-  height: 120px; 
+  height: 130px; /* বারকোড হাইট বাড়ানো হলো */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -151,7 +175,7 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 14px 10px;
-  color: #FFFFFF; /* Gold থেকে White */
+  color: #FFFFFF; 
   font-size: 18px; 
   font-weight: 800;
   text-align: center;
@@ -162,7 +186,7 @@
 }
 
 .ticket-number-input:focus {
-  border-color: #FFFFFF; /* Gold থেকে White */
+  border-color: #FFFFFF; 
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
@@ -190,8 +214,8 @@
 
 .action-btn {
   background: transparent;
-  color: #FFFFFF; /* Gold থেকে White */
-  border: 1px solid #FFFFFF; /* Gold থেকে White */
+  color: #FFFFFF; 
+  border: 1px solid #FFFFFF; 
   border-radius: 4px;
   padding: 6px 10px;
   font-size: 10px;
@@ -201,7 +225,7 @@
 }
 
 .action-btn:hover {
-  background: rgba(255, 255, 255, 0.1); /* Gold থেকে White */
+  background: rgba(255, 255, 255, 0.1); 
 }
 
 /* =========================================
@@ -283,16 +307,7 @@
 }
 
 @keyframes ticketSpinPulse {
-  0% {
-    transform: scale(1) rotate(0deg);
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
-  }
-  50% {
-    transform: scale(1.15) rotate(180deg);
-    filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.9));
-  }
-  100% {
-    transform: scale(1) rotate(360deg);
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
-  }
+  0% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); }
+  50% { transform: scale(1.15) rotate(180deg); filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.9)); }
+  100% { transform: scale(1) rotate(360deg); filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); }
 }
