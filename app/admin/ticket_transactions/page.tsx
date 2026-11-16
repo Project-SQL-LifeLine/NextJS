@@ -9,6 +9,9 @@ export default function AdminTicketTransactionsPage() {
   const [message, setMessage] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("pending");
+  
+  // ডিবাগিং স্টেট
+  const [debugInfo, setDebugInfo] = useState({ totalFetched: 0, errorMsg: "" });
 
   useEffect(() => {
     fetchTransactions();
@@ -25,28 +28,32 @@ export default function AdminTicketTransactionsPage() {
         `)
         .order("created_at", { ascending: false });
 
+      // 🔥 কনসোলে ডাটা চেক করার জন্য
+      console.log("SUPABASE DATA:", data);
+      console.log("SUPABASE ERROR:", error);
+
       if (error) throw error;
-      if (data) setTransactions(data);
+      
+      if (data) {
+        setTransactions(data);
+        setDebugInfo({ totalFetched: data.length, errorMsg: "None" });
+      }
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
+      setDebugInfo({ totalFetched: 0, errorMsg: err.message });
     } finally {
       setLoading(false);
     }
   };
 
-  // অ্যাপ্রুভ করার ফাংশন
   const handleApprove = async (tx: any) => {
     if (!window.confirm("Are you sure you want to approve this transaction?")) return;
     
     try {
       let response;
-      
-      // ট্রানজেকশন টাইপ অনুযায়ী আলাদা ফাংশন কল হবে
       if (tx.transaction_type === "fee_payment") {
-        // ফি পেমেন্টের জন্য approve_lottery_fee ফাংশন
         response = await supabase.rpc("approve_lottery_fee", { p_tx_id: tx.id });
       } else {
-        // অন্য সব (balance_reload) জন্য approve_lottery_transaction ফাংশন
         response = await supabase.rpc("approve_lottery_transaction", { p_tx_id: tx.id });
       }
 
@@ -54,7 +61,7 @@ export default function AdminTicketTransactionsPage() {
       
       if (response.data.success) {
         setMessage({ type: "success", text: "Transaction approved successfully!" });
-        fetchTransactions(); // রিফ্রেশ
+        fetchTransactions();
       } else {
         setMessage({ type: "error", text: response.data.error });
       }
@@ -63,17 +70,14 @@ export default function AdminTicketTransactionsPage() {
     }
   };
 
-  // রিজেক্ট করার ফাংশন
   const handleReject = async (tx: any) => {
     if (!window.confirm("Are you sure you want to reject this transaction?")) return;
     
     try {
-      // যদি উইথড্র হয়, তবে reject_lottery_withdrawal কল করে টাকা ফেরত দিতে হবে
       if (tx.transaction_type === "withdrawal") {
         const response = await supabase.rpc("reject_lottery_withdrawal", { p_tx_id: tx.id });
         if (response.error) throw response.error;
       } else {
-        // সাধারণ রিজেক্ট
         const { error } = await supabase
           .from("ticket_transactions")
           .update({ status: "rejected" })
@@ -88,19 +92,23 @@ export default function AdminTicketTransactionsPage() {
     }
   };
 
-  // ফিল্টারিং ও সার্চ
   const filteredTransactions = transactions.filter((tx) => {
+    // Safe check for null values
+    const gameId = tx.profiles?.game_id || "";
+    const trxId = tx.trx_id || "";
+    const trackId = tx.ticket_dp_track_id || "";
+    const currentStatus = tx.status || "";
+
     const matchesSearch = 
-      tx.profiles?.game_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tx.trx_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tx.ticket_dp_track_id?.toLowerCase().includes(searchTerm.toLowerCase());
+      gameId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trxId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trackId.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = filterStatus === "all" || tx.status === filterStatus;
+    const matchesStatus = filterStatus === "all" || currentStatus.toLowerCase() === filterStatus.toLowerCase();
     
     return matchesSearch && matchesStatus;
   });
 
-  // ট্রানজেকশন টাইপের নাম ও কালার নির্ধারণের হেল্পার ফাংশন
   const getTypeBadge = (type: string) => {
     switch (type) {
       case "balance_reload":
@@ -122,7 +130,15 @@ export default function AdminTicketTransactionsPage() {
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4">
       
-      {/* হেডার */}
+      {/* 🔥 ডিবাগিং প্যানেল (সমস্যা বোঝার জন্য) */}
+      <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg text-sm text-yellow-800">
+        <strong>Debug Info:</strong><br/>
+        Total Records Fetched from DB: {debugInfo.totalFetched} <br/>
+        Filtered Records showing: {filteredTransactions.length} <br/>
+        Selected Status Filter: {filterStatus} <br/>
+        Error (if any): {debugInfo.errorMsg}
+      </div>
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Ticket Transactions</h1>
@@ -155,14 +171,12 @@ export default function AdminTicketTransactionsPage() {
         </div>
       </div>
 
-      {/* মেসেজ */}
       {message.text && (
         <div className={`p-4 rounded-lg text-sm font-semibold ${message.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
           {message.text}
         </div>
       )}
 
-      {/* টেবিল */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px]">
@@ -180,7 +194,7 @@ export default function AdminTicketTransactionsPage() {
             <tbody>
               {filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-gray-500">No transactions found.</td>
+                  <td colSpan={7} className="p-8 text-center text-gray-500">No transactions found matching the filter.</td>
                 </tr>
               ) : (
                 filteredTransactions.map((tx) => (
@@ -189,6 +203,7 @@ export default function AdminTicketTransactionsPage() {
                       {new Date(tx.created_at).toLocaleString()}
                     </td>
                     <td className="p-4 font-bold text-gray-900">
+                      {/* Join ফেইল করলে Unknown দেখাবে */}
                       {tx.profiles?.game_id || "Unknown"}
                     </td>
                     <td className="p-4">
