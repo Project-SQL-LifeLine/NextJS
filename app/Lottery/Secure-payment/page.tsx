@@ -14,7 +14,7 @@ export default function SecurePaymentPage() {
   const [profile, setProfile] = useState<any>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
-  const [loading, setLoading] = useState(true); // নতুন লোডিং স্টেট
+  const [loading, setLoading] = useState(true); 
   
   const [amount, setAmount] = useState<string>("");
   const [trxId, setTrxId] = useState<string>("");
@@ -30,10 +30,15 @@ export default function SecurePaymentPage() {
     const fetchData = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profileData } = await supabase.from("profiles").select("id, game_id, lottery_balance").eq("id", user.id).single();
-          if (profileData) setProfile(profileData);
+        
+        // ইউজার লগইন না থাকলে লগইন পেজে পাঠিয়ে দেবে
+        if (!user) {
+          router.replace("/user/login");
+          return;
         }
+
+        const { data: profileData } = await supabase.from("profiles").select("id, game_id, lottery_balance").eq("id", user.id).single();
+        if (profileData) setProfile(profileData);
 
         const { data: methodsData } = await supabase
           .from("control_payment_method")
@@ -46,13 +51,16 @@ export default function SecurePaymentPage() {
         }
       } catch (err) {
         console.error("Error fetching data:", err);
-      } finally {
-        // ডাটা লোড শেষ হলে লোডিং বন্ধ হবে
-        setLoading(false);
       }
     };
-    fetchData();
-  }, []);
+
+    // ৩.১ সেকেন্ড (৩১০০ মিলি সেকেন্ড) লোডিং টাইমার
+    const timer = new Promise((resolve) => setTimeout(resolve, 3100));
+    
+    Promise.all([fetchData(), timer]).then(() => {
+      setLoading(false);
+    });
+  }, [router]);
 
   const copyNumber = () => {
     if (selectedMethod?.admin_payment_number) {
@@ -60,6 +68,15 @@ export default function SecurePaymentPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  // TrxID ইনপুটে শুধু ইংরেজি অক্ষর এবং সংখ্যা গ্রহণ করার লজিক
+  const handleTrxIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // বাংলা বা স্পেসিয়াল ক্যারেক্টার বাদ দিয়ে শুধু A-Z এবং 0-9 রাখবে
+    const cleanValue = e.target.value.replace(/[^a-zA-Z0-9]/g, "");
+    setTrxId(cleanValue.toUpperCase());
+    setError("");
+    setSuccessMsg("");
   };
 
   const handleSubmit = async () => {
@@ -73,10 +90,13 @@ export default function SecurePaymentPage() {
       setError(t("Please select a payment method.", "পেমেন্ট মেথড সিলেক্ট করুন।"));
       return;
     }
-    if (trxId.length < 6) {
-      setError(t("Please enter a valid Transaction ID (TrxID).", "সঠিক ট্রানজেকশন আইডি (TrxID) দিন।"));
+    
+    // মিনিমাম ৮ অক্ষরের চেক
+    if (trxId.length < 8) {
+      setError(t("Transaction ID must be at least 8 characters/digits.", "ট্রানজেকশন আইডি কমপক্ষে ৮ অক্ষরের হতে হবে।"));
       return;
     }
+    
     if (!profile) return;
 
     setSubmitting(true);
@@ -91,14 +111,14 @@ export default function SecurePaymentPage() {
         ticket_dp_track_id: trackId,
         transaction_type: "balance_reload", 
         amount: depositAmount,
-        trx_id: trxId.toUpperCase(),
+        trx_id: trxId,
         status: "pending",
         bank_details: { method: selectedMethod.method_name }
       });
 
       if (insertError) throw insertError;
 
-      setSuccessMsg(t(`Reload request of ৳${depositAmount} submitted successfully! Admin will verify shortly.`, `৳${depositAmount} রিলোড রিকোয়েস্ট সফলভাবে জমা হয়েছে! অ্যাডমিন শীঘ্রই ভেরিফাই করবেন।`));
+      setSuccessMsg(t(`Reload request of ৳${depositAmount} submitted successfully!`, `৳${depositAmount} রিলোড রিকোয়েস্ট সফলভাবে জমা হয়েছে!`));
       setAmount("");
       setTrxId("");
 
@@ -110,12 +130,11 @@ export default function SecurePaymentPage() {
   };
 
   // ==========================================
-  // লোডিং স্ক্রিন (যখন ডাটা লোড হবে)
+  // ৩.১ সেকেন্ডের সাদা লোডিং স্ক্রিন
   // ==========================================
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
-        {/* ডিপোজিট / ক্যাশ SVG আইকন */}
+      <div className="h-[100dvh] bg-[#0d241e] flex flex-col items-center justify-center">
         <svg 
           className="w-12 h-12 text-white animate-spin" 
           fill="none" 
@@ -137,7 +156,7 @@ export default function SecurePaymentPage() {
   }
 
   return (
-    <div className="secure-payment-page pb-20">
+    <div className="secure-payment-page">
       <LotteryHeader userProfile={profile} />
 
       <main className="secure-main">
@@ -190,20 +209,20 @@ export default function SecurePaymentPage() {
 
         {/* ইন্সট্রাকশন এবং ডাইনামিক অ্যাডমিন নাম্বার */}
         <div className="instruction-box">
-          <p>1. {t("Send money to the number below using", "নিচের নাম্বারে টাকা পাঠান")} <b>{selectedMethod?.method_name || "Payment Method"}</b>:</p>
+          <p>1. {t("Send money to", "টাকা পাঠান")} <b>{selectedMethod?.method_name || "Payment Method"}</b>:</p>
           
           <div className="admin-number-container">
             <div className="admin-number">
-              {selectedMethod?.admin_payment_number || t("Number not set", "নাম্বার সেট করা নেই")}
+              {selectedMethod?.admin_payment_number || t("Number not set", "নাম্বার সেট নেই")}
             </div>
             {selectedMethod?.admin_payment_number && (
               <button onClick={copyNumber} className="copy-btn-small">
-                {copied ? t("Copied!", "কপি হয়েছে!") : t("Copy", "কপি")}
+                {copied ? t("Copied!", "কপি!") : t("Copy", "কপি")}
               </button>
             )}
           </div>
 
-          <p style={{ marginTop: '10px' }}>2. {t("After sending money, enter the Transaction ID (TrxID) below.", "টাকা পাঠানোর পর নিচে ট্রানজেকশন আইডি (TrxID) দিন।")}</p>
+          <p style={{ marginTop: '8px' }}>2. {t("Enter TrxID below.", "নিচে TrxID দিন।")}</p>
         </div>
 
         {/* ট্রানজেকশন আইডি ইনপুট */}
@@ -212,9 +231,10 @@ export default function SecurePaymentPage() {
           <input 
             type="text"
             value={trxId}
-            onChange={(e) => { setTrxId(e.target.value); setError(""); setSuccessMsg(""); }}
-            placeholder={t("e.g. 9F7A2B1C", "যেমন: 9F7A2B1C")}
+            onChange={handleTrxIdChange}
+            placeholder={t("Min 8 characters", "কমপক্ষে ৮ অক্ষর")}
             className="trx-input"
+            maxLength={20}
           />
         </div>
 
@@ -227,7 +247,7 @@ export default function SecurePaymentPage() {
       <div className="submit-btn-wrapper">
         <button 
           onClick={handleSubmit} 
-          disabled={submitting || !amount || !trxId || !selectedMethod?.admin_payment_number}
+          disabled={submitting || !amount || trxId.length < 8 || !selectedMethod?.admin_payment_number}
           className="submit-btn"
         >
           {submitting ? t("Submitting...", "জমা হচ্ছে...") : t("Submit Reload Request", "রিলোড রিকোয়েস্ট জমা দিন")}
