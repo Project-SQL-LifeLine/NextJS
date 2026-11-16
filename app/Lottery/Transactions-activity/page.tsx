@@ -10,18 +10,19 @@ export default function UserTransactionsPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
-  const [filter, setFilter] = useState("all"); // all, ticket_purchase, balance_reload, fee_payment
+  
+  // ফিল্টার স্টেট
+  const [filter, setFilter] = useState("all"); 
+  
+  // পেজিনেশন স্টেট (প্রথমে ৭টি দেখাবে)
+  const [visibleCount, setVisibleCount] = useState(7);
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setLoading(false);
-          return;
-        }
+        if (!user) return;
 
-        // হেডারের জন্য প্রোফাইল ডাটা
         const { data: profileData } = await supabase
           .from("profiles")
           .select("*")
@@ -29,7 +30,6 @@ export default function UserTransactionsPage() {
           .single();
         if (profileData) setProfile(profileData);
 
-        // ইউজারের নিজের সব লেনদেন ফেচ করা
         const { data, error } = await supabase
           .from("ticket_transactions")
           .select("*")
@@ -41,13 +41,23 @@ export default function UserTransactionsPage() {
 
       } catch (err) {
         console.error("Error fetching transactions:", err);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchTransactions();
+    // ৩.১ সেকেন্ডের (৩১০০ মিলি সেকেন্ড) লোডিং টাইমার
+    const timer = new Promise((resolve) => setTimeout(resolve, 3100));
+    
+    // ডাটা ফেচ এবং টাইমার একসাথে শেষ হলে loading false হবে
+    Promise.all([fetchTransactions(), timer]).then(() => {
+      setLoading(false);
+    });
   }, []);
+
+  // ফিল্টার পরিবর্তন হলে visibleCount আবার ৭ এ রিসেট হবে
+  const handleFilterChange = (newFilter: string) => {
+    setFilter(newFilter);
+    setVisibleCount(7); 
+  };
 
   // ফিল্টার লজিক
   const filteredData = transactions.filter(tx => {
@@ -55,13 +65,20 @@ export default function UserTransactionsPage() {
     return tx.transaction_type === filter;
   });
 
-  // ট্রানজেকশন টাইপের নাম এবং আইকন নির্ধারণ
+  // পেজিনেশন লজিক (৭টি করে কাটা)
+  const displayedData = filteredData.slice(0, visibleCount);
+
+  // Load More ক্লিক করলে ৭টি করে বাড়বে
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 7);
+  };
+
+  // ট্রানজেকশন টাইপের নাম এবং সাদা SVG আইকন নির্ধারণ
   const getTxDetails = (type: string) => {
     switch (type) {
       case "ticket_purchase":
         return {
           title: "Ticket Purchase",
-          iconClass: "ticket",
           isNegative: true,
           icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -72,7 +89,6 @@ export default function UserTransactionsPage() {
       case "balance_reload":
         return {
           title: "Balance Reload",
-          iconClass: "reload",
           isNegative: false,
           icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -83,7 +99,6 @@ export default function UserTransactionsPage() {
       case "fee_payment":
         return {
           title: "Fee Payment",
-          iconClass: "fee",
           isNegative: true,
           icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -94,7 +109,6 @@ export default function UserTransactionsPage() {
       case "withdrawal":
         return {
           title: "Withdrawal",
-          iconClass: "withdraw",
           isNegative: true,
           icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -105,12 +119,32 @@ export default function UserTransactionsPage() {
       default:
         return {
           title: type,
-          iconClass: "ticket",
           isNegative: false,
           icon: null
         };
     }
   };
+
+  // ==========================================
+  // ৩.১ সেকেন্ডের সাদা লোডিং স্ক্রিন
+  // ==========================================
+  if (loading) {
+    return (
+      <div className="transactions-loading-wrapper">
+        {/* Transactions / Wallet SVG */}
+        <div className="svg-loader">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+            <path d="M7 15h.01M11 15h2"></path>
+          </svg>
+        </div>
+        <p className="text-white mt-6 font-bold tracking-widest animate-pulse text-[12px]">
+          LOADING TRANSACTIONS...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="transactions-page-wrapper">
@@ -120,64 +154,66 @@ export default function UserTransactionsPage() {
         
         {/* ফিল্টার ট্যাব */}
         <div className="filter-tabs">
-          <button className={`filter-btn ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>
+          <button className={`filter-btn ${filter === "all" ? "active" : ""}`} onClick={() => handleFilterChange("all")}>
             All
           </button>
-          <button className={`filter-btn ${filter === "ticket_purchase" ? "active" : ""}`} onClick={() => setFilter("ticket_purchase")}>
+          <button className={`filter-btn ${filter === "ticket_purchase" ? "active" : ""}`} onClick={() => handleFilterChange("ticket_purchase")}>
             Tickets
           </button>
-          <button className={`filter-btn ${filter === "balance_reload" ? "active" : ""}`} onClick={() => setFilter("balance_reload")}>
+          <button className={`filter-btn ${filter === "balance_reload" ? "active" : ""}`} onClick={() => handleFilterChange("balance_reload")}>
             Reloads
           </button>
-          <button className={`filter-btn ${filter === "fee_payment" ? "active" : ""}`} onClick={() => setFilter("fee_payment")}>
+          <button className={`filter-btn ${filter === "fee_payment" ? "active" : ""}`} onClick={() => handleFilterChange("fee_payment")}>
             Fees
           </button>
         </div>
 
         {/* ট্রানজেকশন লিস্ট */}
-        {loading ? (
-          <div className="flex justify-center items-center h-40">
-            <svg className="w-8 h-8 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </div>
-        ) : filteredData.length === 0 ? (
+        {filteredData.length === 0 ? (
           <div className="empty-state">
             <p>No transactions found.</p>
           </div>
         ) : (
-          <div className="tx-list">
-            {filteredData.map((tx) => {
-              const details = getTxDetails(tx.transaction_type);
-              
-              return (
-                <div key={tx.id} className="tx-card">
-                  <div className="tx-left">
-                    <div className={`tx-icon ${details.iconClass}`}>
-                      {details.icon}
+          <>
+            <div className="tx-list">
+              {displayedData.map((tx) => {
+                const details = getTxDetails(tx.transaction_type);
+                
+                return (
+                  <div key={tx.id} className="tx-card">
+                    <div className="tx-left">
+                      <div className="tx-icon">
+                        {details.icon}
+                      </div>
+                      <div className="tx-info">
+                        <h4>{details.title}</h4>
+                        <p>{tx.trx_id ? `Trx: ${tx.trx_id}` : tx.ticket_dp_track_id}</p>
+                        <span className="text-[10px] text-gray-400 mt-1 block">
+                          {new Date(tx.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
                     </div>
-                    <div className="tx-info">
-                      <h4>{details.title}</h4>
-                      {/* TrxID বা TrackID দেখানো হচ্ছে */}
-                      <p>{tx.trx_id ? `Trx: ${tx.trx_id}` : tx.ticket_dp_track_id}</p>
-                      <span className="text-[10px] text-gray-500 mt-1 block">
-                        {new Date(tx.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    
+                    <div className="tx-right">
+                      <span className={`tx-amount ${details.isNegative ? 'negative' : 'positive'}`}>
+                        {details.isNegative ? '-' : '+'} ৳{Number(tx.amount).toLocaleString()}
+                      </span>
+                      <span className={`status-badge ${tx.status}`}>
+                        {tx.status}
                       </span>
                     </div>
                   </div>
-                  
-                  <div className="tx-right">
-                    <span className={`tx-amount ${details.isNegative ? 'negative' : 'positive'}`}>
-                      {details.isNegative ? '-' : '+'} ৳{Number(tx.amount).toLocaleString()}
-                    </span>
-                    <span className={`status-badge ${tx.status}`}>
-                      {tx.status}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+
+            {/* Load More বাটন (যদি আরও ডাটা থাকে) */}
+            {visibleCount < filteredData.length && (
+              <button className="load-more-btn" onClick={handleLoadMore}>
+                Load More
+              </button>
+            )}
+          </>
         )}
 
       </main>
