@@ -15,10 +15,20 @@ function TicketBuyContent() {
   const ticketPrice = Number(searchParams.get("price")) || 50;
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Prize Pool ম্যাপিং (টিকিট প্রাইস অনুযায়ী)
+  const prizePools: { [key: number]: string } = {
+    50: "50,000",
+    100: "100,000",
+    250: "250,000",
+    500: "500,000",
+    1000: "1,000,000"
+  };
+  const currentPrizePool = prizePools[ticketPrice] || "50,000";
+
   const [profile, setProfile] = useState<any>(null);
   const [ticketNumber, setTicketNumber] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true); // ২.৯ সেকেন্ডের লোডিং স্টেট
+  const [loading, setLoading] = useState(true); 
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -119,7 +129,6 @@ function TicketBuyContent() {
     return (
       <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
         <div className="ticket-loader">
-          {/* সাদা টিকিট SVG */}
           <svg 
             className="w-16 h-16 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.6)]" 
             fill="none" 
@@ -150,6 +159,13 @@ function TicketBuyContent() {
           <div className="ticket-left">
             <h2 className="ticket-title">LUCKY<br/>TICKET</h2>
             <span className="ticket-subtitle">{t("Official Draw", "অফিসিয়াল ড্র")}</span>
+            
+            {/* Prize Pool ডিসপ্লে */}
+            <div className="prize-pool-display">
+              <span className="pool-label">{t("Prize Pool", "প্রাইজ পুল")}</span>
+              <span className="pool-amount">৳ {currentPrizePool}</span>
+            </div>
+
             <div className="ticket-price-tag">৳ {ticketPrice}</div>
           </div>
 
@@ -173,7 +189,6 @@ function TicketBuyContent() {
           <div className="flex justify-between items-center mb-3">
             <h3>{t("Select 12-Digit Ticket Number", "১২ ডিজিটের টিকিট নাম্বার দিন")}</h3>
             
-            {/* Gold থেকে White করা হলো */}
             <span className="text-[10px] text-white font-bold bg-white/10 px-2 py-1 rounded border border-white/30">
               {t("Balance", "ব্যালেন্স")}: ৳ {currentBalance.toFixed(2)}
             </span>
@@ -233,7 +248,7 @@ function TicketBuyContent() {
         ) : (
           <button 
             onClick={handleReloadBalance} 
-            className="buy-ticket-btn !bg-white !text-black !border-black" /* Gold থেকে White */
+            className="buy-ticket-btn !bg-white !text-black !border-black"
           >
             {t("Reload Balance", "ব্যালেন্স রিলোড করুন")}
           </button>
