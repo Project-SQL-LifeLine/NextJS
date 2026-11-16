@@ -33,14 +33,14 @@ function TicketBuyContent() {
   const [successMsg, setSuccessMsg] = useState("");
 
   // ==========================================
-  // ফেক লাইভ এবং সোল্ড কাউন্টার লজিক
+  // ফেক লাইভ এবং সোল্ড কাউন্টার লজিক (আপডেট করা হয়েছে)
   // ==========================================
-  // প্রতিটি টিকিটের জন্য বেস ভ্যালু (আপনি চাইলে পরিবর্তন করতে পারেন)
-  const baseSold: { [key: number]: number } = { 50: 1245, 100: 850, 250: 420, 500: 210, 1000: 50 };
+  // প্রতিটি টিকিটের জন্য বেস ভ্যালু (১০০০ এর নিচে রাখা হয়েছে যাতে বাড়ার জায়গা থাকে)
+  const baseSold: { [key: number]: number } = { 50: 950, 100: 920, 250: 880, 500: 840, 1000: 800 };
   const baseLive: { [key: number]: number } = { 50: 35, 100: 20, 250: 15, 500: 10, 1000: 5 };
 
   const [liveCount, setLiveCount] = useState(baseLive[ticketPrice] || 20);
-  const [soldCount, setSoldCount] = useState(baseSold[ticketPrice] || 100);
+  const [soldCount, setSoldCount] = useState(baseSold[ticketPrice] || 950);
 
   // ১. রাত ১২:৩০ মিনিটে অটো রিসেট এবং localStorage থেকে ডাটা লোড
   useEffect(() => {
@@ -61,13 +61,15 @@ function TicketBuyContent() {
       });
       
       // বর্তমান পেজের জন্য সোল্ড কাউন্ট সেট করা
-      setSoldCount(baseSold[ticketPrice] || 100);
+      setSoldCount(baseSold[ticketPrice] || 950);
     } else {
       // রিসেট না হলে localStorage থেকে ডাটা নিয়ে আসা
       const storedSold = localStorage.getItem(`sold_${ticketPrice}`);
-      if (storedSold) setSoldCount(parseInt(storedSold));
+      if (storedSold) {
+        setSoldCount(parseInt(storedSold));
+      }
     }
-  }, [ticketPrice]); // টিকিট প্রাইস চেঞ্জ হলে আবার রান হবে
+  }, [ticketPrice]); 
 
   // ২. লাইভ কাউন্ট এবং সোল্ড কাউন্ট আপডেট ইন্টারভাল
   useEffect(() => {
@@ -80,11 +82,14 @@ function TicketBuyContent() {
       });
     }, 3000);
 
-    // সোল্ড কাউন্ট আপডেট (প্রতি ৭ সেকেন্ডে ১-৩ টি বাড়বে)
+    // সোল্ড কাউন্ট আপডেট (প্রতি ৭ সেকেন্ডে ১-৩ টি বাড়বে, তবে ১০০০ এর বেশি হবে না)
     const soldInterval = setInterval(() => {
       setSoldCount(prev => {
+        if (prev >= 1000) return 1000; // ১০০০ এ থেমে যাবে
+        
         const increase = Math.floor(Math.random() * 3) + 1; // +1 থেকে +3
-        const newCount = prev + increase;
+        const newCount = Math.min(prev + increase, 1000); // ১০০০ এর বেশি হবে না
+        
         localStorage.setItem(`sold_${ticketPrice}`, newCount.toString());
         return newCount;
       });
@@ -165,10 +170,13 @@ function TicketBuyContent() {
         setTicketNumber(""); 
         fetchData(); 
         
-        // টিকিট কেনার পর সোল্ড কাউন্ট ম্যানুয়ালি ১ বাড়িয়ে দেওয়া (অপশনাল)
-        const newCount = soldCount + 1;
-        setSoldCount(newCount);
-        localStorage.setItem(`sold_${ticketPrice}`, newCount.toString());
+        // টিকিট কেনার পর সোল্ড কাউন্ট ১ বাড়ানো (যদি ১০০০ এর কম থাকে)
+        setSoldCount(prev => {
+          if (prev >= 1000) return 1000;
+          const newCount = prev + 1;
+          localStorage.setItem(`sold_${ticketPrice}`, newCount.toString());
+          return newCount;
+        });
 
       } else {
         setError(data.error);
@@ -211,7 +219,7 @@ function TicketBuyContent() {
 
       <main className="ticket-buy-main">
         
-        {/* সম্পূর্ণ CSS ভিত্তিক টিকিট ডিজাইন */}
+        {/* টিকিট ডিজাইন */}
         <div className="ticket-preview-card">
           <div className="ticket-left">
             <h2 className="ticket-title">LUCKY<br/>TICKET</h2>
@@ -243,7 +251,7 @@ function TicketBuyContent() {
         {/* নাম্বার ইনপুট সেকশন */}
         <div className="input-section">
           
-          {/* Live & Sold Counter (নতুন যুক্ত করা হলো) */}
+          {/* Live & Sold Counter */}
           <div className="live-counter-container">
             <div className="live-badge">
               <span className="live-dot"></span>
