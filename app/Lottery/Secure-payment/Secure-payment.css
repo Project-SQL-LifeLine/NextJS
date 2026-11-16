@@ -4,47 +4,53 @@
   --border-color: #2B4236;
   --text-main: #FFFFFF;
   --text-muted: #A0ADB0;
-  --gold: #F5B041;
+  --white: #FFFFFF; /* Gold থেকে White */
   --btn-green: #184f35;
 
   background-color: var(--bg-main);
-  min-height: 100vh;
+  height: 100dvh; /* ফুল স্ক্রিন হাইট */
   width: 100%;
   font-family: inherit;
-  padding-bottom: 90px; /* বাটন যাতে নিচে কন্টেন্ট ঢেকে না ফেলে */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* মেইন পেজ স্ক্রল বন্ধ */
 }
 
 .secure-main {
-  padding: 16px;
+  flex: 1;
+  padding: 12px 16px; /* প্যাডিং কমানো হয়েছে */
   max-width: 600px;
   margin: 0 auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px; /* গ্যাপ কমানো হয়েছে */
+  overflow-y: auto; /* জরুরি হলে শুধু এই অংশটুকু স্ক্রল হবে */
+  padding-bottom: 90px;
 }
 
 /* টপ ব্যালেন্স কার্ড */
 .balance-info-card {
   background: linear-gradient(135deg, #1f1b33 0%, #121016 100%);
-  border: 1px solid var(--gold);
+  border: 1px solid var(--white);
   border-radius: 12px;
-  padding: 20px;
+  padding: 12px;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(245, 176, 65, 0.15);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.05);
 }
 
 .balance-info-card span {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .balance-info-card h2 {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 900;
-  color: var(--gold);
-  margin-top: 8px;
+  color: var(--white);
+  margin-top: 4px;
 }
 
 /* সেকশন টাইটেল */
@@ -52,33 +58,33 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--text-main);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 /* অ্যামাউন্ট ইনপুট */
 .amount-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .amount-btn {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 12px 0;
+  padding: 10px 0;
   color: var(--text-main);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .amount-btn.active {
-  border-color: var(--gold);
-  background: rgba(245, 176, 65, 0.1);
-  color: var(--gold);
+  border-color: var(--white);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--white);
 }
 
 .custom-amount-input {
@@ -86,9 +92,9 @@
   background: var(--bg-main);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 14px;
-  color: var(--gold);
-  font-size: 18px;
+  padding: 12px;
+  color: var(--white);
+  font-size: 16px;
   font-weight: 800;
   text-align: center;
   outline: none;
@@ -96,36 +102,36 @@
 }
 
 .custom-amount-input:focus {
-  border-color: var(--gold);
+  border-color: var(--white);
 }
 
 /* পেমেন্ট মেথড */
 .payment-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
 .payment-option {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 12px;
+  padding: 10px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .payment-option.active {
-  border-color: var(--gold);
-  background: rgba(245, 176, 65, 0.05);
+  border-color: var(--white);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .payment-option img {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
 }
 
@@ -137,18 +143,17 @@
 
 /* ইন্সট্রাকশন বক্স */
 .instruction-box {
-  background: rgba(245, 176, 65, 0.1);
-  border: 1px dashed var(--gold);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed var(--white);
   border-radius: 8px;
-  padding: 16px;
-  margin-top: 10px;
+  padding: 12px;
 }
 
 .instruction-box p {
   font-size: 11px;
   color: #E2E8F0;
   margin: 0 0 8px 0;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 /* ডাইনামিক অ্যাডমিন নাম্বার ডিজাইন */
@@ -157,45 +162,42 @@
   align-items: center;
   justify-content: space-between;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(245, 176, 65, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
-  padding: 10px 12px;
-  margin-top: 8px;
+  padding: 8px 10px;
 }
 
 .admin-number {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 900;
-  color: var(--gold);
+  color: var(--white);
   letter-spacing: 1px;
   font-family: monospace;
 }
 
-.copy-btn {
-  background: var(--gold);
+.copy-btn-small {
+  background: var(--white);
   color: #000;
   border: none;
   border-radius: 4px;
-  padding: 6px 12px;
+  padding: 4px 10px;
   font-size: 10px;
   font-weight: 800;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.copy-btn:hover {
-  background: #e5a435;
+.copy-btn-small:hover {
+  background: #e5e5e5;
 }
 
-/* =========================================
-   ট্রানজেকশন আইডি ইনপুট (এটি আগে মিসিং ছিল)
-   ========================================= */
+/* ট্রানজেকশন আইডি ইনপুট */
 .trx-input {
   width: 100%;
-  background: var(--bg-main); /* কালো ব্যাকগ্রাউন্ড */
+  background: var(--bg-main);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 16px;
+  padding: 12px;
   color: var(--text-main);
   font-size: 14px;
   font-weight: 700;
@@ -204,24 +206,16 @@
 }
 
 .trx-input:focus {
-  border-color: var(--gold);
+  border-color: var(--white);
 }
 
-.trx-input::placeholder {
-  color: var(--text-muted);
-  font-weight: normal;
-  text-transform: none;
-}
-
-/* =========================================
-   সাবমিট বাটন (এটিও আগে মিসিং ছিল)
-   ========================================= */
+/* সাবমিট বাটন */
 .submit-btn-wrapper {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  padding: 16px;
+  padding: 12px 16px;
   background: var(--bg-main);
   border-top: 1px solid var(--border-color);
   z-index: 50;
@@ -229,11 +223,11 @@
 
 .submit-btn {
   width: 100%;
-  padding: 16px;
+  padding: 14px;
   background: var(--btn-green);
-  border: 1px solid #FFFFFF;
+  border: 1px solid var(--white);
   border-radius: 8px;
-  color: #FFFFFF;
+  color: var(--white);
   font-size: 14px;
   font-weight: 800;
   cursor: pointer;
@@ -251,11 +245,10 @@
 /* মেসেজ */
 .msg-box {
   text-align: center;
-  padding: 10px;
+  padding: 8px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 700;
-  margin-top: 10px;
 }
 .msg-box.error { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); }
-.msg-box.success { background: rgba(0, 231, 1, 0.1); color: #00E701; border: 1px solid rgba(0, 231, 1, 0.3); }
+.msg-box.success { background: rgba(0, 255, 170, 0.1); color: #00ffaa; border: 1px solid rgba(0, 255, 170, 0.3); }
