@@ -1,7 +1,7 @@
 /* মেইন লেআউট (হেডার এবং ফুটারের মাঝখানে থাকবে) */
 .notification-layout {
   min-height: 100vh;
-  background-color: #0d241e; /* মেইন ব্যাকগ্রাউন্ড কালার */
+  background-color: #0d241e;
   display: flex;
   flex-direction: column;
 }
@@ -9,97 +9,82 @@
 .notification-main {
   flex: 1;
   padding: 16px;
-  padding-bottom: 90px; /* ফুটারের জন্য জায়গা */
+  padding-bottom: 90px;
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
-}
-
-.notification-header-title {
-  margin-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 12px;
 }
 
 /* নোটিফিকেশন লিস্ট */
 .notification-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
-/* নোটিফিকেশন কার্ড */
-.notif-card {
-  background: #133327;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 16px;
+/* নোটিফিকেশন আইটেম (কার্ড বক্স ছাড়া) */
+.notif-list-item {
+  padding: 16px 0; /* উপরে এবং নিচে প্যাডিং */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* লম্বা চিকন দাগ */
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: opacity 0.2s;
 }
 
-.notif-card.unread {
-  background: rgba(24, 79, 53, 0.6);
-  border-color: rgba(255, 255, 255, 0.2);
+/* শেষ আইটেমের নিচে দাগ থাকবে না */
+.notif-list-item:last-child {
+  border-bottom: none;
 }
 
-.notif-header {
+.notif-item-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
-.notif-title {
-  font-size: 14px;
+.notif-item-title {
+  font-size: 15px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.notif-card.unread .notif-title {
-  color: #ffffff;
+  color: #ffffff; /* সাদা কালার */
 }
 
 .unread-dot {
   width: 8px;
   height: 8px;
-  background-color: #ffffff;
+  background-color: #00ffaa; /* নিয়ন গ্রিন ডট (বুঝার সুবিধার্থে) */
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 8px rgba(0, 255, 170, 0.8);
   margin-top: 4px;
 }
 
-/* মেসেজ টেক্সট (সাদা কালার) */
-.notif-message {
+/* মেসেজ টেক্সট */
+.notif-item-message {
   font-size: 13px;
-  color: #ffffff; /* লেখা সাদা করা হলো */
+  color: #e5e7eb; /* হালকা সাদা */
   line-height: 1.6;
-  opacity: 0.9;
 }
 
 /* See More বাটন */
 .see-more-btn {
   background: none;
   border: none;
-  color: #00ffaa; /* নিয়ন গ্রিন */
+  color: #00ffaa;
   font-size: 12px;
   font-weight: 700;
   padding: 0;
-  margin-top: 8px;
+  margin-top: 6px;
   cursor: pointer;
   display: block;
-  text-decoration: underline;
 }
 
 .see-more-btn:hover {
   color: #ffffff;
 }
 
-.notif-time {
+.notif-item-time {
   display: block;
   font-size: 10px;
   color: #9ca3af;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 /* এমপ্টি স্টেট */
