@@ -13,8 +13,7 @@ export default function LotteryHomePage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({ days: "00", hours: "00", minutes: "00", seconds: "00" });
-  const [yesterdayDate, setYesterdayDate] = useState(""); 
-  const [userTickets, setUserTickets] = useState<{[key: number]: string}>({});
+  const [currentDate, setCurrentDate] = useState(""); // আজকের তারিখের জন্য স্টেট
   
   const jackpotAmounts = [50000, 100000, 250000, 500000, 1000000];
   const [activeJackpot, setActiveJackpot] = useState(0);
@@ -26,22 +25,6 @@ export default function LotteryHomePage() {
         if (user) {
           const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
           if (profileData) setProfile(profileData);
-
-          const { data: ticketsData } = await supabase
-            .from("ticket_transactions")
-            .select("ticket_tier, ticket_number")
-            .eq("user_id", user.id)
-            .eq("transaction_type", "ticket_purchase")
-            .eq("status", "approved")
-            .order("created_at", { ascending: false }); 
-
-          if (ticketsData) {
-            const ticketsMap: {[key: number]: string} = {};
-            ticketsData.forEach(t => {
-              if (!ticketsMap[t.ticket_tier]) ticketsMap[t.ticket_tier] = t.ticket_number;
-            });
-            setUserTickets(ticketsMap);
-          }
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -59,13 +42,13 @@ export default function LotteryHomePage() {
     return () => clearInterval(sliderInterval);
   }, [jackpotAmounts.length]);
 
+  // আজকের বর্তমান তারিখ বের করার লজিক
   useEffect(() => {
     const d = new Date();
-    d.setDate(d.getDate() - 1); 
     const formattedDate = d.toLocaleDateString('en-GB', {
       weekday: 'short', day: 'numeric', month: 'short'
     }).toUpperCase().replace(',', ''); 
-    setYesterdayDate(formattedDate);
+    setCurrentDate(formattedDate);
   }, []);
 
   useEffect(() => {
@@ -91,12 +74,13 @@ export default function LotteryHomePage() {
     return () => clearInterval(timer);
   }, []);
 
+  // আপডেট করা টিকিট টায়ার
   const ticketTiers = [
-    { price: 50, title: "LOTTO", titleSpan: "INDIA", color: "orange" },
-    { price: 100, title: "Kerala", titleSpan: "", color: "green" },
-    { price: 250, title: "Sambad", titleSpan: "", color: "orange" },
-    { price: 500, title: "LOTTO", titleSpan: "GOLD", color: "green" },
-    { price: 1000, title: "LOTTO", titleSpan: "MEGA", color: "orange" },
+    { price: 50, title: "LOTTO", titleSpan: "BD", color: "orange" },
+    { price: 100, title: "MEGA", titleSpan: "BD I", color: "green" },
+    { price: 250, title: "DHAKA", titleSpan: "MEGA II", color: "orange" },
+    { price: 500, title: "DHAKA", titleSpan: "MEGA I", color: "green" },
+    { price: 1000, title: "Lotto", titleSpan: "Super Mega", color: "orange" },
   ];
 
   if (loading) {
@@ -118,7 +102,7 @@ export default function LotteryHomePage() {
 
         <main className="lottery-main">
           
-          {/* ১. Today's Jackpot Slider (ইমেজ এবং টেক্সট ফিক্স করা হয়েছে) */}
+          {/* ১. Today's Jackpot Slider */}
           <div 
             className="jackpot-slider-wrapper"
             style={{ backgroundImage: `url(https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d5e7a1d3.png)` }}
@@ -145,13 +129,8 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* ২. Buy & Win Section */}
-          <div>
-            <div className="flex justify-between items-center mb-3 mt-4">
-              <h2 className="section-title">Buy & Win</h2>
-              <span className="text-[10px] text-[#F5B041] font-bold">Select Draw</span>
-            </div>
-            
+          {/* ২. Ticket List (Buy & Win লেখা সরানো হয়েছে) */}
+          <div className="mt-4">
             <div className="ticket-list-container">
               {ticketTiers.map((tier, index) => (
                 <div key={index} className="lotto-card">
@@ -159,26 +138,18 @@ export default function LotteryHomePage() {
                   {/* Header */}
                   <div className="lotto-card-header">
                     <div className={`lotto-card-title ${tier.color}`}>
-                      {tier.title} {tier.titleSpan && <span style={{ color: tier.color === 'orange' ? '#16a34a' : '#f97316' }}>{tier.titleSpan}</span>}
+                      {tier.title} <span style={{ color: tier.color === 'orange' ? '#16a34a' : '#f97316' }}>{tier.titleSpan}</span>
                     </div>
                     <div className="lotto-card-date">
-                      <span>{yesterdayDate}</span> 
+                      {/* আজকের বর্তমান তারিখ */}
+                      <span>{currentDate}</span> 
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
                       </svg>
                     </div>
                   </div>
 
-                  {/* Number / Barcode */}
-                  <div className="ticket-number-container">
-                    {userTickets[tier.price] ? (
-                      <span className="ticket-number">
-                        {userTickets[tier.price].match(/.{1,4}/g)?.join("  ") || userTickets[tier.price]}
-                      </span>
-                    ) : (
-                      <span className="ticket-number-placeholder">•••• •••• ••••</span>
-                    )}
-                  </div>
+                  {/* ডটের (.......) বক্সটি সরিয়ে দেওয়া হয়েছে */}
 
                   {/* Actions */}
                   <div className="lotto-card-actions">
