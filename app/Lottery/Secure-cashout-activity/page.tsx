@@ -7,10 +7,43 @@ import { useLanguage } from "../../../lib/LanguageContext";
 import LotteryHeader from "../Header/Header";
 import "./Secure-cashout-activity.css";
 
+// বাংলাদেশের প্রধান ব্যাংকগুলোর তালিকা
+const bangladeshiBanks = [
+  "Sonali Bank",
+  "Janata Bank",
+  "Agrani Bank",
+  "Rupali Bank",
+  "BRAC Bank",
+  "Dutch-Bangla Bank",
+  "Islami Bank",
+  "City Bank",
+  "Eastern Bank",
+  "Pubali Bank",
+  "IFIC Bank",
+  "United Commercial Bank",
+  "Beximco Bank",
+  "One Bank",
+  "Prime Bank",
+  "Southeast Bank",
+  "Bank Asia",
+  "Standard Chartered",
+  "HSBC",
+  "Prime Islami Bank",
+  "Social Islami Bank",
+  "First Security Islami Bank",
+  "Union Bank",
+  "Modhumoti Bank",
+  "NRB Bank",
+  "Meghna Bank",
+  "Midland Bank",
+  "Global Islami Bank",
+  "Bengal Commercial Bank",
+  "Other Bank"
+];
+
 export default function SecureCashoutActivityPage() {
   const router = useRouter();
   const { t } = useLanguage();
-  const basePath = process.env.NODE_ENV === "production" ? "/NextJS" : "";
 
   const [profile, setProfile] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
@@ -31,7 +64,6 @@ export default function SecureCashoutActivityPage() {
         if (user) {
           const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
           if (profileData) {
-            // সিকিউরিটি চেক: যদি ফি না দেওয়া থাকে তবে তাকে ফি পেজে পাঠিয়ে দাও
             if (!profileData.is_lottery_fee_paid) {
               router.replace("/Lottery/fee-payment");
               return;
@@ -44,7 +76,6 @@ export default function SecureCashoutActivityPage() {
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        // সব ডাটা লোড শেষ হলে লোডিং বন্ধ হবে
         setLoading(false); 
       }
     };
@@ -83,7 +114,6 @@ export default function SecureCashoutActivityPage() {
         setAccountName("");
         setAccountNumber("");
         setRoutingNumber("");
-        // ব্যালেন্স আপডেট
         const { data: profileData } = await supabase.from("profiles").select("*").eq("id", profile.id).single();
         if (profileData) setProfile(profileData);
       } else {
@@ -102,7 +132,6 @@ export default function SecureCashoutActivityPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
-        {/* সিকিউরিটি / শিল্ড SVG আইকন */}
         <svg 
           className="w-12 h-12 text-white animate-spin" 
           fill="none" 
@@ -124,15 +153,7 @@ export default function SecureCashoutActivityPage() {
   }
 
   return (
-    <div 
-      className="cashout-page-wrapper"
-      style={{ 
-        backgroundImage: `url(${basePath}/secure.png)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}
-    >
+    <div className="cashout-page-wrapper">
       <div className="cashout-overlay">
         <LotteryHeader userProfile={profile} />
 
@@ -144,7 +165,7 @@ export default function SecureCashoutActivityPage() {
 
           <div className="form-card">
             <h3 className="form-title">
-              <svg className="w-5 h-5 text-[#00E701]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               {t("Bank Withdrawal Form", "ব্যাংক উইথড্র ফর্ম")}
             </h3>
 
@@ -152,10 +173,22 @@ export default function SecureCashoutActivityPage() {
               <label>{t("Amount (Min 50,000) *", "পরিমাণ (সর্বনিম্ন ৫০,০০০) *")}</label>
               <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="input-field" />
             </div>
+            
+            {/* Bank Name Dropdown */}
             <div className="input-group">
               <label>{t("Bank Name *", "ব্যাংকের নাম *")}</label>
-              <input type="text" value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="e.g. Sonali Bank" className="input-field" />
+              <select 
+                value={bankName} 
+                onChange={(e) => setBankName(e.target.value)} 
+                className="input-field"
+              >
+                <option value="" disabled>{t("Select a Bank", "ব্যাংক নির্বাচন করুন")}</option>
+                {bangladeshiBanks.map((bank, index) => (
+                  <option key={index} value={bank}>{bank}</option>
+                ))}
+              </select>
             </div>
+
             <div className="input-group">
               <label>{t("Account Name *", "অ্যাকাউন্টের নাম *")}</label>
               <input type="text" value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Your Name" className="input-field" />
