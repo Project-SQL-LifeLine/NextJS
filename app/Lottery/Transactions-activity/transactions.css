@@ -29,9 +29,9 @@
 }
 
 .filter-btn {
-  background: #133327;
-  color: #9ca3af;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: #183f35; /* বাটনের কালার আপডেট */
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 12px;
@@ -42,10 +42,9 @@
 }
 
 .filter-btn.active {
-  background: #00ffaa;
-  color: #0d241e;
-  border-color: #00ffaa;
-  box-shadow: 0 0 10px rgba(0, 255, 170, 0.2);
+  background: #ffffff; /* অ্যাক্টিভ হলে সাদা */
+  color: #183f35;
+  border-color: #ffffff;
 }
 
 /* Transaction List */
@@ -78,13 +77,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #ffffff; /* সব আইকন সাদা করা হলো */
+  background: rgba(255, 255, 255, 0.05); /* হালকা সাদা ব্যাকগ্রাউন্ড */
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
-
-/* আইকন ব্যাকগ্রাউন্ড কালার */
-.tx-icon.ticket { background: rgba(168, 85, 247, 0.15); color: #c084fc; } /* Purple */
-.tx-icon.reload { background: rgba(59, 130, 246, 0.15); color: #60a5fa; } /* Blue */
-.tx-icon.fee { background: rgba(234, 179, 8, 0.15); color: #facc15; } /* Yellow */
-.tx-icon.withdraw { background: rgba(239, 68, 68, 0.15); color: #f87171; } /* Red */
 
 .tx-info h4 {
   font-size: 14px;
@@ -112,7 +108,7 @@
   font-weight: 800;
 }
 
-.tx-amount.positive { color: #00ffaa; }
+.tx-amount.positive { color: #ffffff; } /* গোল্ডের বদলে সাদা */
 .tx-amount.negative { color: #ffffff; }
 
 /* Status Badges */
@@ -123,9 +119,9 @@
   border-radius: 4px;
   text-transform: uppercase;
 }
-.status-badge.pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-.status-badge.approved { background: rgba(16, 185, 129, 0.15); color: #10b981; }
-.status-badge.rejected { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.status-badge.pending { background: rgba(255, 255, 255, 0.1); color: #ffffff; }
+.status-badge.approved { background: rgba(255, 255, 255, 0.15); color: #ffffff; }
+.status-badge.rejected { background: rgba(255, 255, 255, 0.05); color: #9ca3af; }
 
 /* Empty State */
 .empty-state {
@@ -133,4 +129,28 @@
   padding: 40px 20px;
   color: #9ca3af;
   font-size: 14px;
+}
+
+/* Load More Button */
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.load-more-btn {
+  background: #183f35; /* নির্দেশিত বাটন কালার */
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.load-more-btn:hover {
+  background: #1f5547;
+  border-color: #ffffff;
 }
