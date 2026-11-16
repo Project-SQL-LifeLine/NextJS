@@ -31,23 +31,38 @@ function TicketBuyContent() {
   // ==========================================
   // Time-Based Live & Sold Counter Logic
   // ==========================================
-  const [liveCount, setLiveCount] = useState(25);
+  const [liveCount, setLiveCount] = useState(20);
   const [soldCount, setSoldCount] = useState(1);
   const [isDrawTime, setIsDrawTime] = useState(false);
   const [watchingCount, setWatchingCount] = useState(950);
 
+  // প্রতিটি টিকিটের জন্য আলাদা কনফিগারেশন
+  const tierConfigs: { [key: number]: { multiplier: number, baseLive: number } } = {
+    50: { multiplier: 1.25, baseLive: 45 },   // ৫০ টাকার টিকিট আগে ১০০০ হবে (প্রায় ৮-৯টায়)
+    100: { multiplier: 1.15, baseLive: 35 },  // ১০০ টাকার টিকিট ১০-১১টায় ১০০০ হবে
+    250: { multiplier: 1.08, baseLive: 25 },  // ২৫০ টাকার টিকিট ১১:৩০-এ ১০০০ হবে
+    500: { multiplier: 1.02, baseLive: 15 },  // ৫০০ টাকার টিকিট ১২:১৫-এ ১০০০ হবে
+    1000: { multiplier: 1.00, baseLive: 8 },  // ১০০০ টাকার টিকিট ঠিক ১২:২৯-এ ১০০০ হবে
+  };
+
+  const config = tierConfigs[ticketPrice] || tierConfigs[50];
+
   useEffect(() => {
+    // রিসেট বা ইনিশিয়াল সেটআপ
+    setLiveCount(config.baseLive);
+    setSoldCount(1);
+
     const tick = () => {
       const now = new Date();
       const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
       
-      const drawStart = 30 * 60; // 1800 secs = 00:30:00
-      const resetStart = 33 * 60; // 1980 secs = 00:33:00
+      const drawStart = 30 * 60; // 12:30 AM (1800 secs)
+      const resetStart = 33 * 60; // 12:33 AM (1980 secs)
 
       if (currentSeconds >= drawStart && currentSeconds < resetStart) {
-        // 12:30 AM থেকে 12:32:59 পর্যন্ত (Draw Window)
+        // 🔴 ১২:৩০ থেকে ১২:৩২ পর্যন্ত (Draw Window)
         setIsDrawTime(true);
-        setSoldCount(1000); // ১০০০ এ লক হয়ে থাকবে
+        setSoldCount(1000); // ১০০০ এ লক
         
         // Watching Count র‍্যান্ডমলি ৯০০-৯৯০ এর মধ্যে ঘুরবে
         setWatchingCount(prev => {
@@ -55,35 +70,41 @@ function TicketBuyContent() {
           return Math.max(900, Math.min(990, newCount));
         });
       } else {
-        // Normal Window (12:33 AM থেকে 12:29:59 পর্যন্ত)
+        // 🟢 নরমাল টাইম (১২:৩৩ থেকে ১২:২৯ পর্যন্ত)
         setIsDrawTime(false);
         
-        // ১. Sold Count হিসাব (ঠিক ১২:৩৩ এ ১ হবে এবং ১২:২৯:৫৯ এ ৯৯৯ হবে)
+        // ১. Sold Count হিসাব
         let elapsed;
         if (currentSeconds >= resetStart) {
           elapsed = currentSeconds - resetStart;
         } else {
           elapsed = (86400 - resetStart) + currentSeconds;
         }
-        const totalDuration = 86400 - 180; // 86220 seconds
-        let progress = elapsed / totalDuration;
-        setSoldCount(Math.floor(progress * 999) + 1);
         
-        // ২. Live Count বাড়বে-কমবে (রিয়েল লাইভ ভাইব)
+        const totalDuration = 86220; // ২৩ ঘণ্টা ৫৭ মিনিট (১২:৩৩ থেকে ১২:২৯:৫৯)
+        let progress = elapsed / totalDuration;
+        
+        // মাল্টিপ্লায়ার ব্যবহার করে আলাদা টিকিটের জন্য আলাদা স্পিড তৈরি করা হলো
+        let calculatedSold = Math.floor(progress * 1000 * config.multiplier);
+        
+        // কাউন্ট ১ থেকে ১০০০ এর মধ্যে লিমিটেড রাখা
+        calculatedSold = Math.max(1, Math.min(1000, calculatedSold));
+        setSoldCount(calculatedSold);
+        
+        // ২. Live Count বাড়বে-কমবে (টিকিট অনুযায়ী আলাদা বেস ভ্যালু)
         setLiveCount(prev => {
           const change = Math.floor(Math.random() * 7) - 3; // -3 to +3
-          return Math.max(15, prev + change); // মিনিমাম ১৫ জন থাকবে
+          const minLive = Math.max(5, config.baseLive - 10);
+          return Math.max(minLive, prev + change);
         });
       }
     };
 
-    // সাথে সাথে রান হবে
-    tick();
-
-    // প্রতি ৩ সেকেন্ডে আপডেট হবে
-    const interval = setInterval(tick, 3000);
+    tick(); // সাথে সাথে একবার রান হবে
+    const interval = setInterval(tick, 3000); // প্রতি ৩ সেকেন্ডে আপডেট হবে
     return () => clearInterval(interval);
-  }, []);
+  }, [ticketPrice, config.baseLive, config.multiplier]);
+
 
   // ==========================================
   // Profile Fetch & Loading
@@ -226,7 +247,7 @@ function TicketBuyContent() {
         {/* নাম্বার ইনপুট সেকশন */}
         <div className="input-section">
           
-          {/* Live & Sold Counter (Title-এর জায়গায়) */}
+          {/* Live & Sold Counter */}
           <div className="live-counter-container">
             {isDrawTime ? (
               <div className="draw-watching-badge">
