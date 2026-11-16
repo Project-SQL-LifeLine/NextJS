@@ -5,40 +5,18 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
 import LotteryHeader from "../Header/Header";
+import LotteryFooter from "../Footer/Footer"; // Footer ইমপোর্ট করা হলো
 import "./Secure-cashout-activity.css";
 
 // বাংলাদেশের প্রধান ব্যাংকগুলোর তালিকা
 const bangladeshiBanks = [
-  "Sonali Bank",
-  "Janata Bank",
-  "Agrani Bank",
-  "Rupali Bank",
-  "BRAC Bank",
-  "Dutch-Bangla Bank",
-  "Islami Bank",
-  "City Bank",
-  "Eastern Bank",
-  "Pubali Bank",
-  "IFIC Bank",
-  "United Commercial Bank",
-  "Beximco Bank",
-  "One Bank",
-  "Prime Bank",
-  "Southeast Bank",
-  "Bank Asia",
-  "Standard Chartered",
-  "HSBC",
-  "Prime Islami Bank",
-  "Social Islami Bank",
-  "First Security Islami Bank",
-  "Union Bank",
-  "Modhumoti Bank",
-  "NRB Bank",
-  "Meghna Bank",
-  "Midland Bank",
-  "Global Islami Bank",
-  "Bengal Commercial Bank",
-  "Other Bank"
+  "Sonali Bank", "Janata Bank", "Agrani Bank", "Rupali Bank",
+  "BRAC Bank", "Dutch-Bangla Bank", "Islami Bank", "City Bank",
+  "Eastern Bank", "Pubali Bank", "IFIC Bank", "United Commercial Bank",
+  "Beximco Bank", "One Bank", "Prime Bank", "Southeast Bank",
+  "Bank Asia", "Standard Chartered", "HSBC", "First Security Islami Bank",
+  "Union Bank", "Modhumoti Bank", "NRB Bank", "Meghna Bank",
+  "Midland Bank", "Global Islami Bank", "Other Bank"
 ];
 
 export default function SecureCashoutActivityPage() {
@@ -49,11 +27,14 @@ export default function SecureCashoutActivityPage() {
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // ফর্ম স্টেট
   const [amount, setAmount] = useState("");
   const [bankName, setBankName] = useState("");
   const [accountName, setAccountName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [routingNumber, setRoutingNumber] = useState("");
+  const [secretPin, setSecretPin] = useState(""); // নতুন PIN স্টেট
+  
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -84,6 +65,8 @@ export default function SecureCashoutActivityPage() {
 
   const handleWithdraw = async () => {
     const withdrawAmount = Number(amount);
+
+    // ১. বেসিক ভ্যালিডেশন
     if (!withdrawAmount || withdrawAmount < Number(settings?.min_withdrawal_limit || 50000)) {
       setMessage({ type: "error", text: `${t("Minimum withdrawal is", "সর্বনিম্ন উত্তোলন")} ৳${settings?.min_withdrawal_limit}` });
       return;
@@ -93,6 +76,21 @@ export default function SecureCashoutActivityPage() {
       return;
     }
 
+    // ২. Secret PIN ভ্যালিডেশন
+    if (!profile?.lottery_secret_pin) {
+      setMessage({ type: "error", text: t("You haven't set a Secret PIN yet. Please set it in your Profile.", "আপনি এখনো সিক্রেট পিন সেট করেননি। প্রোফাইল পেজে গিয়ে পিন সেট করুন।") });
+      return;
+    }
+    if (secretPin.length !== 4) {
+      setMessage({ type: "error", text: t("Please enter a valid 4-digit Secret PIN.", "সঠিক ৪ ডিজিটের সিক্রেট পিন দিন।") });
+      return;
+    }
+    if (secretPin !== profile.lottery_secret_pin) {
+      setMessage({ type: "error", text: t("Incorrect Secret PIN.", "ভুল সিক্রেট পিন দিয়েছেন।") });
+      return;
+    }
+
+    // ৩. সাবমিট লজিক
     setSubmitting(true);
     setMessage({ type: "", text: "" });
 
@@ -114,6 +112,9 @@ export default function SecureCashoutActivityPage() {
         setAccountName("");
         setAccountNumber("");
         setRoutingNumber("");
+        setSecretPin(""); // পিন রিসেট
+        
+        // ব্যালেন্স আপডেট
         const { data: profileData } = await supabase.from("profiles").select("*").eq("id", profile.id).single();
         if (profileData) setProfile(profileData);
       } else {
@@ -126,28 +127,14 @@ export default function SecureCashoutActivityPage() {
     }
   };
 
-  // ==========================================
-  // লোডিং স্ক্রিন (যখন ডাটা লোড হবে)
-  // ==========================================
+  // লোডিং স্ক্রিন
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
-        <svg 
-          className="w-12 h-12 text-white animate-spin" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={1.5} 
-            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" 
-          />
+        <svg className="w-12 h-12 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
-        <p className="text-white mt-4 font-bold tracking-widest animate-pulse text-[11px]">
-          SECURING...
-        </p>
+        <p className="text-white mt-4 font-bold tracking-widest animate-pulse text-[11px]">SECURING...</p>
       </div>
     );
   }
@@ -174,14 +161,9 @@ export default function SecureCashoutActivityPage() {
               <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="input-field" />
             </div>
             
-            {/* Bank Name Dropdown */}
             <div className="input-group">
               <label>{t("Bank Name *", "ব্যাংকের নাম *")}</label>
-              <select 
-                value={bankName} 
-                onChange={(e) => setBankName(e.target.value)} 
-                className="input-field"
-              >
+              <select value={bankName} onChange={(e) => setBankName(e.target.value)} className="input-field">
                 <option value="" disabled>{t("Select a Bank", "ব্যাংক নির্বাচন করুন")}</option>
                 {bangladeshiBanks.map((bank, index) => (
                   <option key={index} value={bank}>{bank}</option>
@@ -202,15 +184,31 @@ export default function SecureCashoutActivityPage() {
               <input type="text" value={routingNumber} onChange={(e) => setRoutingNumber(e.target.value)} placeholder="Routing Number" className="input-field" />
             </div>
 
+            {/* নতুন Secret PIN ফিল্ড */}
+            <div className="input-group">
+              <label>{t("Secret PIN (4 Digits) *", "সিক্রেট পিন (৪ ডিজিট) *")}</label>
+              <input 
+                type="password" 
+                value={secretPin} 
+                onChange={(e) => setSecretPin(e.target.value.replace(/\D/g, '').slice(0, 4))} // শুধু ৪ ডিজিট
+                placeholder="****" 
+                className="input-field" 
+                maxLength={4}
+              />
+            </div>
+
             {message.text && <div className={`msg-box ${message.type}`}>{message.text}</div>}
           </div>
         </main>
 
         <div className="submit-btn-wrapper">
-          <button onClick={handleWithdraw} disabled={submitting || !amount || !bankName || !accountName || !accountNumber || !routingNumber} className="submit-btn">
+          <button onClick={handleWithdraw} disabled={submitting || !amount || !bankName || !accountName || !accountNumber || !routingNumber || secretPin.length !== 4} className="submit-btn">
             {submitting ? t("Processing...", "প্রসেসিং...") : t("Request Withdrawal", "উত্তোলনের আবেদন করুন")}
           </button>
         </div>
+
+        {/* Footer যুক্ত করা হলো */}
+        <LotteryFooter />
       </div>
     </div>
   );
