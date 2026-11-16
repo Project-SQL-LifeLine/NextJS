@@ -1,7 +1,7 @@
-/* মেইন লেআউট (হেডার এবং ফুটারের মাঝখানে থাকবে) */
+/* মেইন লেআউট (ব্যাকগ্রাউন্ড কালার #0d241e) */
 .notification-layout {
   min-height: 100vh;
-  background-color: #0d241e;
+  background-color: #0d241e; /* কালার আপডেট করা হলো */
   display: flex;
   flex-direction: column;
 }
@@ -9,10 +9,11 @@
 .notification-main {
   flex: 1;
   padding: 16px;
-  padding-bottom: 90px;
+  padding-bottom: 90px; /* ফুটারের জন্য জায়গা */
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
+  background-color: #0d241e; /* নিশ্চিত করা হলো */
 }
 
 /* নোটিফিকেশন লিস্ট */
@@ -21,15 +22,14 @@
   flex-direction: column;
 }
 
-/* নোটিফিকেশন আইটেম (কার্ড বক্স ছাড়া) */
+/* নোটিফিকেশন আইটেম (বক্স ছাড়া, নিচে চিকন দাগ) */
 .notif-list-item {
-  padding: 16px 0; /* উপরে এবং নিচে প্যাডিং */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* লম্বা চিকন দাগ */
+  padding: 16px 0; 
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* চিকন সাদা দাগ */
   cursor: pointer;
   transition: opacity 0.2s;
 }
 
-/* শেষ আইটেমের নিচে দাগ থাকবে না */
 .notif-list-item:last-child {
   border-bottom: none;
 }
@@ -44,13 +44,13 @@
 .notif-item-title {
   font-size: 15px;
   font-weight: 700;
-  color: #ffffff; /* সাদা কালার */
+  color: #ffffff; 
 }
 
 .unread-dot {
   width: 8px;
   height: 8px;
-  background-color: #00ffaa; /* নিয়ন গ্রিন ডট (বুঝার সুবিধার্থে) */
+  background-color: #00ffaa; /* নিয়ন গ্রিন ডট */
   border-radius: 50%;
   box-shadow: 0 0 8px rgba(0, 255, 170, 0.8);
   margin-top: 4px;
@@ -59,7 +59,7 @@
 /* মেসেজ টেক্সট */
 .notif-item-message {
   font-size: 13px;
-  color: #e5e7eb; /* হালকা সাদা */
+  color: #e5e7eb; 
   line-height: 1.6;
 }
 
