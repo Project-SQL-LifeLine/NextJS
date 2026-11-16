@@ -17,11 +17,7 @@ function TicketBuyContent() {
 
   // Prize Pool ম্যাপিং
   const prizePools: { [key: number]: string } = {
-    50: "50,000",
-    100: "100,000",
-    250: "250,000",
-    500: "500,000",
-    1000: "1,000,000"
+    50: "50,000", 100: "100,000", 250: "250,000", 500: "500,000", 1000: "1,000,000"
   };
   const currentPrizePool = prizePools[ticketPrice] || "50,000";
 
@@ -33,76 +29,65 @@ function TicketBuyContent() {
   const [successMsg, setSuccessMsg] = useState("");
 
   // ==========================================
-  // ফেক লাইভ এবং সোল্ড কাউন্টার লজিক (আপডেট করা হয়েছে)
+  // Time-Based Live & Sold Counter Logic
   // ==========================================
-  // প্রতিটি টিকিটের জন্য বেস ভ্যালু (১০০০ এর নিচে রাখা হয়েছে যাতে বাড়ার জায়গা থাকে)
-  const baseSold: { [key: number]: number } = { 50: 950, 100: 920, 250: 880, 500: 840, 1000: 800 };
-  const baseLive: { [key: number]: number } = { 50: 35, 100: 20, 250: 15, 500: 10, 1000: 5 };
+  const [liveCount, setLiveCount] = useState(25);
+  const [soldCount, setSoldCount] = useState(1);
+  const [isDrawTime, setIsDrawTime] = useState(false);
+  const [watchingCount, setWatchingCount] = useState(950);
 
-  const [liveCount, setLiveCount] = useState(baseLive[ticketPrice] || 20);
-  const [soldCount, setSoldCount] = useState(baseSold[ticketPrice] || 950);
-
-  // ১. রাত ১২:৩০ মিনিটে অটো রিসেট এবং localStorage থেকে ডাটা লোড
   useEffect(() => {
-    const now = new Date();
-    const todayStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
-    const lastReset = localStorage.getItem('last_reset_date');
-    
-    // ১২:৩০ AM এর পরের সময় কি না চেক করা
-    const isAfterResetTime = now.getHours() > 0 || (now.getHours() === 0 && now.getMinutes() >= 30);
+    const tick = () => {
+      const now = new Date();
+      const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      
+      const drawStart = 30 * 60; // 1800 secs = 00:30:00
+      const resetStart = 33 * 60; // 1980 secs = 00:33:00
 
-    // যদি আজ রিসেট না হয়ে থাকে এবং ১২:৩০ পার হয়ে যায়
-    if (lastReset !== todayStr && isAfterResetTime) {
-      localStorage.setItem('last_reset_date', todayStr);
-      
-      // সব টায়ারের সোল্ড কাউন্ট রিসেট করা
-      Object.keys(baseSold).forEach(key => {
-        localStorage.setItem(`sold_${key}`, baseSold[Number(key)].toString());
-      });
-      
-      // বর্তমান পেজের জন্য সোল্ড কাউন্ট সেট করা
-      setSoldCount(baseSold[ticketPrice] || 950);
-    } else {
-      // রিসেট না হলে localStorage থেকে ডাটা নিয়ে আসা
-      const storedSold = localStorage.getItem(`sold_${ticketPrice}`);
-      if (storedSold) {
-        setSoldCount(parseInt(storedSold));
+      if (currentSeconds >= drawStart && currentSeconds < resetStart) {
+        // 12:30 AM থেকে 12:32:59 পর্যন্ত (Draw Window)
+        setIsDrawTime(true);
+        setSoldCount(1000); // ১০০০ এ লক হয়ে থাকবে
+        
+        // Watching Count র‍্যান্ডমলি ৯০০-৯৯০ এর মধ্যে ঘুরবে
+        setWatchingCount(prev => {
+          let newCount = prev + Math.floor(Math.random() * 7) - 3;
+          return Math.max(900, Math.min(990, newCount));
+        });
+      } else {
+        // Normal Window (12:33 AM থেকে 12:29:59 পর্যন্ত)
+        setIsDrawTime(false);
+        
+        // ১. Sold Count হিসাব (ঠিক ১২:৩৩ এ ১ হবে এবং ১২:২৯:৫৯ এ ৯৯৯ হবে)
+        let elapsed;
+        if (currentSeconds >= resetStart) {
+          elapsed = currentSeconds - resetStart;
+        } else {
+          elapsed = (86400 - resetStart) + currentSeconds;
+        }
+        const totalDuration = 86400 - 180; // 86220 seconds
+        let progress = elapsed / totalDuration;
+        setSoldCount(Math.floor(progress * 999) + 1);
+        
+        // ২. Live Count বাড়বে-কমবে (রিয়েল লাইভ ভাইব)
+        setLiveCount(prev => {
+          const change = Math.floor(Math.random() * 7) - 3; // -3 to +3
+          return Math.max(15, prev + change); // মিনিমাম ১৫ জন থাকবে
+        });
       }
-    }
-  }, [ticketPrice]); 
-
-  // ২. লাইভ কাউন্ট এবং সোল্ড কাউন্ট আপডেট ইন্টারভাল
-  useEffect(() => {
-    // লাইভ কাউন্ট আপডেট (প্রতি ৩ সেকেন্ডে ২-৪ জন বাড়বে বা কমবে)
-    const liveInterval = setInterval(() => {
-      setLiveCount(prev => {
-        const change = Math.floor(Math.random() * 7) - 3; // -3 থেকে +3
-        const newCount = Math.max(5, prev + change); // কমপক্ষে ৫ জন লাইভ থাকবে
-        return newCount;
-      });
-    }, 3000);
-
-    // সোল্ড কাউন্ট আপডেট (প্রতি ৭ সেকেন্ডে ১-৩ টি বাড়বে, তবে ১০০০ এর বেশি হবে না)
-    const soldInterval = setInterval(() => {
-      setSoldCount(prev => {
-        if (prev >= 1000) return 1000; // ১০০০ এ থেমে যাবে
-        
-        const increase = Math.floor(Math.random() * 3) + 1; // +1 থেকে +3
-        const newCount = Math.min(prev + increase, 1000); // ১০০০ এর বেশি হবে না
-        
-        localStorage.setItem(`sold_${ticketPrice}`, newCount.toString());
-        return newCount;
-      });
-    }, 7000);
-
-    return () => {
-      clearInterval(liveInterval);
-      clearInterval(soldInterval);
     };
-  }, [ticketPrice]);
 
+    // সাথে সাথে রান হবে
+    tick();
 
-  // প্রোফাইল লোড করা
+    // প্রতি ৩ সেকেন্ডে আপডেট হবে
+    const interval = setInterval(tick, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ==========================================
+  // Profile Fetch & Loading
+  // ==========================================
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -111,7 +96,6 @@ function TicketBuyContent() {
     }
   };
 
-  // ২.৯ সেকেন্ড লোডিং
   useEffect(() => {
     const timer = new Promise((resolve) => setTimeout(resolve, 2900));
     Promise.all([fetchData(), timer]).then(() => {
@@ -169,15 +153,6 @@ function TicketBuyContent() {
         setSuccessMsg(data.message + ` (Track ID: ${data.track_id})`);
         setTicketNumber(""); 
         fetchData(); 
-        
-        // টিকিট কেনার পর সোল্ড কাউন্ট ১ বাড়ানো (যদি ১০০০ এর কম থাকে)
-        setSoldCount(prev => {
-          if (prev >= 1000) return 1000;
-          const newCount = prev + 1;
-          localStorage.setItem(`sold_${ticketPrice}`, newCount.toString());
-          return newCount;
-        });
-
       } else {
         setError(data.error);
       }
@@ -251,20 +226,27 @@ function TicketBuyContent() {
         {/* নাম্বার ইনপুট সেকশন */}
         <div className="input-section">
           
-          {/* Live & Sold Counter */}
+          {/* Live & Sold Counter (Title-এর জায়গায়) */}
           <div className="live-counter-container">
-            <div className="live-badge">
-              <span className="live-dot"></span>
-              <span>{liveCount} {t("Users Buying", "জন ইউজার কিনছেন")}</span>
-            </div>
-            <div className="sold-badge">
-              🔥 {soldCount.toLocaleString()} {t("Sold", "বিক্রিত")}
-            </div>
+            {isDrawTime ? (
+              <div className="draw-watching-badge">
+                <span className="live-dot"></span>
+                <span>{watchingCount} {t("Live Watching For Draws", "জন লাইভ ড্র দেখছেন")}</span>
+              </div>
+            ) : (
+              <>
+                <div className="live-badge">
+                  <span className="live-dot"></span>
+                  <span>{liveCount} {t("Users Buying", "জন ইউজার কিনছেন")}</span>
+                </div>
+                <div className="sold-badge">
+                  🔥 {soldCount.toLocaleString()} {t("Sold", "বিক্রিত")}
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="flex justify-between items-center mb-3">
-            <h3>{t("Select 12-Digit Ticket Number", "১২ ডিজিটের টিকিট নাম্বার দিন")}</h3>
-            
+          <div className="flex justify-end items-center mb-2">
             <span className="text-[10px] text-white font-bold bg-white/10 px-2 py-1 rounded border border-white/30">
               {t("Balance", "ব্যালেন্স")}: ৳ {currentBalance.toFixed(2)}
             </span>
