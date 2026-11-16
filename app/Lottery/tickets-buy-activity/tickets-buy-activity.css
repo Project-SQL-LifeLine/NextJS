@@ -205,6 +205,26 @@
   border-radius: 4px;
 }
 
+/* Draw Watching Mode (নতুন স্টাইল) */
+.draw-watching-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #F5B041;
+  background: rgba(245, 176, 65, 0.1);
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.draw-watching-badge .live-dot {
+  background-color: #F5B041;
+  box-shadow: 0 0 8px rgba(245, 176, 65, 0.8);
+}
+
 .ticket-number-input {
   width: 100%;
   background: var(--bg-main);
