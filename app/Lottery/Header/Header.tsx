@@ -95,8 +95,8 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
         
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            {/* Text size 30% reduced (text-2xl to text-lg) & added stylish italic tracking */}
-            <div className="text-lg font-black text-white tracking-widest uppercase leading-tight drop-shadow-md italic font-serif">
+            {/* ৩০% ছোট করা হয়েছে (text-2xl থেকে text-xl) */}
+            <div className="text-xl font-black text-white tracking-widest uppercase leading-tight drop-shadow-md">
               Lotto Dhaka
             </div>
           </div>
@@ -121,10 +121,10 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               >
                 {t("Login", "লগইন")}
               </Link>
-              {/* Signup Button Color changed to White */}
+              {/* Signup বাটনের কালার সাদা করা হয়েছে */}
               <Link 
                 href="/user/signup?redirect=/Lottery" 
-                className="bg-white text-black px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-gray-200 transition shadow-sm"
+                className="bg-white text-black px-3 py-1.5 rounded-full text-[11px] font-bold hover:opacity-90 transition"
               >
                 {t("Signup", "সাইনআপ")}
               </Link>
