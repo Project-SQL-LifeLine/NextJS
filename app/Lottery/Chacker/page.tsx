@@ -27,7 +27,8 @@ export default function TicketCheckerPage() {
   // সার্চ বা স্ক্যান করে ডাটা বের করার ফাংশন
   // ==========================================
   const checkTicket = useCallback(async (numberToCheck: string) => {
-    const cleanNumber = numberToCheck.replace(/\s/g, '');
+    // স্পেস এবং হাইফেন দুটোই রিমুভ করা হচ্ছে
+    const cleanNumber = numberToCheck.replace(/[\s-]/g, '');
     
     if (!cleanNumber || cleanNumber.length < 10) {
       setErrorMsg("অনুগ্রহ করে সঠিক ১২ ডিজিটের টিকিট নাম্বার দিন।");
@@ -40,24 +41,33 @@ export default function TicketCheckerPage() {
     setShowScanner(false); // স্ক্যানার বন্ধ
 
     try {
+      console.log("Searching for ticket:", cleanNumber); // ডিবাগ লগ
+
       const { data, error } = await supabase
         .from("ticket_transactions")
         .select("*")
         .eq("ticket_number", cleanNumber)
         .eq("transaction_type", "ticket_purchase")
         .eq("status", "approved")
-        .maybeSingle();
+        .order("created_at", { ascending: false })
+        .limit(1); // maybeSingle() এর পরিবর্তে limit(1)
 
       if (error) {
-        console.error("Supabase Error:", error);
-        setErrorMsg("সার্ভারে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
-      } else if (!data) {
+        console.error("Supabase Error Details:", error);
+        if (error.code === '42501' || error.message.includes('permission')) {
+          setErrorMsg("ডাটাবেসে অনুমতি নেই। অনুগ্রহ করে অ্যাডমিনের সাথে যোগাযোগ করুন।");
+        } else {
+          setErrorMsg("সার্ভারে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+        }
+      } else if (!data || data.length === 0) {
+        console.warn("No ticket found for:", cleanNumber);
         setErrorMsg("❌ এই টিকিটটি আমাদের ডাটাবেসে পাওয়া যায়নি। এটি নকল হতে পারে!");
       } else {
-        setResult(data);
+        console.log("Ticket found:", data[0]);
+        setResult(data[0]); // limit(1) হলে অ্যারে আসে, তাই প্রথম উপাদানটি নিচ্ছি
       }
     } catch (err) {
-      console.error(err);
+      console.error("Unexpected Error:", err);
       setErrorMsg("সার্ভারে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
     } finally {
       setLoading(false);
@@ -83,17 +93,14 @@ export default function TicketCheckerPage() {
 
     const startScanner = async () => {
       try {
-        // চেক করা হচ্ছে ব্রাউজার BarcodeDetector সাপোর্ট করে কিনা
         if (!("BarcodeDetector" in window)) {
           setErrorMsg("আপনার ব্রাউজারটি বারকোড স্ক্যান সমর্থন করে না। ম্যানুয়ালি টিকিট নাম্বার দিন।");
           setShowScanner(false);
           return;
         }
 
-        // নির্দিষ্ট ফরম্যাট না দিয়ে ডিফল্ট কনস্ট্রাক্টর ব্যবহার করা হলো (ক্র্যাশ রোধে)
         barcodeDetector = new window.BarcodeDetector();
 
-        // ক্যামেরা চালু করা
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "environment" },
         });
@@ -104,7 +111,6 @@ export default function TicketCheckerPage() {
         }
 
         const scanFrame = async () => {
-          // readyState === 4 মানে ভিডিও প্লে হওয়ার জন্য রেডি
           if (videoRef.current && videoRef.current.readyState === 4) {
             try {
               const barcodes = await barcodeDetector.detect(videoRef.current);
@@ -116,7 +122,7 @@ export default function TicketCheckerPage() {
                 return;
               }
             } catch (e) {
-              // স্ক্যান এরর ইগনোর (প্রায়ই হয় যখন ফ্রেমে কোনো বারকোড থাকে না)
+              // স্ক্যান এরর ইগনোর
             }
           }
           animationFrameId = requestAnimationFrame(scanFrame);
@@ -219,7 +225,6 @@ export default function TicketCheckerPage() {
             className="w-full h-64 object-cover"
           ></video>
           
-          {/* স্ক্যানার ওভারলে গ্রাফিক্স */}
           <div className="absolute inset-0 border-2 border-[#00ffaa]/50 m-8 pointer-events-none rounded-lg">
              <div className="w-full h-0.5 bg-red-500 absolute top-1/2 -translate-y-1/2 animate-pulse"></div>
           </div>
