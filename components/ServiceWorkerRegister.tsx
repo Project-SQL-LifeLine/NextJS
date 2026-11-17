@@ -6,11 +6,11 @@ export default function ServiceWorkerRegister() {
   useEffect(() => {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        // আপনার basePath "/NextJS" সহ ফাইলটি রেজিস্টার করা হচ্ছে
+        // basePath "/NextJS" সহ ফাইলটি রেজিস্টার করা হচ্ছে
         navigator.serviceWorker
           .register("/NextJS/sw.js")
           .then((reg) => {
-            console.log("Service Worker registered successfully!", reg.scope);
+            console.log("Service Worker registered successfully!");
           })
           .catch((err) => {
             console.log("Service Worker registration failed:", err);
@@ -19,5 +19,5 @@ export default function ServiceWorkerRegister() {
     }
   }, []);
 
-  return null; // এটি স্ক্রিনে কিছু দেখাবে না, শুধু ব্যাকগ্রাউন্ডে কাজ করবে
+  return null; 
 }
