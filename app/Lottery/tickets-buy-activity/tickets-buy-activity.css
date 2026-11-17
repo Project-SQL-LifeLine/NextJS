@@ -11,7 +11,8 @@
   min-height: 100vh;
   width: 100%;
   font-family: inherit;
-  padding-bottom: 90px;
+  /* ফুটার এবং ফিক্সড বাটনের জন্য জায়গা রাখা হলো (যাতে কন্টেন্ট ঢেকে না যায়) */
+  padding-bottom: 160px; 
 }
 
 .ticket-buy-main {
@@ -205,7 +206,7 @@
   border-radius: 4px;
 }
 
-/* Draw Watching Mode (নতুন স্টাইল) */
+/* Draw Watching Mode */
 .draw-watching-badge {
   display: flex;
   align-items: center;
@@ -285,22 +286,23 @@
 }
 
 /* =========================================
-   3. Submit Button
+   3. Submit Button (Fixed above Footer)
    ========================================= */
 .submit-btn-wrapper {
   position: fixed;
-  bottom: 0;
+  /* Footer এর উচ্চতা প্রায় 65px, তাই বাটনটিকে তার উপরে রাখার জন্য 65px দেওয়া হলো */
+  bottom: 65px; 
   left: 0;
   width: 100%;
-  padding: 16px;
+  padding: 12px 16px;
   background: var(--bg-main);
   border-top: 1px solid var(--border-color);
-  z-index: 50;
+  z-index: 40; /* Footer এর z-index (50) থেকে কম দেওয়া হলো যাতে ফুটার সবার উপরে থাকে */
 }
 
 .buy-ticket-btn {
   width: 100%;
-  padding: 16px;
+  padding: 14px;
   background: var(--btn-green);
   border: 1px solid #FFFFFF;
   border-radius: 8px;
