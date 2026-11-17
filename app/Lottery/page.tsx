@@ -105,7 +105,7 @@ export default function LotteryHomePage() {
           {/* ১. Today's Jackpot Slider */}
           <div 
             className="jackpot-slider-wrapper"
-            style={{ backgroundImage: `url(https://i.ibb.co.com/Z6W8bbtz/file-000000002204821192cb3561d5e7a1d3.png)` }}
+            style={{ backgroundImage: `url(/lottery/top-banner.png)` }}
           >
             <div className="jackpot-overlay"></div>
             <div className="jackpot-track" style={{ transform: `translateX(-${activeJackpot * 100}%)` }}>
