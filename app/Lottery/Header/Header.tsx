@@ -91,11 +91,15 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
 
   return (
     <>
-      <header className="bg-[#184f35] px-4 py-4 flex items-center justify-between sticky top-0 z-50 shadow-[0_4px_10px_-1px_rgba(0,0,0,0.5)] border-b-2 border-[#26352e]">
+      {/* 
+        Header-এর উপরে হালকা কালো শ্যাডো দেওয়া হয়েছে: 
+        shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.3)] 
+      */}
+      <header className="bg-[#184f35] px-4 py-4 flex items-center justify-between sticky top-0 z-50 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.3)] border-b-2 border-[#26352e]">
         
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            {/* ৩০% ছোট করা হয়েছে (text-2xl থেকে text-xl) */}
+            {/* ৩০% ছোট করা হয়েছে (text-xl) */}
             <div className="text-xl font-black text-white tracking-widest uppercase leading-tight drop-shadow-md">
               Lotto Dhaka
             </div>
@@ -121,7 +125,7 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               >
                 {t("Login", "লগইন")}
               </Link>
-              {/* Signup বাটনের কালার সাদা করা হয়েছে */}
+              {/* Signup বাটনের কালার সাদা */}
               <Link 
                 href="/user/signup?redirect=/Lottery" 
                 className="bg-white text-black px-3 py-1.5 rounded-full text-[11px] font-bold hover:opacity-90 transition"
