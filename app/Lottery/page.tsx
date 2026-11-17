@@ -73,11 +73,12 @@ export default function LotteryHomePage() {
     return () => clearInterval(timer);
   }, []);
 
+  // 🔥 এখানে প্রতিটি টিকিটের দামের সাথে প্রাইজ পুল যুক্ত করা হলো
   const ticketTiers = [
-    { price: 20, title: "LOTTO", titleSpan: "BD", color: "orange" },
-    { price: 50, title: "MEGA", titleSpan: "BD I", color: "green" },
-    { price: 100, title: "DHAKA", titleSpan: "MEGA II", color: "orange" },
-    { price: 200, title: "DHAKA", titleSpan: "MEGA I", color: "green" },
+    { price: 20, prize: 20000, title: "LOTTO", titleSpan: "BD", color: "orange" },
+    { price: 50, prize: 50000, title: "MEGA", titleSpan: "BD I", color: "green" },
+    { price: 100, prize: 100000, title: "DHAKA", titleSpan: "MEGA II", color: "orange" },
+    { price: 200, prize: 200000, title: "DHAKA", titleSpan: "MEGA I", color: "green" },
   ];
 
   if (loading) {
@@ -92,17 +93,13 @@ export default function LotteryHomePage() {
   }
 
   return (
-    // এখানে bg-[#184f35] দিয়ে ব্যাকগ্রাউন্ড কালার সেট করা হয়েছে যাতে গ্যাপ দেখা না যায়
     <div className="lottery-page-wrapper pb-20 bg-[#0d241e] min-h-screen">
       
-      {/* Header-কে Wrapper-এর বাইরে রাখা হয়েছে যাতে ফুল উইড্থ থাকে এবং গ্যাপ না থাকে */}
       <LotteryHeader userProfile={profile} />
 
       <div className="lottery-overlay">
-        {/* main এ pt-0 বা mt-0 নিশ্চিত করা হয়েছে */}
         <main className="lottery-main pt-0 mt-0">
           
-          {/* ১. Today's Jackpot Slider */}
           <div 
             className="jackpot-slider-wrapper"
             style={{ backgroundImage: `url(https://i.ibb.co.com/6J70LMrp/file-000000002204821192cb3561d5e7a1d3.png)` }}
@@ -129,7 +126,6 @@ export default function LotteryHomePage() {
             </div>
           </div>
 
-          {/* ২. Ticket List */}
           <div className="mt-4">
             <div className="ticket-list-container">
               {ticketTiers.map((tier, index) => (
@@ -154,9 +150,10 @@ export default function LotteryHomePage() {
                     >
                       Draw History
                     </button>
+                    {/* 🔥 এখানে price এর সাথে prize প্যারামিটারটিও পাঠানো হচ্ছে */}
                     <button 
                       className="lotto-btn primary" 
-                      onClick={() => router.push(`/Lottery/tickets-buy-activity?price=${tier.price}`)}
+                      onClick={() => router.push(`/Lottery/tickets-buy-activity?price=${tier.price}&prize=${tier.prize}`)}
                     >
                       Buy ৳{tier.price}
                     </button>
