@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
 import LotteryHeader from "../Header/Header";
-import LotteryFooter from "../Footer/Footer";
+import LotteryFooter from "../Footer/Footer"; // ফুটার ইমপোর্ট
 import "./tickets-buy-activity.css";
 
 function TicketBuyContent() {
@@ -16,9 +16,15 @@ function TicketBuyContent() {
   const ticketPrice = Number(searchParams.get("price")) || 50;
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Prize Pool ম্যাপিং
+  // 🎯 Prize Pool ম্যাপিং (২০ এবং ২০০ টাকা সহ ফাইনাল আপডেট)
   const prizePools: { [key: number]: string } = {
-    50: "50,000", 100: "100,000", 250: "250,000", 500: "500,000", 1000: "1,000,000"
+    20: "20,000", 
+    50: "50,000", 
+    100: "100,000", 
+    200: "200,000", 
+    250: "250,000", 
+    500: "500,000", 
+    1000: "1,000,000"
   };
   const currentPrizePool = prizePools[ticketPrice] || "50,000";
 
@@ -37,10 +43,12 @@ function TicketBuyContent() {
   const [isDrawTime, setIsDrawTime] = useState(false);
   const [watchingCount, setWatchingCount] = useState(950);
 
-  // প্রতিটি টিকিটের জন্য আলাদা কনফিগারেশন
+  // 🎯 প্রতিটি টিকিটের জন্য আলাদা কনফিগারেশন (২০ এবং ২০০ টাকা যোগ করা হয়েছে)
   const tierConfigs: { [key: number]: { multiplier: number, baseLive: number } } = {
+    20: { multiplier: 1.35, baseLive: 50 },   // ২০ টাকার কনফিগারেশন
     50: { multiplier: 1.25, baseLive: 45 },   
     100: { multiplier: 1.15, baseLive: 35 },  
+    200: { multiplier: 1.05, baseLive: 20 },  // ২০০ টাকার কনফিগারেশন
     250: { multiplier: 1.08, baseLive: 25 },  
     500: { multiplier: 1.02, baseLive: 15 },  
     1000: { multiplier: 1.00, baseLive: 8 },  
@@ -210,9 +218,8 @@ function TicketBuyContent() {
     );
   }
 
-  // pb-20 থেকে বাড়িয়ে pb-32 করা হয়েছে যাতে ফুটারের নিচে বাটন ঢাকা না পড়ে
   return (
-    <div className="ticket-buy-page pb-32">
+    <div className="ticket-buy-page pb-20">
       <LotteryHeader userProfile={profile} />
 
       <main className="ticket-buy-main">
@@ -330,6 +337,7 @@ function TicketBuyContent() {
         )}
       </div>
 
+      {/* Footer */}
       <LotteryFooter />
     </div>
   );
