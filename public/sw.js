@@ -1,11 +1,9 @@
-const CACHE_NAME = 'lotto-app-cache-v1';
+const CACHE_NAME = 'lotto-app-cache-v2'; // ভার্সন বাড়ানো হলো
 
-// পেজ লোড হওয়ার সময় ফাইলগুলো ক্যাশে সেভ করবে
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// নতুন সাইট ডিপ্লয় হলে পুরনো ক্যাশ মুছে ফেলবে
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -21,30 +19,48 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// নেটওয়ার্ক চেক করবে, না পেলে ক্যাশ থেকে দেখাবে (এটাই মূল লজিক)
 self.addEventListener('fetch', (event) => {
-  // শুধুমাত্র GET রিকোয়েস্টের জন্য কাজ করবে
   if (event.request.method !== 'GET') return;
 
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // রেসপন্স সফল হলে (404 না হলে) ক্যাশে সেভ করবে
-        if (response && response.status === 200 && response.type === 'basic') {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        // নেটওয়ার্ক ফেইল করলে বা 404 আসলে ক্যাশ থেকে আগের পেজ দেখাবে
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
+  // পেজ নেভিগেশন বা HTML ফাইলের রিকোয়েস্ট হলে
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // 🌟 যদি সার্ভার 404 দেয় (মানে ডিপ্লয় চলছে), ক্যাশ থেকে আগের পেজ দাও
+          if (response.status === 404) {
+            return caches.match(event.request).then((cachedResponse) => {
+              return cachedResponse || response;
+            });
           }
+          // সব ঠিক থাকলে ক্যাশে সেভ করো
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // ইন্টারনেট না থাকলে ক্যাশ থেকে দাও
+          return caches.match(event.request);
+        })
+    );
+  } else {
+    // অন্যান্য ফাইল (CSS, JS, ইমেজ) এর জন্য সাধারণ ক্যাশ লজিক
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        return cachedResponse || fetch(event.request).then((response) => {
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
         });
       })
-  );
+    );
+  }
 });
