@@ -27,44 +27,36 @@ export default function TicketCheckerPage() {
   // সার্চ বা স্ক্যান করে ডাটা বের করার ফাংশন
   // ==========================================
   const checkTicket = useCallback(async (numberToCheck: string) => {
-    // স্পেস এবং হাইফেন দুটোই রিমুভ করা হচ্ছে
+    // স্পেস এবং হাইফেন রিমুভ করা হচ্ছে
     const cleanNumber = numberToCheck.replace(/[\s-]/g, '');
     
     if (!cleanNumber || cleanNumber.length < 10) {
-      setErrorMsg("অনুগ্রহ করে সঠিক ১২ ডিজিটের টিকিট নাম্বার দিন।");
+      setErrorMsg("অনুগ্রহ করে সঠিক টিকিট নাম্বার দিন।");
       return;
     }
 
     setLoading(true);
     setResult(null);
     setErrorMsg("");
-    setShowScanner(false); // স্ক্যানার বন্ধ
+    setShowScanner(false);
 
     try {
-      console.log("Searching for ticket:", cleanNumber); // ডিবাগ লগ
-
       const { data, error } = await supabase
         .from("ticket_transactions")
         .select("*")
         .eq("ticket_number", cleanNumber)
         .eq("transaction_type", "ticket_purchase")
-        .eq("status", "approved")
+        // .eq("status", "approved") // <-- স্ট্যাটাস ফিল্টার সরানো হয়েছে
         .order("created_at", { ascending: false })
-        .limit(1); // maybeSingle() এর পরিবর্তে limit(1)
+        .limit(1);
 
       if (error) {
         console.error("Supabase Error Details:", error);
-        if (error.code === '42501' || error.message.includes('permission')) {
-          setErrorMsg("ডাটাবেসে অনুমতি নেই। অনুগ্রহ করে অ্যাডমিনের সাথে যোগাযোগ করুন।");
-        } else {
-          setErrorMsg("সার্ভারে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
-        }
+        setErrorMsg("সার্ভারে সমস্যা হয়েছে বা অনুমতি নেই।");
       } else if (!data || data.length === 0) {
-        console.warn("No ticket found for:", cleanNumber);
         setErrorMsg("❌ এই টিকিটটি আমাদের ডাটাবেসে পাওয়া যায়নি। এটি নকল হতে পারে!");
       } else {
-        console.log("Ticket found:", data[0]);
-        setResult(data[0]); // limit(1) হলে অ্যারে আসে, তাই প্রথম উপাদানটি নিচ্ছি
+        setResult(data[0]);
       }
     } catch (err) {
       console.error("Unexpected Error:", err);
@@ -85,7 +77,7 @@ export default function TicketCheckerPage() {
   }, []);
 
   // ==========================================
-  // নেটিভ BarcodeDetector API দিয়ে স্ক্যানার লজিক
+  // স্ক্যানার লজিক
   // ==========================================
   useEffect(() => {
     let barcodeDetector: any = null;
@@ -94,7 +86,7 @@ export default function TicketCheckerPage() {
     const startScanner = async () => {
       try {
         if (!("BarcodeDetector" in window)) {
-          setErrorMsg("আপনার ব্রাউজারটি বারকোড স্ক্যান সমর্থন করে না। ম্যানুয়ালি টিকিট নাম্বার দিন।");
+          setErrorMsg("আপনার ব্রাউজার বারকোড স্ক্যান সমর্থন করে না। ম্যানুয়ালি নাম্বার দিন।");
           setShowScanner(false);
           return;
         }
@@ -122,7 +114,7 @@ export default function TicketCheckerPage() {
                 return;
               }
             } catch (e) {
-              // স্ক্যান এরর ইগনোর
+              // ইগনোর
             }
           }
           animationFrameId = requestAnimationFrame(scanFrame);
@@ -165,7 +157,7 @@ export default function TicketCheckerPage() {
 
       {/* ইনপুট এবং স্ক্যান বাটন */}
       <div className="bg-[#103626] p-5 rounded-2xl border border-white/10 shadow-lg mb-6">
-        <label className="text-xs text-[#A0ADB0] mb-2 block">Enter 12-Digit Ticket Number</label>
+        <label className="text-xs text-[#A0ADB0] mb-2 block">Enter Ticket Number</label>
         
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -181,7 +173,7 @@ export default function TicketCheckerPage() {
               placeholder="e.g. 2152 2618 4808"
               value={ticketNumber}
               onChange={(e) => setTicketNumber(e.target.value)}
-              maxLength={15}
+              maxLength={20}
             />
           </div>
           
@@ -257,8 +249,8 @@ export default function TicketCheckerPage() {
               </h2>
               <p className="text-xs text-gray-400">This ticket is authentic and valid.</p>
             </div>
-            <div className="bg-[#00ffaa] text-[#0b1a13] px-3 py-1 rounded-full text-xs font-bold">
-              APPROVED
+            <div className="bg-[#00ffaa] text-[#0b1a13] px-3 py-1 rounded-full text-xs font-bold uppercase">
+              {result.status || "VERIFIED"}
             </div>
           </div>
 
@@ -266,25 +258,27 @@ export default function TicketCheckerPage() {
             <div className="flex justify-between">
               <span className="text-gray-400">Ticket Number:</span>
               <span className="font-mono font-bold text-white tracking-widest">
-                {result.ticket_number.match(/.{1,4}/g)?.join("  ") || result.ticket_number}
+                {result.ticket_number || "N/A"}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Ticket Tier:</span>
-              <span className="font-bold text-[#F5B041]">৳ {result.ticket_tier}</span>
+              <span className="font-bold text-[#F5B041]">৳ {result.ticket_tier || result.amount || "0"}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Purchase Date:</span>
               <span className="text-white">
-                {new Date(result.created_at).toLocaleDateString('en-GB', {
+                {result.created_at ? new Date(result.created_at).toLocaleDateString('en-GB', {
                   day: 'numeric', month: 'short', year: 'numeric',
                   hour: '2-digit', minute: '2-digit'
-                })}
+                }) : "N/A"}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Transaction ID:</span>
-              <span className="text-white font-mono text-xs">{result.id.split('-')[0]}...</span>
+              <span className="text-white font-mono text-xs">
+                {result.id ? result.id.split('-')[0] + "..." : "N/A"}
+              </span>
             </div>
           </div>
         </div>
