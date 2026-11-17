@@ -91,12 +91,14 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
 
   return (
     <>
-      <header className="bg-[#184f35] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#26352e]">
+      {/* Header thickness updated to match footer (border-b-2 & py-4) */}
+      <header className="bg-[#184f35] px-4 py-4 flex items-center justify-between sticky top-0 z-50 shadow-[0_4px_10px_-1px_rgba(0,0,0,0.5)] border-b-2 border-[#26352e]">
         
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            <div className="text-xl font-black text-[#F5B041] tracking-widest uppercase leading-tight drop-shadow-md">
-              Lotto
+            {/* Text changed to LOTTO DHAKA, color to White, kept style */}
+            <div className="text-2xl font-black text-white tracking-widest uppercase leading-tight drop-shadow-md">
+              Lotto Dhaka
             </div>
           </div>
         </div>
@@ -140,10 +142,10 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setIsMenuOpen(false)}>
           <div 
-            className="absolute top-[60px] right-3 mt-1 w-64 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
+            className="absolute top-[64px] right-3 mt-1 w-64 bg-[#184f35] border border-[#26352e] rounded-xl shadow-2xl overflow-hidden py-1"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Reload Balance (আগে Buy Tickets ছিল) */}
+            {/* Reload Balance */}
             <button 
               onClick={() => { setIsMenuOpen(false); router.push("/Lottery/Secure-payment"); }}
               className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
@@ -169,7 +171,7 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
                   <Icons.Trophy /> <span className="text-[11px] font-semibold">{t("Winner", "বিজয়ী")}</span>
                 </button>
 
-                {/* Transactions (নতুন যুক্ত করা হলো) */}
+                {/* Transactions */}
                 <button 
                   onClick={() => { setIsMenuOpen(false); router.push("/Lottery/Transactions-activity"); }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-black/20 transition border-b border-[#26352e]"
