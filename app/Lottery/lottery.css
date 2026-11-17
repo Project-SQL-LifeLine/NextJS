@@ -7,19 +7,22 @@
   font-family: inherit;
   position: relative;
   background-color: #0d241e; 
+  display: flex;
+  flex-direction: column;
 }
 
 .lottery-overlay {
   position: relative;
   z-index: 1; 
-  min-height: 100vh;
+  flex: 1; /* ফ্লেক্সবক্স ব্যবহার করে ফুটারকে নিচে রাখার জন্য */
   width: 100%;
   background-color: #0d241e;
-  padding-bottom: 65px; 
+  /* padding-bottom সরানো হয়েছে কারণ Footer fixed আছে এবং page.tsx এ pb-20 দেওয়া আছে */
 }
 
 .lottery-main {
-  padding: 16px;
+  /* উপরের প্যাডিং 0 করা হয়েছে যাতে হেডার ও ব্যানারের মাঝে গ্যাপ না থাকে */
+  padding: 0 16px 16px 16px; 
   max-width: 600px;
   margin: 0 auto;
   display: flex;
@@ -33,6 +36,7 @@
    1. Jackpot Slider
    ========================================= */
 .jackpot-slider-wrapper {
+  /* গ্যাপ দূর করার জন্য মার্জিন ঠিক করা হয়েছে */
   margin: 0 -16px; 
   background-size: cover;
   background-position: center;
@@ -218,7 +222,7 @@
 .lotto-card-actions {
   display: flex;
   gap: 12px;
-  padding: 20px; /* ডট বক্স সরানোর কারণে প্যাডিং অ্যাডজাস্ট করা হলো */
+  padding: 20px; 
 }
 
 .lotto-btn {
