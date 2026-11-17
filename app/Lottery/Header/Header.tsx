@@ -91,13 +91,12 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
 
   return (
     <>
-      {/* Header thickness updated to match footer (border-b-2 & py-4) */}
       <header className="bg-[#184f35] px-4 py-4 flex items-center justify-between sticky top-0 z-50 shadow-[0_4px_10px_-1px_rgba(0,0,0,0.5)] border-b-2 border-[#26352e]">
         
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            {/* Text changed to LOTTO DHAKA, color to White, kept style */}
-            <div className="text-2xl font-black text-white tracking-widest uppercase leading-tight drop-shadow-md">
+            {/* Text size 30% reduced (text-2xl to text-lg) & added stylish italic tracking */}
+            <div className="text-lg font-black text-white tracking-widest uppercase leading-tight drop-shadow-md italic font-serif">
               Lotto Dhaka
             </div>
           </div>
@@ -122,9 +121,10 @@ export default function LotteryHeader({ userProfile }: { userProfile?: any }) {
               >
                 {t("Login", "লগইন")}
               </Link>
+              {/* Signup Button Color changed to White */}
               <Link 
                 href="/user/signup?redirect=/Lottery" 
-                className="bg-[#F5B041] text-black px-3 py-1.5 rounded-full text-[11px] font-bold hover:opacity-90 transition"
+                className="bg-white text-black px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-gray-200 transition shadow-sm"
               >
                 {t("Signup", "সাইনআপ")}
               </Link>
