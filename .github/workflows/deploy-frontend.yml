@@ -10,9 +10,11 @@ permissions:
   pages: write
   id-token: write
 
+# একই সময়ে একাধিক Pages deployment চলা আটকাবে।
+# চলমান deployment নতুন push এলে বাতিল হবে না।
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -26,6 +28,7 @@ jobs:
         with:
           node-version: 20
 
+      # Next.js build cache
       - name: Cache Next.js build
         uses: actions/cache@v4
         with:
@@ -43,9 +46,11 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
-      # 🌟 404 ফিক্স: Jekyll বন্ধ করার জন্য
       - name: Add .nojekyll file
         run: touch ./out/.nojekyll
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -62,20 +67,23 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-      
-      # 🌟 সাইট লাইভ হওয়া পর্যন্ত অপেক্ষা করবে
-      - name: Wait for Live Site (Verify No 404)
+
+      # Deployment সম্পন্ন হওয়ার পর সাইটের HTTP status যাচাই
+      - name: Verify Live Site
         run: |
-          echo "Waiting for the new site to be fully live..."
+          echo "Checking the deployed site..."
           SITE_URL="${{ steps.deployment.outputs.page_url }}"
-          
+
           for i in $(seq 1 20); do
-            STATUS=$(curl -o /dev/null -s -w "%{http_code}" $SITE_URL)
+            STATUS=$(curl -L -o /dev/null -s -w "%{http_code}" "$SITE_URL")
+
             if [ "$STATUS" -eq 200 ]; then
               echo "Success! Site is live with Status 200."
               exit 0
             fi
+
             echo "Attempt $i: Site returned status $STATUS. Retrying in 5 seconds..."
             sleep 5
           done
-          echo "Warning: Site did not return 200 within the time limit."
+
+          echo "Warning: Site did not return 200 within the time limit, but deployment task is complete."
