@@ -19,7 +19,8 @@ export default function TrickSubmitPage() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.user) {
-        router.push("/login"); // লগইন পেজের পাথ দিন
+        // ইউজার লগইন না থাকলে লগইন পেজে পাঠান
+        router.push("/login"); 
         return;
       }
 
@@ -27,14 +28,18 @@ export default function TrickSubmitPage() {
       await loadMessages(session.user.id);
       setLoading(false);
 
-      // রিয়েল-টাইম আপডেট
+      // রিয়েল-টাইম আপডেট (অ্যাডমিন মেসেজ দিলে সাথে সাথে দেখা যাবে)
       const subscription = supabase
         .channel("public:support_messages")
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "support_messages", filter: `user_id=eq.${session.user.id}` },
           (payload) => {
-            setMessages((prev) => [...prev, payload.new]);
+            setMessages((prev) => {
+              // ডুপ্লিকেট মেসেজ আটকানোর জন্য
+              if (prev.find((m) => m.id === payload.new.id)) return prev;
+              return [...prev, payload.new];
+            });
           }
         )
         .subscribe();
@@ -60,7 +65,11 @@ export default function TrickSubmitPage() {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !userId) return;
+    if (!newMessage.trim()) return;
+    if (!userId) {
+      alert("ইউজার সেশন পাওয়া যায়নি। আবার লগইন করুন।");
+      return;
+    }
 
     setSending(true);
     const msgText = newMessage.trim();
@@ -74,14 +83,11 @@ export default function TrickSubmitPage() {
 
     if (error) {
       console.error("Error sending message:", error);
-      alert("মেসেজ পাঠানো যায়নি! " + error.message);
-      setNewMessage(msgText); 
+      alert("মেসেজ পাঠানো যায়নি! এরর: " + error.message);
+      setNewMessage(msgText); // এরর হলে মেসেজ ফেরত আনা
     }
     
     setSending(false);
-    setTimeout(() => {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
   };
 
   useEffect(() => {
@@ -97,7 +103,7 @@ export default function TrickSubmitPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b1a13] text-white font-sans">
+    <div className="min-h-screen bg-[#0b1a13] text-white font-sans flex flex-col">
       
       {/* হেডার (Fixed) */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center gap-4 p-4 bg-[#103626] border-b border-white/10 shadow-md h-[72px]">
@@ -108,14 +114,12 @@ export default function TrickSubmitPage() {
           </svg>
         </button>
         <div>
-          {/* নাম পরিবর্তন করে Trick Submit করা হয়েছে এবং Online সরানো হয়েছে */}
           <h1 className="text-lg font-bold tracking-wide">Trick Submit</h1>
         </div>
       </div>
 
-      {/* চ্যাট এরিয়া (হেডার এবং ইনপুট এর মাঝখানে) */}
-      {/* pt-[72px] দেওয়া হয়েছে যাতে হেডারের নিচ থেকে শুরু হয়, pb-[90px] যাতে ইনপুট বক্সের উপরে থাকে */}
-      <div className="pt-[72px] pb-[90px] p-4 space-y-4 overflow-y-auto">
+      {/* চ্যাট এরিয়া */}
+      <div className="flex-1 overflow-y-auto pt-[88px] pb-[90px] px-4 space-y-4">
         {messages.length === 0 ? (
           <div className="text-center text-gray-500 mt-10 text-sm px-4">
             আপনার কোনো সমস্যা বা ট্রিক সাবমিট করতে চাইলে এখানে মেসেজ দিন। অ্যাডমিন শীঘ্রই উত্তর দেবে।
