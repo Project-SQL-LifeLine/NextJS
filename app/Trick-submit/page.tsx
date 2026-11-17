@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabase/client"; // আপনার পাথ অনুযায়ী ঠিক করে নিন
+import { supabase } from "../../lib/supabase/client";
 
 export default function TrickSubmitPage() {
   const router = useRouter();
@@ -14,44 +14,56 @@ export default function TrickSubmitPage() {
   
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // ==========================================
+  // ১. ইউজার সেশন চেক এবং মেসেজ লোড করা
+  // ==========================================
   useEffect(() => {
     const fetchUserAndMessages = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.user) {
-        // ইউজার লগইন না থাকলে লগইন পেজে পাঠান
-        router.push("/login"); 
-        return;
+      try {
+        // Supabase থেকে সেশন নেওয়া
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        // যদি সেশন না থাকে, তবে লগইন পেজে পাঠিয়ে দিন
+        if (sessionError || !session || !session.user) {
+          router.push("/login"); // আপনার লগইন পেজের সঠিক পাথটি এখানে দিন
+          return;
+        }
+
+        const currentUserId = session.user.id;
+        setUserId(currentUserId);
+        
+        // মেসেজ লোড করা
+        await loadMessages(currentUserId);
+        setLoading(false);
+
+        // রিয়েল-টাইম আপডেট (অ্যাডমিন মেসেজ দিলে সাথে সাথে দেখা যাবে)
+        const subscription = supabase
+          .channel("public:support_messages")
+          .on(
+            "postgres_changes",
+            { event: "INSERT", schema: "public", table: "support_messages", filter: `user_id=eq.${currentUserId}` },
+            (payload) => {
+              setMessages((prev) => {
+                if (prev.find((m) => m.id === payload.new.id)) return prev;
+                return [...prev, payload.new];
+              });
+            }
+          )
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(subscription);
+        };
+      } catch (err) {
+        console.error("Error in initialization:", err);
+        setLoading(false);
       }
-
-      setUserId(session.user.id);
-      await loadMessages(session.user.id);
-      setLoading(false);
-
-      // রিয়েল-টাইম আপডেট (অ্যাডমিন মেসেজ দিলে সাথে সাথে দেখা যাবে)
-      const subscription = supabase
-        .channel("public:support_messages")
-        .on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table: "support_messages", filter: `user_id=eq.${session.user.id}` },
-          (payload) => {
-            setMessages((prev) => {
-              // ডুপ্লিকেট মেসেজ আটকানোর জন্য
-              if (prev.find((m) => m.id === payload.new.id)) return prev;
-              return [...prev, payload.new];
-            });
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(subscription);
-      };
     };
 
     fetchUserAndMessages();
   }, [router]);
 
+  // মেসেজ লোড করার ফাংশন
   const loadMessages = async (uid: string) => {
     const { data, error } = await supabase
       .from("support_messages")
@@ -64,10 +76,16 @@ export default function TrickSubmitPage() {
     }
   };
 
+  // ==========================================
+  // ২. মেসেজ পাঠানোর ফাংশন
+  // ==========================================
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
+    
+    // যদি ইউজার আইডি না থাকে, তবে মেসেজ পাঠানো যাবে না
     if (!userId) {
-      alert("ইউজার সেশন পাওয়া যায়নি। আবার লগইন করুন।");
+      alert("আপনার লগইন সেশন পাওয়া যায়নি। অনুগ্রহ করে আবার লগইন করুন।");
+      router.push("/login");
       return;
     }
 
@@ -83,8 +101,9 @@ export default function TrickSubmitPage() {
 
     if (error) {
       console.error("Error sending message:", error);
+      // স্ক্রিনে এরর দেখানোর জন্য alert
       alert("মেসেজ পাঠানো যায়নি! এরর: " + error.message);
-      setNewMessage(msgText); // এরর হলে মেসেজ ফেরত আনা
+      setNewMessage(msgText); // মেসেজ ফেরত আনা
     }
     
     setSending(false);
