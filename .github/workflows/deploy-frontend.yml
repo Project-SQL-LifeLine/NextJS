@@ -36,13 +36,11 @@ jobs:
             ${{ runner.os }}-nextjs-
 
       - name: Install dependencies
-        # --no-audit এবং --no-fund যোগ করায় ইনস্টলেশন একটু ফাস্ট হবে
         run: npm install --no-audit --no-fund
 
       - name: Build
         run: npm run build
         env:
-          # আপনার Supabase কানেকশন ফিরিয়ে আনা হলো
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
@@ -64,3 +62,26 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      
+      # 🌟 নতুন যোগ করা অংশ: সাইট লাইভ হওয়া পর্যন্ত অপেক্ষা করবে
+      - name: Wait for Live Site (Verify No 404)
+        run: |
+          echo "Waiting for the new site to be fully live..."
+          # আপনার সাইটের মূল URL নিচে বসান
+          SITE_URL="${{ steps.deployment.outputs.page_url }}"
+          
+          # সর্বোচ্চ ২০ বার চেষ্টা করবে, প্রতিবার ৫ সেকেন্ড অপেক্ষা করবে (সর্বমোট ১০০ সেকেন্ড)
+          for i in $(seq 1 20); do
+            # URL থেকে HTTP স্ট্যাটাস কোড চেক করা (200 মানে সাইট লাইভ)
+            STATUS=$(curl -o /dev/null -s -w "%{http_code}" $SITE_URL)
+            
+            if [ "$STATUS" -eq 200 ]; then
+              echo "Success! Site is live with Status 200."
+              exit 0
+            fi
+            
+            echo "Attempt $i: Site returned status $STATUS. Retrying in 5 seconds..."
+            sleep 5
+          done
+          
+          echo "Warning: Site did not return 200 within the time limit, but deployment task is complete."
