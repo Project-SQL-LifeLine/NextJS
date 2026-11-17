@@ -8,9 +8,13 @@ export default function AdminTicketTransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("pending");
   
-  // ডিবাগিং স্টেট (স্ক্রিনে এরর দেখার জন্য)
+  // ১. ফিল্টার ডিফল্টভাবে "all" করা হলো, যাতে সব ডাটা প্রথমেই দেখা যায়
+  const [filterStatus, setFilterStatus] = useState("all"); 
+  
+  // ২. বাটনে ক্লিক করলে লোডিং দেখানোর জন্য নতুন স্টেট
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
   const [debugInfo, setDebugInfo] = useState({ totalFetched: 0, errorMsg: "None" });
 
   useEffect(() => {
@@ -27,13 +31,9 @@ export default function AdminTicketTransactionsPage() {
         .from("ticket_transactions")
         .select(`
           *,
-          profiles:user_id (game_id)
-        `)
+          profiles ( game_id )
+        `) // ৩. জয়েন কুয়েরি ঠিক করা হয়েছে (profiles:user_id এর বদলে profiles)
         .order("created_at", { ascending: false });
-
-      // কনসোলে চেক করার জন্য
-      console.log("SUPABASE RESPONSE - DATA:", data);
-      console.log("SUPABASE RESPONSE - ERROR:", error);
 
       if (error) throw error;
       
@@ -54,6 +54,8 @@ export default function AdminTicketTransactionsPage() {
 
   const handleApprove = async (tx: any) => {
     if (!window.confirm("Are you sure you want to approve this transaction?")) return;
+    
+    setProcessingId(tx.id); // বাটন লোডিং শুরু
     try {
       let response;
       if (tx.transaction_type === "fee_payment") {
@@ -63,19 +65,24 @@ export default function AdminTicketTransactionsPage() {
       }
 
       if (response.error) throw response.error;
+      
       if (response.data?.success) {
         setMessage({ type: "success", text: "Transaction approved successfully!" });
-        fetchTransactions();
+        await fetchTransactions(); // ডাটা রিফ্রেশ
       } else {
         setMessage({ type: "error", text: response.data?.error || "Approval failed." });
       }
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
+    } finally {
+      setProcessingId(null); // লোডিং বন্ধ
     }
   };
 
   const handleReject = async (tx: any) => {
     if (!window.confirm("Are you sure you want to reject this transaction?")) return;
+    
+    setProcessingId(tx.id);
     try {
       if (tx.transaction_type === "withdrawal") {
         const response = await supabase.rpc("reject_lottery_withdrawal", { p_tx_id: tx.id });
@@ -88,14 +95,15 @@ export default function AdminTicketTransactionsPage() {
         if (error) throw error;
       }
       setMessage({ type: "success", text: "Transaction rejected." });
-      fetchTransactions();
+      await fetchTransactions();
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
+    } finally {
+      setProcessingId(null);
     }
   };
 
   const filteredTransactions = transactions.filter((tx) => {
-    // Safe checks (Null বা Undefined হলেও ক্র্যাশ করবে না)
     const gameId = tx.profiles?.game_id || "Unknown";
     const trxId = tx.trx_id || "";
     const trackId = tx.ticket_dp_track_id || "";
@@ -159,10 +167,11 @@ export default function AdminTicketTransactionsPage() {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500"
           >
+            <option value="all">All Status</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
-            <option value="all">All Status</option>
+            <option value="drawn">Drawn</option>
           </select>
           <button 
             onClick={fetchTransactions} 
@@ -222,23 +231,27 @@ export default function AdminTicketTransactionsPage() {
                       <span className={`px-2 py-1 rounded text-xs font-bold ${
                         tx.status === "approved" ? "bg-green-100 text-green-700 border border-green-200" :
                         tx.status === "rejected" ? "bg-red-100 text-red-700 border border-red-200" :
+                        tx.status === "drawn" ? "bg-blue-100 text-blue-700 border border-blue-200" :
                         "bg-orange-100 text-orange-700 border border-orange-200"
                       }`}>
                         {tx.status ? tx.status.toUpperCase() : "UNKNOWN"}
                       </span>
                     </td>
                     <td className="p-4 text-right flex justify-end gap-2">
-                      {tx.status === "pending" && (
+                      {/* ৪. বাটনের স্টেট আপডেট (pending বা drawn হলে দেখাবে) */}
+                      {(tx.status === "pending" || tx.status === "drawn") && (
                         <>
                           <button 
                             onClick={() => handleApprove(tx)}
-                            className="px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md text-xs font-bold transition-colors"
+                            disabled={processingId === tx.id}
+                            className="px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md text-xs font-bold transition-colors disabled:opacity-50"
                           >
-                            Approve
+                            {processingId === tx.id ? "Wait..." : "Approve"}
                           </button>
                           <button 
                             onClick={() => handleReject(tx)}
-                            className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md font-bold transition-colors text-xs"
+                            disabled={processingId === tx.id}
+                            className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md font-bold transition-colors text-xs disabled:opacity-50"
                           >
                             Reject
                           </button>
