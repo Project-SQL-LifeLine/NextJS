@@ -26,7 +26,6 @@ jobs:
         with:
           node-version: 20
 
-      # Next.js এর বিল্ড ক্যাশ (বিল্ড ফাস্ট করার জন্য)
       - name: Cache Next.js build
         uses: actions/cache@v4
         with:
@@ -44,12 +43,9 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
-      # 🌟 নতুন যোগ করা সবচেয়ে জরুরি স্টেপ (404 ফিক্স)
+      # 🌟 404 ফিক্স: Jekyll বন্ধ করার জন্য
       - name: Add .nojekyll file
         run: touch ./out/.nojekyll
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -75,14 +71,11 @@ jobs:
           
           for i in $(seq 1 20); do
             STATUS=$(curl -o /dev/null -s -w "%{http_code}" $SITE_URL)
-            
             if [ "$STATUS" -eq 200 ]; then
               echo "Success! Site is live with Status 200."
               exit 0
             fi
-            
             echo "Attempt $i: Site returned status $STATUS. Retrying in 5 seconds..."
             sleep 5
           done
-          
-          echo "Warning: Site did not return 200 within the time limit, but deployment task is complete."
+          echo "Warning: Site did not return 200 within the time limit."
