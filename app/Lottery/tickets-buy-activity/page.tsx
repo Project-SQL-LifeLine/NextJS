@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
 import LotteryHeader from "../Header/Header";
+import LotteryFooter from "../Footer/Footer"; // ফুটার ইমপোর্ট করা হলো
 import "./tickets-buy-activity.css";
 
 function TicketBuyContent() {
@@ -327,6 +328,9 @@ function TicketBuyContent() {
           </button>
         )}
       </div>
+
+      {/* Footer যুক্ত করা হলো */}
+      <LotteryFooter />
     </div>
   );
 }
