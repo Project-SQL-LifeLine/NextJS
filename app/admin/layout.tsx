@@ -10,7 +10,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // সিকিউরিটি স্টেট
   const [loading, setLoading] = useState(true);
@@ -20,6 +20,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [pinError, setPinError] = useState("");
   const [verifying, setVerifying] = useState(false);
 
+  // 🌟 ১. প্যানেল আনমাউন্ট হলে (বের হয়ে গেলে) পিন সেশন ডিলিট হবে
+  useEffect(() => {
+    return () => {
+      sessionStorage.removeItem("admin_pin_verified");
+    };
+  }, []);
+
+  // 🌟 ২. অথেনটিকেশন চেক
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
@@ -41,18 +49,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           return;
         }
 
+        // 🌟 পিন ভেরিফাইড থাকলে সরাসরি ঢুকতে দিবে (লোডিং স্ক্রিন ছাড়াই)
         const isPinVerified = sessionStorage.getItem("admin_pin_verified");
-        
         if (isPinVerified === "true") {
           setIsAuthorized(true);
+          setLoading(false); // সরাসরি লোডিং বন্ধ
         } else {
           setShowPinScreen(true);
+          setLoading(false);
         }
       } catch (error) {
         console.error("Auth error:", error);
         router.replace("/");
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -85,7 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   };
 
-  // ১. লোডিং স্ক্রিন
+  // 🌟 ৩. লোডিং স্ক্রিন (শুধুমাত্র প্রথমবার চেক করার সময় দেখাবে)
   if (loading) {
     return (
       <div className="h-screen bg-gray-50 flex flex-col items-center justify-center">
@@ -95,7 +103,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // ২. পিন স্ক্রিন
+  // 🌟 ৪. পিন স্ক্রিন
   if (showPinScreen) {
     return (
       <div className="h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
@@ -130,7 +138,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </form>
           
           <button 
-            onClick={() => router.push("/")}
+            onClick={() => {
+              sessionStorage.removeItem("admin_pin_verified");
+              router.push("/");
+            }}
             className="mt-4 text-xs text-gray-400 hover:text-gray-800 font-semibold"
           >
             Back to Site
@@ -140,22 +151,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // ৩. মূল অ্যাডমিন প্যানেল (কম্পোনেন্ট দিয়ে সাজানো)
+  // 🌟 ৫. অ্যাডমিন প্যানেল
   if (isAuthorized) {
     return (
-      <div className="h-screen bg-white flex font-sans text-gray-800 overflow-hidden w-full">
+      <div className="h-screen bg-white flex font-sans text-gray-800 overflow-hidden w-full relative">
         
-        {/* সাইডবার কম্পোনেন্ট */}
-        <AdminSidebar pathname={pathname} isSidebarOpen={isSidebarOpen} />
+        <AdminSidebar 
+          pathname={pathname} 
+          isSidebarOpen={isSidebarOpen} 
+          setIsSidebarOpen={setIsSidebarOpen} 
+        />
 
-        {/* মেইন কন্টেন্ট এরিয়া */}
-        <div className="flex-1 flex flex-col min-w-0 h-full bg-white">
+        <div className="flex-1 flex flex-col min-w-0 h-full bg-gray-50">
           
-          {/* হেডার কম্পোনেন্ট */}
-          <AdminHeader setIsSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
+          <AdminHeader setIsSidebarOpen={setIsSidebarOpen} />
 
-          {/* চিলড্রেন রেন্ডার */}
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-white">
+          <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50">
             {children}
           </main>
 
