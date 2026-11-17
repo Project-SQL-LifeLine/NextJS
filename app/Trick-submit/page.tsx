@@ -14,17 +14,12 @@ export default function TrickSubmitPage() {
   
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // ==========================================
-  // ১. ইউজার লগইন চেক এবং মেসেজ লোড করা
-  // ==========================================
   useEffect(() => {
     const fetchUserAndMessages = async () => {
-      // ইউজার লগইন করা আছে কিনা চেক করা
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.user) {
-        // লগইন না থাকলে লগইন পেজে পাঠিয়ে দিন (আপনার প্রজেক্টের লগইন পাথ দিন)
-        router.push("/login"); 
+        router.push("/login"); // লগইন পেজের পাথ দিন
         return;
       }
 
@@ -32,7 +27,7 @@ export default function TrickSubmitPage() {
       await loadMessages(session.user.id);
       setLoading(false);
 
-      // রিয়েল-টাইম সাবস্ক্রিপশন (যদি অ্যাডমিন উত্তর দেয়, সাথে সাথে দেখাবে)
+      // রিয়েল-টাইম আপডেট
       const subscription = supabase
         .channel("public:support_messages")
         .on(
@@ -52,7 +47,6 @@ export default function TrickSubmitPage() {
     fetchUserAndMessages();
   }, [router]);
 
-  // মেসেজ লোড করার ফাংশন
   const loadMessages = async (uid: string) => {
     const { data, error } = await supabase
       .from("support_messages")
@@ -65,15 +59,12 @@ export default function TrickSubmitPage() {
     }
   };
 
-  // ==========================================
-  // ২. নতুন মেসেজ পাঠানোর ফাংশন
-  // ==========================================
   const sendMessage = async () => {
     if (!newMessage.trim() || !userId) return;
 
     setSending(true);
     const msgText = newMessage.trim();
-    setNewMessage(""); // ইনপুট খালি করা
+    setNewMessage(""); 
 
     const { error } = await supabase.from("support_messages").insert({
       user_id: userId,
@@ -82,18 +73,17 @@ export default function TrickSubmitPage() {
     });
 
     if (error) {
-      alert("মেসেজ পাঠানো যায়নি! আবার চেষ্টা করুন।");
-      setNewMessage(msgText); // এরর হলে মেসেজটি ফেরত আনা
+      console.error("Error sending message:", error);
+      alert("মেসেজ পাঠানো যায়নি! " + error.message);
+      setNewMessage(msgText); 
     }
     
     setSending(false);
-    // অটো স্ক্রল নিচে
     setTimeout(() => {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
-  // ইউজার মেসেজ পাঠালে বা অ্যাডমিন মেসেজ দিলে অটো স্ক্রল
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -107,10 +97,10 @@ export default function TrickSubmitPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b1a13] text-white flex flex-col font-sans">
+    <div className="min-h-screen bg-[#0b1a13] text-white font-sans">
       
-      {/* হেডার */}
-      <div className="flex items-center gap-4 p-4 bg-[#103626] border-b border-white/10 shadow-md">
+      {/* হেডার (Fixed) */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex items-center gap-4 p-4 bg-[#103626] border-b border-white/10 shadow-md h-[72px]">
         <button onClick={() => router.back()} className="p-2 bg-white/5 rounded-xl border border-white/10">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -118,17 +108,16 @@ export default function TrickSubmitPage() {
           </svg>
         </button>
         <div>
-          <h1 className="text-lg font-bold tracking-wide">Admin Support</h1>
-          <p className="text-xs text-[#00ffaa] flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#00ffaa] animate-pulse"></span> Online
-          </p>
+          {/* নাম পরিবর্তন করে Trick Submit করা হয়েছে এবং Online সরানো হয়েছে */}
+          <h1 className="text-lg font-bold tracking-wide">Trick Submit</h1>
         </div>
       </div>
 
-      {/* চ্যাট এরিয়া */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+      {/* চ্যাট এরিয়া (হেডার এবং ইনপুট এর মাঝখানে) */}
+      {/* pt-[72px] দেওয়া হয়েছে যাতে হেডারের নিচ থেকে শুরু হয়, pb-[90px] যাতে ইনপুট বক্সের উপরে থাকে */}
+      <div className="pt-[72px] pb-[90px] p-4 space-y-4 overflow-y-auto">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-500 mt-10 text-sm">
+          <div className="text-center text-gray-500 mt-10 text-sm px-4">
             আপনার কোনো সমস্যা বা ট্রিক সাবমিট করতে চাইলে এখানে মেসেজ দিন। অ্যাডমিন শীঘ্রই উত্তর দেবে।
           </div>
         ) : (
@@ -155,8 +144,8 @@ export default function TrickSubmitPage() {
         <div ref={bottomRef} />
       </div>
 
-      {/* মেসেজ ইনপুট এরিয়া (ফিক্সড) */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#103626] border-t border-white/10 pb-safe">
+      {/* মেসেজ ইনপুট এরিয়া (Fixed) */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#103626] border-t border-white/10 pb-safe z-50">
         <div className="max-w-md mx-auto flex gap-2 items-end">
           <textarea
             value={newMessage}
