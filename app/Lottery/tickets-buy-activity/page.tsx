@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../lib/supabase/client";
 import { useLanguage } from "../../../lib/LanguageContext";
 import LotteryHeader from "../Header/Header";
-import LotteryFooter from "../Footer/Footer"; // ফুটার ইমপোর্ট করা হলো
+import LotteryFooter from "../Footer/Footer";
 import "./tickets-buy-activity.css";
 
 function TicketBuyContent() {
@@ -39,11 +39,11 @@ function TicketBuyContent() {
 
   // প্রতিটি টিকিটের জন্য আলাদা কনফিগারেশন
   const tierConfigs: { [key: number]: { multiplier: number, baseLive: number } } = {
-    50: { multiplier: 1.25, baseLive: 45 },   // ৫০ টাকার টিকিট আগে ১০০০ হবে (প্রায় ৮-৯টায়)
-    100: { multiplier: 1.15, baseLive: 35 },  // ১০০ টাকার টিকিট ১০-১১টায় ১০০০ হবে
-    250: { multiplier: 1.08, baseLive: 25 },  // ২৫০ টাকার টিকিট ১১:৩০-এ ১০০০ হবে
-    500: { multiplier: 1.02, baseLive: 15 },  // ৫০০ টাকার টিকিট ১২:১৫-এ ১০০০ হবে
-    1000: { multiplier: 1.00, baseLive: 8 },  // ১০০০ টাকার টিকিট ঠিক ১২:২৯-এ ১০০০ হবে
+    50: { multiplier: 1.25, baseLive: 45 },   
+    100: { multiplier: 1.15, baseLive: 35 },  
+    250: { multiplier: 1.08, baseLive: 25 },  
+    500: { multiplier: 1.02, baseLive: 15 },  
+    1000: { multiplier: 1.00, baseLive: 8 },  
   };
 
   const config = tierConfigs[ticketPrice] || tierConfigs[50];
@@ -210,8 +210,9 @@ function TicketBuyContent() {
     );
   }
 
+  // pb-20 থেকে বাড়িয়ে pb-32 করা হয়েছে যাতে ফুটারের নিচে বাটন ঢাকা না পড়ে
   return (
-    <div className="ticket-buy-page pb-20">
+    <div className="ticket-buy-page pb-32">
       <LotteryHeader userProfile={profile} />
 
       <main className="ticket-buy-main">
@@ -329,7 +330,6 @@ function TicketBuyContent() {
         )}
       </div>
 
-      {/* Footer যুক্ত করা হলো */}
       <LotteryFooter />
     </div>
   );
