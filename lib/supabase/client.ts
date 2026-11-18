@@ -11,5 +11,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co', 
-  supabaseAnonKey || 'placeholder-key'
+  supabaseAnonKey || 'placeholder-key',
+  {
+    global: {
+      // এই fetch অপশনটি Next.js-কে ডাটা ক্যাশ করতে বাধা দেয়
+      fetch: (url, options) => {
+        return fetch(url, { ...options, cache: 'no-store' });
+      },
+    },
+  }
 );
