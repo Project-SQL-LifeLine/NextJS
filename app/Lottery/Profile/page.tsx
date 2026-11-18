@@ -15,8 +15,8 @@ export default function ProfilePage() {
 
   // মডাল স্টেট
   const [activeModal, setActiveModal] = useState<"pin" | "password" | "trick" | null>(null);
-  const [oldInputValue, setOldInputValue] = useState(""); // পুরনো পিন বা পাসওয়ার্ড
-  const [inputValue, setInputValue] = useState(""); // নতুন পিন বা পাসওয়ার্ড
+  const [oldInputValue, setOldInputValue] = useState(""); 
+  const [inputValue, setInputValue] = useState(""); 
   const [modalMessage, setModalMessage] = useState({ type: "", text: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -42,9 +42,51 @@ export default function ProfilePage() {
     }
   };
 
+  // ==========================================
+  // ১. পেজ লোড এবং অটো-রিফ্রেশ লজিক
+  // ==========================================
   useEffect(() => {
     fetchProfile();
+
+    // ইউজার যখন অন্য ট্যাব বা অ্যাপে গিয়ে আবার ফিরে আসবে, তখন ডাটা রিফ্রেশ হবে
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchProfile();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", fetchProfile);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", fetchProfile);
+    };
   }, []);
+
+  // ==========================================
+  // ২. Real-time আপডেট (যদি অ্যাডমিন সাথে সাথে ব্যালেন্স আপডেট করে)
+  // ==========================================
+  useEffect(() => {
+    if (!profile?.id) return;
+
+    const subscription = supabase
+      .channel('profile-updates')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${profile.id}` },
+        (payload) => {
+          // যখনই ডাটাবেসে lottery_balance আপডেট হবে, সাথে সাথে UI-তে দেখাবে
+          setProfile((prev: any) => ({ ...prev, ...payload.new }));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [profile?.id]);
+
 
   const handleModalSubmit = async () => {
     setIsSubmitting(true);
@@ -72,14 +114,12 @@ export default function ProfilePage() {
         if (inputValue.length < 6) {
           throw new Error("New Password must be at least 6 characters.");
         }
-        // পুরনো পাসওয়ার্ড ভেরিফাই করা
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: userEmail,
           password: oldInputValue,
         });
         if (signInError) throw new Error("Incorrect old password.");
 
-        // নতুন পাসওয়ার্ড সেট করা
         const { error: updateError } = await supabase.auth.updateUser({ password: inputValue });
         if (updateError) throw updateError;
         
@@ -115,7 +155,6 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d241e] flex flex-col items-center justify-center">
-        {/* সাদা লোডার SVG */}
         <svg className="w-10 h-10 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
         </svg>
@@ -130,7 +169,6 @@ export default function ProfilePage() {
     ? new Date(profile.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) 
     : "N/A";
   
-  // ১৬ ডিজিটের অ্যাকাউন্ট নাম্বার ফরম্যাট
   let displayAccNum = "**** **** **** ****";
   if (profile?.lottery_account_number) {
     if (showAccountNumber) {
@@ -182,7 +220,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* কন্টাক্টলেস আইকন (সাদা SVG) */}
           <div className="v-card-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rotate-90">
               <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
@@ -233,7 +270,6 @@ export default function ProfilePage() {
       {/* Full Screen Modals */}
       {activeModal && (
         <div className="fullscreen-modal">
-          {/* মডাল হেডার */}
           <div className="modal-header">
             <button onClick={closeModal} className="modal-back-btn">
               <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
@@ -247,10 +283,8 @@ export default function ProfilePage() {
             </h3>
           </div>
 
-          {/* মডাল বডি */}
           <div className="modal-body">
             
-            {/* পিন পরিবর্তন ফর্ম */}
             {activeModal === "pin" && (
               <>
                 {profile?.lottery_secret_pin && (
@@ -280,7 +314,6 @@ export default function ProfilePage() {
               </>
             )}
 
-            {/* পাসওয়ার্ড পরিবর্তন ফর্ম */}
             {activeModal === "password" && (
               <>
                 <div className="form-group">
@@ -306,7 +339,6 @@ export default function ProfilePage() {
               </>
             )}
 
-            {/* ট্রিক সাবমিট ফর্ম */}
             {activeModal === "trick" && (
               <div className="form-group">
                 <label className="form-label">Your Trick</label>
@@ -326,7 +358,6 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* মডাল ফুটার (সাবমিট বাটন) */}
           <div className="modal-footer">
             <button onClick={handleModalSubmit} disabled={isSubmitting} className="btn-submit">
               {isSubmitting ? "Saving..." : "Confirm & Save"}
