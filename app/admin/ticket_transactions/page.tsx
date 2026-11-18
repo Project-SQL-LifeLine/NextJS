@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // ১. useRouter ইমপোর্ট করা হলো
 import { supabase } from "../../../lib/supabase/client";
 
 export default function AdminTicketTransactionsPage() {
+  const router = useRouter(); // ২. রাউটার ডিক্লেয়ার
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
   
-  // নতুন স্টেট: ট্যাব এবং ফিল্টার
   const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [activeType, setActiveType] = useState<string>("all");
   
@@ -22,6 +23,7 @@ export default function AdminTicketTransactionsPage() {
   const fetchTransactions = async () => {
     setLoading(true);
     setMessage({ type: "", text: "" });
+    setTransactions([]); // ৩. নতুন ডাটা আনার আগে পুরনো ডাটা UI থেকে মুছে ফেলা হচ্ছে
 
     try {
       const { data, error } = await supabase
@@ -62,7 +64,11 @@ export default function AdminTicketTransactionsPage() {
       
       if (response.data?.success) {
         setMessage({ type: "success", text: "Transaction approved successfully!" });
+        
+        // ৪. ডাটা রিফ্রেশ করা এবং Next.js ক্যাশ ক্লিয়ার করা
         await fetchTransactions(); 
+        router.refresh(); 
+        
       } else {
         setMessage({ type: "error", text: response.data?.error || "Approval failed." });
       }
@@ -89,7 +95,10 @@ export default function AdminTicketTransactionsPage() {
         if (error) throw error;
       }
       setMessage({ type: "success", text: "Transaction rejected." });
+      
       await fetchTransactions();
+      router.refresh(); // রিজেক্ট করার পরেও ক্যাশ ক্লিয়ার হবে
+      
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
     } finally {
@@ -97,7 +106,6 @@ export default function AdminTicketTransactionsPage() {
     }
   };
 
-  // ফিল্টারিং লজিক (ট্যাব এবং টাইপ অনুযায়ী)
   const filteredTransactions = transactions.filter((tx) => {
     const gameId = tx.profiles?.game_id || "Unknown";
     const trxId = tx.trx_id || "";
@@ -105,19 +113,16 @@ export default function AdminTicketTransactionsPage() {
     const currentStatus = tx.status?.toLowerCase() || "unknown";
     const currentType = tx.transaction_type?.toLowerCase() || "unknown";
 
-    // ১. সার্চ ফিল্টার
     const matchesSearch = 
       gameId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       trxId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       trackId.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // ২. স্ট্যাটাস ফিল্টার (ট্যাব)
     let matchesStatus = false;
     if (activeTab === "all") matchesStatus = true;
     else if (activeTab === "pending") matchesStatus = (currentStatus === "pending" || currentStatus === "drawn");
     else matchesStatus = (currentStatus === activeTab);
 
-    // ৩. টাইপ ফিল্টার (বাটন)
     const matchesType = activeType === "all" || currentType === activeType;
     
     return matchesSearch && matchesStatus && matchesType;
@@ -136,13 +141,11 @@ export default function AdminTicketTransactionsPage() {
   return (
     <div className="flex flex-col gap-4 w-full max-w-7xl mx-auto p-4">
       
-      {/* হেডার */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Ticket Transactions</h1>
         <p className="text-gray-500 text-sm mt-1">Manage and approve user transactions.</p>
       </div>
 
-      {/* ১. স্ট্যাটাস ট্যাব (Pending, History, Rejected) */}
       <div className="flex gap-2 bg-gray-100 p-1 rounded-xl w-fit overflow-x-auto">
         <button
           onClick={() => setActiveTab("pending")}
@@ -170,7 +173,6 @@ export default function AdminTicketTransactionsPage() {
         </button>
       </div>
 
-      {/* ২. ট্রানজেকশন টাইপ ফিল্টার বাটন */}
       <div className="flex flex-wrap gap-2">
         {["all", "ticket_purchase", "balance_reload", "withdrawal", "fee_payment"].map((type) => (
           <button
@@ -190,7 +192,6 @@ export default function AdminTicketTransactionsPage() {
         ))}
       </div>
 
-      {/* সার্চ বার */}
       <div className="flex gap-2 w-full max-w-md">
         <input
           type="text"
@@ -213,7 +214,6 @@ export default function AdminTicketTransactionsPage() {
         </div>
       )}
 
-      {/* টেবিল */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[900px]">
@@ -225,12 +225,17 @@ export default function AdminTicketTransactionsPage() {
                 <th className="p-4 font-semibold">Amount</th>
                 <th className="p-4 font-semibold">TrxID / TrackID</th>
                 <th className="p-4 font-semibold">Status</th>
-                {/* Pending ট্যাবে থাকলে Actions কলাম দেখাবে */}
                 {activeTab === "pending" && <th className="p-4 font-semibold text-right">Actions</th>}
               </tr>
             </thead>
             <tbody>
-              {filteredTransactions.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={activeTab === "pending" ? 7 : 6} className="p-8 text-center text-gray-500">
+                    Loading transactions...
+                  </td>
+                </tr>
+              ) : filteredTransactions.length === 0 ? (
                 <tr>
                   <td colSpan={activeTab === "pending" ? 7 : 6} className="p-8 text-center text-gray-500">
                     No transactions found matching the filter.
@@ -266,7 +271,6 @@ export default function AdminTicketTransactionsPage() {
                       </span>
                     </td>
                     
-                    {/* পেন্ডিং ট্যাবে থাকলে তবেই Approve/Reject বাটন দেখাবে */}
                     {activeTab === "pending" && (
                       <td className="p-4 text-right flex justify-end gap-2">
                         {(tx.status === "pending" || tx.status === "drawn") && (
