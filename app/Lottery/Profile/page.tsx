@@ -12,8 +12,6 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  
-  // ম্যানুয়াল রিফ্রেশের জন্য স্টেট
   const [refreshing, setRefreshing] = useState(false);
 
   // মডাল স্টেট
@@ -22,7 +20,6 @@ export default function ProfilePage() {
   const [inputValue, setInputValue] = useState(""); 
   const [modalMessage, setModalMessage] = useState({ type: "", text: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
   const [showAccountNumber, setShowAccountNumber] = useState(false);
 
   const fetchProfile = async () => {
@@ -46,9 +43,13 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
+    // ১. ডাটা ফেচ করা
     fetchProfile();
+    
+    // ২. Next.js রাউটার ক্যাশ ক্লিয়ার করা (যাতে নতুন করে পেজ লোড হয়)
+    router.refresh();
 
-    // ইউজার অন্য ট্যাব বা অ্যাপ থেকে ফিরে আসলে ডাটা রিফ্রেশ হবে
+    // ৩. ইউজার অন্য ট্যাব থেকে ফিরে আসলে ডাটা রিফ্রেশ হবে
     const handleFocus = () => {
       fetchProfile();
     };
@@ -57,12 +58,12 @@ export default function ProfilePage() {
     return () => {
       window.removeEventListener("focus", handleFocus);
     };
-  }, []);
+  }, [router]);
 
-  // ম্যানুয়াল রিফ্রেশ হ্যান্ডলার
   const handleRefresh = () => {
     setRefreshing(true);
     fetchProfile();
+    router.refresh(); // ম্যানুয়াল রিফ্রেশেও ক্যাশ ক্লিয়ার হবে
   };
 
   const handleModalSubmit = async () => {
@@ -159,7 +160,6 @@ export default function ProfilePage() {
           <div className="v-card-balance-section flex justify-between items-center">
             <h3 className="v-card-balance">৳ {balance}</h3>
             
-            {/* ম্যানুয়াল রিফ্রেশ বাটন */}
             <button 
               onClick={handleRefresh} 
               disabled={refreshing}
