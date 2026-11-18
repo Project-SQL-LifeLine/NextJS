@@ -12,6 +12,9 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  
+  // ম্যানুয়াল রিফ্রেশের জন্য স্টেট
+  const [refreshing, setRefreshing] = useState(false);
 
   // মডাল স্টেট
   const [activeModal, setActiveModal] = useState<"pin" | "password" | "trick" | null>(null);
@@ -38,48 +41,29 @@ export default function ProfilePage() {
       console.error("Error fetching profile:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    // ১. প্রথমবার ডাটা লোড করা
     fetchProfile();
 
-    // ২. ইউজার অন্য অ্যাপ বা ট্যাব থেকে ফিরে আসলে ডাটা রিফ্রেশ হবে
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        fetchProfile();
-      }
+    // ইউজার অন্য ট্যাব বা অ্যাপ থেকে ফিরে আসলে ডাটা রিফ্রেশ হবে
+    const handleFocus = () => {
+      fetchProfile();
     };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", fetchProfile);
+    window.addEventListener("focus", handleFocus);
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", fetchProfile);
+      window.removeEventListener("focus", handleFocus);
     };
   }, []);
 
-  // ৩. রিয়েল-টাইম সাবস্ক্রিপশন (অ্যাডমিন বা সিস্টেম থেকে ব্যালেন্স চেঞ্জ হলে সাথে সাথে UI আপডেট হবে)
-  useEffect(() => {
-    if (!profile?.id) return;
-
-    const subscription = supabase
-      .channel('profile-realtime-updates')
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${profile.id}` },
-        (payload) => {
-          // ব্যালেন্স আপডেট হলে সাথে সাথে রিফ্লেক্ট করবে
-          setProfile((prev: any) => ({ ...prev, ...payload.new }));
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(subscription);
-    };
-  }, [profile?.id]);
+  // ম্যানুয়াল রিফ্রেশ হ্যান্ডলার
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchProfile();
+  };
 
   const handleModalSubmit = async () => {
     setIsSubmitting(true);
@@ -174,9 +158,15 @@ export default function ProfilePage() {
 
           <div className="v-card-balance-section flex justify-between items-center">
             <h3 className="v-card-balance">৳ {balance}</h3>
-            {/* ম্যানুয়াল রিফ্রেশ বাটন */}
-            <button onClick={fetchProfile} className="text-white/50 hover:text-white transition-colors p-2" title="Refresh Balance">
-              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            
+            {/* ম্যানুয়াল রিফ্রেশ বাটন */}
+            <button 
+              onClick={handleRefresh} 
+              disabled={refreshing}
+              className="text-white/70 hover:text-white transition-colors p-2 bg-white/10 rounded-full disabled:opacity-50"
+              title="Refresh Balance"
+            >
+              <svg className={refreshing ? "animate-spin" : ""} width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
